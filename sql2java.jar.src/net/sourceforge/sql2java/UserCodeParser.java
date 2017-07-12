@@ -1,13 +1,14 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
-
 package net.sourceforge.sql2java;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 public class UserCodeParser {
-
 	private static final String START = "// ";
 	private static final String BLOCK_BEGIN = "+";
 	private static final String BLOCK_END = "-";
@@ -17,89 +18,93 @@ public class UserCodeParser {
 	private boolean isNew;
 
 	public UserCodeParser(String filename) throws Exception {
-		parse(filename);
+		this.parse(filename);
 	}
 
 	public String getFilename() {
-		return filename;
+		return this.filename;
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return this.isNew;
 	}
 
 	public void parse(String parsedFileName) throws Exception {
-		codeHash = new Hashtable();
+		this.codeHash = new Hashtable();
 		boolean inBlock = false;
 		String blockName = null;
 		StringBuffer code = new StringBuffer();
-		isNew = true;
+		this.isNew = true;
 		File file = new File(parsedFileName);
 		if (file.exists()) {
-			filename = parsedFileName;
-			isNew = false;
+			this.filename = parsedFileName;
+			this.isNew = false;
 			BufferedReader reader = new BufferedReader(new FileReader(file));
-			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				if (inBlock)
-					code.append(line).append(LINE_SEP);
-				if (line.indexOf("// ") == -1)
-					continue;
+			String line = reader.readLine();
+			while (line != null) {
 				if (inBlock) {
-					if (line.equals("// " + blockName + "-")) {
-						codeHash.put(blockName, code.toString());
-						inBlock = false;
-					}
-					continue;
-				}
-				blockName = parseName(line);
-				if (!"".equals(blockName)) {
-					inBlock = true;
-					code.setLength(0);
 					code.append(line).append(LINE_SEP);
 				}
+				if (line.indexOf("// ") != -1) {
+					if (inBlock) {
+						if (line.equals("// " + blockName + "-")) {
+							this.codeHash.put(blockName, code.toString());
+							inBlock = false;
+						}
+					} else {
+						blockName = this.parseName(line);
+						if (!"".equals(blockName)) {
+							inBlock = true;
+							code.setLength(0);
+							code.append(line).append(LINE_SEP);
+						}
+					}
+				}
+				line = reader.readLine();
 			}
-
 			reader.close();
 		}
 	}
 
 	private String parseName(String line) {
 		int startPos = line.indexOf("// ");
-		if (startPos == -1)
+		if (startPos == -1) {
 			return "";
-		startPos += "// ".length();
-		if (startPos >= line.length() + 1)
+		}
+		if ((startPos += "// ".length()) >= line.length() + 1) {
 			return "";
+		}
 		int endPos = line.lastIndexOf("+", startPos);
 		if (endPos != line.length() - "+".length()) {
 			return "";
-		} else {
-			String name = line.substring(startPos, endPos);
-			return name.trim();
 		}
+		String name = line.substring(startPos, endPos);
+		return name.trim();
 	}
 
 	public boolean hasBlock(String name) {
-		return codeHash.get(name) != null;
+		return this.codeHash.get(name) != null;
 	}
 
 	public String getBlock(String name) {
 		String code = null;
-		if (name != null)
-			code = (String) codeHash.get(name);
+		if (name != null) {
+			code = (String) this.codeHash.get(name);
+		}
 		if (code == null) {
-			code = generateNewBlock(name);
-			codeHash.put(name, code);
+			code = this.generateNewBlock(name);
+			this.codeHash.put(name, code);
 		}
 		return code;
 	}
 
 	public String[] getBlockNames() {
-		String list[] = new String[codeHash.size()];
+		String[] list = new String[this.codeHash.size()];
 		int i = 0;
-		for (Enumeration e = codeHash.keys(); e.hasMoreElements();)
+		Enumeration e = this.codeHash.keys();
+		while (e.hasMoreElements()) {
 			list[i++] = (String) e.nextElement();
-
+		}
 		return list;
 	}
 
@@ -114,5 +119,4 @@ public class UserCodeParser {
 		str.append("-");
 		return str.toString();
 	}
-
 }

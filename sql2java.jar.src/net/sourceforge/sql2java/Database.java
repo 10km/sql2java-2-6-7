@@ -1,15 +1,27 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
-
 package net.sourceforge.sql2java;
 
 import java.io.PrintStream;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.Vector;
+import net.sourceforge.sql2java.CodeWriter;
+import net.sourceforge.sql2java.Column;
+import net.sourceforge.sql2java.Index;
+import net.sourceforge.sql2java.IndexColumn;
+import net.sourceforge.sql2java.Procedure;
+import net.sourceforge.sql2java.Table;
 import oracle.jdbc.driver.OracleConnection;
 
 public class Database {
-
-	private String tableTypes[];
+	private String[] tableTypes;
 	private Connection pConnection;
 	private DatabaseMetaData meta;
 	private Vector tables;
@@ -22,14 +34,10 @@ public class Database {
 	private String catalog;
 	private String schema;
 	private String tablenamepattern;
-	private boolean retrieveRemarks;
+	private boolean retrieveRemarks = true;
 	private String activeConnections;
 	private String idleConnections;
 	private String maxWait;
-
-	public Database() {
-		retrieveRemarks = true;
-	}
 
 	public void setOracleRetrieveRemarks(boolean retrieveRemarks) {
 		this.retrieveRemarks = retrieveRemarks;
@@ -59,8 +67,8 @@ public class Database {
 		this.tablenamepattern = tablenamepattern;
 	}
 
-	public void setTableTypes(String tt[]) {
-		tableTypes = tt;
+	public void setTableTypes(String[] tt) {
+		this.tableTypes = tt;
 	}
 
 	public void setActiveConnections(String activeConnections) {
@@ -76,156 +84,151 @@ public class Database {
 	}
 
 	public boolean getOracleRetrieveRemarks() {
-		return retrieveRemarks;
+		return this.retrieveRemarks;
 	}
 
 	public String getEngine() {
-		return engine;
+		return this.engine;
 	}
 
 	public String getDriver() {
-		return driver;
+		return this.driver;
 	}
 
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	public String getCatalog() {
-		return catalog;
+		return this.catalog;
 	}
 
 	public String getSchema() {
-		return schema;
+		return this.schema;
 	}
 
 	public String getTableNamePattern() {
-		return tablenamepattern;
+		return this.tablenamepattern;
 	}
 
 	public String[] getTableTypes() {
-		return tableTypes;
+		return this.tableTypes;
 	}
 
 	public String getActiveConnections() {
-		return activeConnections;
+		return this.activeConnections;
 	}
 
 	public String getIdleConnections() {
-		return idleConnections;
+		return this.idleConnections;
 	}
 
 	public String getMaxWait() {
-		return maxWait;
+		return this.maxWait;
 	}
 
 	public void setSchema(String schema) {
-		if ("null".equalsIgnoreCase(schema))
-			this.schema = null;
-		else
-			this.schema = schema;
+		this.schema = "null".equalsIgnoreCase(schema) ? null : schema;
 	}
 
 	public Table[] getRelationTable(Table table) {
-		Vector vector = new Vector();
-		for (int iIndex = 0; iIndex < tables.size(); iIndex++) {
-			Table tempTable = (Table) tables.get(iIndex);
-			if (!table.equals(tempTable) && tempTable.isRelationTable() && tempTable.relationConnectsTo(table)
-					&& !vector.contains(tempTable))
-				vector.add(tempTable);
+		Vector<Table> vector = new Vector<Table>();
+		for (int iIndex = 0; iIndex < this.tables.size(); ++iIndex) {
+			Table tempTable = (Table) this.tables.get(iIndex);
+			if (table.equals((Object) tempTable) || !tempTable.isRelationTable() || !tempTable.relationConnectsTo(table)
+					|| vector.contains((Object) tempTable))
+				continue;
+			vector.add(tempTable);
 		}
-
-		return (Table[]) (Table[]) vector.toArray(new Table[vector.size()]);
+		return vector.toArray((T[]) new Table[vector.size()]);
 	}
 
 	public void load() throws SQLException, ClassNotFoundException {
-		Class.forName(driver);
-		System.out.println("Connecting to " + username + " on " + url + " ...");
-		pConnection = DriverManager.getConnection(url, username, password);
+		Class.forName(this.driver);
+		System.out.println("Connecting to " + this.username + " on " + this.url + " ...");
+		this.pConnection = DriverManager.getConnection(this.url, this.username, this.password);
 		System.out.println("    Connected.");
 		try {
-			if (pConnection instanceof OracleConnection)
-				((OracleConnection) pConnection).setRemarksReporting(getOracleRetrieveRemarks());
+			if (this.pConnection instanceof OracleConnection) {
+				((OracleConnection) this.pConnection).setRemarksReporting(this.getOracleRetrieveRemarks());
+			}
 		} catch (NoClassDefFoundError ncdfe) {
 		} catch (Exception e) {
+			// empty catch block
 		}
-		meta = pConnection.getMetaData();
-		engine = meta.getDatabaseProductName();
-		System.out.println("    Database server :" + engine + ".");
-		engine = (new StringTokenizer(engine)).nextToken();
-		tables = new Vector();
-		tableHash = new Hashtable();
-		loadTables();
-		loadColumns();
-		loadPrimaryKeys();
-		loadImportedKeys();
-		loadIndexes();
-		loadProcedures();
-		pConnection.close();
+		this.meta = this.pConnection.getMetaData();
+		this.engine = this.meta.getDatabaseProductName();
+		System.out.println("    Database server :" + this.engine + ".");
+		this.engine = new StringTokenizer(this.engine).nextToken();
+		this.tables = new Vector();
+		this.tableHash = new Hashtable();
+		this.loadTables();
+		this.loadColumns();
+		this.loadPrimaryKeys();
+		this.loadImportedKeys();
+		this.loadIndexes();
+		this.loadProcedures();
+		this.pConnection.close();
 	}
 
 	public Table[] getTables() {
-		return (Table[]) (Table[]) tables.toArray(new Table[tables.size()]);
+		return this.tables.toArray((T[]) new Table[this.tables.size()]);
 	}
 
 	private void addTable(Table t) {
-		tables.addElement(t);
-		tableHash.put(t.getName(), t);
+		this.tables.addElement(t);
+		this.tableHash.put(t.getName(), t);
 	}
 
 	public Table getTable(String name) {
-		return (Table) tableHash.get(name);
+		return (Table) this.tableHash.get(name);
 	}
 
 	private void loadTables() throws SQLException {
-		System.out.println("Loading table list according to pattern " + tablenamepattern + " ...");
-		ResultSet resultSet;
-		label0 : for (StringTokenizer st = new StringTokenizer(tablenamepattern, ",; \t"); st.hasMoreTokens(); resultSet
-				.close()) {
+		System.out.println("Loading table list according to pattern " + this.tablenamepattern + " ...");
+		StringTokenizer st = new StringTokenizer(this.tablenamepattern, ",; \t");
+		while (st.hasMoreTokens()) {
 			String pattern = st.nextToken().trim();
-			String tableSchema = schema;
-			int index = pattern.indexOf('.');
+			String tableSchema = this.schema;
+			int index = pattern.indexOf(46);
 			if (index > 0) {
 				tableSchema = pattern.substring(0, index);
 				pattern = pattern.substring(index + 1);
 			}
-			resultSet = meta.getTables(catalog, tableSchema, pattern, tableTypes);
-			do {
-				if (!resultSet.next())
-					continue label0;
+			ResultSet resultSet = this.meta.getTables(this.catalog, tableSchema, pattern, this.tableTypes);
+			while (resultSet.next()) {
 				Table table = new Table();
 				table.setCatalog(resultSet.getString("TABLE_CAT"));
 				table.setSchema(resultSet.getString("TABLE_SCHEM"));
 				table.setName(resultSet.getString("TABLE_NAME"));
 				table.setType(resultSet.getString("TABLE_TYPE"));
 				table.setRemarks(resultSet.getString("REMARKS"));
-				if (CodeWriter.authorizeProcess(table.getName(), "tables.include", "tables.exclude")) {
-					addTable(table);
-					System.out.println("    table " + table.getName() + " found");
-				}
-			} while (true);
+				if (!CodeWriter.authorizeProcess((String) table.getName(), (String) "tables.include",
+						(String) "tables.exclude"))
+					continue;
+				this.addTable(table);
+				System.out.println("    table " + table.getName() + " found");
+			}
+			resultSet.close();
 		}
-
 	}
 
 	private void loadColumns() throws SQLException {
 		System.out.println("Loading columns ...");
-		Table table;
-		for (Iterator it = tables.iterator(); it.hasNext(); System.out
-				.println("    " + table.getName() + " found " + table.countColumns() + " columns")) {
-			table = (Table) it.next();
+		Iterator it = this.tables.iterator();
+		while (it.hasNext()) {
+			Table table = (Table) it.next();
 			Column c = null;
-			ResultSet resultSet;
-			for (resultSet = meta.getColumns(table.getCatalog(), table.getSchema(), table.getName(), "%"); resultSet
-					.next(); table.addColumn(c)) {
+			ResultSet resultSet = this.meta.getColumns(table.getCatalog(), table.getSchema(), table.getName(), "%");
+			while (resultSet.next()) {
 				c = new Column();
 				c.setDatabase(this);
 				c.setCatalog(resultSet.getString("TABLE_CAT"));
@@ -241,134 +244,121 @@ public class Database {
 				c.setRemarks(resultSet.getString("REMARKS"));
 				c.setDefaultValue(resultSet.getString("COLUMN_DEF"));
 				c.setOrdinalPosition(resultSet.getInt("ORDINAL_POSITION"));
+				table.addColumn(c);
 			}
-
 			resultSet.close();
+			System.out.println("    " + table.getName() + " found " + table.countColumns() + " columns");
 		}
-
 	}
 
 	private void loadPrimaryKeys() throws SQLException {
 		System.out.println("Database::loadPrimaryKeys");
-		for (Iterator it = tables.iterator(); it.hasNext();) {
+		Iterator it = this.tables.iterator();
+		while (it.hasNext()) {
+			Column col;
 			Table table = (Table) it.next();
-			SortedMap map = new TreeMap();
-			ResultSet pResultSet = meta.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName());
-			do {
-				if (!pResultSet.next())
-					break;
+			TreeMap<String, Column> map = new TreeMap<String, Column>();
+			ResultSet pResultSet = this.meta.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName());
+			while (pResultSet.next()) {
 				String colName = pResultSet.getString("COLUMN_NAME");
-				int seq = pResultSet.getShort("KEY_SEQ");
+				short seq = pResultSet.getShort("KEY_SEQ");
 				System.out.println("Found primary key (seq,name) (" + seq + "," + colName + ") for table '"
 						+ table.getName() + "'");
-				Column col = table.getColumn(colName);
-				if (col != null)
-					map.put(String.valueOf(seq), col);
-			} while (true);
+				col = table.getColumn(colName);
+				if (col == null)
+					continue;
+				map.put(String.valueOf(seq), col);
+			}
 			pResultSet.close();
 			int size = map.size();
-			int k = 1;
-			while (k <= size) {
-				Column col = (Column) map.get(String.valueOf(k));
+			for (int k = 1; k <= size; ++k) {
+				col = (Column) map.get(String.valueOf(k));
 				table.addPrimaryKey(col);
-				k++;
 			}
 		}
-
 	}
 
 	private void loadImportedKeys() throws SQLException {
 		System.out.println("Loading imported keys ...");
-		Iterator it = tables.iterator();
-		do {
-			if (!it.hasNext())
-				break;
-			Table table = (Table) it.next();
+		Iterator it = this.tables.iterator();
+		while (it.hasNext()) {
 			ResultSet resultSet;
+			Table table = (Table) it.next();
 			try {
-				resultSet = meta.getImportedKeys(table.getCatalog(), table.getSchema(), table.getName());
+				resultSet = this.meta.getImportedKeys(table.getCatalog(), table.getSchema(), table.getName());
 			} catch (SQLException sqle) {
 				System.out.println("    Error while loading imported keys for table " + table.getName());
 				continue;
 			}
-			do {
-				if (!resultSet.next())
-					break;
+			while (resultSet.next()) {
 				String tabName = resultSet.getString("FKTABLE_NAME");
 				String colName = resultSet.getString("FKCOLUMN_NAME");
 				String foreignTabName = resultSet.getString("PKTABLE_NAME");
 				String foreignColName = resultSet.getString("PKCOLUMN_NAME");
-				Column col = getTable(tabName).getColumn(colName);
-				Table foreignTable = getTable(foreignTabName);
-				if (null != foreignTable) {
-					Column foreignCol = foreignTable.getColumn(foreignColName);
-					col.addForeignKey(foreignCol);
-					foreignCol.addImportedKey(col);
-					System.out.println("    " + col.getFullName() + " -> " + foreignCol.getFullName() + " found ");
-				}
-			} while (true);
+				Column col = this.getTable(tabName).getColumn(colName);
+				Table foreignTable = this.getTable(foreignTabName);
+				if (null == foreignTable)
+					continue;
+				Column foreignCol = foreignTable.getColumn(foreignColName);
+				col.addForeignKey(foreignCol);
+				foreignCol.addImportedKey(col);
+				System.out.println("    " + col.getFullName() + " -> " + foreignCol.getFullName() + " found ");
+			}
 			resultSet.close();
-		} while (true);
+		}
 	}
 
 	private void loadIndexes() throws SQLException {
 		System.out.println("Loading indexes ...");
-		Iterator it = tables.iterator();
-		do {
-			if (!it.hasNext())
-				break;
+		Iterator it = this.tables.iterator();
+		while (it.hasNext()) {
 			Table table = (Table) it.next();
 			ResultSet resultSet = null;
 			try {
-				resultSet = meta.getIndexInfo(table.getCatalog(), table.getSchema(), table.getName(), false, true);
+				resultSet = this.meta.getIndexInfo(table.getCatalog(), table.getSchema(), table.getName(), false, true);
 			} catch (SQLException sqle) {
 				System.out.println("    Error while loading indexes for table " + table.getName());
 				continue;
 			}
 			String currentName = "";
 			Index index = null;
-			do {
-				if (!resultSet.next())
-					break;
+			while (resultSet.next()) {
+				Column col;
 				String colName = resultSet.getString("COLUMN_NAME");
 				String indName = resultSet.getString("INDEX_NAME");
-				if (null != indName && null != colName) {
-					Column col = table.getColumn(colName);
-					if (!col.isPrimaryKey()) {
-						System.out.println("  Found interesting index " + indName + " on " + colName + " for table "
-								+ table.getName());
-						if (!currentName.equals(indName)) {
-							index = new Index(indName, table);
-							index.setUnique(!resultSet.getBoolean("NON_UNIQUE"));
-							currentName = indName;
-						}
-						IndexColumn column = new IndexColumn();
-						column.setName(resultSet.getString("COLUMN_NAME"));
-						column.setOrdinalPosition(resultSet.getShort("ORDINAL_POSITION"));
-						column.setSortSequence(resultSet.getString("ASC_OR_DESC"));
-						column.setFilterCondition(resultSet.getString("FILTER_CONDITION"));
-						column.setType(col.getType());
-						index.addIndexColumn(column);
-					}
+				if (null == indName || null == colName || (col = table.getColumn(colName)).isPrimaryKey())
+					continue;
+				System.out.println(
+						"  Found interesting index " + indName + " on " + colName + " for table " + table.getName());
+				if (!currentName.equals(indName)) {
+					index = new Index(indName, table);
+					index.setUnique(!resultSet.getBoolean("NON_UNIQUE"));
+					currentName = indName;
 				}
-			} while (true);
+				IndexColumn column = new IndexColumn();
+				column.setName(resultSet.getString("COLUMN_NAME"));
+				column.setOrdinalPosition((int) resultSet.getShort("ORDINAL_POSITION"));
+				column.setSortSequence(resultSet.getString("ASC_OR_DESC"));
+				column.setFilterCondition(resultSet.getString("FILTER_CONDITION"));
+				column.setType(col.getType());
+				index.addIndexColumn(column);
+			}
 			resultSet.close();
-		} while (true);
+		}
 	}
 
 	private void loadProcedures() throws SQLException {
 		System.out.println("Loading procedures ...");
-		Iterator it = tables.iterator();
-		do {
-			if (!it.hasNext())
-				break;
+		Iterator it = this.tables.iterator();
+		while (it.hasNext()) {
 			Table table = (Table) it.next();
 			String procedurePattern = table.getTableProperty("procedures");
-			if (null == procedurePattern || "".equals(procedurePattern))
+			if (null == procedurePattern || "".equals(procedurePattern)) {
 				procedurePattern = "%" + table.getName() + "%";
+			}
 			ResultSet resultSet = null;
 			try {
-				resultSet = meta.getProcedures(table.getCatalog(), table.getSchema(), procedurePattern);
+				resultSet = this.meta.getProcedures(table.getCatalog(), table.getSchema(), procedurePattern);
 			} catch (SQLException sqle) {
 				System.out.println("    Error while loading procedures for table " + table.getName());
 				continue;
@@ -382,26 +372,20 @@ public class Database {
 				procedure.setReturnType("void");
 				table.addProcedure(procedure);
 				System.out.println("    Found procedure " + spName + " for table " + table.getName());
-				ResultSet rs = meta.getProcedureColumns(catalog, schema, spName, null);
-				label0 : do {
-					String colName;
-					short columnType;
-					Column c;
-					do {
-						if (!rs.next())
-							break label0;
-						colName = rs.getString("COLUMN_NAME");
-						columnType = rs.getShort("COLUMN_TYPE");
-						if (0 == columnType) {
-							System.err.println("    Column " + colName + " of unknown type in procedure " + spName);
-							continue;
-						}
-						c = new Column();
-						c.setType(rs.getShort("DATA_TYPE"));
-						if (5 != columnType)
-							break;
+				ResultSet rs = this.meta.getProcedureColumns(this.catalog, this.schema, spName, null);
+				block9 : while (rs.next()) {
+					String colName = rs.getString("COLUMN_NAME");
+					short columnType = rs.getShort("COLUMN_TYPE");
+					if (0 == columnType) {
+						System.err.println("    Column " + colName + " of unknown type in procedure " + spName);
+						continue;
+					}
+					Column c = new Column();
+					c.setType(rs.getShort("DATA_TYPE"));
+					if (5 == columnType) {
 						procedure.setReturnType(c.getJavaType());
-					} while (true);
+						continue;
+					}
 					c.setDatabase(this);
 					c.setCatalog(rs.getString("PROCEDURE_CAT"));
 					c.setSchema(rs.getString("PROCEDURE_SCHEM"));
@@ -413,38 +397,35 @@ public class Database {
 					c.setNullable(rs.getInt("NULLABLE"));
 					c.setRemarks(rs.getString("REMARKS"));
 					switch (columnType) {
-						case 1 : // '\001'
+						case 1 : {
 							procedure.addInColumn(c);
-							break;
-
-						case 2 : // '\002'
+							continue block9;
+						}
+						case 2 : {
 							procedure.addInOutColumn(c);
-							break;
-
-						case 4 : // '\004'
+							continue block9;
+						}
+						case 4 : {
 							procedure.addOutColumn(c);
-							break;
-
-						case 3 : // '\003'
-						default :
-							procedure.setReturnType("List");
-							break;
+							continue block9;
+						}
 					}
-				} while (true);
+					procedure.setReturnType("List");
+				}
 				rs.close();
 			}
 			resultSet.close();
-		} while (true);
+		}
 	}
 
 	public String[] getAllPackages() {
-		Vector vector = new Vector();
-		for (int iIndex = 0; iIndex < tables.size(); iIndex++) {
-			Table table = (Table) tables.get(iIndex);
-			if (!vector.contains(table.getPackage()))
-				vector.add(table.getPackage());
+		Vector<String> vector = new Vector<String>();
+		for (int iIndex = 0; iIndex < this.tables.size(); ++iIndex) {
+			Table table = (Table) this.tables.get(iIndex);
+			if (vector.contains(table.getPackage()))
+				continue;
+			vector.add(table.getPackage());
 		}
-
-		return (String[]) (String[]) vector.toArray(new String[vector.size()]);
+		return vector.toArray(new String[vector.size()]);
 	}
 }

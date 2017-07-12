@@ -1,86 +1,87 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
-
 package net.sourceforge.sql2java;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
-import org.jdom.*;
+import net.sourceforge.sql2java.CodeWriter;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 public class ConfigHelper {
-
 	private static Document doc = null;
 
 	public static String getTableProperty(String table, String propertyName) {
-		return getXPathProperty("//table[@name='" + table.toLowerCase() + "']", propertyName.toLowerCase());
+		return ConfigHelper.getXPathProperty("//table[@name='" + table.toLowerCase() + "']",
+				propertyName.toLowerCase());
 	}
 
 	public static String getColumnProperty(String table, String column, String propertyName) {
-		return getXPathProperty(
+		return ConfigHelper.getXPathProperty(
 				"//table[@name='" + table.toLowerCase() + "']/column[@name='" + column.toLowerCase() + "']",
 				propertyName);
 	}
 
 	public static String getProperty(String propertyName) {
-		return getXPathProperty("//sql2java", propertyName.toLowerCase());
+		return ConfigHelper.getXPathProperty("//sql2java", propertyName.toLowerCase());
 	}
 
 	public static String getGlobalProperty(String propertyName) {
-		return getProperty(propertyName);
+		return ConfigHelper.getProperty(propertyName);
 	}
 
 	public static String getXPathProperty(String xPathQuery, String propertyName) {
-		if (doc == null)
-			return null;
-		String result = null;
-		List nodes;
-		String s;
-		XPath servletPath = XPath.newInstance(xPathQuery);
-		nodes = servletPath.selectNodes(doc);
-		if (nodes != null)
-			break MISSING_BLOCK_LABEL_35;
-		s = null;
-		return s;
-		Element item;
-		String s1;
-		Iterator i = nodes.iterator();
-		if (!i.hasNext())
-			break MISSING_BLOCK_LABEL_142;
-		item = (Element) i.next();
-		if (item.getAttribute(propertyName) == null)
-			break MISSING_BLOCK_LABEL_95;
-		String result = item.getAttribute(propertyName).getValue();
-		if (result == null)
-			break MISSING_BLOCK_LABEL_95;
-		s1 = result;
-		return s1;
-		if (item.getChild(propertyName) != null)
-			break MISSING_BLOCK_LABEL_110;
-		s1 = null;
-		return s1;
-		String s2;
-		try {
-			String result = item.getChild(propertyName).getTextTrim();
-			s2 = result;
-		} catch (Exception e) {
-			e.printStackTrace();
-			break MISSING_BLOCK_LABEL_142;
-		} finally {
-			throw exception;
+		block9 : {
+			String result;
+			Element item;
+			block11 : {
+				block10 : {
+					List nodes;
+					block8 : {
+						if (doc == null) {
+							return null;
+						}
+						result = null;
+						XPath servletPath = XPath.newInstance((String) xPathQuery);
+						nodes = servletPath.selectNodes((Object) doc);
+						if (nodes != null)
+							break block8;
+						String string = null;
+						return string;
+					}
+					Iterator i = nodes.iterator();
+					if (!i.hasNext())
+						break block9;
+					item = (Element) i.next();
+					if (item.getAttribute(propertyName) == null
+							|| (result = item.getAttribute(propertyName).getValue()) == null)
+						break block10;
+					String string = result;
+					return string;
+				}
+				if (item.getChild(propertyName) != null)
+					break block11;
+				String string = null;
+				return string;
+			}
+			try {
+				String string = result = item.getChild(propertyName).getTextTrim();
+				return string;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		return s2;
 		return null;
 	}
 
 	static {
 		try {
-			String filename = CodeWriter.getProperty("sql2java.xml", "sql2java.xml");
-			if (!(new File(filename)).isFile()) {
-				filename = "src/sql2java.xml";
-				if (!(new File(filename)).isFile())
-					filename = "src/config/sql2java.xml";
+			String filename = CodeWriter.getProperty((String) "sql2java.xml", (String) "sql2java.xml");
+			if (!new File(filename).isFile() && !new File(filename = "src/sql2java.xml").isFile()) {
+				filename = "src/config/sql2java.xml";
 			}
 			SAXBuilder builder = new SAXBuilder();
 			doc = builder.build(new File(filename));
