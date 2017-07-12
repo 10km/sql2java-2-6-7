@@ -1,0 +1,43 @@
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+<!-- __________________________________________________-->
+<!--                                                   -->
+<!-- SERVLETS DEFINITION                               -->
+<!-- __________________________________________________-->
+    <servlet>
+        <servlet-name>org.acme.sample.web.servlet.RendererServlet</servlet-name>
+        <servlet-class>org.acme.sample.web.servlet.RendererServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+        <servlet-class>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>dwr-invoker</servlet-name>
+        <servlet-class>uk.ltd.getahead.dwr.DWRServlet</servlet-class>
+    </servlet>
+
+<!-- __________________________________________________-->
+<!--                                                   -->
+<!-- MAPPING SERVLETS TO URL                           -->
+<!-- __________________________________________________-->
+    <servlet-mapping>
+        <servlet-name>org.acme.sample.web.servlet.RendererServlet</servlet-name>
+        <url-pattern>/render.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+        <url-pattern>/JSON-RPC</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>dwr-invoker</servlet-name>
+        <url-pattern>/dwr/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

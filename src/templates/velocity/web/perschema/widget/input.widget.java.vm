@@ -1,0 +1,30 @@
+##$Id: input.widget.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "InputWidget.java")
+package $widgetPkg;
+
+import java.util.Map;
+
+public class InputWidget extends BaseWidget implements Widget
+{
+    /**
+     * constructor
+     */
+    public InputWidget()
+    {
+    }
+
+    public String extendedSearchInput(Map map)
+    {
+        String ret = "";
+        ret += "<select name=\"" + column + "_search_action\">\n";
+        ret += "    <option value=\"CONTAINS\" selected>Contains</option>\n";
+        ret += "    <option value=\"STARTSWITH\"       >Starts with</option>\n";
+        ret += "    <option value=\"ENDSWITH\"         >Ends with</option>\n";
+        ret += "</select>\n";
+        ret += input();
+        return ret;
+    }
+
+}

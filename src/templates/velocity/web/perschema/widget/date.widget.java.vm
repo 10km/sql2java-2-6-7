@@ -1,0 +1,79 @@
+##$Id: date.widget.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "DateWidget.java")
+package $widgetPkg;
+
+import java.util.Map;
+
+public class DateWidget extends BaseWidget implements Widget
+{
+    public DateWidget()
+    {
+    }
+
+    public String input()
+    {
+        StringBuffer ret = new StringBuffer(200);
+        ret.append("<input type=\"text\" name=\"" + column + "\" id=\"id_" + column + "\" size=\"30\"\n");
+        ret.append("><input type=\"reset\" id=\"select_" + column + "\" value=\" ... \" onclick=\"return showCalendar('id_" + column + "', '%A, %B %e, %Y');\">\n");
+        ret.append("<script type=\"text/javascript\">\n");
+        ret.append("  Calendar.setup(\n");
+        ret.append("    {\n");
+        ret.append("      inputField     :    \"id_" + column + "\",\n");
+        ret.append("      ifFormat       :    \"%d-%m-%Y\",\n");
+        ret.append("      isPopup        :    true,\n");
+        ret.append("      button         :    \"select_" + column + "\",\n");
+        ret.append("      align          :    \"TC\",\n");
+        ret.append("      singleClick    :    true\n");
+        ret.append("    }\n");
+        ret.append("  );\n");
+        ret.append("</script>\n");
+        return ret.toString();
+    }
+
+    public String extendedSearchInput(Map map)
+    {
+        String ret = "";
+        ret += "<script>\n";
+        ret += "function onChangeExtended" + column + "Input(sel)\n";
+        ret += "{\n";
+        ret += "    value = sel.options[sel.selectedIndex].value;\n";
+        ret += "    if (value == \"TODAY\" || value == \"YESTERDAY\" || value == \"THISWEEK\" || value == \"THISMONTH\")\n";
+        ret += "    {\n";
+        ret += "        document.getElementById('ExtendedInput" + column + "Value1').style.visibility='hidden';\n";
+        ret += "    }\n";
+        ret += "    if (value == \"EQUALS\" || value == \"BEFORE\" || value == \"AFTER\")\n";
+        ret += "    {\n";
+        ret += "        document.getElementById('ExtendedInput" + column + "Value1').style.visibility='hidden';\n";
+        ret += "    }\n";
+        ret += "    if (value == \"BETWEEN\")\n";
+        ret += "    {\n";
+        ret += "        document.getElementById('ExtendedInput" + column + "Value1').style.visibility='visible';\n";
+        ret += "    }\n";
+        ret += "}\n";
+        ret += "</script>\n";
+
+        ret += "<select name=\"" + column + "_search_action\"\n";
+        ret += "        onchange=\"javascript:onChangeExtended" + column + "Input(this);\"\n";
+        ret += "        onkeypress=\"javascript:onChangeExtended" + column + "Input(this);\">\n";
+        ret += "    <option value=\"EQUALS\" selected>Equals</option>\n";
+        ret += "    <option value=\"TODAY\"          >Today</option>\n";
+        ret += "    <option value=\"YESTERDAY\"      >Yesterday</option>\n";
+        ret += "    <option value=\"THISWEEK\"       >This week</option>\n";
+        ret += "    <option value=\"THISMONTH\"      >This month</option>\n";
+        ret += "    <option value=\"BEFORE\"         >Before</option>\n";
+        ret += "    <option value=\"AFTER\"          >After</option>\n";
+        ret += "    <option value=\"BETWEEN\"        >Between</option>\n";
+        ret += "</select>\n";
+        ret += "\n";
+        ret += input();
+        ret += "\n";
+        ret += "<span id=\"ExtendedInput" + column + "Value1\" style=\"visibility: hidden\">\n";
+        ret += " and ";
+        ret += input();
+        ret += "</span>";
+        return ret;
+    }
+
+}

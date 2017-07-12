@@ -1,0 +1,56 @@
+##$Id: select.widget.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "SelectWidget.java")
+package $widgetPkg;
+
+import java.util.Map;
+
+public class SelectWidget extends BaseWidget implements Widget
+{
+    /**
+     * constructor
+     */
+    public SelectWidget()
+    {
+    }
+
+    /**
+     *
+     */
+    public String input(Map map)
+    {
+        /*	// useless
+        String value = "";
+        if (getBean() != null)
+            value = getBean().getValue(column);
+        /**/
+	
+        String ret = "";
+        ret += "<select name=\"" + column + "\">\n";
+        ret += "</select>";
+        return ret;
+    }
+
+    public String extendedSearchInput(Map map)
+    {
+        String ret = "";
+        ret += "<select name=\"" + column + "_search_action\">\n";
+        ret += "    <option value=\"is\"   >Is</option>\n";
+        ret += "    <option value=\"isnot\">Is not</option>\n";
+        ret += "</select>\n";
+        ret += input();
+        return ret;
+    }
+
+    public String display()
+    {
+        String ret = "";
+        String id = (getBean().getDictionnary().get(column) == null ? "": getBean().getDictionnary().get(column).toString());
+        ret += "<a href=\"render.do?module=" + getProperty("foreign.table") + "&action=display&" + getProperty("foreign.column") + "=" + id + "\">";
+        ret += id;
+        ret += "</a>";
+        return ret;
+    }
+}
+

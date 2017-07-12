@@ -1,0 +1,7 @@
+## set your macro here
+## example:
+## #macro( myFunction $a $b $c)
+##  1st argument : $a, 2nd argument : $b and third one is $c
+## #end
+##
+## call your macro with #myFunction("un","dos","three")

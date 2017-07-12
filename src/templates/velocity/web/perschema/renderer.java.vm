@@ -1,0 +1,289 @@
+##$Id: renderer.java.vm,v 1.1 2007/06/22 07:29:16 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($pkg, "Renderer.java")
+package $pkg;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * abstract renderer class to be subclassed
+ */
+public abstract class Renderer
+{
+    protected HttpServletRequest request;
+    protected HttpServletResponse response;
+    protected int depth = 1;
+    protected int maxDepth = 4;
+    protected int pagingSize = 10;
+    protected int nbPages = 0;
+    protected int nbItems = 0;
+    protected int pageId = 0;
+    protected boolean skipHeaders = false;
+    protected String module = "";
+    protected String subModule = "";
+    protected String action = "";
+    protected Map map = new HashMap();
+
+    /**
+     * constructor of the renderer
+     * @param request
+     * @param response
+     */
+    public Renderer(HttpServletRequest request, HttpServletResponse response)
+    {
+        initParameters(request, response);
+    }
+
+    /**
+     * constructor of the renderer with depth specification, used for recursive rendering
+     * @param request
+     * @param response
+     * @param depth
+     */
+    public Renderer(HttpServletRequest request, HttpServletResponse response, int depth)
+    {
+        initParameters(request, response);
+        setDepth(depth);
+    }
+
+    /**
+     * Init renderer parameters
+     * @param request
+     * @param response
+     */
+    public void initParameters(HttpServletRequest request, HttpServletResponse response)
+    {
+        this.request = request;
+        this.response = response;
+        if (request.getParameter("pageId") != null && "".equals(request.getParameter("pageId")) == false)
+            setPageId(getIntValue(request.getParameter("pageId")));
+        if (request.getParameter("depth") != null && "".equals(request.getParameter("depth")) == false)
+            setDepth(getIntValue(request.getParameter("depth")));
+        if (request.getParameter("maxDepth") != null && "".equals(request.getParameter("maxDepth")) == false)
+            setMaxDepth(getIntValue(request.getParameter("maxDepth")));
+        if (request.getParameter("pagingSize") != null && "".equals(request.getParameter("pagingSize")) == false)
+            setPagingSize(getIntValue(request.getParameter("pagingSize")));
+        if (request.getParameter("module") != null && "".equals(request.getParameter("module")) == false)
+            setModule(request.getParameter("module"));
+        if (request.getParameter("action") != null && "".equals(request.getParameter("action")) == false)
+            setAction(request.getParameter("action"));
+        if (request.getParameter("submodule") != null && "".equals(request.getParameter("submodule")) == false)
+            setSubModule(request.getParameter("submodule"));
+        if ("true".equalsIgnoreCase(request.getParameter("skipHeaders")))
+            setSkipHeaders(true);
+    }
+
+    private int getIntValue(String value)
+    {
+        try
+        {
+            return Integer.parseInt(value);
+        }
+        catch(Exception e)
+        {
+            return -1;
+        }
+    }
+
+    /**
+     * retrieve the page Id from the request
+     * @param pageId
+     */
+    public void setPageId(int pageId)
+    {
+        if (pageId < 0)
+            pageId = 1;
+        this.pageId = pageId;
+    }
+
+    /**
+     * return the current page id
+     */
+    public int getPageId()
+    {
+        return pageId;
+    }
+
+    /**
+     * retrieve the depth from the request
+     * @param depth
+     */
+    public void setDepth(int depth)
+    {
+        if (depth < 1)
+            depth = 1;
+        this.depth = depth;
+    }
+
+    /**
+     * return the current depth
+     */
+    public int getDepth()
+    {
+        return depth;
+    }
+
+    /**
+     * retrieve the max depth from the request
+     * @param maxDepth
+     */
+    public void setMaxDepth(int maxDepth)
+    {
+        if (maxDepth < 1)
+            maxDepth = 1;
+        this.maxDepth = maxDepth;
+    }
+
+    /**
+     * return the max depth
+     */
+    public int getMaxDepth()
+    {
+        return maxDepth;
+    }
+
+    /**
+     * retrieve the paging size from the request
+     * @param pagingSize
+     */
+    public void setPagingSize(int pagingSize)
+    {
+        if (pagingSize < 1)
+            pagingSize = 1;
+        this.pagingSize = pagingSize;
+    }
+
+    /**
+     * return the action
+     */
+    public String getAction()
+    {
+        return action;
+    }
+
+    /**
+     * set the action
+     */
+    public void setAction(String action)
+    {
+        this.action = action;
+    }
+
+    /**
+     * return the module
+     */
+    public String getModule()
+    {
+        return module;
+    }
+
+    /**
+     * set the Module
+     */
+    public void setModule(String module)
+    {
+        this.module = module;
+    }
+
+    /**
+     * set the submodule
+     */
+    public void setSubModule(String subModule)
+    {
+        this.subModule = subModule;
+    }
+
+    /**
+     * return the module
+     */
+    public String getSubModule()
+    {
+        return subModule;
+    }
+
+    /**
+     * set skip headers
+     */
+    public void setSkipHeaders(boolean skip)
+    {
+        this.skipHeaders = skip;
+    }
+
+    /**
+     * return the submodule
+     */
+    public boolean getSkipHeaders()
+    {
+        return skipHeaders;
+    }
+
+    /**
+     * set the submodule
+     */
+    public void getSubModule(String submodule)
+    {
+        this.subModule = submodule;
+    }
+
+    /**
+     * return the number of items
+     */
+    public int getNbItems()
+    {
+        return nbItems;
+    }
+
+    /**
+     * return the paging size
+     */
+    public int getPagingSize()
+    {
+        return pagingSize;
+    }
+
+    public void setMap(Map map)
+    {
+        if (map == null)
+            map = new HashMap();
+        this.map = map;
+    }
+
+    /**
+     * should the headers be displayed ?
+     */
+    public boolean displayHeaders()
+    {
+        if (getSkipHeaders() == true)
+            return false;
+        if (getDepth() == 1)
+            return true;
+        return false;
+    }
+
+    /**
+     * render the footer
+     */
+    public void renderBoxEnd()
+    {
+        if (displayHeaders() == true)
+            write("</td></tr></table>");
+        else
+            write("</ul>");
+    }
+
+    public void write(String value)
+    {
+        try
+        {
+            this.response.getWriter().write(value +"\n");
+        }
+        catch(Exception e)
+        {
+        }
+    }
+}

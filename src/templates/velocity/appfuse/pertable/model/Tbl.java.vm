@@ -1,0 +1,78 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${TblClass}.java")
+
+import java.io.Serializable;
+#if ($table.hasCompositeKey)
+import java.util.Map;
+import java.util.HashMap;
+#end
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+
+public class $TblClass extends BaseObject implements Serializable {
+	private static final long serialVersionUID = ${table.getSerialVersionUID()}L;
+
+#if ($table.hasCompositeKey())
+    protected ${PKClass} ${modelClass}PK = new $PKClass();
+#end
+
+#foreach ($column in $columns)
+#if (($column.isPrimaryKey() && $table.hasCompositeKey() == false) ||$column.isPrimaryKey() == false)
+    protected $column.getJavaType() $column.getVarName();
+#end
+#end
+
+#foreach ($table in $table.getForeignTables())
+    protected java.util.Set $table.asModelClass()Group = new java.util.HashSet();
+#end
+
+	public $TblClass(
+#set ($comma = " ")
+#foreach ($column in $columns)
+        $comma$column.getJavaType() $column.getVarName()
+#set ($comma=",")
+#end
+    )
+    {
+#foreach ($column in $columns)
+        $column.getSetMethod()($column.getVarName());
+#end
+    }
+
+#if ($table.hasCompositeKey())
+    public void set${modelClass}PK($PKClass ${modelClass}PK)
+    {
+        this.${modelClass}PK = ${modelClass}PK;
+    }
+
+    public $PKClass get${modelClass}PK()
+    {
+        return this.${modelClass}PK;
+    }
+#end
+
+#foreach ($column in $columns)
+	public $column.getJavaType() $column.getGetMethod()()
+	{
+#if ($column.isPrimaryKey() && $table.hasCompositeKey())
+		return this.get${modelClass}PK().$column.getGetMethod();
+#else
+		return this.$column.getVarName();
+#end
+	}
+
+	public void $column.getSetMethod()($column.getJavaType() value)
+	{
+#if ($column.isPrimaryKey() && $table.hasCompositeKey())
+		this.set${modelClass}PK().$column.getSetMethod(value);
+#else
+		this.$column.getVarName() = value;
+#end
+	}
+
+#end
+
+
+}

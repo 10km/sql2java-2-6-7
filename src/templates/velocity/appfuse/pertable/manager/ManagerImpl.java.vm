@@ -1,0 +1,16 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${managerImplClass}.java")
+
+import java.util.*;
+import org.apache.commons.lang.StringUtils;
+
+#foreach ($linkedPackage in $linkedPackages)
+import ${linkedPackage}.*;
+#end
+
+public class $managerImplClass implements $managerClass {
+//todo
+}
+
+  

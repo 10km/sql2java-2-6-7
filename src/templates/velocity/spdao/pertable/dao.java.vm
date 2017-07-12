@@ -1,0 +1,22 @@
+##$Id: dao.java.vm,v 1.4 2007/11/12 11:44:36 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("${pkg}.dao" , "${table.asDAOClass()}.java")
+#if ( $table.hasProcedures() )
+package ${pkg}.dao;
+
+import java.util.List;
+
+import ${pkg}.exception.DAOException;
+
+/**
+ * @author sql2java
+ */
+public interface $table.asDAOClass() {
+
+#foreach ( $sp in $table.getProcedures() )
+    public ${sp.getReturnType()} ${sp.getName()}(#foreach ( $column in $sp.getInColumns() )#if($velocityCount > 1),#end final $column.getJavaType() $column.getJavaName()#end) throws DAOException;
+    
+#end
+}
+#end

@@ -1,0 +1,55 @@
+##$Id: numeric.widget.java.vm,v 1.1 2007/06/22 07:29:10 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "NumericWidget.java")
+package $widgetPkg;
+
+import java.util.Map;
+
+public class NumericWidget extends InputWidget implements Widget
+{
+    /**
+     * constructor
+     */
+    public NumericWidget()
+    {
+    }
+
+    public String extendedSearchInput(Map map)
+    {
+        String ret = "";
+        ret += "<script>\n";
+        ret += "function onChangeExtended" + column + "Input(sel)\n";
+        ret += "{\n";
+        ret += "    value = sel.options[sel.selectedIndex].value;\n";
+        ret += "    if (value == \"EQUALS\" || value == \"LOWERTHAN\" || value == \"GREATHERTHAN\")\n";
+        ret += "    {\n";
+        ret += "        document.getElementById('ExtendedInput" + column + "Value1').style.visibility='hidden';\n";
+        ret += "    }\n";
+        ret += "    if (value == \"BETWEEN\")\n";
+        ret += "    {\n";
+        ret += "        document.getElementById('ExtendedInput" + column + "Value1').style.visibility='visible';\n";
+        ret += "    }\n";
+        ret += "}\n";
+        ret += "</script>\n";
+
+        ret += "<select name=\"" + column + "_search_action\"\n";
+        ret += "        onchange=\"javascript:onChangeExtended" + column + "Input(this);\"\n";
+        ret += "        onkeypress=\"javascript:onChangeExtended" + column + "Input(this);\">\n";
+        ret += "    <option value=\"EQUALS\" selected>Equals</option>\n";
+        ret += "    <option value=\"LOWERTHAN\"      >Lower than</option>\n";
+        ret += "    <option value=\"GREATHERTHAN\"   >Greather than</option>\n";
+        ret += "    <option value=\"BETWEEN\"        >Between</option>\n";
+        ret += "</select>\n";
+
+        ret += "\n";
+        ret += input();
+        ret += "\n";
+        ret += "<span id=\"ExtendedInput" + column + "Value1\" style=\"visibility: hidden\">\n";
+        ret += " and ";
+        ret += input();
+        ret += "</span>";
+        return ret;
+    }
+
+}

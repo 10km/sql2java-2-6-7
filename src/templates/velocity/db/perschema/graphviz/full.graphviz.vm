@@ -1,0 +1,22 @@
+##$Id: full.graphviz.vm,v 1.3 2006/03/26 21:57:46 framiere Exp $
+#parse( "schema.include.vm" )
+$codewriter.setCurrentFilename("web/database/graphviz/", "full.graphviz")
+#set ( $tables = $codewriter.getTables() )
+digraph sql2java {
+	graph [label="\n\sql2java http://sql2java.sf.net"];
+	rankdir=LR;
+    node [shape=record];
+
+#foreach ( $table in $tables )
+    $table.getName() [label="__$table.getName()__ #foreach ( $column in $table.getColumns() ) | <f$column.getName().toLowerCase()> $column.getName().toLowerCase() #end "];
+#end
+
+#foreach ( $table in $tables )
+    #foreach ( $column in $table.getForeignKeys() )
+
+        $column.getTableName():f$column.getName().toLowerCase() -> $column.getForeignColumn().getTableName():f$column.getForeignColumn().getName().toLowerCase();
+    #end
+#end
+
+
+}

@@ -1,0 +1,22 @@
+<sql2java>
+<!--
+
+this XML file will is used to add comments and additionnal data to your database
+sql2java.generated.xml can be your starting guide ...
+
+-->
+
+<table name="CUSTOMER">
+    <description>
+        the customer table, this description is in this sql2java.xml file
+        because HSQL does not support comments
+    </description>
+
+        <column name="CUSTOMER_ID">
+        <description>
+            same here, this description is in this sql2java.xml file
+            because HSQL does not support comments
+        </description>
+</table>
+
+</sql2java>

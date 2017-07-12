@@ -1,0 +1,13 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${controllerTestClass}.java")
+
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+
+public class $controllerTestClass extends BaseControllerTestCase {
+//todo
+}

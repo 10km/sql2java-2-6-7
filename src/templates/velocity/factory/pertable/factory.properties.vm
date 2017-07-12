@@ -1,0 +1,30 @@
+##$Id: factory.properties.vm,v 1.1 2007/06/22 07:29:18 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${factoryClass}.properties")
+
+#available check methods:  nullallowed nullnotallowed email inrange intextrange httplink nospace numeric dateformat
+
+#foreach ( $column in $columns )
+#set( $columnfield=$column.getVarName())
+#set( $property = $column.getPropertyTag())
+
+# ____ $column.getFullName() _________________________________________________________
+${property}.fieldname=$column.getName()
+${property}.default=$column.getDefaultValue()
+${property}.check=$column.getDefaultRules()
+${property}.nullnotallowed.error=(<TAG>) Sorry but you have to specify something
+${property}.email.error=(<TAG>) Sorry <VALUE> should be an email
+${property}.inrange.inferior=1
+${property}.inrange.superior=10
+${property}.inrange.error=(<TAG>) Sorry <VALUE> should be between 1 and 10
+${property}.intextrange.inferior=1
+${property}.intextrange.superior=10
+${property}.intextrange.error=(<TAG>) Sorry the length (<VALUE>) should be between 1 and 10
+${property}.httplink.error=(<TAG>) Sorry <VALUE> should be an http link
+${property}.nospace.error=(<TAG>) Sorry <VALUE> should not contain any space
+${property}.numeric.error=(<TAG>) Sorry <VALUE> should be a numeric
+${property}.dateformat.error=(<TAG>) Sorry <VALUE> should be a date
+
+#end
+

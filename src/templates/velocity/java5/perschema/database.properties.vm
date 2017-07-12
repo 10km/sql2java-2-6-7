@@ -1,0 +1,8 @@
+##$Id: database.properties.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($pkg, "database.properties")
+jdbc.driver=$db.getDriver()
+jdbc.url=$db.getUrl()
+jdbc.username=$db.getUsername()
+jdbc.password=$db.getPassword()

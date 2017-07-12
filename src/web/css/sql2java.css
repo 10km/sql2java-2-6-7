@@ -1,0 +1,82 @@
+body, td, select, li{
+  margin: 0px;
+  padding: 0px 0px 10px 0px
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+table {
+  padding:0px;
+  margin-left: -2px;
+  margin-right: -2px;
+}
+a {
+  text-decoration: none;
+}
+a:link {
+  color:#36a;
+}
+a:visited  {
+  color:#47a;
+}
+a:active, a:hover {
+  color:#69c;
+}
+a navigation {
+    font-weight: bold;
+}
+h2 {
+  padding: 4px 4px 4px 6px;
+  border: 1px solid #999;
+  color: #900;
+  background-color: #ddd;
+  font-weight:900;
+  font-size: x-large;
+}
+h3 {
+  padding: 4px 4px 4px 6px;
+  border: 1px solid #aaa;
+  color: #900;
+  background-color: #eee;
+  font-weight: normal;
+  font-size: large;
+}
+table.bodyTable th {
+  padding: 2px 4px 2px 4px;
+  vertical-align: top;
+      color: white;
+  background-color: #bbb;
+  text-align: left;
+  font-weight: bold;
+}
+table.bodyTable th {
+  color: white;
+  background-color: #bbb;
+  text-align: left;
+  font-weight: bold;
+}
+table.bodyTable th, table.bodyTable td {
+  font-size: 1em;
+}
+table.bodyTable tr.listnavigation{
+  background-color: #ccccee;
+}
+table.bodyTable tr.listaction{
+  background-color: #ccddaa;
+}
+table.bodyTable tr.title {
+  color: white;
+  background-color: #bbb;
+  text-align: left;
+  font-weight: bold;
+}
+table.bodyTable tr.normal {
+  background-color: #ddd;
+}
+table.bodyTable tr.over {
+  background-color: #eee;
+}
+input{
+  margin: 0px;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}

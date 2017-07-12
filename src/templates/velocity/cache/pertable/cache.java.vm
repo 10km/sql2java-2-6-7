@@ -1,0 +1,157 @@
+##$Id: cache.java.vm,v 1.3 2007/11/12 14:06:31 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${cacheClass}.java")
+package $table.getPackage();
+
+#if ($table.countPrimaryKeys() == 1)
+import java.util.HashMap;
+
+import ${pkg}.exception.DAOException;
+
+/**
+ * This cache manager is based on code from Mark GRAND in "Patterns in Java,
+ * Volume 1", Wiley.
+ * 
+ * @author afagot
+ */
+public final class ${cacheClass} {
+	/**
+	 * Unique instance of the cache manager.
+	 */
+	private static ${cacheClass} instance;
+
+	/**
+	 * Maximum number of ${beanClass} objects that may be in the cache.
+	 */
+	private static final int MAX_CACHE_SIZE = 80;
+
+	/**
+	 * The number of ${beanClass} objects currently in the cache.
+	 */
+	private int currentCacheSize = 0;
+
+	/**
+	 * We use a linked list to determine the least recently used bean. The cache
+	 * is implemented by a HashMap object. The HashMap values are linked list
+	 * objects that refer to the actual ${beanClass}.
+	 */
+	private HashMap cache = new HashMap();
+
+	/**
+	 * This is the head of the linked list that refers to the most recently used
+	 * ${beanClass}.
+	 */
+	private LinkedList mru;
+
+	/**
+	 * This is the end of the linked list that refers to the least recently used
+	 * ${beanClass}.
+	 */
+	private LinkedList lru;
+	
+	/**
+	 * In order to prevent the compiler from generating the default constructor.
+	 */
+	private ${cacheClass}() {
+	}
+	
+	/**
+	 * Return the unique instance of the class.
+	 */
+	public static ${cacheClass} getInstance() {
+		if (null == instance) {
+			instance = new ${cacheClass}();
+		}
+		return instance;
+	}
+
+	/**
+	 * A ${beanClass} object is passed to this method for addition to the cache.
+	 */
+	public void add${coreClass}(${beanClass} bean) {
+		$table.getPrimaryKey().getJavaType() id = bean.${table.getPrimaryKey().getGetMethod()}();
+		if (null == cache.get(id)) { // bean not in the cache
+			// add bean to the cache, making it the most recently used
+			if (0 == currentCacheSize) {
+				// treat empty cache as a special case
+				lru = mru = new LinkedList();
+				mru.bean = bean;
+			} else {
+				LinkedList newLink;
+				if (MAX_CACHE_SIZE < currentCacheSize) {
+					// remove the least recently used bean from the cache
+					newLink = lru;
+					lru = newLink.previous;
+					cache.remove(newLink.bean.${table.getPrimaryKey().getGetMethod()}());
+					lru.next = null;
+				} else {
+					newLink = new LinkedList();
+					currentCacheSize++;
+				}
+				newLink.bean = bean;
+				newLink.next = mru;
+				newLink.previous = null;
+				mru = newLink;
+			}
+			// put the now most recently used bean in the cache
+			cache.put(id, mru);
+		} else { // bean already in the cache
+			// addBid should not be called when the object is already in the
+			// cache however since that happened do a fetch so that the object
+			// becomes the most recently used
+			fetch${coreClass}(id);
+		}
+	}
+
+	/**
+	 * Return the ${beanClass} associated with the given key.
+	 */
+	public ${beanClass} fetch${coreClass}($table.getPrimaryKey().getJavaType() id) {
+		LinkedList foundLink = (LinkedList) cache.get(id);
+		if (null == foundLink) {
+			${beanClass} bean = null;
+			try {
+				bean = ${managerClass}.getInstance().loadByPrimaryKey(id);
+			} catch (DAOException e) {
+				return null;
+			}
+			if (null != bean) {
+				add${coreClass}(bean);
+			}
+			return bean;
+		}
+		// AFagot [2007-07-06]
+		// this could be acheived with the now standard java.util.LinkedList and
+		// java.util.ListIterator but the code was already written since 1998 ;-)
+		if (mru != foundLink) {
+			if (null != foundLink.previous) {
+				foundLink.previous.next = foundLink.next;
+			}
+			if (null != foundLink.next) {
+				foundLink.next.previous = foundLink.previous;
+			}
+			foundLink.previous = null;
+			foundLink.next = mru;
+			mru = foundLink;
+		}
+		return foundLink.bean;
+	}
+
+	/**
+	 * Private doubly linked list for managing list of most recently used beans.
+	 */
+	private class LinkedList {
+		${beanClass} bean;
+		LinkedList previous;
+		LinkedList next;
+	}
+}
+#else
+	/**
+	 * The table does not have exactly one column as primary key.
+	 * The generation of the cache has failed.
+	 * @author sql2java
+	 */
+public abstract class ${cacheClass} {}
+#end

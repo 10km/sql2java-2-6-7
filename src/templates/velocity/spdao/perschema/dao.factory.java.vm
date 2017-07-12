@@ -1,0 +1,87 @@
+##$Id: dao.factory.java.vm,v 1.4 2007/11/12 11:44:35 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($pkg, "DAOFactory.java")
+package $pkg;
+
+// import org.apache.commons.logging.Log;
+// import org.apache.commons.logging.LogFactory;
+
+#foreach ( $table in $tables )
+#if ( $table.hasProcedures() )
+import ${pkg}.dao.$table.asDAOClass();
+#end
+#end
+
+import ${pkg}.exception.DAOException;
+
+/**
+ * The abstract factory defining all the DAO objects we can get.
+ * @author sql2java
+ */
+public abstract class DAOFactory {
+	// private static final Log logger = LogFactory.getLog(DAOFactory.class);
+
+	/**
+	 * Obtención de la factory concreta.
+	 * 
+	 * @param tipoFactory
+	 *            el nombre plenamente cualificado de la clase de la factory concreta.
+	 * @return DAOFactory
+	 */
+	public static final DAOFactory getConcreteFactory(final String tipoFactory) throws DAOException {
+		DAOFactory factory = null;
+		
+		try {
+			factory = (DAOFactory) Class.forName(tipoFactory).newInstance();
+		} catch (ClassNotFoundException cnfe) {
+			// logger.error("getConcreteFactory", cnfe);
+			throw new DAOException("ClassNotFoundException for " + tipoFactory, cnfe);
+		} catch (IllegalAccessException iae) {
+			// logger.error("getConcreteFactory", iae);
+			throw new DAOException("IllegalAccessException for " + tipoFactory, iae);
+		} catch (InstantiationException ie) {
+			// logger.error("getConcreteFactory", ie);
+			throw new DAOException("InstantiationException for " + tipoFactory, ie);
+		}
+		
+		return factory;
+	}
+
+    /**
+     * @param packageName the name of the package the procedure is defined in.
+     * @param procedureName the name of the procedure to be called.
+     * @param paramCount the number of parameters the procedure is expecting.
+     * @return the JDBC call statement string with the given number of parameters.
+     */
+	public static String buildProcedureCall(String packageName, String procedureName, int paramCount) {
+		return buildProcedureCall(packageName + "." + procedureName, paramCount);
+    }
+
+    /**
+     * @param procedureName the name of the procedure to be called.
+     * @param paramCount the number of parameters the procedure is expecting.
+     * @return the JDBC call statement string with the given number of parameters.
+     */
+	public static String buildProcedureCall(String procedureName, int paramCount) {
+		StringBuffer sb = new StringBuffer("{call ").append(procedureName).append("(");
+		for (int n = 0; n < paramCount; n++) {
+			sb.append("?,");
+		}
+		if (paramCount > 0) {
+			sb.setLength(sb.length()-1);
+		}
+		return sb.append(")}").toString();
+	}
+    
+	/**
+	 * Se declarará un método por cada DAO creado. 
+	 * Las factorías concretas implementarán estos métodos.
+	 */
+#foreach ( $table in $tables )
+#if ( $table.hasProcedures() )
+	public abstract $table.asDAOClass() getDAO${table.asCoreClass()}();
+#end
+#end
+}
+

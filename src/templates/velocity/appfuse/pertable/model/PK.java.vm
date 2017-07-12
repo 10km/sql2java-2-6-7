@@ -1,0 +1,13 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${PKClass}.java")
+
+import java.io.Serializable;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+
+public class $PKClass  implements Serializable {
+	private static final long serialVersionUID = ${table.getSerialVersionUID()}L;
+//TODO
+}

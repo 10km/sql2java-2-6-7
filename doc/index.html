@@ -1,0 +1,104 @@
+<html>
+<head>
+    <title>SQL2JAVA</title>
+    <meta name="DESCRIPTION" content="SQL 2 JAVA is an Open source object-relational mapping tools for java. It generates all the needed java code from a database wihtout any user input" />
+    <meta name="KEYWORDS" content="java, mysql, oracle, mssql, postgresql, code, generation, jdbc, preparedstatement, iterator, easy, simple, transaction, optimization, dao, j2ee, pattern, database, sql" />
+<style type="text/css">
+body td {
+  margin: 0px;
+  padding: 0px 0px 10px 0px;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+.source {
+  background-color: #ddd;
+  border: 1px solid #aaa;
+}
+.note {
+  font-size: 10px;
+}
+</style>
+</head>
+<body>
+
+<!-- sourceforge logo here -->
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=54687&amp;type=1" border="0" alt="SourceForge Logo" /></a>
+
+<h2>Running the SQL2JAVA example</h2>
+
+<p>The SQL2JAVA example can be run in less than five minutes. It generates a DB layer
+        API to access a sample hsql database schema, Javadoc, and more!</p>
+
+<p>We assume Java and Ant have already been installed.</p>
+
+<ol>
+    <li>First, start the hsql database. From a console, type: <span class="source">ant hsql.server</span><br/>
+        <i><span class="note">NOTE: In Linux, type <span class="source">ant hsql.server &amp;</span> to keep hsql running in the background and immediately regain access to the console.
+If you accidentally forget the <span class="source">&amp;</span>, you can still enter ctrl+z, <span class="source">bg</span> to move hsql.server to the background. </span></i><br />
+<i><span class="note">NOTE: In Windows, type <span class="source">START ant hsql.server</span> to keep hsql running in the background and immediately
+          access a new command console.)</span></i>
+    <li>Create the sample database:  <span class="source">ant database.create</span>
+    <li>Generate the Java API for accessing the sample database: <span class="source">ant generate</span>, the generated code
+        was placed <a href="../src/java/org/acme/sample/">here...</a>
+    <li>Compile the <a href="../src/java/org/acme/sample/">generated source code API</a>: <span class="source">ant compile</span>
+    <li>Run the <a href="../src/java/org/acme/Main.java">Main.java</a> program which
+            uses the sample source code API: <span class="source">ant run</span>
+    <li>Type <span class="source">ant javadoc</span> to generate the <a href="../build/javadoc/index.html">javadoc</a>
+    <li>Try sql2java against your own schema.
+        Take a look at <a href="../src/config/sql2java.properties">sql2java.properties</a>; it is self documented.
+    <li>To customize the generated code, edit sql2java velocity templates:
+        <ul>
+            <li><a href="../src/templates/velocity/java/perschema/database.properties.vm">database.properties</a>,</li>
+            <li><a href="../src/templates/velocity/java/perschema/generated.bean.java.vm">GeneratedBean.java</a>,</li>
+            <li><a href="../src/templates/velocity/java/perschema/manager.java.vm">Manager.java</a>,</li>
+            <li><a href="../src/templates/velocity/java/pertable/bean.java.vm">xBean.java</a>,</li>
+            <li><a href="../src/templates/velocity/java/pertable/comparator.java.vm">xComparator.java</a>,</li>
+            <li><a href="../src/templates/velocity/java/pertable/listener.java.vm">xListener.java</a>,</li>
+            <li><a href="../src/templates/velocity/java/pertable/manager.java.vm">xManager.java</a></li>
+        </ul>
+    <li>You can also add your own templates <a href="../src/templates/velocity/">here ...</a>
+    <li>Enjoy!
+</ol>
+
+<h2>Not sure what to do ?</h2>
+<table>
+<tr><td>Distribution file</td>                                                     <td><img alt="" src="screenshots/step01.png" /> </tr>
+<tr><td>Unzip it ...</td>                                                          <td><img alt="" src="screenshots/step02.png" /> </tr>
+<tr><td>You have jdk installed, and ant installed, so start the hsql server</td>   <td><img alt="" src="screenshots/step03.png" /> </tr>
+<tr><td>Your database server is now up and running</td>                            <td><img alt="" src="screenshots/step04.png" /> </tr>
+<tr><td>Well let's create the sample database schema</td>                          <td><img alt="" src="screenshots/step05.png" /> </tr>
+<tr><td>Type ant, looks like it is analyzing our database schema</td>              <td><img alt="" src="screenshots/step06.png" /> </tr>
+<tr><td>... and now generating stuffs</td>                                         <td><img alt="" src="screenshots/step07.png" /> </tr>
+<tr><td>... and now running the sample application</td>                            <td><img alt="" src="screenshots/step08.png" /> </tr>
+<tr><td>Why not generating the javadoc </td>                                       <td><img alt="" src="screenshots/step09.png" /> </tr>
+<tr><td>... and reading it afterwards ...</td>                                     <td><img alt="" src="screenshots/step10.png" /> </tr>
+</table>
+<hr />
+
+
+<h2>Support</h2>
+    <ul>
+        <li><a href="http://sql2java.sourceforge.net/">sql2java main website</a>
+        <li><a href="http://sf.net/projects/sql2java">sql2java on sourceforge</a>
+    </ul>
+<hr>
+
+<p>
+    This product uses Velocity which license is available here
+    <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
+
+<p>NOTE:
+    For the example, we ship hsqldb in a binary form, but you do not need it to use
+    sql2java against another database. </p>
+
+<pre>
+    Manditory Legal Stuff:
+    This product includes Hypersonic SQL.
+    ORIGINAL LICENSE (a.k.a. "hypersonic_lic.txt")
+    For content, code, and products originally developed by Thomas Mueller and the Hypersonic SQL Group:
+    Copyright (c) 1995-2000 by the Hypersonic SQL Group. All rights reserved.
+</pre>
+
+<p>$Id: index.html,v 1.18 2008/03/19 12:12:13 kameleono Exp $</p>
+</body>
+</html>

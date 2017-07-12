@@ -1,0 +1,45 @@
+##$Id: data.retrieval.exception.java.vm,v 1.5 2007/11/12 11:44:29 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$exceptionPkg", "DataRetrievalException.java")
+package $exceptionPkg;
+
+/**
+ * @author sql2java
+ */
+public class DataRetrievalException extends DataAccessException
+{
+    private static final long serialVersionUID = -1628427750056759044L;
+
+	/**
+     * contructor
+     */
+    public DataRetrievalException()
+    {
+        super();
+    }
+
+    /**
+     * contructor
+     */
+    public DataRetrievalException(String message)
+    {
+        super(message);
+    }
+
+    /**
+     * contructor
+     */
+    public DataRetrievalException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    /**
+     * contructor
+     */
+    public DataRetrievalException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+}

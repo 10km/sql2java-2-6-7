@@ -1,0 +1,26 @@
+##$Id: widget.properties.vm,v 1.1 2007/06/22 07:29:08 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${widgetClass}.properties")
+
+#foreach ( $column in $columns )
+#set( $columnfield=$column.getVarName())
+#set( $property = $column.getPropertyTag())
+
+# ____ $column.getFullName() _________________________________________________________
+${property}.widget.class=${pkg}.widget.${column.getDefaultWidget()}
+#if ( $column.isForeignKey() == true || $column.isImportedKey())
+${property}.widget.decorators=${pkg}.widget.AjaxDecorator
+#end
+#if ( $column.isForeignKey() == true)
+${property}.widget.property.foreign.table=$column.getForeignColumn().getTableName()
+${property}.widget.property.foreign.column=$column.getForeignColumn().getName()
+#end
+#foreach ( $importedColumn in $column.getImportedKeys() )
+${property}.widget.property.imported.table=$importedColumn.getTableName()
+${property}.widget.property.imported.column=$importedColumn.getName()
+${property}.widget.property.imported.column.fk.column=$importedColumn.getForeignColumn().getName()
+#end
+
+#end
+

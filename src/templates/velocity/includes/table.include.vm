@@ -1,0 +1,52 @@
+##$Id: table.include.vm,v 1.9 2007/11/12 14:06:31 kameleono Exp $
+#parse( "schema.include.vm" )
+##
+## table, columns, linked tables
+##
+#set ( $tablename = $table.getName() )
+#set ( $tableName = $table.getJavaName() )
+#set ( $columns = $table.getColumns() )
+#set ( $foreignKeys = $table.getForeignKeys() )
+#set ( $importedKeys = $table.getImportedKeys() )
+#set ( $primaryKeys = $table.getPrimaryKeys() )
+##set ( $primaryKey = $table.getPrimaryKey() )
+#set ( $foreignTables = $table.getForeignTables() )
+#set ( $linkedTables = $table.getLinkedTables() )
+#set ( $linkedPackages = $table.getLinkedPackages() )
+#set ( $pkgPath = $table.getPackagePath() )
+#set ( $Q = '"' )
+##
+## classes
+##
+#set ( $coreClass = $table.asCoreClass() )
+#set ( $managerClass = $table.asManagerClass() )
+#set ( $hibernateManagerClass = $table.asHibernateManagerClass() )
+#set ( $beanClass = $table.asBeanClass() )
+#set ( $relationnalBeanClass = $table.asRelationnalBeanClass() )
+#set ( $factoryClass = $table.asFactoryClass() )
+#set ( $httpFactoryClass = $table.asHttpFactoryClass() )
+#set ( $comparatorClass = $table.asComparatorClass() )
+#set ( $listenerClass = $table.asListenerClass() )
+#set ( $rendererClass = $table.asRendererClass() )
+#set ( $exceptionClass = $table.asExceptionClass() )
+#set ( $widgetFactoryClass = $table.asWidgetFactoryClass() )
+#set ( $widgetClass = $table.asWidgetClass() )
+#set ( $cacheClass = $table.asCacheClass() )
+##
+## Appfuse classes
+##
+#set ( $DAOClass = $table.asDAOClass() )
+#set ( $DAOHibernateClass = $table.asDAOHibernateClass() )
+#set ( $DAOTestClass = $table.asDAOTestClass() )
+#set ( $managerTestClass = $table.asManagerTestClass() )
+#set ( $managerImplClass = $table.asManagerImplClass() )
+#set ( $modelClass = $table.asModelClass() )
+#set ( $PKClass = $table.asPKClass() )
+#set ( $TblClass = $table.asTblClass() )
+#set ( $controllerClass = $table.asControllerClass() )
+#set ( $controllerTestClass = $table.asControllerTestClass() )
+#set ( $formControllerClass = $table.asFormControllerClass() )
+#set ( $formControllerTestClass = $table.asFormControllerTestClass() )
+#set ( $actionClass = $table.asActionClass() )
+#set ( $actionTestClass = $table.asActionTestClass() )
+## add your own stuffs here

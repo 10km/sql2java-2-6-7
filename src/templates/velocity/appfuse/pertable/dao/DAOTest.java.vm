@@ -1,0 +1,10 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${DAOTestClass}.java")
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+
+public class $DAOTestClass extends BaseDAOTestCase {
+//
+}

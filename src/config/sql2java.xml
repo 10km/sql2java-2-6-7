@@ -1,0 +1,40 @@
+<sql2java>
+<!-- !!! description should whenever possible be in the database !!! -->
+<!-- !!! default values should whenever possible be in the database !!! -->
+
+    <table name="manufacturer" subpackage="products.manufacturer" description="manufacturer info table">
+        <presentation>
+            <list include="manufacturer_name, manufacturer_description"/>
+        </presentation>
+    </table>
+
+    <table name="customer" subpackage="users.customer" description="customer info table">
+        <presentation>
+            <list exclude="customer_id"/>
+            <searchform exclude="customer_id"/>
+            <form exclude="customer_id"/>
+        </presentation>
+        <description>
+            override database description, or specify a description for
+            databases that do not allow comments like hsql
+        </description>
+    </table>
+
+    <table name="product" subpackage="products.product" description="product info table">
+        <column name="product_name" defaultValue="grosprout">
+            <description>
+                Name of the product
+            </description>
+        </column>
+    </table>
+
+    <table name="delivery" subpackage="products.delivery" description="delivery info table linking products to customers"/>
+    <table name="shipper" subpackage="users.shipper" description="shipper info table"/>
+    
+    <table name="poetb02_curs_escolar" subpackage="ensenianza" procedures="%CURS%" />
+    <table name="poetb14_concert" subpackage="ensenianza" procedures="%CONCER%" />
+    <table name="poetb15_autoritzacio" subpackage="ensenianza" procedures="%AUTOR%" />
+    <table name="poetb20_canvi_matricula" subpackage="ensenianza" procedures="%PETICI%" />
+    <table name="tmetb01comarques" subpackage="ensenianza" procedures="%COMAR%" />
+
+</sql2java>

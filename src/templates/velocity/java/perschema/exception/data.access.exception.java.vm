@@ -1,0 +1,45 @@
+##$Id: data.access.exception.java.vm,v 1.5 2007/11/12 11:44:29 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$exceptionPkg", "DataAccessException.java")
+package $exceptionPkg;
+
+/**
+ * @author sql2java
+ */
+public class DataAccessException extends DAOException
+{
+    private static final long serialVersionUID = 5584785072347143333L;
+
+    /**
+     * contructor
+     */
+    public DataAccessException()
+    {
+        super();
+    }
+
+    /**
+     * contructor
+     */
+    public DataAccessException(String message)
+    {
+        super(message);
+    }
+
+    /**
+     * contructor
+     */
+    public DataAccessException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    /**
+     * contructor
+     */
+    public DataAccessException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+}

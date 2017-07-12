@@ -1,0 +1,16 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${formControllerTestClass}.java")
+
+import java.util.*;
+import org.apache.commons.lang.StringUtils;
+
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
+
+public class $formControllerTestClass extends $BaseControllerTestCase {
+//todo
+}

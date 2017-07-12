@@ -1,0 +1,126 @@
+##$Id: widget.decorator.base.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "WidgetDecoratorBase.java")
+package $widgetPkg;
+
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import ${pkg}.GeneratedBean;
+
+public class WidgetDecoratorBase implements Widget
+{
+    protected Widget widget;
+
+    public WidgetDecoratorBase()
+    {
+    }
+
+    public WidgetDecoratorBase(Widget widget)
+    {
+        setWidget(widget);
+    }
+
+    public void setWidget(Widget widget)
+    {
+        this.widget = widget;
+    }
+
+    public void setTable(String table)
+    {
+        widget.setTable(table);
+    }
+
+    public String getTable()
+    {
+        return widget.getTable();
+    }
+
+    public void setColumn(String column)
+    {
+        widget.setColumn(column);
+    }
+
+    public String getColumn()
+    {
+        return widget.getColumn();
+    }
+
+    public void setBean(GeneratedBean bean)
+    {
+        widget.setBean(bean);
+    }
+
+    public GeneratedBean getBean()
+    {
+        return widget.getBean();
+    }
+
+    public void setMap(Map map)
+    {
+        widget.setMap(map);
+    }
+
+    public Map getMap()
+    {
+        return widget.getMap();
+    }
+
+    public void setResourceBundle(ResourceBundle resourceBundle)
+    {
+        widget.setResourceBundle(resourceBundle);
+    }
+
+    public ResourceBundle getResourceBundle()
+    {
+        return widget.getResourceBundle();
+    }
+
+    public String input()
+    {
+        return widget.input();
+    }
+
+    public String input(Map params)
+    {
+        return widget.input(params);
+    }
+
+    public String searchInput()
+    {
+        return widget.searchInput();
+    }
+
+    public String searchInput(Map params)
+    {
+        return widget.searchInput(params);
+    }
+
+    public String extendedSearchInput()
+    {
+        return widget.extendedSearchInput();
+    }
+
+    public String extendedSearchInput(Map params)
+    {
+        return widget.extendedSearchInput(params);
+    }
+
+    public String display()
+    {
+        return widget.display();
+    }
+
+    public String display(Map params)
+    {
+        return widget.display(params);
+    }
+
+    public String getProperty(String key)
+    {
+        return widget.getProperty(key);
+    }
+
+
+}

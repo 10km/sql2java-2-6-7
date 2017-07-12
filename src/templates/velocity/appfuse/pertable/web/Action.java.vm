@@ -1,0 +1,10 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${actionClass}.java")
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class $actionClass extends BaseAction {
+//todo
+}

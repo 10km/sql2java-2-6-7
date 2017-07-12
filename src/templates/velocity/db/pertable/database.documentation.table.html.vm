@@ -1,0 +1,60 @@
+##$Id: database.documentation.table.html.vm,v 1.5 2007/06/13 12:58:30 kameleono Exp $
+<!--
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+-->
+$codewriter.setCurrentFilename("web/database/", "${table.getJavaName()}.html")
+#set ( $columns = $table.getColumns() )
+<link rel="stylesheet" type="text/css" media="all" href="../css/sql2java.css" title="sql2java"/>
+
+<h2><a href="../index.html">Home</a> / <a href="./index.html">Table list</a> / ${table.getName()}</h2>
+<h3>${table.getName()} description</h3>
+$table.getRemarks()<br/>
+Jump directly to:
+<table class="bodyTable">
+    #foreach ($column in $columns)
+    <tr class="normal" onmouseover="javascript:this.className='over';" onmouseout="javascript:this.className='normal';">
+        <td>
+            <a href="#$column.getName()">$column.getName()</a>
+        </td>
+    </tr>
+    #end
+    <tr class="normal" onmouseover="javascript:this.className='over';" onmouseout="javascript:this.className='normal';">
+        <td>
+            <a href="../render.do?module=${coreClass}">Live data</a>
+        </td>
+    </tr>
+</table>
+<br/><br/>
+
+<h3>Fields relations</h3>
+<img src="graphviz/${table.getJavaName()}.png">
+<br/>
+
+#foreach ($column in $columns)
+<a name="$column.getName()">
+
+<u>$column.getName()</u>
+<ul>
+#if ( $column.isPrimaryKey() )
+     <li><b>PRIMARY KEY</b></li>
+#end
+#if ( $column.getRemarks().length() > 0 )
+     <li>Remarks: $column.getRemarks()</li>
+#end
+#if ( $column.DefaultValue.length() > 0 )
+     <li><i>Default value</i>: "$column.DefaultValue"</li>
+#end
+     <li>Column size: $column.getSize()</li>
+     <li>Jdbc type: $column.getJavaTypeAsTypeName()</li>
+     <li>Java mapped type: $column.getJavaType()</li>
+
+#foreach ($importedColumn in $column.getImportedKeys())
+    <li><b>Being referenced by</b> <a href="${importedColumn.getTable().getJavaName()}.html#${importedColumn.getName()}">${importedColumn.getFullName()}</a>
+#end
+#foreach ($foreignColumn in $column.getForeignKeys())
+    <li><b>Points on</b> <a href="${foreignColumn.getTable().getJavaName()}.html#${foreignColumn.getName()}">${foreignColumn.getFullName()}</a>
+#end
+
+</ul>
+#end

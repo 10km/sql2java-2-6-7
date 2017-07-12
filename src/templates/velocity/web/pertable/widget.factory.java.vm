@@ -1,0 +1,157 @@
+##$Id: widget.factory.java.vm,v 1.3 2008/04/15 20:46:27 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("${table.getPackage()}/web", "${widgetFactoryClass}.java")
+package ${table.getPackage()}.web;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.PropertyResourceBundle;
+import java.util.StringTokenizer;
+
+import ${pkg}.GeneratedBean;
+import ${pkg}.Manager;
+
+import ${widgetPkg}.InputWidget;
+import ${widgetPkg}.Widget;
+import ${widgetPkg}.WidgetDecoratorBase;
+
+/**
+ * Render a $beanClass object
+ */
+public class $widgetFactoryClass
+{
+
+    private static $widgetFactoryClass singleton = new $widgetFactoryClass();
+    private PropertyResourceBundle bundle;
+
+
+    /**
+     * Get the $widgetFactoryClass singleton.
+     *
+     * @return $widgetFactoryClass
+     */
+    public static $widgetFactoryClass getInstance()
+    {
+        return singleton;
+    }
+
+    /**
+     * constructor of the $widgetFactoryClass
+     */
+    public $widgetFactoryClass()
+    {
+        String fileName = null;
+        try
+        {
+            fileName = "$pkgPath/${widgetClass}.properties";;
+            InputStream inputStream = Manager.class.getClassLoader().getResourceAsStream(fileName);
+            bundle = new PropertyResourceBundle(inputStream);
+        }
+        catch(Exception e)
+        {
+            System.err.println("Could not find " + fileName);
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * get the widget for a given column
+     */
+    public Widget getWidget(String column)
+    {
+        return getWidget(column, null);
+    }
+
+    /**
+     * get the widget for a given column
+     */
+    public Widget getWidget(String column, GeneratedBean bean)
+    {
+        String property = "${table.getName().toLowerCase()}." + column.toLowerCase() + ".widget.class";
+        String widgetClass = getProperty(property);
+        Widget widget = null;
+        try
+        {
+            widget = (Widget)Class.forName(widgetClass).newInstance();
+        }
+        catch(Exception e)
+        {
+            System.out.println("*********************");
+            System.out.println("  property : " + property );
+            System.out.println("  widgetClass : " + widgetClass );
+            System.out.println("*********************");
+            e.printStackTrace();
+            widget = new InputWidget();
+        }
+        widget.setTable("${table.getName().toLowerCase()}");
+        widget.setColumn(column);
+        widget.setBean(bean);
+        widget.setResourceBundle(bundle);
+        return applyDecorators(column, widget);
+    }
+
+    private Widget applyDecorators(String column, Widget widget)
+    {
+        String property = "${table.getName().toLowerCase()}." + column.toLowerCase() + ".widget.decorators";
+        String[] decorators = getPropertyExploded(property);
+        if (decorators.length == 0)
+            return widget;
+        for (int i = 0; i < decorators.length; i ++)
+        {
+            String decoratorClass = decorators[i];
+            try
+            {
+                WidgetDecoratorBase decorator  = (WidgetDecoratorBase)Class.forName(decoratorClass).newInstance();
+                decorator.setWidget(widget);
+                widget = decorator;
+            }
+            catch(Exception e)
+            {
+                System.out.println("*********************");
+                System.out.println("  property : " + property );
+                System.out.println("  decoratorClass : " + decoratorClass );
+                System.out.println("*********************");
+                e.printStackTrace();
+            }
+        }
+        return widget;
+    }
+
+    /**
+     *
+     */
+     private String getProperty(String property)
+     {
+        if (bundle == null)
+            return "";
+        try
+        {
+            return bundle.getString(property);
+        }
+        catch(Exception e)
+        {
+            return "";
+        }
+    }
+
+    /**
+     * Return as a String array the key's value.
+     */
+    private String[] getPropertyExploded(String key)
+    {
+        String v = getProperty(key);
+        if (v==null) {
+            return new String[0];
+        }
+        ArrayList al = new ArrayList();
+
+        StringTokenizer st = new StringTokenizer(v, " ,;\t");
+        while (st.hasMoreTokens()) {
+            al.add(st.nextToken().trim());
+        }
+
+        return (String[])al.toArray(new String[al.size()]);
+    }
+}

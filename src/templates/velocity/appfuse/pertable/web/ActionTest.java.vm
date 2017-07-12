@@ -1,0 +1,9 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${actionTestClass}.java")
+
+import com.opensymphony.webwork.ServletActionContext;
+
+public class $actionTestClass extends BaseActionTestCase {
+//
+}

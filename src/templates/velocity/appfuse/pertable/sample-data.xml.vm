@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+-->
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "sample-date.xml")
+<table name="$table.getName().toLowerCase()">
+
+#foreach ( $column in $columns)
+    <column>$column.getName()</column>
+#end
+
+#foreach ( $column in [1..100])
+    <row>
+#foreach ( $column in $columns)
+        <value>$column.getSampleData()</value>
+#end
+    </row>
+
+#end
+</table>
+

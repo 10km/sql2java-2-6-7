@@ -1,0 +1,65 @@
+##$Id: database.documentation.overview.html.vm,v 1.5 2006/03/26 21:57:46 framiere Exp $
+<!--
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+-->
+$codewriter.setCurrentFilename("web/database/", "overview.html")
+<link rel="stylesheet" type="text/css" media="all" href="../css/sql2java.css" title="sql2java"/>
+<h2><a href="../index.html">Home</a> / Table overview</h2>
+<a href="index.html">List instead of a brief overview ? </a>
+<br/>
+<br/>
+
+<table class="bodyTable">
+<tr class="title"">
+    <td>
+        Name
+    </td>
+    <td>
+        Nb fields
+    </td>
+    <td>
+        Primary keys
+    </td>
+    <td>
+        Imported keys
+    </td>
+    <td>
+        Foreign keys
+    </td>
+</tr>
+#foreach ( $table in $tables )#set ( $columns = $table.getColumns() )
+<tr class="normal" onmouseover="javascript:this.className='over';" onmouseout="javascript:this.className='normal';">
+    <td>
+        <b><a href="${table.getJavaName()}.html">$table.getName()</a></b>
+        $table.getRemarks()&nbsp;
+    </td>
+    <td>
+        #foreach ( $column in $columns )
+            $column.getName() ($column.getJavaTypeAsTypeName(), $column.getNullableAsString())<br/>
+        #end
+        &nbsp;
+    </td>
+    <td>
+        #foreach ( $column in $table.getPrimaryKeys() )
+            $column.getName()<br/>
+        #end
+        &nbsp;
+    </td>
+    <td>
+        #foreach ( $column in $table.getImportedKeys() )
+            $column.getForeignColumn().getFullName() <- $column.getFullName()<br/>
+        #end
+        &nbsp;
+    </td>
+    <td>
+        #foreach ( $column in $table.getForeignKeys() )
+            $column.getFullName() -> $column.getForeignColumn().getFullName()<br/>
+        #end
+        &nbsp;
+    </td>
+</tr>
+#end
+</table>
+<h2>Tables relations</h2>
+<img src="graphviz/full.png">

@@ -1,0 +1,363 @@
+<!-- $Id: build.xml,v 1.26 2007/09/10 13:51:20 kameleono Exp $ -->
+<project name="acme" default="all" basedir=".">
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    PROPERTIES                                          -->
+<!-- ______________________________________________________ -->
+
+    <!-- your environment properties are imported here and available -->
+    <property environment="env"/>
+
+    <!-- FOLDERS -->
+    <property name="build"              value="${basedir}/build"/>
+    <property name="src"                value="${basedir}/src"/>
+    <property name="lib"                value="${basedir}/lib"/>
+    <property name="config"             value="${basedir}/src/config"/>
+
+    <!-- WHERE WILL BE GENERATED THE CODE -->
+    <property name="generated-src"      value="${basedir}/src/java/org/acme/sample/"/>
+    <property name="project-name"       value="sql2java"/>
+    <property name="sql2java-config"    value="${config}/${project-name}.properties"/>
+
+    <property file="${sql2java-config}"/>
+
+    <!-- TOMCAT -->
+    <property name="tomcat.host"        value="localhost"/>
+    <property name="tomcat.port"        value="8080"/>
+    <property name="tomcat.login"       value="admin"/>
+    <property name="tomcat.password"    value=""/>
+    <property name="tomcat.admin.url"   value="http://localhost:8080/manager"/>
+
+    <path id="lib">
+        <pathelement location="${build}/classes"/>
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    	<!--
+        <fileset dir="${lib}/hibernate">
+            <include name="*.jar"/>
+        </fileset>
+        -->
+        <fileset dir="${lib}/jdom">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    SPECIFY PLUGINS                                     -->
+<!-- ______________________________________________________ -->
+
+    <!-- TOMCAT DEPLOYMENT CONFIG -->
+    <taskdef name="deploy"  classname="org.apache.catalina.ant.DeployTask" classpathref="lib"/>
+    <taskdef name="install" classname="org.apache.catalina.ant.InstallTask" classpathref="lib"/>
+    <taskdef name="remove"  classname="org.apache.catalina.ant.RemoveTask" classpathref="lib"/>
+
+    <!-- SQL2JAVA CONFIG -->
+    <taskdef name="sql2java"        classname="net.sourceforge.sql2java.ant.GenerationTask" classpathref="lib"/>
+    <taskdef name="sql2java-utils"  classname="net.sourceforge.sql2java.ant.UtilsGenerationTask" classpathref="lib"/>
+    <taskdef name="sql2java-table"  classname="net.sourceforge.sql2java.ant.TableGenerationTask" classpathref="lib"/>
+    <taskdef name="sql2java-check"  classname="net.sourceforge.sql2java.ant.SchemaCheckTask" classpathref="lib"/>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    TOOLS TARGETS                                       -->
+<!-- ______________________________________________________ -->
+
+	<target name="prepare">
+        <mkdir dir="${build}"/>
+        <mkdir dir="${build}/classes"/>
+        <mkdir dir="${build}/javadoc"/>
+
+        <copy todir="${build}/classes/" overwrite="true">
+            <fileset dir="${src}/java" includes="**/*.properties"/>
+            <fileset dir="${src}/java" includes="**/*.xml"/>
+        </copy>
+    </target>
+
+    <!-- CLEAN ALL -->
+    <target name="clean">
+        <delete includeEmptyDirs="true" dir="${build}"/>
+        <!-- delete generated code -->
+        <delete includeEmptyDirs="true" dir="${generated-src}"/>
+    </target>
+
+    <!-- REBUILD -->
+    <target name="rebuild" depends="clean, generate, compile"/>
+
+    <!-- RUN THE SAMPLE USING THE GENERATED API TO ACCESS YOUR DB -->
+    <target name="all" depends="generate, compile, run"/>
+
+	<!-- ARE YOU SURE N-->
+    <target name="are.you.sure">
+        <input message="Are you sure you want to execute this target ? (Yes/No) " addproperty="are.you.sure"/>
+
+        <!-- check tag -->
+        <condition property="do.abort">
+        	<not>
+            	<istrue value="${are.you.sure}"/>
+            </not>
+        </condition>
+        <fail if="do.abort">
+        	Aborting
+        </fail>
+	</target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    DATABASE TARGETS                                    -->
+<!-- ______________________________________________________ -->
+
+    <target name="hsql.server">
+        <mkdir dir="${basedir}/hsql"/>
+        <echo message="Launching hypersonic SQL server"/>
+        <java classname="org.hsqldb.Server" fork="true" classpathref="lib">
+             <arg value="-url"/>
+             <arg value="${jdbc.url}"/>
+             <arg value="-driver"/>
+             <arg value="${jdbc.driver}"/>
+             <arg value="-database"/>
+             <arg value="${basedir}/hsql/${project-name}"/>
+        </java>
+     </target>
+
+    <!-- CREATE SCHEMA -->
+    <target name="database.create">
+        <sql driver="${jdbc.driver}"
+             url="${jdbc.url}"
+             userid="${jdbc.username}"
+             password="${jdbc.password}"
+             src="${src}/sql/${jdbc.type}/jpetstore-${jdbc.type}-schema.sql"
+             classpathref="lib">
+        </sql>
+    </target>
+
+    <!-- INIT DATA -->
+    <target name="database.init">
+        <sql driver="${jdbc.driver}"
+             url="${jdbc.url}"
+             userid="${jdbc.username}"
+             password="${jdbc.password}"
+            src="${src}/sql/${jdbc.type}/jpetstore-${jdbc.type}-dataload.sql"
+             classpathref="lib">
+        </sql>
+    </target>
+
+    <!-- RECREATE SCHEMA -->
+    <target name="database.recreate" depends="are.you.sure, database.create, database.init"/>
+
+    <!-- HSQL GRAPHICAL MANAGER -->
+    <target name="database.manager">
+        <echo message="Please launch server (ant hsql.server)"/>
+        <java classname="org.hsqldb.util.DatabaseManager" fork="true" classpathref="lib">
+             <arg value="-url"/>
+             <arg value="${jdbc.url}"/>
+             <arg value="-driver"/>
+             <arg value="${jdbc.driver}"/>
+        </java>
+     </target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    GENERATION                                          -->
+<!-- ______________________________________________________ -->
+
+    <!-- CHECK IF A GENERATED FILE IS OLDER THAN SQL FILE OR THE TEMPLATES SQL2JAVA -->
+    <target name="generate.check">
+        <uptodate property="doNotGenerate"
+                  targetfile="${build}/classes/org/acme/sample/users/SignonBean.class">
+            <srcfiles dir="${src}/sql/${jdbc.type}/" includes="**/*.sql"/>
+            <srcfiles dir="${src}/templates/velocity/" includes="**/*.vm"/>
+            <srcfiles dir="${lib}/" includes="sql2java.jar"/>
+        </uptodate>
+    </target>
+
+    <!-- GENERATE THE SOURCE CODE API TO ACCESS YOUR DB -->
+    <target name="generate.code" depends="generate.check" unless="doNotGenerate">
+        <!-- launch generation -->
+        <sql2java propertyFile="${sql2java-config}"/>
+	</target>
+	<target name="generate.graphs.check">
+		<available classname="${src}/web/database/graphviz/build.xml" property="hasGraphs"></available>
+	</target>
+	<target name="generate.graphs" depends="generate.graphs.check" if="hasGraphs">
+        <!-- generate graphs -->
+        <ant dir="${src}/web/database/graphviz"/>
+    </target>
+	<target name="generate" depends="generate.code, generate.graphs">
+	</target>
+
+    <!-- GENERATE SPECIFIC TABLES -->
+    <target name="generate-table" depends="generate.check" unless="doNotGenerate">
+        <input message="Please enter the tables you want to generate" addproperty="tables"/>
+        <!-- launch generation -->
+        <sql2java-table propertyFile="${sql2java-config}" tables="${tables}"/>
+    </target>
+
+    <!-- GENERATE NON RELATION TABLES FILES -->
+    <target name="generate-utils" depends="generate.check" unless="doNotGenerate">
+        <!-- launch generation -->
+        <sql2java-utils propertyFile="${sql2java-config}"/>
+    </target>
+
+    <!-- CHECK THE DATABASE STRUCTURE ACCORDING TO SQL2JAVA CONSTRAINTS -->
+    <target name="check-schema" depends="generate.check">
+        <!-- launch generation -->
+        <sql2java-check propertyFile="${sql2java-config}"/>
+    </target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    COMPILATION                                         -->
+<!-- ______________________________________________________ -->
+
+    <!-- COMPILE THE SOURCE CODE API TO ACCESS YOUR DB -->
+    <target name="compile" depends="prepare">
+        <javac fork="yes"
+                destdir="${build}/classes"
+                srcdir="${src}/java"
+                memoryInitialSize="64M"
+                memoryMaximumSize="512M">
+            <classpath refid="lib" />
+        </javac>
+    </target>
+
+    <!-- GENERATE JAVADOC FOR THE GENERATED API -->
+    <target name="javadoc">
+        <javadoc packagenames="*"
+            destdir="build/javadoc"
+            sourcepath="${src}/java"
+            author="true"
+            version="true"
+            use="true"
+            link="http://java.sun.com/j2se/1.4.2/docs/api"
+            maxmemory="512M"
+            windowtitle="Documentation API">
+ 			<classpath refid="lib" />
+            <bottom><![CDATA[<i><a href="http://www.sourceforge.net/projects/sql2java" target="new">http://www.sourceforge.net/projects/sql2java</a></i>]]></bottom>
+        </javadoc>
+    </target>
+
+    <!-- RUN THE SAMPLE USING THE GENERATED API TO ACCESS YOUR DB -->
+    <target name="run" depends="compile">
+        <property file="sql2java.properties"/>
+        <java classname ="org.acme.Main" fork="true">
+            <classpath refid="lib" />
+            <arg value="${jdbc.driver}"/>
+            <arg value="${jdbc.url}"/>
+            <arg value="${jdbc.username}"/>
+            <arg value="${jdbc.password}"/>
+        </java>
+    </target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    WEBAPP                                              -->
+<!-- ______________________________________________________ -->
+
+    <target name="war" depends="compile, prepare">
+
+        <!-- add build time -->
+        <tstamp>
+            <format property="build.time" pattern="MM/dd/yyyy HH:MM" offset="1" unit="hour"/>
+        </tstamp>
+        <echo file="build_info.txt">Build done on ${build.time} by ${env.USERNAME}</echo>
+
+        <war
+            destfile="${build}/sample.war"
+            webxml  = "${src}/web/WEB-INF/web.xml"
+            excludes= "WEB-INF/web.xml">
+
+<!--            <fileset file="build_info.txt"/> -->
+
+            <!-- include web source in / -->
+            <fileset dir="${src}/web/">
+                <exclude name="**/web.xml"/>
+            </fileset>
+
+			<!-- include libs in WEB-INF/lib -->
+            <lib dir="${lib}">
+                <exclude name="**/servlet.jar"/>
+                <exclude name="**/velocity*"/>
+            </lib>
+
+            <!-- include compiled classed in WEB-INF/classes -->
+            <classes dir="${build}/classes"/>
+
+            <classes dir="${src}/java">
+                <include name="**/*.properties"/>
+            </classes>
+        </war>
+
+        <delete file="build_info.txt" failonerror="false"/>
+    </target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    TOMCAT DEPLOYMENT                                   -->
+<!-- ______________________________________________________ -->
+
+
+	<!-- TOMCAT DEPLOY -->
+    <target name="deploy" depends="war">
+        <echo message="Deploying sample on Tomcat."/>
+        <install url="${tomcat.admin.url}" username="${tomcat.login}" password="${tomcat.password}"
+            path="/sample" war="file://${build}/sample.war"/>
+        <echo message="Tomcat sample deployed."/>
+    </target>
+
+    <!-- TOMCAT UNDEPLOY -->
+    <target name="undeploy">
+        <echo message="Undeploying sample from Tomcat."/>
+        <remove url="${tomcat.admin.url}" username="${tomcat.login}" password="${tomcat.password}"
+            path="/sample"/>
+        <echo message="Tomcat sample undeployed."/>
+    </target>
+
+    <!-- REDEPLOY -->
+    <target name="redeploy" depends="undeploy, deploy">
+        <echo message="Tomcat sample reployment."/>
+    </target>
+
+<!-- ______________________________________________________ -->
+<!--                                                        -->
+<!--    HELP TARGET                                         -->
+<!-- ______________________________________________________ -->
+    <target name="help">
+        <echo>
+___Main_____________________________
+all     : generate the code, compile it, then run it
+help    : this message
+javadoc : create the javadoc
+rebuild : clean, then recompile the project
+run     : execute the Main example
+
+___Database_________________________
+database.create   : create the database schema using src/sql/[database]/jpetstore-[database]-schema.sql
+database.init     : load in the database data using src/sql/[database]/jpetstore-[database]-dataload.sql
+database.manager  : run an external application for a visual interaction with the database
+database.recreate : create the database schema and load the database data
+hsql.server       : run the hypersonic sql server
+
+___Generation_______________________
+check-schema   : check the schema for sql2java hints/recommandations
+generate       : generate using sql2java
+generate-table : generate using sql2java a set of tables
+generate-utils : generate using sql2java a set of utils
+
+___Compilation______________________
+clean   : remove all files generated by sql2java and classes
+compile : compile java files
+
+___Webapp___________________________
+war : create the war file
+
+___Tomcat___________________________
+deploy   : deploy on tomcat
+redeploy : undeploy, then deploy on tomcat
+undeploy : undeploy from tomcat
+        </echo>
+    </target>
+
+</project>

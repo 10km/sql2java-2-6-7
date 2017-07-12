@@ -1,0 +1,128 @@
+##$Id: dao.db.java.vm,v 1.4 2007/11/12 11:44:36 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+#set ( $engine    = $db.getEngine() )
+#set ( $enginePkg = "${pkg}.${engine.toLowerCase()}" )
+#set ( $edsuffix = "${engine}_D_A_O" )
+#set ( $engineDAO = $table.asClass($edsuffix) )
+$codewriter.setCurrentJavaFilename("${enginePkg}" , "${engineDAO}.java")
+#if ( $table.hasProcedures() )
+package ${enginePkg};
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+
+// import org.apache.commons.logging.Log;
+// import org.apache.commons.logging.LogFactory;
+
+import ${pkg}.DAOFactory;
+import ${pkg}.DAO${engine}Factory;
+import ${pkg}.dao.$table.asDAOClass();
+import ${pkg}.exception.DAOException;
+
+import ${table.getPackage()}.${beanClass};
+import ${table.getPackage()}.${managerClass};
+
+/**
+ * @author sql2java
+ */
+public class ${engineDAO} implements $table.asDAOClass() {
+	// private static final Log logger = LogFactory.getLog(${engineDAO}.class);
+	
+	private DAO${engine}Factory factory;
+	
+	public $engineDAO(DAO${engine}Factory factory) {
+		this.factory = factory;
+	}
+#foreach ( $sp in $table.getProcedures() )
+	
+    public $sp.getReturnType() $sp.getName()(#foreach ( $column in $sp.getInColumns() )#if($velocityCount > 1),#end final $column.getJavaType() $column.getJavaName()#end) throws DAOException {
+        Connection _conn = null;
+        CallableStatement _query = null;
+#if ( $sp.getOutColumnsCount() > 0 )
+		int _estado = 0;
+		ResultSet _set = null;
+		List _results = null;
+#end
+
+        try {
+            _conn = factory.getConnection();
+            _query = _conn.prepareCall(DAOFactory.buildProcedureCall("$sp.getSqlName()", $sp.getColumnsCount()));
+
+#foreach ( $column in $sp.getColumns() )
+#if ( $column.getDefaultValue() == "IN" )
+#if ( $column.getJavaType() == "java.util.Date" )
+			_query.$column.getQuerySetMethod()($velocityCount, new java.sql.Date(${column.getJavaName()}.getTime()));
+#else
+			_query.$column.getQuerySetMethod()($velocityCount, $column.getJavaName());
+#end
+#end
+#if ( $column.getDefaultValue() == "OUT" )
+			_query.registerOutParameter($velocityCount, $column.getJavaTypeAsTypeName());
+#end
+#if ( $column.getDefaultValue() == "INOUT" )
+#if ( $column.getJavaType() == "java.util.Date" )
+			_query.$column.getQuerySetMethod()($velocityCount, new java.sql.Date(${column.getJavaName()}.getTime()));
+#else
+			_query.$column.getQuerySetMethod()($velocityCount, $column.getJavaName());
+#end
+			_query.registerOutParameter($velocityCount, $column.getJavaTypeAsTypeName());
+#end
+#end
+
+            _query.execute();
+#foreach ( $column in $sp.getOutColumns() )
+#if ( $column.isColumnNumeric() )
+			_estado = _query.getInt($column.getOrdinalPosition());
+			if (_estado != 0) throw new DAOException("Error executing procedure $sp.getName(), returned " + _estado);
+#elseif ( $column.getJavaTypeAsTypeName() == "Types.OTHER" )
+			_results = new ArrayList();
+			_set = (ResultSet) _query.getObject($column.getOrdinalPosition());
+			$managerClass _manager = ${managerClass}.getInstance();
+			while (_set.next()) {
+				$beanClass _bean = _manager.decodeRow(_set);
+				_results.add(_bean);
+			}
+			return _results;
+#else
+			// TODO _query.${column.getQuerySetMethod().replace("set", "get")}(${column.getOrdinalPosition()});
+#end
+#end
+        } catch (SQLException e) {
+            // logger.error("Se produjo un error en la clase: ${engineDAO}");
+            throw new DAOException(e);
+        } finally {
+            try {
+#if ( $sp.getOutColumnsCount() > 0 )
+                if (_set != null) {
+                    _set.close(); 
+                }   
+#end
+                if (_query != null) {
+                    _query.close(); 
+                }   
+                if (_conn != null) {
+                    _conn.close();
+                }
+            } catch (SQLException e) {
+                // logger.error("Error en la conexion, clase: ${engineDAO}");
+            }
+        }
+#if ( $sp.getOutColumnsCount() > 0 )
+		if (_estado != 0) throw new DAOException("Error executing procedure $sp.getName(), returned " + _estado);
+#foreach ( $column in $sp.getOutColumns() )
+#if ( ! $column.isColumnNumeric() )
+
+		return null;
+#end
+#end
+#end
+    }
+#end
+}
+#end

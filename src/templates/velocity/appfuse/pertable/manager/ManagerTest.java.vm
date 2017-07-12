@@ -1,0 +1,17 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${managerTestClass}.java")
+package $table.getPackage();
+
+import java.util.*;
+#foreach ($linkedPackage in $linkedPackages)
+import ${linkedPackage}.*;
+#end
+import org.springframework.dao.DataIntegrityViolationException;
+import org.jmock.Mock;
+
+public class $managerTestClass extends BaseManagerTestCase {
+//todo
+}
+
+  

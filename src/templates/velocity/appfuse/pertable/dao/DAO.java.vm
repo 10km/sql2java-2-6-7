@@ -1,0 +1,56 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${DAOClass}.java")
+package $table.getPackage();
+
+import java.util.List;
+
+public interface $DAOClass extends DAO {
+
+#if ($table.hasPrimaryKey())
+#if ($table.hasCompositeKey())
+	/**
+     * Gets $modelClass information based on the composite key
+     * @param $PKClass the composite key
+     * @return $modelClass populated $modelClass object
+     */
+	public $modelClass get${modelClass}($PKClass pkey);
+#else
+	/**
+     * Gets $modelClass information based on the primary key
+     * @param $table.getPrimaryKey().getJavaType() the primary key
+     * @return $modelClass populated $modelClass object
+     */
+	public $modelClass get${modelClass}($table.getPrimaryKey().getJavaType() pKey);
+#end
+#end
+
+    /**
+     * Gets a list of $modelClass based on parameters passed in.
+     * @return List populated list of $modelClass
+     */
+    public List get${modelClass}s($modelClass model);
+
+    /**
+     * Saves a $modelClass information
+     * @param $modelClass the object to be saved
+     * @return $modelClass the updated $modelClass object
+     */
+    public void save$modelClass($modelClass model);
+
+#if ($table.hasPrimaryKey())
+#if ($table.hasCompositeKey())
+	/**
+     * Remove a $modelClass from the database given its composite key
+     * @param $PKClass the composite key
+     */
+	public void remove$modelClass($PKClass pkey);
+#else
+	/**
+     * Remove a $modelClass from the database given its primary key
+     * @param $table.getPrimaryKey().getJavaType the primary key
+     */
+	public $modelClass remove$modelClass($table.getPrimaryKey().getJavaType() pKey);
+#end
+#end
+}

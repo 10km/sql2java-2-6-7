@@ -1,0 +1,24 @@
+##$Id: table.graphviz.vm,v 1.3 2006/03/25 04:23:14 framiere Exp $
+$codewriter.setCurrentFilename("web/database/graphviz/", "${table.getJavaName()}.graphviz")
+#parse( "table.include.vm" )
+digraph sql2java {
+	graph [label="\n\sql2java http://sql2java.sf.net"];
+	rankdir=LR;
+    node [shape=record];
+
+$table.getName() [label="__$table.getName()__ #foreach ( $column in $table.getColumns() ) | <f$column.getName().toLowerCase()> $column.getName().toLowerCase() #end "];
+
+#foreach ( $column in $table.getForeignKeys() )
+
+    $column.getForeignColumn().getTableName() [style=dashed,color=grey,label="__$column.getForeignColumn().getTableName()__ | <f$column.getForeignColumn().getName().toLowerCase()> $column.getForeignColumn().getName().toLowerCase() "];
+    $column.getTableName():f$column.getName().toLowerCase() -> $column.getForeignColumn().getTableName():f$column.getForeignColumn().getName().toLowerCase();
+#end
+
+#foreach ( $column in $table.getImportedKeys() )
+
+    $column.getTableName() [style=dashed,color=grey,label="__$column.getTableName()__ | <f$column.getName().toLowerCase()> $column.getForeignColumn().getName().toLowerCase() "];
+    $column.getTableName():f$column.getName().toLowerCase() -> $column.getForeignColumn().getTableName():f$column.getForeignColumn().getName().toLowerCase();
+#end
+
+
+}

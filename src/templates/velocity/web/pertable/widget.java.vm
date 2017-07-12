@@ -1,0 +1,40 @@
+##$Id: widget.java.vm,v 1.2 2007/07/13 13:18:28 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${widgetClass}.java")
+package $table.getPackage();
+
+#foreach ($linkedTable in $linkedTables)
+import ${linkedTable.getPackage()}.${linkedTable.asBeanClass()};
+#end
+import ${widgetPkg}.BaseWidget;
+
+public class $widgetClass extends BaseWidget
+{
+#foreach ($linkedTable in $linkedTables)
+#set ($linkedCoreClass = $linkedTable.asCoreClass())
+#set ($linkedBeanClass = $linkedTable.asBeanClass())
+    $linkedBeanClass $linkedCoreClass.toLowerCase() = null;
+#end
+    /**
+     * constructor
+     */
+    public $widgetClass()
+    {
+        //
+    }
+
+#foreach ($linkedTable in $linkedTables)
+#set ($linkedCoreClass = $linkedTable.asCoreClass())
+#set ($linkedBeanClass = $linkedTable.asBeanClass())
+    public $linkedBeanClass get$linkedCoreClass()
+    {
+        return this.$linkedCoreClass.toLowerCase();
+    }
+
+    public void set$linkedCoreClass($linkedBeanClass $linkedCoreClass.toLowerCase())
+    {
+        this.$linkedCoreClass.toLowerCase() = $linkedCoreClass.toLowerCase();
+    }
+#end
+}

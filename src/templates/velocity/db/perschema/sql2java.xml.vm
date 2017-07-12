@@ -1,0 +1,25 @@
+##$Id: sql2java.xml.vm,v 1.6 2007/08/09 08:06:39 kameleono Exp $
+<!--
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+-->
+$codewriter.setCurrentFilename("../config", "sql2java.generated.xml")
+<sql2java>
+#foreach ( $table in $tables )
+
+<!-- ______________________________________________________ $table.getName() ___ -->
+<table name="$table.getName().toLowerCase()">
+    <description>
+        $table.getRemarks()
+    </description>
+    #foreach ( $column in $table.getColumns() )
+
+    <column name="$column.getName().toLowerCase()"#if ( (!$column.isPrimaryKey()) && ($column.getDefaultValue().length() > 0)) defaultValue="$column.getDefaultValue()"#end>
+        <description>
+            $column.getRemarks()
+        </description>
+    </column>
+    #end
+</table>
+#end
+</sql2java>

@@ -1,0 +1,503 @@
+##$Id: renderer.java.vm,v 1.3 2008/04/15 20:46:27 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()/web", "${rendererClass}.java")
+package ${table.getPackage()}.web;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import ${pkg}.Renderer;
+import ${table.getPackage()}.$beanClass;
+import ${table.getPackage()}.$managerClass;
+//import $widgetPkg.*;
+#foreach ($linkedTable in $linkedTables)
+import ${linkedTable.getPackage()}.web.${linkedTable.asRendererClass()};
+#end
+
+/**
+ * subclassed renderer class
+ */
+public class $rendererClass extends Renderer
+{
+    /**
+     * constructor of the renderer
+     * @param request
+     * @param response
+     */
+    public $rendererClass(HttpServletRequest request, HttpServletResponse response)
+    {
+        super(request, response);
+    }
+
+    /**
+     * constructor of the renderer with depth specification, used for recursive rendering
+     * @param request
+     * @param response
+     * @param depth
+     */
+    public $rendererClass(HttpServletRequest request, HttpServletResponse response, int depth)
+    {
+        super(request, response, depth);
+    }
+
+    /**
+     * entry point for rendering
+     */
+    public void render()
+    {
+        // stop recursion here
+        if (getDepth() >= getMaxDepth())
+            return;
+
+        // get bean using http parameter
+        $httpFactoryClass beanFactory= new $httpFactoryClass();
+        beanFactory.dumpRequest(request);
+        beanFactory.dump(map);
+        beanFactory.resetEmptyValues();
+
+        // template for list
+        $beanClass templateBean = null;
+
+        // item selected
+        $beanClass bean = null;
+
+        // get template
+        try { templateBean = beanFactory.create(); } catch(Exception e){}
+        countItems(templateBean);
+
+        // try to get the selected bean using the provided template
+        try{ bean = ${managerClass}.getInstance().loadUniqueUsingTemplate(templateBean);}catch(Exception e){}
+
+        // render box
+        renderBoxBegin();
+
+        // render actions
+        if (("form".equalsIgnoreCase(getAction()) || "add".equalsIgnoreCase(getAction())) && ("$coreClass".equalsIgnoreCase(getModule()) || "$coreClass".equalsIgnoreCase(getSubModule())))
+            renderForm(bean);
+        else if(bean != null && "display".equalsIgnoreCase(getAction()))
+            renderDisplay(bean);
+        else
+            renderList(templateBean);
+
+        // render box
+        renderBoxEnd();
+    }
+
+    /**
+     * render sub items
+     */
+    public void renderSubItems($beanClass bean)
+    {
+#foreach ( $importedTable in $table.getImportedTables() )
+#set ($importedRendererClass = $importedTable.asRendererClass())
+        write("Linked: ${importedRendererClass}<br/>");
+        ${importedRendererClass} _${importedRendererClass} = (new ${importedRendererClass}(request, response, getDepth() + 1));
+        _${importedRendererClass}.setMap(bean.getPkDictionnary());
+        _${importedRendererClass}.render();
+
+#end
+    }
+
+    /**
+     * render the form name
+     */
+    public String getFormName()
+    {
+        return "$beanClass" + getDepth();
+    }
+
+    /**
+     * render the list header
+     */
+    public void renderListHeader()
+    {
+        write("    <tr class=\"title\">");
+        write("       <td>");
+        write("           &nbsp;");
+        write("       </td>");
+#foreach ( $column in $table.getColumnsFor("list") )
+
+        write("       <td>");
+        write("           $column.getJavaName() ");
+        write("       </td>");
+#end
+        write("       <td>");
+        write("           Actions");
+        write("       </td>");
+        write("   </tr>");
+    }
+
+    /**
+     * render the list header
+     */
+    public void renderListNavigation()
+    {
+#set ($colsCount = $table.countColumns() )
+#set ($nbColspan = $colsCount + 2 )
+        if (nbPages > 1)
+        {
+            write("    <tr class=\"listNavigation\">");
+            write("       <td colspan=\"$nbColspan\">");
+            for (int i = 1; i <= nbPages; i ++)
+            {
+                String linkStart = "<a class=\"navigation\" href=\"?module=$coreClass&action=list&pageid=" + i + "\">";
+                String linkEnd = "</a>";
+                if (i == getPageId())
+                {
+                    linkStart = "";
+                    linkEnd = "";
+                }
+                write("           [" + linkStart + i + linkEnd + "]");
+            }
+            write("       </td>");
+            write("   </tr>");
+        }
+    }
+
+    /**
+     * render the list header
+     */
+    public void renderListActionFooter()
+    {
+        write("    <tr class=\"listAction\">");
+        write("       <td align=\"right\" colspan=\"$nbColspan\">");
+        write("           <input type=\"button\" value=\"delete\" onclick=\"javascript:if (confirm('Do you really want to delete these items ?')) {" + getFormName() + ".action.value='delete'; " + getFormName() + ".submit();}\">");
+        write("           <input type=\"button\" value=\"Add\"    onclick=\"javascript:location='?module=$coreClass&action=add'\"><br/>");
+        write("       </td>");
+        write("   </tr>");
+    }
+
+    /**
+     * render a td for the actions in the list
+     * @param bean the bean
+     */
+    public void renderListActionBegin($beanClass bean)
+    {
+        write("<td>");
+#foreach ( $column in $table.getPrimaryKeys() )
+        write("<input type=\"checkbox\" name=\"$column.getName()\" value=\"" + ((bean != null && bean.$column.getGetMethod()() != null) ? bean.$column.getGetMethod()().toString() : "") + "\">");
+#end
+        write("</td>");
+    }
+
+    /**
+     * render a td for the actions in the list
+     * @param bean the bean
+     */
+    public void renderListActionEnd($beanClass bean)
+    {
+        write("<td>");
+#foreach ( $column in $table.getPrimaryKeys() )
+        write("<input type=\"button\" value=\"Display\" onclick=\"javascript:location='?module=$coreClass&action=display&${column.getName()}=" + ((bean != null && bean.$column.getGetMethod()() != null) ? bean.$column.getGetMethod()().toString() : "") + "&${column.getName()}=" + ((bean != null && bean.$column.getGetMethod()() != null) ? bean.$column.getGetMethod()().toString() : "") + "'\"><br/>");
+        write("<input type=\"button\" value=\"Update\" onclick=\"javascript:location='?module=$coreClass&action=form&${column.getName()}=" + ((bean != null && bean.$column.getGetMethod()() != null) ? bean.$column.getGetMethod()().toString() : "") + "&${column.getName()}=" + ((bean != null && bean.$column.getGetMethod()() != null) ? bean.$column.getGetMethod()().toString() : "") + "'\"><br/>");
+#end
+        write("</td>");
+    }
+
+    /**
+     * retrieve the beans to be displayed
+     */
+    public $beanClass[] getRenderList($beanClass templateBean)
+    {
+        $beanClass beans[] = null;
+        try
+        {
+            if ( getNbItems() > getPagingSize())
+            {
+                beans = ${managerClass}.getInstance().loadUsingTemplate(templateBean, (getPagingSize() * (getPageId() - 1)) + 1, getPagingSize(), ${managerClass}.SEARCH_LIKE);
+                nbPages = (int)Math.ceil(new Double(getNbItems()).doubleValue() / new Double(getPagingSize()).doubleValue());
+            }
+            else
+            {
+                beans = ${managerClass}.getInstance().loadUsingTemplate(templateBean, 1, -1, ${managerClass}.SEARCH_LIKE);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return beans;
+    }
+
+    /**
+     * render the $beanClass list
+     */
+    public void renderList($beanClass templateBean)
+    {
+        $beanClass beans[] = getRenderList(templateBean);
+        if (beans == null || beans.length == 0)
+        {
+            write("empty...");
+            return;
+        }
+
+        write("<table class=\"bodyTable\">");
+        write("<!-- beans.length: " + beans.length + "-->");
+        write("<form action=\"render.do\" name=\"" + getFormName() + "\">");
+        write("<input type=\"hidden\" name=\"module\" value=\"$coreClass\">");
+        write("<input type=\"hidden\" name=\"action\" value=\"\">");
+
+        renderListHeader();
+        for(int i = 0; i < beans.length; i ++)
+        {
+            write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+            renderListActionBegin(beans[i]);
+#foreach ( $column in $table.getColumnsFor("list") )
+            write("       <td>");
+            write(${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}", beans[i]).display());
+            write("       </td>");
+#end
+            renderListActionEnd(beans[i]);
+            write("   </tr>");
+        }
+        renderListNavigation();
+        renderListActionFooter();
+        renderMultiUpdateForm();
+        write("</form>");
+        write("</table>");
+        renderSearchForms(templateBean);
+        beans = null;
+    }
+
+    /**
+     * render a form multiupdate form
+     */
+    public void renderMultiUpdateForm()
+    {
+#set ($colsCount = $table.countColumns() )
+#set ($nbColspan = $colsCount + 2 )
+        write("    <tr class=\"listAction\">");
+        write("       <td colspan=\"$nbColspan\">");
+        write("       Multi-update");
+        write("       </td>");
+        write("    </tr>");
+        write("    <tr class=\"listAction\">");
+        write("       <td colspan=\"$nbColspan\">");
+
+        write("          <table>");
+#foreach ( $column in $table.getColumnsFor("form") )
+        write("               <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("                  <td>");
+        write("                     $column.getJavaName() ");
+        write("                  </td>");
+        write("                  <td>");
+        write("                     " + ${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}").input());
+        write("                  </td>");
+        write("              </tr>");
+#end
+
+        write("               <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("                  <td colspan=\"2\">");
+        write("                      <input type=\"button\" value=\"Multi-Update\" onclick=\"javascript:if (confirm('Do you really want to update these items ?')) {" + getFormName() + ".action.value='multiupdate'; " + getFormName() + ".submit();}\">");
+        write("                  </td>");
+        write("              </tr>");
+        write("           </table>");
+
+        write("       </td>");
+        write("    </tr>");
+    }
+
+    /**
+     * render a form using the given bean
+     * @param bean the bean
+     */
+    public void renderForm($beanClass bean)
+    {
+        write("<h2>Form</h2>");
+        write("<table>");
+        write("<form>");
+        write("<input type=\"hidden\" name=\"module\" value=\"$coreClass\">");
+        write("<input type=\"hidden\" name=\"action\" value=\"save\">");
+#foreach ( $column in $table.getColumnsFor("form") )
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td>");
+        write("          $column.getJavaName() ");
+        write("       </td>");
+        write("       <td>");
+        write("          " + ${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}", bean).input());
+        write("       </td>");
+        write("   </tr>");
+#end
+
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td colspan=\"2\">");
+        write("           <input type=\"submit\" value=\"Update/Save\"\">");
+        write("       </td>");
+        write("   </tr>");
+        write("</form>");
+        write("</table>");
+        renderSubItems(bean);
+    }
+
+
+    /**
+     * render a form using the given bean
+     * @param templateBean the bean
+     */
+    public void renderSearchForms($beanClass templateBean)
+    {
+        if (getDepth() > 1)
+            return;
+        if ("true".equalsIgnoreCase(request.getParameter("noSearchForm")))
+            return;
+        write("<table>");
+        write("  <tr>");
+        write("     <td>");
+        renderSearchForm(templateBean);
+        write("     </td>");
+        write("     <td>");
+        renderExtendedSearchForm(templateBean);
+        write("     </td>");
+        write("  </tr>");
+        write("</table>");
+    }
+
+    /**
+     * render a form using the given bean
+     * @param bean the bean
+     */
+    public void renderSearchForm($beanClass bean)
+    {
+        if (getDepth() > 1)
+            return;
+        if ("true".equalsIgnoreCase(request.getParameter("noSearchForm")))
+            return;
+        write("<h2>Search</h2>");
+        write("<table>");
+        write("<form>");
+        write("<input type=\"hidden\" name=\"module\" value=\"$coreClass\">");
+        write("<input type=\"hidden\" name=\"action\" value=\"list\">");
+#foreach ( $column in $table.getColumnsFor("searchform") )
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td>");
+        write("          $column.getJavaName() ");
+        write("       </td>");
+        write("       <td>");
+        write("          " + ${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}", bean).input());
+        write("       </td>");
+        write("   </tr>");
+#end
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td colspan=\"2\">");
+        write("           <input type=\"submit\" value=\"Search\"\">");
+        write("       </td>");
+        write("   </tr>");
+
+        write("</form>");
+        write("</table>");
+    }
+
+
+    /**
+     * render a form using the given bean
+     * @param bean the bean
+     */
+    public void renderExtendedSearchForm($beanClass bean)
+    {
+        write("<h2>Extended Search</h2>");
+        write("<table>");
+        write("<form>");
+        write("<input type=\"hidden\" name=\"module\" value=\"$coreClass\">");
+        write("<input type=\"hidden\" name=\"action\" value=\"save\">");
+#foreach ( $column in $table.getColumnsFor("form") )
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td>");
+        write("          $column.getJavaName() ");
+        write("       </td>");
+        write("       <td>");
+        write("          " + ${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}", bean).extendedSearchInput());
+        write("       </td>");
+        write("   </tr>");
+#end
+
+        write("</form>");
+        write("</table>");
+    }
+
+    /**
+     * render the bean using the given bean
+     * @param bean the bean
+     */
+    public void renderDisplay($beanClass bean)
+    {
+        if (bean == null)
+        {
+            write("Unkown bean");
+            return;
+        }
+        if (displayHeaders() == true)
+            write("<h2>Display</h2>");
+
+        write("<table class=\"bodyTable\">");
+#foreach ( $column in $table.getColumnsFor("display") )
+        write("");
+        write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+        write("       <td>");
+        write("          $column.getJavaName() ");
+        write("       </td>");
+        write("       <td>");
+        write("          " + ${widgetFactoryClass}.getInstance().getWidget("${column.getName().toLowerCase()}", bean).display());
+        write("       </td>");
+        write("   </tr>");
+#end
+        write("</table>");
+#foreach ( $column in $table.getPrimaryKeys() )
+        write("<input type=\"button\" value=\"Update\" onclick=\"javascript:location='?module=$coreClass&action=form&${column.getName()}=" + request.getParameter("${column.getName()}") + "'\"><br/>");
+#end
+        renderSubItems(bean);
+    }
+
+    /**
+     * countItems
+     */
+    public int countItems($beanClass templateBean)
+    {
+        try
+        {
+            nbItems = ${managerClass}.getInstance().countUsingTemplate(templateBean, -1, -1, ${managerClass}.SEARCH_LIKE);
+        }
+        catch(Exception e)
+        {
+        //
+        }
+        return 0;
+    }
+
+    /**
+     * render the header
+     */
+    public void renderBoxBegin()
+    {
+        if (displayHeaders() == true)
+        {
+            write("<head>");
+            write("");
+            write("    <link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"css/sql2java.css\" title=\"sql2java\"/>");
+            write("    <link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"js/jscalendar/calendar-win2k-cold-1.css\" title=\"win2k-cold-1\"/>");
+            write("");
+            write("    <script type=\"text/javascript\" src=\"js/minijax.js\"></script>");
+            write("    <script type=\"text/javascript\" src=\"js/jscalendar/calendar.js\"></script>");
+            write("    <script type=\"text/javascript\" src=\"js/jscalendar/lang/calendar-en.js\"></script>");
+            write("    <script type=\"text/javascript\" src=\"js/jscalendar/calendar-setup.js\"></script>");
+            write("");
+            write("</head>");
+            write("");
+            write("<h2><a href=\"./\">Home</a> / <a href=\"./database/${coreClass}.html\">$beanClass</a></h2>");
+            write("");
+            write("<table class=\"bodyTable\">");
+            write("    <tr class=\"normal\" onmouseover=\"javascript:this.className='over';\" onmouseout=\"javascript:this.className='normal';\">");
+            write("        <td colspan=\"2\">");
+            write("            <i>" + getNbItems() + " item(s)</i>");
+            write("            <i>current depth is " + getDepth() + " </i>");
+            write("        </td>");
+            write("    </tr>");
+            write("</table>");
+            write("");
+        }
+        else
+        {
+            write("<ul>");
+        }
+    }
+}

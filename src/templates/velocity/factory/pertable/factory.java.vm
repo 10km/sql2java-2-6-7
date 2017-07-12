@@ -1,0 +1,345 @@
+##$Id: factory.java.vm,v 1.5 2007/11/12 14:09:21 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${factoryClass}.java")
+package $table.getPackage();
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+
+import ${pkg}.Manager;
+
+/**
+ * Class that allow you to transform a string object representation into a
+ * $beanClass object<br>
+ * This object uses rules to verify the conformity of the values.
+ * @author sql2java
+ */
+public class $factoryClass
+{
+
+    /** default properties path */
+    public static final String DEFAULT_RESOURCE = "$table.getPackagePath()${factoryClass}.properties";
+
+    /**
+     * The resource file that will contain all the informations about
+     * the kind of check to perform on each field.<br>
+     * If nothing is associated for a field, then no check is performed.
+     */
+    public static PropertyResourceBundle defaultResource = null;
+
+
+#foreach ( $column in $columns )
+#set( $columnfield = $column.getVarName())
+
+    /** field containing the $column.getName() value */
+    private String $column.getVarName()  = null;
+    /** boolean used to determine the modification status of the $column.getName() field */
+    private boolean $column.getModifiedVarName() = false;
+
+#end
+
+#foreach ($column in $columns)
+    /**
+     * Getter method for $column.getVarName().
+     * @return the value of $column.getVarName()
+     */
+    public String $column.getGetMethod()()
+    {
+        return $column.getVarName();
+    }
+
+    /**
+     * Setter method for $column.getVarName().
+     * @param newVal the new value to be assigned to $column.getVarName()
+     */
+    public void $column.getSetMethod()(String newVal)
+    {
+        this.$column.getVarName() = newVal;
+        this.$column.getModifiedVarName() = true;
+    }
+
+    /**
+     * Determines if the $column.getVarName() has been modified.
+     * @return true if the field has been modified, false if the field has not been modified
+     */
+    public boolean $column.getModifiedMethod()()
+    {
+        return $column.getModifiedVarName();
+    }
+
+#end
+
+    /**
+     * reset values that are modified and where the value is empty
+     */
+    public void resetEmptyValues()
+    {
+#foreach ($column in $columns)
+        if ($column.getGetMethod()() == null || "".equals($column.getGetMethod()().toString())) {
+            this.$column.getModifiedVarName() = false;
+        }
+#end
+    }
+
+
+    /**
+     * Determines if the object has been modified since the last time this method was called.
+     * @return true if the object has been modified, false if the object has not been modified
+     */
+    public boolean isModified()
+    {
+        return #foreach ( $column in $columns )#if ( $velocityCount == 1 )$column.getModifiedVarName()#else ||
+		$column.getModifiedVarName()#end#end;
+    }
+
+    /**
+     * Resets the object modification status to 'not modified'.
+     */
+    public void resetIsModified()
+    {
+#foreach ( $column in $columns )
+        $column.getModifiedVarName() = false;
+#end
+    }
+
+    /**
+     * Init the fields using a Map
+     * @param map the map to be used
+     */
+    public void dump(Map map)
+    {
+        dump(map, "");
+    }
+
+    /**
+     * Init the fields using a Map
+     * @param map the map to be used
+     * @param prefix the prefix to be used
+     */
+    public void dump(Map map, String prefix)
+    {
+        String value = "";
+#foreach ( $column in $columns )
+        value = (String)map.get(prefix + ${Q}$column.getName()${Q});
+        if (value == null) {
+            value = (String)map.get(prefix + ${Q}$column.getName().toLowerCase()${Q});
+        }
+        if (value != null) {
+            $column.getSetMethod()(value);
+        }
+#end
+    }
+
+    /**
+     * init the factory given a bean
+     * @param bean the bean used for initialization
+     */
+    public void dump($beanClass bean)
+    {
+        dump(bean, "");
+    }
+
+    /**
+     * init the factory given a bean
+     * @param bean the bean used for initialization
+     * @param prefix 
+     */
+    public void dump($beanClass bean, String prefix)
+    {
+        try
+        {
+#foreach ( $column in $columns )
+            if (bean.$column.getModifiedMethod()() == true && bean.$column.getGetMethod()() != null) {
+                $column.getSetMethod()(prefix + bean.$column.getGetMethod()().toString());
+            }
+#end
+        }
+        catch(NullPointerException e)
+        {
+            ; // there is nothing to do to recover
+        }
+    }
+
+    /**
+     * Return a $beanClass object from the data of this factory object.
+     * If the data is not valid (does not match the criterias specified in properties), then a null object is returned.
+     * @return $beanClass which was initialized with the datas specified.
+     */
+    public $beanClass create()
+    {
+        try
+        {
+            $beanClass bean = new $beanClass();
+#foreach ( $column in $columns )
+            if ($column.getModifiedVarName()) {
+                bean.$column.getSetMethod()($column.getStringConvertionMethod()($column.getGetMethod()()));
+            }
+#end
+            return bean;
+        }
+        catch(NullPointerException npe)
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Set the default values specified in the properties.
+     */
+    public void setDefaultValues()
+    {
+    	if (null == defaultResource) { return; }
+#foreach ( $column in $columns )
+#if ($column.isPrimaryKey() == false && $column.isForeignKey() == false)
+        $column.getSetMethod()(defaultResource.getString("${column.getPropertyTag()}.default"));
+#end
+#end
+    }
+
+    /**
+     * Returns the object string representation.
+     *
+     * @return the object as a string
+     */
+    public String toString()
+    {
+        return   ""
+#foreach ( $column in $columns )
+                 + "\n - $column.getName() = " + ($column.getModifiedVarName() ? ("[" + ($column.getVarName() == null ? null : $column.getVarName().toString()) + "]") : "not initialized") + ""
+#end
+            ;
+    }
+
+    //_____________________________________________________________________
+    //
+    // VALIDATION
+    //_____________________________________________________________________
+
+
+    /**
+     * Return the default generated property storing the database rules
+     * @return the generated properties
+     */
+    public ResourceBundle getResource()
+    {
+        if (defaultResource != null) {
+            return defaultResource;
+        }
+        try
+        {
+            InputStream inputStream = ${factoryClass}.class.getClassLoader().getResourceAsStream(DEFAULT_RESOURCE);
+            defaultResource = new PropertyResourceBundle(inputStream);
+            return defaultResource;
+        }
+        catch(IOException e)
+        {
+            throw new RuntimeException(DEFAULT_RESOURCE + " should be in your classpath");
+        }
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * @return true or false
+     */
+    public boolean isValid() throws Exception
+    {
+        return isValid(getResource());
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * @param resourceFilename the name of the resource containing the rules to match
+     * @return true or false
+     */
+    public boolean isValid(String resourceFilename) throws Exception
+    {
+        InputStream inputStream = ${factoryClass}.class.getClassLoader().getResourceAsStream(resourceFilename);
+        return isValid(new PropertyResourceBundle(inputStream));
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * @param resource the resource containing the rules to match
+     * @return true or false
+     */
+    public boolean isValid(ResourceBundle resource) throws Exception
+    {
+        int numberOfErrors = check(resource, false).size();
+        if (numberOfErrors != 0) {
+            return false;
+        }
+        return true;
+    }
+    /**
+     * Check the validity of the object using the description in the property file
+     * with the default rule resource
+     * @return a ArrayList containing the erros if any
+     */
+    public ArrayList check() throws IOException
+    {
+        return check(getResource());
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * using a given rule resource
+     * @param resource the resource containing the rules to match
+     * @return a ArrayList containing the erros if any
+     */
+    public ArrayList check(ResourceBundle resource) throws IOException
+    {
+        return check(resource, false);
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * given a rule resource name
+     * @param resourceFilename the name of the resource containing the rules to match
+     * @return a ArrayList containing the erros if any
+     */
+    public ArrayList check(String resourceFilename) throws IOException
+    {
+        return check(resourceFilename, false);
+    }
+
+    /**
+     * Check the validity of the object using the description in the property file
+     * given a rule resource name
+     * @param resourceFilename the name of the resource containing the rules to match
+     * @param bStopAtFirstError a Boolean to specify to the check method to stop at the first error.
+     * @return a ArrayList containing the erros if any
+     */
+    public ArrayList check(String resourceFilename, boolean bStopAtFirstError) throws IOException
+    {
+        InputStream inputStream = ${factoryClass}.class.getClassLoader().getResourceAsStream(resourceFilename);
+        return check(new PropertyResourceBundle(inputStream), bStopAtFirstError);
+    }
+
+
+    /**
+     * Check the validity of the object using the description in the property file. This method is overloaded
+     * using a given rule resource
+     * @param resource the resource containing the rules to match
+     * @param bStopAtFirstError a Boolean to specify to the check method to stop at the first error.
+     * @return a ArrayList containing the erros if any
+     */
+    public ArrayList check(ResourceBundle resource, boolean bStopAtFirstError)
+    {
+        ArrayList pListError = new ArrayList();
+#foreach ( $column in $columns )
+        if (net.sf.sql2java.validator.Validator.checkElement(${Q}$column.getName()${Q}, $column.getGetMethod()(), resource, pListError, bStopAtFirstError) == false)
+        {
+            if (bStopAtFirstError == true) {
+                return pListError;
+            }
+        }
+#end
+        return pListError;
+    }
+
+}

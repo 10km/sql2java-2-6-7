@@ -1,0 +1,140 @@
+##$Id: base.widget.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "BaseWidget.java")
+package $widgetPkg;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import ${pkg}.GeneratedBean;
+
+public abstract class BaseWidget implements Widget
+{
+    protected String table;
+    protected String column;
+    protected GeneratedBean bean;
+    protected Map map;
+    protected ResourceBundle bundle;
+
+    public void setTable(String table)
+    {
+        this.table = table.toLowerCase();
+    }
+
+    public String getTable()
+    {
+        return this.table;
+    }
+
+    public void setColumn(String column)
+    {
+        this.column = column.toLowerCase();
+    }
+
+    public String getColumn()
+    {
+        return this.column;
+    }
+
+    public void setBean(GeneratedBean bean)
+    {
+        this.bean = bean;
+    }
+
+    public GeneratedBean getBean()
+    {
+        return this.bean;
+    }
+
+    public void setMap(Map map)
+    {
+        this.map = map;
+    }
+
+    public Map getMap()
+    {
+        return this.map;
+    }
+
+    public void setResourceBundle(ResourceBundle bundle)
+    {
+        this.bundle = bundle;
+    }
+
+    public ResourceBundle getResourceBundle()
+    {
+        return bundle;
+    }
+
+    public String display()
+    {
+        return display(new HashMap());
+    }
+
+    public String display(Map params)
+    {
+        return getBean().getDictionnary().get(column).toString();
+    }
+
+    public String input()
+    {
+        return input(new HashMap());
+    }
+
+    public String input(Map params)
+    {
+        String value = "";
+        if (getBean() != null)
+            value = getBean().getValue(column);
+        return "<input type=\"text\" name=\"" + column + "\" value=\"" + value + "\">";
+    }
+
+    public String searchInput()
+    {
+        return searchInput(new HashMap());
+    }
+
+    public String searchInput(Map params)
+    {
+        return input(params);
+    }
+
+    public String extendedSearchInput()
+    {
+        return extendedSearchInput(new HashMap());
+    }
+
+    public String extendedSearchInput(Map params)
+    {
+        return searchInput(params);
+    }
+
+    public String getProperty(String key)
+    {
+        String ret = getProperty(key, bundle);
+        if (ret != null)
+            return ret;
+        return getProperty(key, map);
+    }
+
+    protected String getProperty(String key, Map map)
+    {
+        if (map == null)
+            return null;
+        return (String) map.get(key);
+    }
+
+    protected String getProperty(String key, ResourceBundle bundle)
+    {
+        try
+        {
+            return bundle.getString(table + "." + column + ".widget.property." + key);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+    }
+}

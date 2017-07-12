@@ -1,0 +1,38 @@
+##$Id: database.documentation.txt.vm,v 1.4 2006/03/26 15:08:48 framiere Exp $
+$codewriter.setCurrentJavaFilename($pkg, "database.txt")
+<!--
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+-->
+#foreach ( $table in $tables )#set ( $columns = $table.getColumns() )
+
+______$table.getName().toUpperCase()_______________________________________________________
+
+    FIELDS ($table.countColumns())
+    #foreach ( $column in $columns )
+    - $column.getName() ($column.getJavaTypeAsTypeName(), $column.getNullableAsString())
+    #end
+
+    PRIMARY KEY ($table.countPrimaryKeys())
+    #foreach ( $column in $table.getPrimaryKeys() )
+    - $column.getName()
+    #end
+
+    IMPORTED KEYS ($table.countImportedKeys())
+    #foreach ( $column in $table.getImportedKeys() )
+    - $column.getForeignColumn().getFullName() <- $column.getFullName()
+    #end
+
+    FOREIGN KEYS ($table.countForeignKeys())
+    #foreach ( $column in $table.getForeignKeys() )
+    - $column.getFullName() -> $column.getForeignColumn().getFullName()
+    #end
+
+    IMPORTED TABLES ($table.countImportedTables()) :#foreach ( $iTable in $table.getImportedTables() )- $iTable.getName() #end
+
+    FOREIGN TABLES ($table.countForeignTables()) :#foreach ( $fTable in $table.getForeignTables() )- $fTable.getName() #end
+
+    TABLES VIA N/N RELATIONSHIP ($table.countManyToManyTables()) :#foreach ( $nnTable in $table.getManyToManyTables() )- $nnTable.getName() #end
+
+
+#end

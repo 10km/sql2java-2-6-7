@@ -1,0 +1,6 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${managerClass}.java")
+
+public interface $managerClass {
+}

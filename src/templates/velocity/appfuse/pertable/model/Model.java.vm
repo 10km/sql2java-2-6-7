@@ -1,0 +1,29 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${modelClass}.java")
+
+public class $modelClass extends $TblClass
+{
+    public $modelClass()
+    {
+		super();
+	}
+
+	public $modelClass(
+#set ($comma = " ")
+#foreach ($column in $columns)
+        $comma$column.getJavaType() $column.getVarName()
+#set ($comma=",")
+#end
+    )
+    {
+        super(
+#set ($comma = " ")
+#foreach ($column in $columns)
+        $comma$column.getVarName()
+#set ($comma=",")
+#end
+        );
+    }
+
+}

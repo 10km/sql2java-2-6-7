@@ -1,0 +1,29 @@
+##$Id: database.documentation.list.html.vm,v 1.5 2006/03/26 21:57:46 framiere Exp $
+<!--
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+-->
+$codewriter.setCurrentFilename("web/database/", "index.html")
+<link rel="stylesheet" type="text/css" media="all" href="../css/sql2java.css" title="sql2java"/>
+<h2><a href="../index.html">Home</a> / Table list</h2>
+<a href="overview.html">Brief overview instead of a list ? </a>
+<br/>
+<br/>
+<table class="bodyTable">
+#foreach ( $table in $tables )#set ( $columns = $table.getColumns() )
+<tr class="normal" onmouseover="javascript:this.className='over';" onmouseout="javascript:this.className='normal';">
+    <td>
+        <a href="${table.getJavaName()}.html">$table.getName()</a>
+    </td>
+    <td>
+        $table.countColumns() field(s),
+        $table.countPrimaryKeys() primary key(s),
+        $table.countImportedKeys() imported key(s),
+        $table.countForeignKeys() foreign key(s)
+    </td>
+</tr>
+#end
+</table>
+
+<h1>Tables relations</h1>
+<img src="graphviz/overview.png">

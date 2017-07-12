@@ -1,0 +1,47 @@
+##$Id: multiselect.widget.java.vm,v 1.1 2007/06/22 07:29:10 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "MultiSelectWidget.java")
+package $widgetPkg;
+
+import java.util.Map;
+
+public class MultiSelectWidget extends SelectWidget implements Widget
+{
+    /**
+     * constructor
+     */
+    public MultiSelectWidget()
+    {
+    }
+
+    /**
+     *
+     */
+    public String input(Map map)
+    {
+        return "<select name=\"" + column + "\" multiple></select>";
+    }
+
+    public String extendedSearchInput(Map map)
+    {
+        String ret = "";
+        ret += "<select name=\"" + column + "_search_action\">\n";
+        ret += "    <option value=\"ISIN\"   >Is in</option>\n";
+        ret += "    <option value=\"ISNOTIN\">Is not in</option>\n";
+        ret += "</select>\n";
+        ret += input();
+        return ret;
+    }
+
+    public String display()
+    {
+        String ret = "";
+        String id = (getBean().getDictionnary().get(column) == null ? "": getBean().getDictionnary().get(column).toString());
+        ret += "<a href=\"render.do?module=" + getProperty("foreign.table") + "&action=display&" + getProperty("foreign.column") + "=" + id + "\">";
+        ret += id;
+        ret += "</a>";
+        return ret;
+    }
+}
+

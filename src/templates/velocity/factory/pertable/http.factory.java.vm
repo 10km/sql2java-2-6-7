@@ -1,0 +1,75 @@
+##$Id: http.factory.java.vm,v 1.5 2008/04/02 20:20:44 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()/web", "${httpFactoryClass}.java")
+package ${table.getPackage()}.web;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+// import $pkg.*;
+
+import ${table.getPackage()}.$factoryClass;
+
+/**
+ * Class that allow you to transform a string object representation into a
+ * $beanClass object<br>
+ * This object uses rules to verify the conformity of the values.
+ * @author sql2java
+ */
+public class $httpFactoryClass extends $factoryClass
+{
+    /**
+     * Init the fields using the HttpServletRequest
+     * @param request the HttpServletRequest to be used
+     */
+    public void dumpRequest(HttpServletRequest request)
+    {
+        dumpRequest(request, "");
+    }
+
+    /**
+     * Init the fields using the HttpServletRequest
+     * @param request the HttpServletRequest to be used
+     */
+    public void dumpRequest(HttpServletRequest request, String prefix)
+    {
+        String value = "";
+#foreach ( $column in $columns )
+        value = request.getParameter(prefix + ${Q}$column.getName()${Q});
+        if (value == null) {
+            value = request.getParameter(prefix + ${Q}$column.getName().toLowerCase()${Q});
+        }
+        if (value != null) {
+            $column.getSetMethod()(value);
+        }
+#end
+    }
+
+    /**
+     * Init the fields using the HttpSession;
+     * @param session the HttpSession to be used
+     */
+    public void dumpSession(HttpSession session)
+    {
+        dumpSession(session, "");
+    }
+
+    /**
+     * Init the fields using the HttpSession;
+     * @param session the HttpSession to be used
+     */
+    public void dumpSession(HttpSession session, String prefix)
+    {
+        String value = "";
+#foreach ( $column in $columns )
+        value = (String)session.getAttribute(prefix + ${Q}$column.getName()${Q});
+        if (value == null) {
+            value = (String)session.getAttribute(prefix + ${Q}$column.getName().toLowerCase()${Q});
+        }
+        if (value != null) {
+            $column.getSetMethod()(value);
+        }
+#end
+    }
+}

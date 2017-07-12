@@ -1,0 +1,87 @@
+##$Id: ajax.decorator.java.vm,v 1.1 2007/06/22 07:29:09 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename($widgetPkg, "AjaxDecorator.java")
+package $widgetPkg;
+
+import java.util.Iterator;
+import java.util.Map;
+
+public class AjaxDecorator extends WidgetDecoratorBase
+{
+    public AjaxDecorator()
+    {
+    }
+
+    public String display()
+    {
+        String ret = "";
+        if (getProperty("foreign.table") != null && getProperty("foreign.table").equals("") == false)
+            ret = ret + displayForeignKey();
+        if (getProperty("imported.table") != null && getProperty("imported.table").equals("") == false)
+            ret = ret + displayImportedKey();
+        if (ret.equals(""))
+            ret = ret + widget.display();
+        return ret;
+    }
+
+    public String displayForeignKey()
+    {
+        String id = (getBean().getDictionnary().get(getColumn()) == null ? "": getBean().getDictionnary().get(getColumn()).toString());
+        String url = "render.do?module=" + getProperty("foreign.table") + "&action=display&" + getProperty("foreign.column") + "=" + id ;
+        Map pkDictionnary = getBean().getPkDictionnary();
+        Iterator iterator = pkDictionnary.keySet().iterator();
+        while(iterator.hasNext())
+        {
+            String key = (String)iterator.next();
+            id += pkDictionnary.get(key);
+        }
+        String divId = "fk" + (getTable() + getColumn() + id).toUpperCase();
+
+        String ret = "<!-- displayForeignKey -->\n";
+        ret += "<span onmouseover=\"javascript:document.getElementById('query" + divId + "').style.visibility='visible'\" onmouseout=\"javascript:document.getElementById('query" + divId + "').style.visibility='hidden'\">\n";
+        ret += "    " + widget.display() + "\n";
+        ret += "    <span id=\"query" + divId + "\" style=\"visibility: hidden\">\n";
+        ret += "        <font size=\"1\">\n";
+        ret += "            <a href=\"" + url + "\">[page]</a>&nbsp;\n";
+        ret += "            <a onclick=\"javascript:fillDivWithUrl('" + divId + "', '" + url + "&skipHeaders=true');\">[show]</a>&nbsp;\n";
+        ret += "            <a onclick=\"javascript:document.getElementById('" + divId + "').innerHTML='';document.getElementById('" + divId + "').style.visibility='hidden'\">[hide]</a>\n";
+        ret += "        </font>\n";
+        ret += "    </span>\n";
+        ret += "    <span id=\"" + divId + "\" style=\"visibility: hidden\"></span>\n";
+        ret += "</span>\n";
+        ret += "\n";
+        return ret;
+    }
+
+    public String displayImportedKey()
+    {
+        String id = (getBean().getDictionnary().get(getColumn()) == null ? "": getBean().getDictionnary().get(getColumn()).toString());
+        String url = "render.do?module=" + getProperty("imported.table") + "&action=list";
+        Map pkDictionnary = getBean().getPkDictionnary();
+        Iterator iterator = pkDictionnary.keySet().iterator();
+        while(iterator.hasNext())
+        {
+            String key = (String)iterator.next();
+            url += "&" + key + "=" + pkDictionnary.get(key);
+            url += "&" + getProperty("imported.column.fk.column") + "=" + pkDictionnary.get(key);
+            id += pkDictionnary.get(key);
+        }
+        String divId = "impK" + (getTable() + getColumn() + id).toUpperCase();
+
+        String ret = "<!-- displayImportedKey -->\n";
+        ret += "<span onmouseover=\"javascript:document.getElementById('query" + divId + "').style.visibility='visible'\" onmouseout=\"javascript:document.getElementById('query" + divId + "').style.visibility='hidden'\">\n";
+        ret += "    " + widget.display() + "\n";
+        ret += "    <span id=\"query" + divId + "\" style=\"visibility: hidden\">\n";
+        ret += "        <font size=\"1\">\n";
+        ret += "            <a href=\"" + url + "\">[page]</a>&nbsp;\n";
+        ret += "            <a onclick=\"javascript:fillDivWithUrl('" + divId + "', '" + url + "&skipHeaders=true&maxDepth=2&noSearchForm=true');\">[show]</a>&nbsp;\n";
+        ret += "            <a onclick=\"javascript:document.getElementById('" + divId + "').innerHTML='';document.getElementById('" + divId + "').style.visibility='hidden'\">[hide]</a>\n";
+        ret += "        </font>\n";
+        ret += "    </span>\n";
+        ret += "    <span id=\"" + divId + "\" style=\"visibility: hidden\"></span>\n";
+        ret += "</span>\n";
+        ret += "\n";
+        return ret;
+    }
+}

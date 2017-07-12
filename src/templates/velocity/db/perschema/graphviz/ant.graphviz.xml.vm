@@ -1,0 +1,31 @@
+##$Id: ant.graphviz.xml.vm,v 1.4 2006/03/26 21:57:46 framiere Exp $
+$codewriter.setCurrentFilename("web/database/graphviz/", "build.xml")
+#parse( "schema.include.vm" )
+<project name="acme" default="generate.graph" basedir=".">
+
+    <!-- GRAPHWIZ -->
+    <property name="graphviz" value="C:/Program Files/ATT/Graphviz/"/>
+
+    <!-- GENERATE THE DB GRAPH USING GRAPHVIZ -->
+    <target name="generate.graph.check">
+        <available file="${graphviz}/bin/dot.exe" property="generateGraph"/>
+    </target>
+
+    <!-- GENERATE THE DB GRAPH USING GRAPHVIZ -->
+    <target name="generate.graph" depends="generate.graph.check" if="generateGraph">
+        <exec executable="${graphviz}/bin/dot.exe">
+            <arg line="-Tpng -o${src}/web/database/graphviz/full.png ${src}/web/database/graphviz/full.graphviz"/>
+        </exec>
+        <exec executable="${graphviz}/bin/dot.exe">
+            <arg line="-Tpng -o${src}/web/database/graphviz/overview.png ${src}/web/database/graphviz/overview.graphviz"/>
+        </exec>
+#foreach ( $table in $tables )
+        <echo>Generating graph for $table.getName()</echo>
+        <exec executable="${graphviz}/bin/dot.exe">
+            <arg line="-Tpng -o${tableName}.png ${table.getJavaName()}.graphviz"/>
+        </exec>
+#end
+
+    </target>
+
+</project>

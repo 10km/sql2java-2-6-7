@@ -1,0 +1,45 @@
+##$Id: object.retrieval.exception.java.vm,v 1.5 2007/11/12 11:44:29 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$exceptionPkg", "ObjectRetrievalException.java")
+package $exceptionPkg;
+
+/**
+ * @author sql2java
+ */
+public class ObjectRetrievalException extends DataRetrievalException
+{
+    private static final long serialVersionUID = -3197505872331833160L;
+
+	/**
+     * contructor
+     */
+    public ObjectRetrievalException()
+    {
+        super();
+    }
+
+    /**
+     * contructor
+     */
+    public ObjectRetrievalException(String message)
+    {
+        super(message);
+    }
+
+    /**
+     * contructor
+     */
+    public ObjectRetrievalException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    /**
+     * contructor
+     */
+    public ObjectRetrievalException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+}

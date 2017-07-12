@@ -1,0 +1,73 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${DAOHibernateClass}.java")
+
+import java.util.List;
+import org.springframework.orm.ObjectRetrievalFailureException;
+
+public class $DAOHibernateClass extends BaseDAOHibernate implements $DAOClass {
+
+#if ($table.hasPrimaryKey() )
+#if ($table.hasCompositeKey)
+	/**
+     * Gets $modelClass information based on the composite key
+     * @param $PKClass the composite key
+     * @return $modelClass populated $modelClass object
+     */
+	public $modelClass get${coreClass}($PKClass pKey)
+#else
+	/**
+     * Gets $modelClass information based on the primary key
+     * @see $table.getPackage().$DAOClass#get${modelClass}
+     * @param $table.getPrimaryKey().getJavaType() the primary key
+     * @return $modelClass populated $modelClass object
+     */
+	public $modelClass get$modelClass($table.getPrimaryKey().getJavaType() pKey)
+#end
+#end
+    {
+        $modelClass value = ($modelClass) getHibernateTemplate().get(${modelClass}.class, pKey);
+        if (value == null) {
+            log.warn("uh oh, no value with key '" + pkey.toString() + "' found...");
+            throw new ObjectRetrievalFailureException(${modelClass}.class, pKey);
+        }
+        return value;
+    }
+
+    /**
+     * @see $table.getPackage().$DAOClass#get${modelClass}s
+     */
+    public List get${modelClass}s($modelClass model)
+    {
+#if ($table.hasCompositeKey)
+        return getHibernateTemplate().find("from ${modelClass} a order by#set ($comma = " ")#foreach ($column in $table.getPrimaryKeys)${comma}a.$PKClass.$column.getVarName()#set ($comma = ",")#end");
+#else
+		return getHibernateTemplate().find("from ${tableName} a order by a.$table.getPrimaryKey().getVarName()");
+#end
+    }
+
+    /**
+     * @see $table.getPackage().$DAOClass#save${modelClass}
+     */
+    public void save${modelClass}(final $modelClass model)
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug("${tablename}'s id: " + model.${table.getPrimaryKey().getGetMethod()}());
+        }
+        getHibernateTemplate().saveOrUpdate(model);
+    }
+
+    /**
+     * @see $table.getPackage().$DAOClass#remove${modelClass}
+     */
+#if ($table.hasCompositeKey)
+	public void remove${modelClass}($PKClass pKey)
+#else
+	public void remove${modelClass}($table.getPrimaryKey().getJavaType() pKey)
+#end
+    {
+        $modelClass model = get${modelClass}(pKey);
+        getHibernateTemplate().delete(model);
+    }
+}

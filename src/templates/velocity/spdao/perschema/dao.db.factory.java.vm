@@ -1,0 +1,94 @@
+##$Id: dao.db.factory.java.vm,v 1.5 2007/11/12 11:44:34 kameleono Exp $
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+#set ( $engine    = $db.getEngine() )
+#set ( $enginePkg = "${pkg}.${engine.toLowerCase()}" )
+#set ( $edsuffix = "${engine}_D_A_O" )
+$codewriter.setCurrentJavaFilename($pkg, "DAO${engine}Factory.java")
+package $pkg;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+// import org.apache.commons.logging.Log;
+// import org.apache.commons.logging.LogFactory;
+
+#foreach ( $table in $tables )
+#if ( $table.hasProcedures() )
+import ${pkg}.dao.$table.asDAOClass();
+#end
+#end
+
+#foreach ( $table in $tables )
+#if ( $table.hasProcedures() )
+#set ( $engineDAO = $table.asClass($edsuffix) )
+import ${enginePkg}.${engineDAO};
+#end
+#end
+
+import ${pkg}.exception.DAOException;
+
+/**
+ * The factory for the $engine database engine.
+ * @author sql2java
+ */
+public class DAO${engine}Factory extends DAOFactory {
+	// private static final Log logger = LogFactory.getLog(DAO${engine}Factory.class);
+	
+	/**
+	 * Método para crear conecciones a $engine
+	 * @return la conexión configurada por los parametros obtenidos por los métodos <code>getXXX</code>.
+	 * @throws DAOException si no se puede obtener una conexión.
+	 */
+    public final Connection getConnection() throws DAOException {
+        Connection conn = null;
+        
+	    try {
+        	DataSource ds = getDataSource();
+
+	        conn = ds.getConnection("$db.getUsername()", "$db.getPassword()");
+        } catch (SQLException se) {
+        	// logger.error("getConnection", se);
+            throw new DAOException(se);
+        }
+        
+        return conn;
+	}
+	
+	/**
+	 * Retrieve the data source for connections to the database.
+	 * DBMS:    $db.getEngine()
+	 * Driver:  $db.getDriver()
+	 * URL:     $db.getUrl()
+	 * Catalog: $db.getCatalog()
+	 * Schema:  $db.getSchema()
+	 */
+	public DataSource getDataSource() {
+		DataSource ds = null; 
+		/*
+        Context initCtx = new InitialContext();
+        Context envCtx = (Context) initCtx.lookup("java:comp/env");
+        ds = (DataSource) envCtx.lookup("sigmads");
+		*/
+		// ds = new DataSourceSapDB();
+		// ds = new MysqlDataSource();
+		// TODO write between the following comment lines the correct way to retrieve the data source
+		$userCode.getBlock("data source")
+		return ds;
+	}
+  
+#foreach ( $table in $tables )
+#if ( $table.hasProcedures() )
+#set ( $engineDAO = $table.asClass($edsuffix) )
+	/**
+	 * @return un nuevo objeto de acceso a datos por el $engine database engine.
+	 */
+	public final $table.asDAOClass() getDAO${table.asCoreClass()}() {
+    	return new ${engineDAO}(this);
+	}
+#end
+#end
+}
+

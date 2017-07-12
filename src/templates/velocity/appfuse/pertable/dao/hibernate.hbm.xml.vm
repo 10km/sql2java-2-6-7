@@ -1,0 +1,21 @@
+##$Id: hibernate.hbm.xml.vm,v 1.1 2006/03/25 04:23:14 framiere Exp $
+$codewriter.setCurrentJavaFilename("$table.getPackage()", "${coreClass}.hbm.xml")<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!--
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+-->
+<hibernate-mapping>
+    <class
+        name="$pkg.$coreClass"
+        table="$table.getName()"
+        select-before-update="false"
+        dynamic-update="true"
+        dynamic-insert="true"
+        optimistic-lock="all"
+    >
+
+
+</hibernate-mapping>
