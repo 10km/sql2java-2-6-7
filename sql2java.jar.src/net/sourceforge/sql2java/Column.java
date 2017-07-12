@@ -442,7 +442,7 @@ public class Column implements Cloneable, Comparable {
 				return "byte[]";
 			}
 			case 4 : {
-				return "Clob";
+				return "java.sql.Clob";
 			}
 			case 5 : {
 				return "java.sql.Date";
@@ -455,6 +455,9 @@ public class Column implements Cloneable, Comparable {
 			}
 			case 8 : {
 				return "Float";
+			}
+			case 9 : {
+				return "java.sql.Blob";
 			}
 			case 10 : {
 				return "Integer";
