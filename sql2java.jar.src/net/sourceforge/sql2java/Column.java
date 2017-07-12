@@ -2,6 +2,7 @@
 package net.sourceforge.sql2java;
 
 import java.io.PrintStream;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -441,8 +442,8 @@ public class Column implements Cloneable, Comparable {
 			case 3 : {
 				return "byte[]";
 			}
-			case 4 : {
-				return "java.sql.Clob";
+			case M_CLOB : {
+				return "String";
 			}
 			case 5 : {
 				return "java.sql.Date";
@@ -456,8 +457,8 @@ public class Column implements Cloneable, Comparable {
 			case 8 : {
 				return "Float";
 			}
-			case 9 : {
-				return "java.sql.Blob";
+			case M_BLOB : {
+				return "byte[]";
 			}
 			case 10 : {
 				return "Integer";
@@ -755,8 +756,8 @@ public class Column implements Cloneable, Comparable {
 			case 3 : {
 				return resultSet + ".getBytes(" + pos + ")";
 			}
-			case 9 : {
-				return resultSet + ".getBlob(" + pos + ")";
+			case M_BLOB : {
+				return CodeWriter.MGR_CLASS + ".getBlob(" + resultSet + ", " + pos + ")";
 			}
 			case 2 : {
 				return CodeWriter.MGR_CLASS + ".getBoolean(" + resultSet + ", " + pos + ")";
@@ -764,8 +765,8 @@ public class Column implements Cloneable, Comparable {
 			case 13 : {
 				return resultSet + ".getString(" + pos + ")";
 			}
-			case 4 : {
-				return resultSet + ".getClob(" + pos + ")";
+			case M_CLOB : {
+				return CodeWriter.MGR_CLASS + ".getClob(" + resultSet + ", " + pos + ")";
 			}
 			case 16 : {
 				return resultSet + ".getURL(" + pos + ")";
@@ -833,75 +834,75 @@ public class Column implements Cloneable, Comparable {
 			end.append(" }");
 		}
 		switch (this.getMappedType()) {
-			case 0 : {
+			case M_ARRAY : {
 				return sb.append("ps.setArray(").append(end).toString();
 			}
-			case 11 : {
+			case M_LONG : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setLong(ps, ").append(end).toString();
 			}
-			case 3 : {
+			case M_BYTES : {
 				return sb.append("ps.setBytes(").append(end).toString();
 			}
-			case 9 : {
-				return sb.append("ps.setBlob(").append(end).toString();
+			case M_BLOB : {
+				return sb.append(CodeWriter.MGR_CLASS).append(".setBlob(ps, ").append(end).toString();
 			}
-			case 2 : {
+			case M_BOOLEAN : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setBoolean(ps, ").append(end).toString();
 			}
-			case 13 : {
+			case M_STRING : {
 				return sb.append("ps.setString(").append(end).toString();
 			}
-			case 4 : {
-				return sb.append("ps.setClob(").append(end).toString();
+			case M_CLOB : {
+				return sb.append(CodeWriter.MGR_CLASS).append(".setClob(ps, ").append(end).toString();
 			}
-			case 16 : {
+			case M_URL : {
 				return sb.append("ps.setURL(").append(end).toString();
 			}
-			case 1 : {
+			case M_BIGDECIMAL : {
 				return sb.append("ps.setBigDecimal(").append(end).toString();
 			}
-			case 7 : {
+			case M_DOUBLE : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setDouble(ps, ").append(end).toString();
 			}
-			case 10 : {
+			case M_INTEGER : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setInteger(ps, ").append(end).toString();
 			}
-			case 17 : {
+			case M_OBJECT : {
 				return sb.append("ps.setObject(").append(end).toString();
 			}
-			case 8 : {
+			case M_FLOAT : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setFloat(ps, ").append(end).toString();
 			}
-			case 5 : {
+			case M_SQLDATE : {
 				return sb.append("ps.setDate(").append(end).toString();
 			}
-			case 14 : {
+			case M_TIME : {
 				return sb.append("ps.setTime(").append(end).toString();
 			}
-			case 15 : {
+			case M_TIMESTAMP : {
 				return sb.append("ps.setTimestamp(").append(end).toString();
 			}
-			case 6 : {
+			case M_UTILDATE : {
 				switch (this.getType()) {
-					case 93 : {
+					case Types.TIMESTAMP : {
 						return sb.append("ps.setTimestamp(").append(pos).append(", new java.sql.Timestamp(").append(var)
 								.append(".getTime())); }").toString();
 					}
-					case 91 : {
+					case Types.DATE : {
 						return sb.append("ps.setDate(").append(pos).append(", new java.sql.Date(").append(var)
 								.append(".getTime())); }").toString();
 					}
-					case 92 : {
+					case Types.TIME : {
 						return sb.append("ps.setTime(").append(pos).append(", new java.sql.Time(").append(var)
 								.append(".getTime())); }").toString();
 					}
 				}
 				return null;
 			}
-			case 18 : {
+			case M_CALENDAR : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setCalendar(ps, ").append(end).toString();
 			}
-			case 12 : {
+			case M_REF : {
 				sb.setLength(0);
 				sb.append("ps.setRef(").append(end);
 				sb.setLength(sb.length() - 2);
