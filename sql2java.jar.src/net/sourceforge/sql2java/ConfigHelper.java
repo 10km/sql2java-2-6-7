@@ -1,16 +1,16 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
+
 package net.sourceforge.sql2java;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
+import org.jdom.*;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 public class ConfigHelper {
+
 	private static Document doc = null;
 
 	public static String getTableProperty(String table, String propertyName) {
@@ -32,55 +32,55 @@ public class ConfigHelper {
 	}
 
 	public static String getXPathProperty(String xPathQuery, String propertyName) {
-		if (doc == null) {
+		if (doc == null)
 			return null;
-		}
 		String result = null;
+		List nodes;
+		String s;
+		XPath servletPath = XPath.newInstance(xPathQuery);
+		nodes = servletPath.selectNodes(doc);
+		if (nodes != null)
+			break MISSING_BLOCK_LABEL_35;
+		s = null;
+		return s;
+		Element item;
+		String s1;
+		Iterator i = nodes.iterator();
+		if (!i.hasNext())
+			break MISSING_BLOCK_LABEL_142;
+		item = (Element) i.next();
+		if (item.getAttribute(propertyName) == null)
+			break MISSING_BLOCK_LABEL_95;
+		String result = item.getAttribute(propertyName).getValue();
+		if (result == null)
+			break MISSING_BLOCK_LABEL_95;
+		s1 = result;
+		return s1;
+		if (item.getChild(propertyName) != null)
+			break MISSING_BLOCK_LABEL_110;
+		s1 = null;
+		return s1;
+		String s2;
 		try {
-			XPath servletPath = XPath.newInstance(xPathQuery);
-			List nodes = servletPath.selectNodes(doc);
-			if (nodes == null) {
-				Object localObject1 = null;
-				return localObject1;
-			}
-			Iterator i = nodes.iterator();
-			if (i.hasNext()) {
-				Element item = (Element) i.next();
-
-				if (item.getAttribute(propertyName) != null) {
-					result = item.getAttribute(propertyName).getValue();
-					if (result != null) {
-						str1 = result;
-						return str1;
-					}
-				}
-
-				if (item.getChild(propertyName) == null) {
-					str1 = null;
-					return str1;
-				}
-
-				result = item.getChild(propertyName).getTextTrim();
-				String str1 = result;
-				return str1;
-			}
-
+			String result = item.getChild(propertyName).getTextTrim();
+			s2 = result;
 		} catch (Exception e) {
 			e.printStackTrace();
+			break MISSING_BLOCK_LABEL_142;
 		} finally {
+			throw exception;
 		}
-
+		return s2;
 		return null;
 	}
 
 	static {
 		try {
 			String filename = CodeWriter.getProperty("sql2java.xml", "sql2java.xml");
-			if (!(new File(filename).isFile())) {
+			if (!(new File(filename)).isFile()) {
 				filename = "src/sql2java.xml";
-				if (!(new File(filename).isFile())) {
+				if (!(new File(filename)).isFile())
 					filename = "src/config/sql2java.xml";
-				}
 			}
 			SAXBuilder builder = new SAXBuilder();
 			doc = builder.build(new File(filename));

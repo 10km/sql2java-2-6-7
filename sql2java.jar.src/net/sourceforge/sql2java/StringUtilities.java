@@ -1,19 +1,20 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
+
 package net.sourceforge.sql2java;
 
 import java.util.Random;
 
 public final class StringUtilities {
+
 	private static StringUtilities singleton = new StringUtilities();
 	public static final String PREFIX = "";
-	static String[] reserved_words = {"null", "true", "false", "abstract", "double", "int", "strictfp", "boolean",
+	static String reserved_words[] = {"null", "true", "false", "abstract", "double", "int", "strictfp", "boolean",
 			"else", "interface", "super", "break", "extends", "long", "switch", "byte", "final", "native",
 			"synchronized", "case", "finally", "new", "this", "catch", "float", "package", "throw", "char", "for",
 			"private", "throws", "class", "goto", "protected", "transient", "const", "if", "public", "try", "continue",
 			"implements", "return", "void", "default", "import", "short", "volatile", "do", "instanceof", "static",
 			"while", "assert", "enum"};
-
-	static String[] latin = {"Ac", "Aethiopia", "Africae", "Anazarbus", "Argonautarum", "Ciliciam", "Cydno", "Danaes,",
+	static String latin[] = {"Ac", "Aethiopia", "Africae", "Anazarbus", "Argonautarum", "Ciliciam", "Cydno", "Danaes,",
 			"Etenim", "Iovis", "Mopsi,", "Mopsuestia", "Perseus", "Quibus", "Sandan", "Tarsus", "a", "abstractum", "ad",
 			"alacriter", "alia", "amni", "anceps", "artes,", "auctoris", "aureo", "aut", "bene", "certamen", "certe",
 			"cespite", "cognatione", "commune", "concitat", "condidisse", "conmilitio", "consumpsit,", "consurgentem",
@@ -29,8 +30,10 @@ public final class StringUtilities {
 			"ratio", "redirent,", "referens,", "repentina", "revocavere", "scuta", "se", "securitas", "sed", "sit",
 			"solido", "sospitales.", "studio", "subire", "tecti", "terrebat", "tutela", "umquam", "uni", "urbs",
 			"varietati", "vatis", "vel", "vellere", "vero,", "vinculum,", "vir", "vocabulum"};
-
 	private static Random rand = new Random();
+
+	private StringUtilities() {
+	}
 
 	public static synchronized StringUtilities getInstance() {
 		return singleton;
@@ -39,15 +42,16 @@ public final class StringUtilities {
 	public String getPackageAsPath(String pkg) {
 		if (pkg == null)
 			return "";
-		return pkg.replace('.', '/');
+		else
+			return pkg.replace('.', '/');
 	}
 
 	public static String convertClass(String table, String type) {
 		String suffix = "";
 		String postfix = "";
-		if (!("".equalsIgnoreCase("")))
+		if (!"".equalsIgnoreCase(""))
 			suffix = suffix + "_";
-		if (!("".equalsIgnoreCase(type)))
+		if (!"".equalsIgnoreCase(type))
 			postfix = "_" + type;
 		return convertName(suffix + table + postfix, false);
 	}
@@ -58,40 +62,42 @@ public final class StringUtilities {
 
 	public static String convertName(String name, boolean wimpyCaps) {
 		StringBuffer buffer = new StringBuffer(name.length());
-		char[] list = name.toLowerCase().toCharArray();
-		for (int i = 0; i < list.length; ++i) {
-			if ((i == 0) && (!(wimpyCaps)))
+		char list[] = name.toLowerCase().toCharArray();
+		for (int i = 0; i < list.length; i++) {
+			if (i == 0 && !wimpyCaps) {
 				buffer.append(Character.toUpperCase(list[i]));
-			else if ((list[i] == '_') && (i + 1 < list.length) && (i != 0))
-				buffer.append(Character.toUpperCase(list[(++i)]));
+				continue;
+			}
+			if (list[i] == '_' && i + 1 < list.length && i != 0)
+				buffer.append(Character.toUpperCase(list[++i]));
 			else
 				buffer.append(list[i]);
 		}
+
 		return buffer.toString();
 	}
 
 	public static String escape(String s) {
-		return ((isReserved(s)) ? "my_" + s : s);
+		return isReserved(s) ? "my_" + s : s;
 	}
 
 	public static String escape(Column s) {
-		return ((isReserved(s.getName())) ? "my_" + s.getName() : s.getName());
+		return isReserved(s.getName()) ? "my_" + s.getName() : s.getName();
 	}
 
 	public static boolean isReserved(String s) {
-		for (int i = 0; i < reserved_words.length; ++i) {
-			if (s.compareToIgnoreCase(reserved_words[i]) == 0) {
+		for (int i = 0; i < reserved_words.length; i++)
+			if (s.compareToIgnoreCase(reserved_words[i]) == 0)
 				return true;
-			}
-		}
+
 		return false;
 	}
 
 	public static String getSampleString(int size) {
-		StringBuffer s = new StringBuffer(size);
-		while (s.length() < size - 5) {
-			s.append(latin[rand.nextInt(latin.length)]).append(" ");
-		}
+		StringBuffer s;
+		for (s = new StringBuffer(size); s.length() < size - 5; s.append(latin[rand.nextInt(latin.length)])
+				.append(" "));
 		return s.toString();
 	}
+
 }

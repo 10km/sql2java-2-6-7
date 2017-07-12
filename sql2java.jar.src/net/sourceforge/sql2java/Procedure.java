@@ -1,11 +1,11 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
+
 package net.sourceforge.sql2java;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Procedure {
+
 	private static final String IN_COLUMN = "IN";
 	private static final String IN_OUT_COLUMN = "INOUT";
 	private static final String OUT_COLUMN = "OUT";
@@ -20,82 +20,83 @@ public class Procedure {
 	private int position;
 
 	public Procedure() {
-		this.columns = new ArrayList();
-		this.inColumns = new ArrayList();
-		this.outColumns = new ArrayList();
-		this.colsHash = new HashMap();
-		this.position = 1;
+		columns = new ArrayList();
+		inColumns = new ArrayList();
+		outColumns = new ArrayList();
+		colsHash = new HashMap();
+		position = 1;
 	}
 
 	private int nextPosition() {
-		return (this.position++);
+		return position++;
 	}
 
 	private boolean addColumn(Column column) {
-		if (null == this.colsHash.get(column.getName())) {
+		if (null == colsHash.get(column.getName())) {
 			column.setOrdinalPosition(nextPosition());
-			this.columns.add(column);
-			this.colsHash.put(column.getName(), column);
+			columns.add(column);
+			colsHash.put(column.getName(), column);
 			return true;
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	public void addInColumn(Column column) {
 		column.setDefaultValue("IN");
 		if (addColumn(column))
-			this.inColumns.add(column);
+			inColumns.add(column);
 	}
 
 	public void addInOutColumn(Column column) {
 		column.setDefaultValue("INOUT");
 		if (addColumn(column)) {
-			this.inColumns.add(column);
-			this.outColumns.add(column);
+			inColumns.add(column);
+			outColumns.add(column);
 		}
 	}
 
 	public void addOutColumn(Column column) {
 		column.setDefaultValue("OUT");
 		if (addColumn(column))
-			this.outColumns.add(column);
+			outColumns.add(column);
 	}
 
 	public int getColumnsCount() {
-		return this.columns.size();
+		return columns.size();
 	}
 
 	public int getOutColumnsCount() {
-		return this.outColumns.size();
+		return outColumns.size();
 	}
 
 	public Column[] getColumns() {
-		return ((Column[]) (Column[]) this.columns.toArray(new Column[this.columns.size()]));
+		return (Column[]) (Column[]) columns.toArray(new Column[columns.size()]);
 	}
 
 	public Column[] getInColumns() {
-		return ((Column[]) (Column[]) this.inColumns.toArray(new Column[this.inColumns.size()]));
+		return (Column[]) (Column[]) inColumns.toArray(new Column[inColumns.size()]);
 	}
 
 	public Column[] getOutColumns() {
-		return ((Column[]) (Column[]) this.outColumns.toArray(new Column[this.outColumns.size()]));
+		return (Column[]) (Column[]) outColumns.toArray(new Column[outColumns.size()]);
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public void setName(String name) {
-		this.sqlName = name;
+		sqlName = name;
 		this.name = StringUtilities.convertName(name, true);
 	}
 
 	public String getSqlName() {
-		return this.sqlName;
+		return sqlName;
 	}
 
 	public String getRemarks() {
-		return this.remarks;
+		return remarks;
 	}
 
 	public void setRemarks(String remarks) {
@@ -103,7 +104,7 @@ public class Procedure {
 	}
 
 	public String getReturnType() {
-		return this.returnType;
+		return returnType;
 	}
 
 	public void setReturnType(String returnType) {

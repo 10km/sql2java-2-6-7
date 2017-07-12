@@ -1,13 +1,11 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
+
 package net.sourceforge.sql2java;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Index {
+
 	private Table table;
 	private String name;
 	private boolean unique;
@@ -22,7 +20,7 @@ public class Index {
 	}
 
 	public Index(String name, Table table) {
-		this(name, table, new HashMap());
+		this(name, table, ((Map) (new HashMap())));
 	}
 
 	public Index(String name, Table table, Map columns) {
@@ -35,33 +33,33 @@ public class Index {
 
 	public void addIndexColumn(IndexColumn column) {
 		if (null != column)
-			this.columns.put(column.getName().toLowerCase(), column);
+			columns.put(column.getName().toLowerCase(), column);
 	}
 
 	public void removeIndexColumn(Column column) {
 		if (null != column)
-			this.columns.remove(column.getName().toLowerCase());
+			columns.remove(column.getName().toLowerCase());
 	}
 
 	public Table getTable() {
-		return this.table;
+		return table;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public boolean isUnique() {
-		return this.unique;
+		return unique;
 	}
 
 	public Map getIndexColumns() {
-		return this.columns;
+		return columns;
 	}
 
 	public List getIndexColumnsList() {
 		List list = new ArrayList();
-		list.addAll(this.columns.values());
+		list.addAll(columns.values());
 		Collections.sort(list);
 		return list;
 	}
