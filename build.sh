@@ -27,3 +27,4 @@ pushd build
 jar uf ../$sql2java_jar $column.class
 exit_on_error
 popd
+cp release.sh build -fr
