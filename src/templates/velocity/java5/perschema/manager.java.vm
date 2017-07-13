@@ -7,8 +7,6 @@ package $pkg;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -484,29 +482,21 @@ public final class Manager
     }
 
     /**
-     * Retrieves a byte array from the passed result set as a Blob object.
+     * Retrieves a Blob object from the passed result set as a byte array.
      */
     public static byte[] getBlob(ResultSet rs, int pos) throws SQLException
     {
         Blob blob = rs.getBlob(pos);
-        if( rs.wasNull() ){
-            return (Blob)null;
-        }else{
-            return blob.getBytes(1,blob.length());
-        }
+        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
     }
 
     /**
-     * Retrieves a byte array from the passed result set as a Blob object.
+     * Retrieves a Blob object from the passed result set as a byte array.
      */
     public static byte[] getBlob(ResultSet rs, String column) throws SQLException
     {
         Blob blob = rs.getBlob(column);
-        if( rs.wasNull() ){
-            return (Blob)null;
-        }else{
-            return blob.getBytes(1,blob.length());
-        }
+        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
     }
 
     /**
@@ -520,34 +510,26 @@ public final class Manager
         }
         else
         {
-            ps.setBlob(pos, new ByteArrayInputStream(blob));
+            ps.setBlob(pos, new java.io.ByteArrayInputStream(blob));
         }
     }
 
     /**
-     * Retrieves a String from the passed result set as a Clob object.
+     * Retrieves a Clob object from the passed result set as a String.
      */
     public static String getClob(ResultSet rs, int pos) throws SQLException
     {
         Clob clob = rs.getClob(pos);
-        if( rs.wasNull() ){
-            return (Clob)null;
-        }else{
-            return clob.getSubString(1,clob.length());
-        }
+        return rs.wasNull()?(String)null:clob.getSubString(1L,(int)clob.length());
     }
 
     /**
-     * Retrieves a String from the passed result set as a Clob object.
+     * Retrieves a Clob object from the passed result set as a String.
      */
-    public static byte[] getClob(ResultSet rs, String column) throws SQLException
+    public static String getClob(ResultSet rs, String column) throws SQLException
     {
         Clob clob = rs.getClob(column);
-        if( rs.wasNull() ){
-            return (Clob)null;
-        }else{
-            return clob.getSubString(1,clob.length());
-        }
+        return rs.wasNull()?(String)null:clob.getSubString(1L,(int)clob.length());
     }
 
     /**
@@ -561,7 +543,7 @@ public final class Manager
         }
         else
         {
-            ps.setClob(pos, new StringReader(clob));
+            ps.setClob(pos, new java.io.StringReader(clob));
         }
     }
 
