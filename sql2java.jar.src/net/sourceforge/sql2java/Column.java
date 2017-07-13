@@ -203,119 +203,119 @@ public class Column implements Cloneable, Comparable {
 
 	public int getMappedType() {
 		switch (this.getType()) {
-			case 2003 : {
-				return 0;
+			case Types.ARRAY : {
+				return M_ARRAY;
 			}
-			case -5 : {
-				return 11;
+			case Types.BIGINT : {
+				return M_LONG;
 			}
-			case -2 : {
-				return 3;
+			case Types.BINARY : {
+				return M_BYTES;
 			}
-			case -7 : {
-				return 2;
+			case Types.BIT : {
+				return M_BOOLEAN;
 			}
-			case 2004 : {
-				return 9;
+			case Types.BLOB : {
+				return M_BLOB;
 			}
-			case 16 : {
-				return 2;
+			case Types.BOOLEAN : {
+				return M_BOOLEAN;
 			}
-			case 1 : {
-				return 13;
+			case Types.CHAR : {
+				return M_STRING;
 			}
-			case 2005 : {
-				return 4;
+			case Types.CLOB : {
+				return M_CLOB;
 			}
-			case 70 : {
-				return 16;
+			case Types.DATALINK : {
+				return M_URL;
 			}
-			case 91 : {
+			case Types.DATE : {
 				if ("java.util.Date".equals(CodeWriter.dateClassName)) {
-					return 6;
+					return M_UTILDATE;
 				}
 				if ("java.sql.Date".equals(CodeWriter.dateClassName)) {
-					return 5;
+					return M_SQLDATE;
 				}
 				if ("java.util.Calendar".equals(CodeWriter.dateClassName)) {
-					return 18;
+					return M_CALENDAR;
 				}
 				this.tuoe();
 			}
-			case 3 : {
-				return this.getDecimalDigits() > 0 ? 1 : 11;
+			case Types.DECIMAL : {
+				return this.getDecimalDigits() > 0 ? M_BIGDECIMAL : M_LONG;
 			}
-			case 2001 : {
-				return 17;
+			case Types.DISTINCT : {
+				return M_OBJECT;
 			}
-			case 8 : {
-				return 7;
+			case Types.DOUBLE : {
+				return M_DOUBLE;
 			}
-			case 6 : {
-				return 7;
+			case Types.FLOAT : {
+				return M_DOUBLE;
 			}
-			case 4 : {
-				return this.getTypeName().equalsIgnoreCase("INT UNSIGNED") ? 11 : 10;
+			case Types.INTEGER : {
+				return this.getTypeName().equalsIgnoreCase("INT UNSIGNED") ? M_LONG : M_INTEGER;
 			}
-			case 2000 : {
-				return 17;
+			case Types.JAVA_OBJECT : {
+				return M_OBJECT;
 			}
-			case -4 : {
-				return 3;
+			case Types.LONGVARBINARY : {
+				return M_BYTES;
 			}
-			case -1 : {
-				return 13;
+			case Types.LONGVARCHAR : {
+				return M_STRING;
 			}
-			case 2 : {
-				return this.getDecimalDigits() > 0 ? 1 : 11;
+			case Types.NUMERIC : {
+				return this.getDecimalDigits() > 0 ? M_BIGDECIMAL : M_LONG;
 			}
-			case 1111 : {
-				return 17;
+			case Types.OTHER : {
+				return M_OBJECT;
 			}
-			case 7 : {
-				return 8;
+			case Types.REAL : {
+				return M_FLOAT;
 			}
-			case 2006 : {
-				return 12;
+			case Types.REF : {
+				return M_REF;
 			}
-			case 5 : {
-				return 10;
+			case Types.SMALLINT : {
+				return M_INTEGER;
 			}
-			case 2002 : {
-				return 17;
+			case Types.STRUCT : {
+				return M_OBJECT;
 			}
-			case 92 : {
+			case Types.TIME : {
 				if ("java.util.Date".equals(CodeWriter.timeClassName)) {
-					return 6;
+					return M_UTILDATE;
 				}
 				if ("java.sql.Time".equals(CodeWriter.timeClassName)) {
-					return 14;
+					return M_TIME;
 				}
 				if ("java.util.Calendar".equals(CodeWriter.timeClassName)) {
-					return 18;
+					return M_CALENDAR;
 				}
 				this.tuoe();
 			}
-			case 93 : {
+			case Types.TIMESTAMP : {
 				if ("java.util.Date".equals(CodeWriter.timestampClassName)) {
-					return 6;
+					return M_UTILDATE;
 				}
 				if ("java.sql.Timestamp".equals(CodeWriter.timestampClassName)) {
-					return 15;
+					return M_TIMESTAMP;
 				}
 				if ("java.util.Calendar".equals(CodeWriter.timestampClassName)) {
-					return 18;
+					return M_CALENDAR;
 				}
 				this.tuoe();
 			}
-			case -6 : {
-				return 10;
+			case Types.TINYINT : {
+				return M_INTEGER;
 			}
-			case -3 : {
-				return 3;
+			case Types.VARBINARY : {
+				return M_BYTES;
 			}
-			case 12 : {
-				return 13;
+			case Types.VARCHAR : {
+				return M_STRING;
 			}
 		}
 		this.tuoe();
@@ -324,79 +324,79 @@ public class Column implements Cloneable, Comparable {
 
 	public String getQuerySetMethod() {
 		switch (this.getType()) {
-			case 2003 : {
+			case Types.ARRAY : {
 				return "setArray";
 			}
-			case -5 : {
+			case Types.BIGINT : {
 				return "setBigDecimal";
 			}
-			case -2 : {
+			case Types.BINARY : {
 				return "setBytes";
 			}
-			case -7 : {
+			case Types.BIT : {
 				return "setBoolean";
 			}
-			case 2004 : {
+			case Types.BLOB : {
 				return "setBlob";
 			}
-			case 16 : {
+			case Types.BOOLEAN : {
 				return "setBoolean";
 			}
-			case 1 : {
+			case Types.CHAR : {
 				return "setString";
 			}
-			case 2005 : {
+			case Types.CLOB : {
 				return "setClob";
 			}
-			case 70 : {
+			case Types.DATALINK : {
 				return "setURL";
 			}
-			case 91 : {
+			case Types.DATE : {
 				return "setDate";
 			}
-			case 3 : {
+			case Types.DECIMAL : {
 				return this.getDecimalDigits() > 0 ? "setBigDecimal" : "setLong";
 			}
-			case 2001 : {
+			case Types.DISTINCT : {
 				return "setObject";
 			}
-			case 8 : {
+			case Types.DOUBLE : {
 				return "setDouble";
 			}
-			case 6 : {
+			case Types.FLOAT : {
 				return "setDouble";
 			}
-			case 4 : {
+			case Types.INTEGER : {
 				return this.getTypeName().equalsIgnoreCase("INT UNSIGNED") ? "setLong" : "setInt";
 			}
-			case 2000 : {
+			case Types.JAVA_OBJECT : {
 				return "setObject";
 			}
-			case -4 : {
+			case Types.LONGVARBINARY : {
 				return "setBytes";
 			}
-			case -1 : {
+			case Types.LONGVARCHAR : {
 				return "setString";
 			}
-			case 2 : {
+			case Types.NUMERIC : {
 				return this.getDecimalDigits() > 0 ? "setBigDecimal" : "setLong";
 			}
-			case 1111 : {
+			case Types.OTHER : {
 				return "setObject";
 			}
-			case 7 : {
+			case Types.REAL : {
 				return "setFloat";
 			}
-			case 2006 : {
+			case Types.REF : {
 				return "setRef";
 			}
-			case 5 : {
+			case Types.SMALLINT : {
 				return "setInt";
 			}
-			case 2002 : {
+			case Types.STRUCT : {
 				return "setObject";
 			}
-			case 92 : {
+			case Types.TIME : {
 				if ("java.util.Date".equals(CodeWriter.timeClassName)) {
 					return "setDate";
 				}
@@ -405,7 +405,7 @@ public class Column implements Cloneable, Comparable {
 				}
 				this.tuoe();
 			}
-			case 93 : {
+			case Types.TIMESTAMP : {
 				if ("java.util.Date".equals(CodeWriter.timestampClassName)) {
 					return "setDate";
 				}
@@ -414,13 +414,13 @@ public class Column implements Cloneable, Comparable {
 				}
 				this.tuoe();
 			}
-			case -6 : {
+			case Types.TINYINT : {
 				return "setInt";
 			}
-			case -3 : {
+			case Types.VARBINARY : {
 				return "setBytes";
 			}
-			case 12 : {
+			case Types.VARCHAR : {
 				return "setString";
 			}
 		}
@@ -430,61 +430,63 @@ public class Column implements Cloneable, Comparable {
 
 	public String getJavaType() {
 		switch (this.getMappedType()) {
-			case 0 : {
+			case M_ARRAY : {
 				return "Array";
 			}
-			case 1 : {
+			case M_BIGDECIMAL : {
 				return "java.math.BigDecimal";
 			}
-			case 2 : {
+			case M_BOOLEAN : {
 				return "Boolean";
 			}
-			case 3 : {
+			case M_BYTES : {
 				return "byte[]";
 			}
 			case M_CLOB : {
+				// map Clob to java.lang.String
 				return "String";
 			}
-			case 5 : {
+			case M_SQLDATE : {
 				return "java.sql.Date";
 			}
-			case 6 : {
+			case M_UTILDATE : {
 				return "java.util.Date";
 			}
-			case 7 : {
+			case M_DOUBLE : {
 				return "Double";
 			}
-			case 8 : {
+			case M_FLOAT : {
 				return "Float";
 			}
 			case M_BLOB : {
+				// map Blob to byte[]
 				return "byte[]";
 			}
-			case 10 : {
+			case M_INTEGER : {
 				return "Integer";
 			}
-			case 11 : {
+			case M_LONG : {
 				return "Long";
 			}
-			case 12 : {
+			case M_REF : {
 				return "Ref";
 			}
-			case 13 : {
+			case M_STRING : {
 				return "String";
 			}
-			case 14 : {
+			case M_TIME : {
 				return "java.sql.Time";
 			}
-			case 15 : {
+			case M_TIMESTAMP : {
 				return "java.sql.Timestamp";
 			}
-			case 16 : {
+			case M_URL : {
 				return "java.net.URL";
 			}
-			case 17 : {
+			case M_OBJECT : {
 				return "Object";
 			}
-			case 18 : {
+			case M_CALENDAR : {
 				return "java.util.Calendar";
 			}
 		}
@@ -498,7 +500,7 @@ public class Column implements Cloneable, Comparable {
 
 	public String getJavaPrimaryType() throws IllegalArgumentException {
 		int decimalDigits = this.getDecimalDigits();
-		if ((this.type == 3 || this.type == 2) && decimalDigits == 0) {
+		if ((this.type == Types.DECIMAL || this.type == Types.NUMERIC) && decimalDigits == 0) {
 			if (this.size == 1) {
 				return "boolean";
 			}
@@ -516,31 +518,31 @@ public class Column implements Cloneable, Comparable {
 			}
 		}
 		switch (this.getMappedType()) {
-			case 2 : {
+			case M_BOOLEAN : {
 				return "boolean";
 			}
-			case 5 : {
+			case M_SQLDATE : {
 				return "long";
 			}
-			case 6 : {
+			case M_UTILDATE : {
 				return "long";
 			}
-			case 7 : {
+			case M_DOUBLE : {
 				return "double";
 			}
-			case 8 : {
+			case M_FLOAT : {
 				return "float";
 			}
-			case 10 : {
+			case M_INTEGER : {
 				return "int";
 			}
-			case 11 : {
+			case M_LONG : {
 				return "long";
 			}
-			case 14 : {
+			case M_TIME : {
 				return "long";
 			}
-			case 15 : {
+			case M_TIMESTAMP : {
 				return "long";
 			}
 		}
@@ -549,94 +551,94 @@ public class Column implements Cloneable, Comparable {
 
 	public String getJavaTypeAsTypeName() {
 		switch (this.getType()) {
-			case 2003 : {
+			case Types.ARRAY : {
 				return "Types.ARRAY";
 			}
-			case -5 : {
+			case Types.BIGINT : {
 				return "Types.BIGINT";
 			}
-			case -2 : {
+			case Types.BINARY : {
 				return "Types.BINARY";
 			}
-			case -7 : {
+			case Types.BIT : {
 				return "Types.BIT";
 			}
-			case 2004 : {
+			case Types.BLOB : {
 				return "Types.BLOB";
 			}
-			case 16 : {
+			case Types.BOOLEAN : {
 				return "Types.BOOLEAN";
 			}
-			case 1 : {
+			case Types.CHAR : {
 				return "Types.CHAR";
 			}
-			case 2005 : {
+			case Types.CLOB : {
 				return "Types.CLOB";
 			}
-			case 70 : {
+			case Types.DATALINK : {
 				return "Types.DATALINK";
 			}
-			case 91 : {
+			case Types.DATE : {
 				return "Types.DATE";
 			}
-			case 3 : {
+			case Types.DECIMAL : {
 				return "Types.DECIMAL";
 			}
-			case 2001 : {
+			case Types.DISTINCT : {
 				return "Types.DISTINCT";
 			}
-			case 8 : {
+			case Types.DOUBLE : {
 				return "Types.DOUBLE";
 			}
-			case 6 : {
+			case Types.FLOAT : {
 				return "Types.FLOAT";
 			}
-			case 4 : {
+			case Types.INTEGER : {
 				return "Types.INTEGER";
 			}
-			case 2000 : {
+			case Types.JAVA_OBJECT : {
 				return "Types.JAVA_OBJECT";
 			}
-			case -4 : {
+			case Types.LONGVARBINARY : {
 				return "Types.LONGVARBINARY";
 			}
-			case -1 : {
+			case Types.LONGVARCHAR : {
 				return "Types.LONGVARCHAR";
 			}
-			case 0 : {
+			case Types.NULL : {
 				return "Types.NULL";
 			}
-			case 2 : {
+			case Types.NUMERIC : {
 				return "Types.NUMERIC";
 			}
-			case 1111 : {
+			case Types.OTHER : {
 				return "Types.OTHER";
 			}
-			case 7 : {
+			case Types.REAL : {
 				return "Types.REAL";
 			}
-			case 2006 : {
+			case Types.REF : {
 				return "Types.REF";
 			}
-			case 5 : {
+			case Types.SMALLINT : {
 				return "Types.SMALLINT";
 			}
-			case 2002 : {
+			case Types.STRUCT : {
 				return "Types.STRUCT";
 			}
-			case 92 : {
+			case Types.TIME : {
 				return "Types.TIME";
 			}
-			case 93 : {
+			case Types.TIMESTAMP : {
 				return "Types.TIMESTAMP";
 			}
-			case -6 : {
+			case Types.TINYINT : {
 				return "Types.TINYINT";
 			}
-			case -3 : {
+			case Types.VARBINARY : {
 				return "Types.VARBINARY";
 			}
-			case 12 : {
+			case Types.VARCHAR : {
 				return "Types.VARCHAR";
 			}
 		}
@@ -645,11 +647,11 @@ public class Column implements Cloneable, Comparable {
 
 	public boolean isColumnNumeric() {
 		switch (this.getMappedType()) {
-			case 1 :
-			case 7 :
-			case 8 :
-			case 10 :
-			case 11 : {
+			case M_BIGDECIMAL :
+			case M_DOUBLE :
+			case M_FLOAT :
+			case M_INTEGER :
+			case M_LONG : {
 				return true;
 			}
 		}
@@ -677,55 +679,60 @@ public class Column implements Cloneable, Comparable {
 
 	public boolean hasCompareTo() throws Exception {
 		switch (this.getMappedType()) {
-			case 0 : {
+			case M_ARRAY : {
 				return false;
 			}
-			case 1 : {
+			case M_BIGDECIMAL : {
 				return true;
 			}
-			case 2 : {
+			case M_BOOLEAN : {
 				return false;
 			}
-			case 3 : {
+			case M_BYTES : {
 				return false;
 			}
-			case 4 : {
+			case M_CLOB : {
+				// Clob map to java.langString that has compareTo
+				return true;
+			}
+			case M_SQLDATE : {
+				return true;
+			}
+			case M_UTILDATE : {
+				return true;
+			}
+			case M_DOUBLE : {
+				return true;
+			}
+			case M_FLOAT : {
+				return true;
+			}
+			case M_BLOB : {
+				// Blob map to byte[] that has not compareTo
 				return false;
 			}
-			case 5 : {
+			case M_INTEGER : {
 				return true;
 			}
-			case 6 : {
+			case M_LONG : {
 				return true;
 			}
-			case 7 : {
-				return true;
-			}
-			case 8 : {
-				return true;
-			}
-			case 10 : {
-				return true;
-			}
-			case 11 : {
-				return true;
-			}
-			case 12 : {
+			case M_REF : {
 				return false;
 			}
-			case 13 : {
+			case M_STRING : {
 				return true;
 			}
-			case 14 : {
+			case M_TIME : {
 				return true;
 			}
-			case 15 : {
+			case M_TIMESTAMP : {
 				return true;
 			}
-			case 16 : {
+			case M_URL : {
 				return false;
 			}
-			case 17 : {
+			case M_OBJECT : {
 				return false;
 			}
 		}
@@ -734,7 +741,11 @@ public class Column implements Cloneable, Comparable {
 
 	public boolean useEqualsInSetter() throws Exception {
 		switch (this.getMappedType()) {
-			case 2 : {
+			case M_BOOLEAN : {
+				return true;
+			}
+			case M_BLOB : {
+				// Blob map to byte[] that can use equals Object.method method to compare
 				return true;
 			}
 		}
