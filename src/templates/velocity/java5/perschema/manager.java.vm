@@ -14,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -478,6 +480,73 @@ public final class Manager
             ps.setLong(pos, l.longValue());
         }
     }
+
+    /**
+     * Retrieves a Blob object from the passed result set as a byte array.
+     */
+    public static byte[] getBlob(ResultSet rs, int pos) throws SQLException
+    {
+        Blob blob = rs.getBlob(pos);
+        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
+    }
+
+    /**
+     * Retrieves a Blob object from the passed result set as a byte array.
+     */
+    public static byte[] getBlob(ResultSet rs, String column) throws SQLException
+    {
+        Blob blob = rs.getBlob(column);
+        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
+    }
+
+    /**
+     * Set a byte array to the passed prepared statement as a Blob or as null.
+     */
+    public static void  setBlob(PreparedStatement ps, int pos, byte[] blob) throws SQLException
+    {
+        if (blob==null)
+        {
+            ps.setNull(pos, Types.BLOB);
+        }
+        else
+        {
+            ps.setBlob(pos, new java.io.ByteArrayInputStream(blob));
+        }
+    }
+
+    /**
+     * Retrieves a Clob object from the passed result set as a String.
+     */
+    public static String getClob(ResultSet rs, int pos) throws SQLException
+    {
+        Clob clob = rs.getClob(pos);
+        return rs.wasNull()?(String)null:clob.getSubString(1L,(int)clob.length());
+    }
+
+    /**
+     * Retrieves a Clob object from the passed result set as a String.
+     */
+    public static String getClob(ResultSet rs, String column) throws SQLException
+    {
+        Clob clob = rs.getClob(column);
+        return rs.wasNull()?(String)null:clob.getSubString(1L,(int)clob.length());
+    }
+
+    /**
+     * Set a String to the passed prepared statement as a Clob or as null.
+     */
+    public static void  setClob(PreparedStatement ps, int pos, String clob) throws SQLException
+    {
+        if (clob==null)
+        {
+            ps.setNull(pos, Types.CLOB);
+        }
+        else
+        {
+            ps.setClob(pos, new java.io.StringReader(clob));
+        }
+    }
+
 
     /**
      * Retrieves a boolean value from the passed result set as a Boolean object.
