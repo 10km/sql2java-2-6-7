@@ -16,7 +16,7 @@
     <property name="config"             value="${basedir}/src/config"/>
 
     <!-- WHERE WILL BE GENERATED THE CODE -->
-    <property name="generated-src"      value="${basedir}/src/java/org/acme/sample/"/>
+    <property name="generated-src"      value="${basedir}/src/java/"/>
     <property name="project-name"       value="sql2java"/>
     <property name="sql2java-config"    value="${config}/${project-name}.properties"/>
 
@@ -71,8 +71,8 @@
         <mkdir dir="${build}/javadoc"/>
 
         <copy todir="${build}/classes/" overwrite="true">
-            <fileset dir="${src}/java" includes="**/*.properties"/>
-            <fileset dir="${src}/java" includes="**/*.xml"/>
+            <fileset dir="${generated-src}" includes="**/*.properties"/>
+            <fileset dir="${generated-src}" includes="**/*.xml"/>
         </copy>
     </target>
 
@@ -216,7 +216,7 @@
     <target name="compile" depends="prepare">
         <javac fork="yes"
                 destdir="${build}/classes"
-                srcdir="${src}/java"
+                srcdir="${generated-src}"
                 memoryInitialSize="64M"
                 memoryMaximumSize="512M">
             <classpath refid="lib" />
@@ -227,7 +227,7 @@
     <target name="javadoc">
         <javadoc packagenames="*"
             destdir="build/javadoc"
-            sourcepath="${src}/java"
+            sourcepath="${generated-src}"
             author="true"
             version="true"
             use="true"
@@ -285,7 +285,7 @@
             <!-- include compiled classed in WEB-INF/classes -->
             <classes dir="${build}/classes"/>
 
-            <classes dir="${src}/java">
+            <classes dir="${generated-src}">
                 <include name="**/*.properties"/>
             </classes>
         </war>
