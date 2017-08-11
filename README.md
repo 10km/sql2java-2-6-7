@@ -1,111 +1,36 @@
-# sql2java-2-6-7
+# sql2java-2-6-7改进版
 
-sql2java是一款轻量级的历史悠久的 java ORM 工具.
+[master](tree/master)分支与原版的[sql2java 2.6.7][1]保持接口一致.
 
->官网地址:[https://sourceforge.net/projects/sql2java](https://sourceforge.net/projects/sql2java)
+此分支是基于[master](tree/master)分支的改进版本,此分支不会与master合并 
 
-可惜早已经不再维护，最后一个版本是[sql2java-2-6-7.zip][1]
+## 使用方式改进
 
-从2010年起我就一直在用这个工具生成的数据库访问代码。它体积很小，结构却非常好，支持很多主流的数据库，生成代码非常方便，而且可以自由定制生成的代码，重要的是很稳定。
+sql2java原本的使用方式是修改 `src/config/sql2java.properties` 文件中的参数来定制生成代码，生成的代码固定在`src/java`下.
 
-然而一年前，我发现这个工具无法支持BLOB,对CLOB类型的支持也不好，当时绕过了这个问题。现在因为项目需要必须要用到BLOB类型，就下决心解决这个问题。
+此分支修改了build.xml中,允许使用者在不修改sql2java代码的情况下完成代码生成，提供更好的项目管理的方便性。
 
-sql2java的官网上虽然有源码,但svn库中因为没有tag,已经无法溯源找到2.6.7版本对应的源码，于是我用CFR反编译器对核心库sql2java.jar反编译得到了源码。
+可以通过命令行参数来指定生成代码的位置,properties文件位置,数据库驱动(jdbc driver)位置，示例如下：
+    
+	cd sql2java-2-6-7
+	ant rebuild \
+		-Dsql2java-config=../sql2java.properties \
+		-Dgenerated-src=../src/main/java \
+		-Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
+`driver-jar`，`driver-lib`是新增加的参数，用于指定jdbc driver.
 
-通过研究反编译的源码，找到了sql2java不支持BLOB的原因,并在此基础上做了较少的修改，就实现了对BLOB,CLOB类型的支持。
+**注意:**
 
-## 更新范围
+上述参数指定的路径以及properties文件中涉及路径的参数，如果是相对路径，则都以 sql2java 根目录为基准。
 
-整个修复只涉及两个文件：
+比如：
 
-	lib/sql2java.jar中的net/sourceforge/sql2java/Column.class(另加入了对应的源码Column.java,基于反编译的源码修复后的代码)
-	src/templates/velocity/java5/perschema/manager.java.vm(velocity模板文件)
+sql2java-config指定的properties文件可以在任何位置,但是properties文件中在用 `codewriter.destdir`指定生成代码的位置时，则还是以sql2java根目录为基准，例如:
 
-对sql2java的接口没有做任何修改。
-
-### 注意
-
-因为只对java5下的perschema/manager.java.vm模板文件进行了修改。所以此版本只保证
-`sql2java.properties`文件中`template.folder.include`使用 `java5` 而不是 `java` 时能生成正确的代码。
-
-
-## 代码说明
-
-为了便于使用，同时也为了隐藏数据库访问相关的细节，在生成的Java Bean类中Blob对象被解析为byte[],Clob对象被解析为java.lang.String
-
-示例代码如下
-
-    /**
-     * Getter method for colorImage.
-     * <br>
-     * Meta Data Information (in progress):
-     * <ul>
-     * <li>full name: TEST_USER.COLOR_IMAGE</li>
-     * <li>column size: 4000</li>
-     * <li>jdbc type returned by the driver: Types.CLOB</li>
-     * </ul>
-     *
-     * @return the value of colorImage
-     */
-    public String getColorImage()
-    {
-        return colorImage;
-    }
-
-    /**
-     * Setter method for colorImage.
-     * <br>
-     * The new value is set only if compareTo() says it is different,
-     * or if one of either the new value or the current value is null.
-     * In case the new value is different, it is set and the field is marked as 'modified'.
-     *
-     * @param newVal the new value to be assigned to colorImage
-     */
-    public void setColorImage(String newVal)
-    {
-        if ((newVal != null && colorImage != null && (newVal.compareTo(colorImage) == 0)) ||
-            (newVal == null && colorImage == null && colorImageIsInitialized)) {
-            return;
-        }
-        colorImage = newVal;
-        colorImageIsModified = true;
-        colorImageIsInitialized = true;
-    }
-    /**
-     * Getter method for grayImage.
-     * <br>
-     * Meta Data Information (in progress):
-     * <ul>
-     * <li>full name: TEST_USER.GRAY_IMAGE</li>
-     * <li>column size: 4000</li>
-     * <li>jdbc type returned by the driver: Types.BLOB</li>
-     * </ul>
-     *
-     * @return the value of grayImage
-     */
-    public byte[] getGrayImage()
-    {
-        return grayImage;
-    }
-
-    /**
-     * Setter method for grayImage.
-     * <br>
-     * Attention, there will be no comparison with current value which
-     * means calling this method will mark the field as 'modified' in all cases.
-     *
-     * @param newVal the new value to be assigned to grayImage
-     */
-    public void setGrayImage(byte[] newVal)
-    {
-        if ((newVal != null && grayImage != null && newVal.equals(grayImage)) ||
-            (newVal == null && grayImage == null && grayImageIsInitialized)) {
-            return;
-        }
-        grayImage = newVal;
-        grayImageIsModified = true;
-        grayImageIsInitialized = true;
-    }
+	codewriter.destdir=../src/main
+	# 指定为 sql2java 同级的src/main为生成代码的路径
+	# 实际生成的代码在 ../src/main/java
+	# 这里的值应该与-Dgenerated-src中指定的值保持同步(少java)
 
 ## author
 	GuYaDong 10km0811@sohu.com

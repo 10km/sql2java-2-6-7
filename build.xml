@@ -8,20 +8,28 @@
 
     <!-- your environment properties are imported here and available -->
     <property environment="env"/>
-
+    <!-- 
+    	sql2java-config generated-src driver-lib driver-jar 参数都可以在外部通过命令行参数指定,例如:
+    	example 1:
+    	ant rebuild -Dsql2java-config=../sql2java.properties -Dgenerated-src=../src/main/java -Ddriver-lib=../lib 
+    	example 2:
+    	ant rebuild -Dsql2java-config=../sql2java.properties -Dgenerated-src=../src/main/java -Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
+    	如果driver-lib driver-jar两个参数根据指定一个就可以,example 1中指定数据库驱动jar包在../lib下,example 2则直接指定了jar包的文件名
+    -->
     <!-- FOLDERS -->
     <property name="build"              value="${basedir}/build"/>
     <property name="src"                value="${basedir}/src"/>
     <property name="lib"                value="${basedir}/lib"/>
-    <!-- 指定 jdbc driver 位置(文件夹)  -->
-    <property name="driver.lib"         value=""/>     
-    <!-- 指定 jdbc driver jar 位置(jar) -->
-    <property name="driver.jar"         value=""/>    
+    <!-- 指定 数据库驱动jar包(jdbc driver) 所在文件夹  -->
+    <property name="driver-lib"         value=""/>
+    <!-- 指定 数据库驱动jar包(jdbc driver) (jar) -->
+    <property name="driver-jar"         value=""/>    
     <property name="config"             value="${basedir}/src/config"/>
 
-    <!-- WHERE WILL BE GENERATED THE CODE -->
+    <!-- 指定代码生成位置 WHERE WILL BE GENERATED THE CODE -->
     <property name="generated-src"      value="${basedir}/src/java/"/>
     <property name="project-name"       value="sql2java"/>
+    <!-- 指定 sql2java配置文件位置 -->
     <property name="sql2java-config"    value="${config}/${project-name}.properties"/>
 
     <property file="${sql2java-config}"/>
@@ -34,8 +42,8 @@
     <property name="tomcat.admin.url"   value="http://localhost:8080/manager"/>
     <path id="lib">
         <pathelement location="${build}/classes"/>
-        <pathelement location="${driver.jar}"/>
-        <fileset dir="${driver.lib}">
+        <pathelement location="${driver-jar}"/>
+        <fileset dir="${driver-lib}">
             <include name="*.jar"/>
         </fileset>
         <fileset dir="${lib}">
