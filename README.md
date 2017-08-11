@@ -1,8 +1,8 @@
 # sql2java-2-6-7改进版
 
-[master](../../master)分支与原版的[sql2java 2.6.7][1]保持接口一致.
+[master](../../tree/master)分支与原版的[sql2java 2.6.7][1]保持接口一致.
 
-此分支是基于[master](/tree/master)分支的改进版本,此分支不会与master合并 
+此分支是基于[master](../../tree/master)分支的改进版本,此分支不会与master合并 
 
 ## 使用方式改进
 
