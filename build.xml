@@ -80,7 +80,9 @@
     <target name="clean">
         <delete includeEmptyDirs="true" dir="${build}"/>
         <!-- delete generated code -->
-        <delete includeEmptyDirs="true" dir="${generated-src}"/>
+				<delete includeEmptyDirs="true">
+					<fileset dir="${generated-src}" includes="**/*" excludes=".gitignore" /> 
+				</delete>
     </target>
 
     <!-- REBUILD -->
