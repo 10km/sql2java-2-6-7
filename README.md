@@ -6,11 +6,13 @@
 
 ## 使用方式改进
 
-sql2java原本的使用方式是修改 `src/config/sql2java.properties` 文件中的参数来定制生成代码，生成的代码固定在`src/java`下.
+sql2java 原本的使用方式是修改 `src/config/sql2java.properties` 文件中的参数来定制生成代码，生成的代码固定在`src/java`下.
 
-此分支修改了build.xml中,允许使用者在不修改sql2java代码的情况下完成代码生成，提供更好的项目管理的方便性。
+此分支修改了 build.xml 中,允许使用者在不修改sql2java代码的情况下完成代码生成，提供更好的项目管理的方便性。
 
-可以通过命令行参数来指定生成代码的位置,properties文件位置,数据库驱动(jdbc driver)位置，示例如下：
+可以通过命令行参数来指定生成代码的位置,properties文件位置,数据库驱动(jdbc driver)位置。
+### ant
+ant 命令行执行 builx.xml 脚本示例如下：
     
 	cd sql2java-2-6-7
 	ant rebuild \
@@ -18,6 +20,15 @@ sql2java原本的使用方式是修改 `src/config/sql2java.properties` 文件�
 		-Dgenerated-src=../src/main/java \
 		-Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
 `driver-jar`，`driver-lib`是新增加的参数，用于指定jdbc driver.
+
+### maven
+[pom.xml](pom.xml)提供了 maven 命令行执行 build.xml 的支持,使用方式如下：
+
+	cd sql2java-2-6-7
+	mvn  generate-sources \
+		-Dsql2java-config=../sql2java.properties \
+		-Dgenerated-src=../src/main/java \
+		-Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
 
 **注意:**
 

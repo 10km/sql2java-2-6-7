@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<groupId>sql2java</groupId>
+  <artifactId>sql2java-generator</artifactId>  
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>sql2java-generator</name>
+	<!-- 调用 ant 执行 build.xml 完成jav代码生成  -->
+  <properties>
+	  <!--  
+	  sql2java参数定义,参见build.xml
+	  调用方式
+	  mvn  generate-sources \
+	  		-Dsql2java-config=../sql2java.properties \
+	  		-Dgenerated-src=../src/main/java \
+	  		-Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
+	  -->
+    <sql2java-config>../sql2java.properties</sql2java-config>
+    <generated-src>../src/main/java</generated-src>
+    <!--<driver-jar>../lib/mysql-connector-java-5.1.43-bin.jar</driver-jar>-->
+  </properties>
+	<build>
+		<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				
+				<executions>
+					<execution>
+						<id>ant-build</id>
+						<phase>generate-sources</phase>
+						<goals>
+						<goal>run</goal>
+						</goals>
+						<configuration>
+						<target>
+							<ant antfile="build.xml" target="rebuild" inheritAll="false">
+								<property name="sql2java-config" value="${sql2java-config}"/>
+								<property name="generated-src" value="${generated-src}"/>
+								<property name="driver-jar" value="${driver-jar}"/>
+							</ant>
+						</target>
+						</configuration>
+					</execution>
+			</executions>
+		</plugin>
+		</plugins>
+	</build>
+</project>

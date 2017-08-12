@@ -15,6 +15,7 @@
     	example 2:
     	ant rebuild -Dsql2java-config=../sql2java.properties -Dgenerated-src=../src/main/java -Ddriver-jar=../lib/mysql-connector-java-5.1.43-bin.jar
     	如果driver-lib driver-jar两个参数根据指定一个就可以,example 1中指定数据库驱动jar包在../lib下,example 2则直接指定了jar包的文件名
+    	注意:参数指定的路径如果是相对路径,则都以 sql2java 根目录为基准
     -->
     <!-- FOLDERS -->
     <property name="build"              value="${basedir}/build"/>
