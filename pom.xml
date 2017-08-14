@@ -28,24 +28,15 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.8</version>
 				
-				<executions>
-					<execution>
-						<id>ant-build</id>
-						<phase>generate-sources</phase>
-						<goals>
-						<goal>run</goal>
-						</goals>
-						<configuration>
-						<target>
-							<ant antfile="build.xml" target="rebuild" inheritAll="false">
-								<property name="sql2java-config" value="${sql2java-config}"/>
-								<property name="generated-src" value="${generated-src}"/>
-								<property name="driver-jar" value="${driver-jar}"/>
-							</ant>
-						</target>
-						</configuration>
-					</execution>
-			</executions>
+				<configuration>
+				<target>
+					<ant antfile="build.xml" target="rebuild" inheritAll="false">
+						<property name="sql2java-config" value="${sql2java-config}"/>
+						<property name="generated-src" value="${generated-src}"/>
+						<property name="driver-jar" value="${driver-jar}"/>
+					</ant>
+				</target>
+				</configuration>
 		</plugin>
 		</plugins>
 	</build>
