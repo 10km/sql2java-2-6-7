@@ -15,10 +15,10 @@ public class Procedure {
 	private String sqlName;
 	private String remarks;
 	private String returnType;
-	private List columns = new ArrayList();
-	private List inColumns = new ArrayList();
-	private List outColumns = new ArrayList();
-	private HashMap colsHash = new HashMap();
+	private List<Column> columns = new ArrayList<Column>();
+	private List<Column> inColumns = new ArrayList<Column>();
+	private List<Column> outColumns = new ArrayList<Column>();
+	private HashMap<String,Column> colsHash = new HashMap<String,Column>();
 	private int position = 1;
 
 	private int nextPosition() {
@@ -66,15 +66,15 @@ public class Procedure {
 	}
 
 	public Column[] getColumns() {
-		return this.columns.toArray((T[]) new Column[this.columns.size()]);
+		return this.columns.toArray(new Column[this.columns.size()]);
 	}
 
 	public Column[] getInColumns() {
-		return this.inColumns.toArray((T[]) new Column[this.inColumns.size()]);
+		return this.inColumns.toArray(new Column[this.inColumns.size()]);
 	}
 
 	public Column[] getOutColumns() {
-		return this.outColumns.toArray((T[]) new Column[this.outColumns.size()]);
+		return this.outColumns.toArray(new Column[this.outColumns.size()]);
 	}
 
 	public String getName() {

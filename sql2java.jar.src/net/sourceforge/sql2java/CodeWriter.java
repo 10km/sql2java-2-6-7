@@ -38,8 +38,8 @@ public class CodeWriter {
 	protected static String timeClassName;
 	protected static String timestampClassName;
 	protected static Database db;
-	protected static Hashtable includeHash;
-	protected static Hashtable excludeHash;
+	protected static Hashtable<String, String> includeHash;
+	protected static Hashtable<String, String> excludeHash;
 	protected static String basePackage;
 	protected static String destDir;
 	protected static String optimisticLockType;
@@ -95,9 +95,9 @@ public class CodeWriter {
 		}
 	}
 
-	private Hashtable setHash(String str) {
+	private Hashtable<String, String> setHash(String str) {
 		if (str == null || str.trim().equals("")) {
-			return new Hashtable();
+			return new Hashtable<String, String>();
 		}
 		Hashtable<String, String> hash = new Hashtable<String, String>();
 		StringTokenizer st = new StringTokenizer(str);
@@ -237,11 +237,11 @@ public class CodeWriter {
 			return;
 		}
 		StringWriter sw = new StringWriter();
-		Velocity.mergeTemplate((String) templateName, (String) "ISO-8859-1", (Context) this.current_vc, (Writer) sw);
+		Velocity.mergeTemplate((String) templateName, (String) "UTF-8", (Context) this.current_vc, (Writer) sw);
 		System.out.println(" .... writing to " + this.current_fullfilename);
 		File file = new File(this.current_fullfilename);
 		new File(file.getParent()).mkdirs();
-		PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.current_fullfilename)));
+		PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.current_fullfilename),"UTF-8"));
 		writer.write(sw.toString());
 		writer.flush();
 		writer.close();
@@ -272,7 +272,7 @@ public class CodeWriter {
 		return db;
 	}
 
-	public List getTables() {
+	public List<Table> getTables() {
 		Table[] tabs = db.getTables();
 		ArrayList<Table> tables = new ArrayList<Table>(tabs.length);
 		for (int i = 0; i < tabs.length; ++i) {
@@ -285,7 +285,7 @@ public class CodeWriter {
 		return db.getTable(tableName);
 	}
 
-	public List getRelationTables() {
+	public List<Table> getRelationTables() {
 		Table[] tabs = db.getTables();
 		ArrayList<Table> tables = new ArrayList<Table>(tabs.length);
 		for (int i = 0; i < tabs.length; ++i) {
@@ -307,9 +307,9 @@ public class CodeWriter {
 		return this.table;
 	}
 
-	public boolean listContainsString(List list, String string) {
+	public boolean listContainsString(List<String> list, String string) {
 		Object obj = null;
-		Iterator iter = list.iterator();
+		Iterator<String> iter = list.iterator();
 		while (iter.hasNext()) {
 			if (string.equals(obj)) {
 				return true;
@@ -372,12 +372,12 @@ public class CodeWriter {
 	}
 
 	public String[] getTemplates(String property, boolean perShema) {
-		Vector files = new Vector();
+		Vector<String> files = new Vector<String>();
 		this.recurseTemplate(files, Main.getProperty((String) property), perShema);
 		return files.toArray(new String[files.size()]);
 	}
 
-	public Vector recurseTemplate(Vector files, String folder, boolean perSchema) {
+	public Vector<String> recurseTemplate(Vector<String> files, String folder, boolean perSchema) {
 		FileFilter filter;
 		File[] dirEntries;
 		String schemaOrTable = "perschema";

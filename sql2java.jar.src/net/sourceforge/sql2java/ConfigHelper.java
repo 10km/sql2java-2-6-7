@@ -34,46 +34,40 @@ public class ConfigHelper {
 	}
 
 	public static String getXPathProperty(String xPathQuery, String propertyName) {
-		block9 : {
-			String result;
-			Element item;
-			block11 : {
-				block10 : {
-					List nodes;
-					block8 : {
-						if (doc == null) {
-							return null;
-						}
-						result = null;
-						XPath servletPath = XPath.newInstance((String) xPathQuery);
-						nodes = servletPath.selectNodes((Object) doc);
-						if (nodes != null)
-							break block8;
-						String string = null;
-						return string;
-					}
-					Iterator i = nodes.iterator();
-					if (!i.hasNext())
-						break block9;
-					item = (Element) i.next();
-					if (item.getAttribute(propertyName) == null
-							|| (result = item.getAttribute(propertyName).getValue()) == null)
-						break block10;
-					String string = result;
-					return string;
-				}
-				if (item.getChild(propertyName) != null)
-					break block11;
-				String string = null;
-				return string;
-			}
-			try {
-				String string = result = item.getChild(propertyName).getTextTrim();
-				return string;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (doc == null) {
+			return null;
 		}
+		String result = null;
+		try {
+			XPath servletPath = XPath.newInstance(xPathQuery);
+			List nodes = servletPath.selectNodes(doc);
+			if (nodes == null) {
+				return null;
+			}
+			Iterator i = nodes.iterator();
+			if (i.hasNext()) {
+				Element item = (Element) i.next();
+
+				if (item.getAttribute(propertyName) != null) {
+					result = item.getAttribute(propertyName).getValue();
+					if (result != null) {
+						return result;
+					}
+				}
+
+				if (item.getChild(propertyName) == null) {
+					return null;
+				}
+
+				result = item.getChild(propertyName).getTextTrim();
+				return result;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+		}
+
 		return null;
 	}
 

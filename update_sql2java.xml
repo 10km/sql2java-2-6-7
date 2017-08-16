@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="update_sql2java" default="all" basedir=".">
+    <property name="build"              value="${basedir}/build"/>
+    <!-- sql2java.jar 反编译代码位置 -->
+    <property name="src"                value="${basedir}/sql2java.jar.src"/>
+    <property name="lib"                value="${basedir}/lib"/>
+    <property name="jar"                value="${lib}/sql2java.jar"/>
+
+    <path id="lib">
+        <pathelement location="${build}/classes"/>
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+		<target name="prepare">
+		    <mkdir dir="${build}"/>
+		    <mkdir dir="${build}/classes"/>
+		    <mkdir dir="${build}/javadoc"/>
+		
+		    <copy todir="${build}/classes/" overwrite="true">
+		        <fileset dir="${src}" includes="**/*.properties"/>
+		        <fileset dir="${src}" includes="**/*.xml"/>
+		    </copy>
+	  </target>
+
+    <!-- CLEAN ALL -->
+    <target name="clean" description="remove all classes">
+        <delete includeEmptyDirs="true" dir="${build}"/>
+    </target>
+
+    <!-- REBUILD -->
+    <target name="rebuild" depends="clean,compile" description="clean, then recompile the project"/>
+
+    <!-- RUN THE SAMPLE USING THE GENERATED API TO ACCESS YOUR DB -->
+    <target name="all" depends="rebuild,update" description="clean build, compile and update to jar"/>
+
+    <!-- COMPILE THE SOURCE CODE API TO ACCESS YOUR DB -->
+    <target name="compile" depends="prepare" description="compile java source">
+        <javac target="1.6" source="1.6"
+                destdir="${build}/classes"
+                srcdir="${src}" >
+            <classpath refid="lib" />
+        </javac>
+    </target>
+
+    <!-- udate sql2java.jar -->
+    <target name="update" depends="compile" description="update class file to sql2java.jar">
+    		<echo message="update class file to ${jar}"/>
+				<jar destfile="${jar}" update="true" >
+						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class"/>
+						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java"/>
+				</jar>
+    </target>
+</project>

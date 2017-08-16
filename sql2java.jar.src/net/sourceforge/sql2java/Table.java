@@ -19,24 +19,24 @@ import net.sourceforge.sql2java.Procedure;
 import net.sourceforge.sql2java.StringUtilities;
 
 public class Table {
-	private Hashtable colHash = new Hashtable();
-	private Vector cols = new Vector();
-	private Hashtable indHash = new Hashtable();
-	private Vector indices = new Vector();
-	private Hashtable indUniqueHash = new Hashtable();
-	private Vector uniqueIndices = new Vector();
-	private Hashtable indNonUniHash = new Hashtable();
-	private Vector nonUniqueIndices = new Vector();
-	private Vector priKey = new Vector();
+	private Hashtable<String,Column> colHash = new Hashtable<String,Column>();
+	private Vector<Column> cols = new Vector<Column>();
+	private Hashtable<String,Index> indHash = new Hashtable<String,Index>();
+	private Vector<Index> indices = new Vector<Index>();
+	private Hashtable<String,Index> indUniqueHash = new Hashtable<String,Index>();
+	private Vector<Index> uniqueIndices = new Vector<Index>();
+	private Hashtable<String,Index> indNonUniHash = new Hashtable<String,Index>();
+	private Vector<Index> nonUniqueIndices = new Vector<Index>();
+	private Vector<Column> priKey = new Vector<Column>();
 	private String catalog;
 	private String schema;
 	private String name;
 	private String type;
 	private String remarks;
-	private Vector foreignKeys = new Vector();
-	private Vector importedKeys = new Vector();
-	private List procedures = new ArrayList();
-	private HashMap procHash = new HashMap();
+	private Vector<Column> foreignKeys = new Vector<Column>();
+	private Vector<Column> importedKeys = new Vector<Column>();
+	private List<Procedure> procedures = new ArrayList<Procedure>();
+	private HashMap<String,Procedure> procHash = new HashMap<String,Procedure>();
 	private Random aleatorio = new Random(new Date().getTime());
 
 	public boolean isRelationTable() {
@@ -125,7 +125,7 @@ public class Table {
 
 	public Column[] getColumns() {
 		Collections.sort(this.cols);
-		return this.cols.toArray((T[]) new Column[this.cols.size()]);
+		return this.cols.toArray(new Column[this.cols.size()]);
 	}
 
 	public Column getColumn(String columnName) {
@@ -143,11 +143,11 @@ public class Table {
 	}
 
 	public Index[] getUniqueIndices() {
-		return this.uniqueIndices.toArray((T[]) new Index[this.uniqueIndices.size()]);
+		return this.uniqueIndices.toArray(new Index[this.uniqueIndices.size()]);
 	}
 
 	public Index[] getNonUniqueIndices() {
-		return this.nonUniqueIndices.toArray((T[]) new Index[this.nonUniqueIndices.size()]);
+		return this.nonUniqueIndices.toArray( new Index[this.nonUniqueIndices.size()]);
 	}
 
 	public int countIndices() {
@@ -155,7 +155,7 @@ public class Table {
 	}
 
 	public Index[] getIndices() {
-		return this.indices.toArray((T[]) new Index[this.indices.size()]);
+		return this.indices.toArray( new Index[this.indices.size()]);
 	}
 
 	public Index getIndex(String indName) {
@@ -187,7 +187,7 @@ public class Table {
 	}
 
 	public Column[] getPrimaryKeys() {
-		return this.priKey.toArray((T[]) new Column[this.priKey.size()]);
+		return this.priKey.toArray( new Column[this.priKey.size()]);
 	}
 
 	public boolean hasCompositeKey() {
@@ -210,7 +210,7 @@ public class Table {
 	}
 
 	public Column[] getImportedKeys() {
-		return this.importedKeys.toArray((T[]) new Column[this.importedKeys.size()]);
+		return this.importedKeys.toArray( new Column[this.importedKeys.size()]);
 	}
 
 	public void addImportedKey(Column column) {
@@ -254,7 +254,7 @@ public class Table {
 	}
 
 	public Column[] getForeignKeys() {
-		return this.foreignKeys.toArray((T[]) new Column[this.foreignKeys.size()]);
+		return this.foreignKeys.toArray( new Column[this.foreignKeys.size()]);
 	}
 
 	public boolean isForeignKey(Column col) {
@@ -386,7 +386,7 @@ public class Table {
 	}
 
 	public Procedure[] getProcedures() {
-		return this.procedures.toArray((T[]) new Procedure[this.procedures.size()]);
+		return this.procedures.toArray( new Procedure[this.procedures.size()]);
 	}
 
 	public void addProcedure(Procedure procedure) {
@@ -447,7 +447,7 @@ public class Table {
 				continue;
 			vector.add(c);
 		}
-		return vector.toArray((T[]) new Column[vector.size()]);
+		return vector.toArray( new Column[vector.size()]);
 	}
 
 	public Column getFirstColumn() {

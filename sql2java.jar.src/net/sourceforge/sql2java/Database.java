@@ -24,8 +24,8 @@ public class Database {
 	private String[] tableTypes;
 	private Connection pConnection;
 	private DatabaseMetaData meta;
-	private Vector tables;
-	private Hashtable tableHash;
+	private Vector<Table> tables;
+	private Hashtable<String,Table> tableHash;
 	private String engine;
 	private String driver;
 	private String url;
@@ -148,7 +148,7 @@ public class Database {
 				continue;
 			vector.add(tempTable);
 		}
-		return vector.toArray((T[]) new Table[vector.size()]);
+		return vector.toArray(new Table[vector.size()]);
 	}
 
 	public void load() throws SQLException, ClassNotFoundException {
@@ -168,8 +168,8 @@ public class Database {
 		this.engine = this.meta.getDatabaseProductName();
 		System.out.println("    Database server :" + this.engine + ".");
 		this.engine = new StringTokenizer(this.engine).nextToken();
-		this.tables = new Vector();
-		this.tableHash = new Hashtable();
+		this.tables = new Vector<Table>();
+		this.tableHash = new Hashtable<String,Table>();
 		this.loadTables();
 		this.loadColumns();
 		this.loadPrimaryKeys();
@@ -180,7 +180,7 @@ public class Database {
 	}
 
 	public Table[] getTables() {
-		return this.tables.toArray((T[]) new Table[this.tables.size()]);
+		return this.tables.toArray(new Table[this.tables.size()]);
 	}
 
 	private void addTable(Table t) {
@@ -223,7 +223,7 @@ public class Database {
 
 	private void loadColumns() throws SQLException {
 		System.out.println("Loading columns ...");
-		Iterator it = this.tables.iterator();
+		Iterator<Table> it = this.tables.iterator();
 		while (it.hasNext()) {
 			Table table = (Table) it.next();
 			Column c = null;
@@ -253,7 +253,7 @@ public class Database {
 
 	private void loadPrimaryKeys() throws SQLException {
 		System.out.println("Database::loadPrimaryKeys");
-		Iterator it = this.tables.iterator();
+		Iterator<Table> it = this.tables.iterator();
 		while (it.hasNext()) {
 			Column col;
 			Table table = (Table) it.next();
@@ -280,7 +280,7 @@ public class Database {
 
 	private void loadImportedKeys() throws SQLException {
 		System.out.println("Loading imported keys ...");
-		Iterator it = this.tables.iterator();
+		Iterator<Table> it = this.tables.iterator();
 		while (it.hasNext()) {
 			ResultSet resultSet;
 			Table table = (Table) it.next();
@@ -310,7 +310,7 @@ public class Database {
 
 	private void loadIndexes() throws SQLException {
 		System.out.println("Loading indexes ...");
-		Iterator it = this.tables.iterator();
+		Iterator<Table> it = this.tables.iterator();
 		while (it.hasNext()) {
 			Table table = (Table) it.next();
 			ResultSet resultSet = null;
@@ -349,7 +349,7 @@ public class Database {
 
 	private void loadProcedures() throws SQLException {
 		System.out.println("Loading procedures ...");
-		Iterator it = this.tables.iterator();
+		Iterator<Table> it = this.tables.iterator();
 		while (it.hasNext()) {
 			Table table = (Table) it.next();
 			String procedurePattern = table.getTableProperty("procedures");
