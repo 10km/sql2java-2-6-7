@@ -51,5 +51,6 @@
 						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class"/>
 						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java"/>
 				</jar>
+		    <copy file="${basedir}/release.sh" todir="${build}" overwrite="true"/>
     </target>
 </project>
