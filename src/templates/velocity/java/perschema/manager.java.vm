@@ -77,7 +77,8 @@ public final class Manager
      */
     public void defaultConfigure() throws DAOException
     {
-        this.configure("${strUtil.getPackageAsPath($pkg)}/database.properties");
+        String folder=this.getClass().getPackage().getName().replaceAll("((\\w+\\.)+)", "");
+        this.configure("database_"+folder+".properties");
     }
 
     /**

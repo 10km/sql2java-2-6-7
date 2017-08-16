@@ -5,12 +5,12 @@ $codewriter.setCurrentJavaFilename("$table.getPackage()", "${listenerClass}.java
 package $table.getPackage();
 
 import ${pkg}.exception.DAOException;
-
+import ${pkg}.TableListener;
 /**
  * Listener that is notified of $tablename table changes.
  * @author sql2java
  */
-public interface $listenerClass
+public interface $listenerClass extends TableListener
 {
     /**
      * Invoked just before inserting a $beanClass record into the database.

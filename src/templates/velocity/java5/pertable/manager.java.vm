@@ -3,7 +3,7 @@
 #parse( "header.include.vm" )
 $codewriter.setCurrentJavaFilename("$table.getPackage()", "${managerClass}.java")
 package $table.getPackage();
-
+import java.lang.ref.SoftReference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import ${pkg}.Manager;
+import ${pkg}.TableListener;
+import ${pkg}.TableManager;
 import ${pkg}.exception.DAOException;
 import ${pkg}.exception.DataAccessException;
 import ${pkg}.exception.ObjectRetrievalException;
@@ -32,7 +34,7 @@ import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
 #end
  * @author sql2java
  */
-public class $managerClass 
+public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 {
 
     /* set =QUERY for loadUsingTemplate */
@@ -52,9 +54,13 @@ public class $managerClass
 
 #end
     /**
+     * Tablename.
+     */
+		public static final String TABLE_NAME="$tablename";
+    /**
      * Contains all the full fields of the $tablename table.
      */
-    private static final String[] FULL_FIELD_NAMES =
+    public static final String[] FULL_FIELD_NAMES =
     {
 #foreach ( $column in $columns )
         #if ( $velocityCount > 1 ),#end"$column.getFullName()"
@@ -70,7 +76,15 @@ public class $managerClass
         #if ( $velocityCount > 1 ),#end"$column.getName()"
 #end
     };
-
+   /**
+     * Contains all the primarykey fields of the $tablename table.
+     */
+    public static final String[] PRIMARYKEY_NAMES =
+    {
+#foreach ( $column in $primaryKeys )
+        #if ( $velocityCount > 1 ),#end"$column.getName()"
+#end
+    };
     /**
      * Field that contains the comma separated fields of the $tablename table.
      */
@@ -87,6 +101,32 @@ public class $managerClass
 
                             + ",#else"#end$column.getName()"#end;
 
+    public static interface Action{
+          void call($beanClass bean);
+          $beanClass getBean();
+     }
+
+    /**
+    * @return tableName
+    */
+    public String getTableName() {
+        return TABLE_NAME;
+    }
+
+    /**
+    * @return fieldNames
+    */
+    public String[] getFieldNames() {
+        return FIELD_NAMES;
+    }
+
+    /**
+    * @return primarykeyNames
+    */
+    public String[] getPrimarykeyNames() {
+        return PRIMARYKEY_NAMES;
+    }
+	
     private static $managerClass singleton = new $managerClass();
 
     /**
@@ -105,7 +145,7 @@ public class $managerClass
      *
      * @return the new $beanClass
      */
-    public $beanClass create$beanClass()
+    public $beanClass createBean()
     {
         return new $beanClass();
     }
@@ -167,6 +207,28 @@ public class $managerClass
         }
     }
 
+    /**
+     * Get Primary Key fileds as parameters from the parameter{@code bean},
+     * then call {@link #loadByPrimaryKey($keys)},loads a $beanClass from the $tablename.
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param bean the $beanClass with key fields
+     * @return a unique $beanClass
+     * @throws DAOException
+     */
+    //1.1
+    public $beanClass loadByPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+#set ( $methods = "" ) 
+#foreach ( $pk in $primaryKeys )
+## part 1
+#if ( $velocityCount > 1 )#set( $methods = "$methods, " )#end
+## part 2
+#set ( $methods = "$methods bean.${pk.getGetMethod()}()" )
+#end     
+        return bean==null?null:loadByPrimaryKey($methods);
+    }
+
 #set ( $sql = "" )
     /**
      * Deletes rows according to its keys.
@@ -187,6 +249,11 @@ public class $managerClass
         PreparedStatement ps = null;
         try
         {
+            ${beanClass} bean=createBean();
+#foreach ( $pk in $primaryKeys )
+            bean.${pk.getSetMethod()}(${pk.getVarName()});
+#end
+            this.beforeDelete(bean); // listener callback
             c = this.getConnection();
             StringBuilder sql = new StringBuilder("DELETE FROM $tablename WHERE $sql");
             // System.out.println("deleteByPrimaryKey: " + sql);
@@ -196,7 +263,10 @@ public class $managerClass
 #foreach( $pk in $primaryKeys )
             $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
 #end
-            return ps.executeUpdate();
+            int _rows=ps.executeUpdate();
+            if(_rows>0)
+                this.afterDelete(bean); // listener callback
+            return _rows;
         }
         catch(SQLException e)
         {
@@ -208,6 +278,37 @@ public class $managerClass
             this.freeConnection(c);
         }
     }
+    /**
+     * Get Primary Key fileds as parameters from the parameter{@code bean},
+     * then call {@link #deleteByPrimaryKey($keys)}.<br>
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param bean the $beanClass with key fields
+     * @return the number of deleted rows
+     * @throws DAOException
+     */
+    //2.1
+    public int deleteByPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+#set ( $methods = "" ) 
+#foreach ( $pk in $primaryKeys )
+## part 1
+#if ( $velocityCount > 1 )#set( $methods = "$methods, " )#end
+## part 2
+#set ( $methods = "$methods bean.${pk.getGetMethod()}()" )
+#end     
+        return bean==null?0:deleteByPrimaryKey($methods);
+    }
+#else
+    public $beanClass loadByPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+        throw new UnsupportedOperationException();
+    }
+    public int deleteByPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+        throw new UnsupportedOperationException();
+    }
+
 #end
 ## ======================================================
 ## xImportedKeys template
@@ -235,7 +336,7 @@ public class $managerClass
     //3.1 GET IMPORTED
     public $importedClass[] get${importedClass}s($beanClass bean) throws DAOException
     {
-        $importedClass other = ${importedClassManager}.getInstance().create${importedClass}();
+        $importedClass other = ${importedClassManager}.getInstance().createBean();
         other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
         return ${importedClassManager}.getInstance().loadUsingTemplate(other);
     }
@@ -250,7 +351,7 @@ public class $managerClass
     //3.1 GET IMPORTED
     public List<$importedClass> get${importedClass}sAsList($beanClass bean) throws DAOException
     {
-        $importedClass other = ${importedClassManager}.getInstance().create${importedClass}();
+        $importedClass other = ${importedClassManager}.getInstance().createBean();
         other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
         return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other);
     }
@@ -297,7 +398,7 @@ public class $managerClass
     //3.2 GET IMPORTED VALUES
     public $importedClass get${importedClass}($beanClass bean) throws DAOException
     {
-        $importedClass other = ${importedClassManager}.getInstance().create${importedClass}();
+        $importedClass other = ${importedClassManager}.getInstance().createBean();
 #foreach ( $fk in $foreignKeys ) 
 #if ( $importedTable.getName() == $fk.getForeignColumn().getTable().getName() ) 
         other.$fk.getForeignColumn().getSetMethod()(bean.$fk.getGetMethod()()); 
@@ -356,14 +457,24 @@ public class $managerClass
     {
         return this.loadUsingTemplate(null);
     }
-
+    /**
+     * Loads each row from $tablename and dealt with action.
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //5-1
+    public int loadAll(Action action) throws DAOException
+    {
+        return this.loadUsingTemplate(null,action);
+    }
     /**
      * Loads all the rows from $tablename.
      *
      * @return a list of $managerClass bean
      * @throws DAOException
      */
-    //5
+    //5-2
     public List<$beanClass> loadAllAsList() throws DAOException
     {
         return this.loadUsingTemplateAsList(null);
@@ -383,7 +494,19 @@ public class $managerClass
     {
         return this.loadUsingTemplate(null, startRow, numRows);
     }
-
+    /**
+     *  Loads the given number of rows from $tablename, given the start row and dealt with action.
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //6-1
+    public int loadAll(int startRow, int numRows,Action action) throws DAOException
+    {
+        return this.loadUsingTemplate(null, startRow, numRows,action);
+    }
     /**
      * Loads the given number of rows from $tablename, given the start row.
      *
@@ -392,7 +515,7 @@ public class $managerClass
      * @return a list of $managerClass bean
      * @throws DAOException
      */
-    //6
+    //6-2
     public List<$beanClass> loadAllAsList(int startRow, int numRows) throws DAOException
     {
         return this.loadUsingTemplateAsList(null, startRow, numRows);
@@ -411,7 +534,7 @@ public class $managerClass
     //7
     public $beanClass[] loadByWhere(String where) throws DAOException
     {
-        return this.loadByWhere(where, null);
+        return this.loadByWhere(where, (int[])null);
     }
     /**
      * Retrieves a list of $beanClass given a sql 'where' clause.
@@ -425,7 +548,18 @@ public class $managerClass
     {
         return this.loadByWhereAsList(where, null);
     }
-
+    /**
+     * Retrieves each row of $beanClass given a sql 'where' clause and dealt with action.
+     * @param where the sql 'where' clause
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //7-1
+    public int loadByWhere(String where,Action action) throws DAOException
+    {
+        return this.loadByWhere(where, null,action);
+    }
     /**
      * Retrieves an array of $beanClass given a sql where clause, and a list of fields.
      * It is up to you to pass the 'WHERE' in your where clausis.
@@ -456,15 +590,30 @@ public class $managerClass
     {
         return this.loadByWhereAsList(where, fieldList, 1, -1);
     }
+    /**
+     * Retrieves each row of $beanClass given a sql where clause, and a list of fields,
+     * and dealt with action.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     * @param where the sql 'WHERE' clause
+     * @param fieldList array of field's ID
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //8-1
+    public int loadByWhere(String where, int[] fieldList,Action action) throws DAOException
+    {
+        return this.loadByWhere(where, fieldList, 1, -1,action);
+    }
 
     /**
      * Retrieves an array of $beanClass given a sql where clause and a list of fields, and startRow and numRows.
      * It is up to you to pass the 'WHERE' in your where clausis.
      *
      * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param fieldList table of the field's associated constants
      * @return the resulting $beanClass table
      * @throws DAOException
      */
@@ -473,60 +622,63 @@ public class $managerClass
     {
         return ($beanClass[]) this.loadByWhereAsList(where, fieldList, startRow, numRows).toArray(new $beanClass[0]);
     }
+    /**
+     * Retrieves each row of  $beanClass given a sql where clause and a list of fields, and startRow and numRows,
+     * and dealt wity action.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //9-1
+    public int loadByWhere(String where, int[] fieldList, int startRow, int numRows,Action action) throws DAOException
+    {
+        return this.loadByWhereForAction(where, fieldList, startRow, numRows,action);
+    }
 
     /**
      * Retrieves a list of $beanClass given a sql where clause and a list of fields, and startRow and numRows.
      * It is up to you to pass the 'WHERE' in your where clausis.
      *
      * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param fieldList table of the field's associated constants
      * @return the resulting $beanClass table
      * @throws DAOException
      */
-    //9
+    //9-2
     public List<$beanClass> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows) throws DAOException
     {
-        StringBuffer sql = new StringBuffer(128);
-        if(fieldList == null) {
-            sql.append("SELECT ").append(ALL_FIELDS).append(" FROM $tablename ").append(where);
-        } else
-        {
-            sql.append("SELECT ");
-            for(int i = 0; i < fieldList.length; i++)
-            {
-                if(i != 0) {
-                    sql.append(",");
-                }
-                sql.append(FULL_FIELD_NAMES[fieldList[i]]);
-            }
-            sql.append(" FROM $tablename ");
-            sql.append(where);
-        }
-        Connection c = null;
-        Statement st = null;
-        ResultSet rs =  null;
-        // System.out.println("loadByWhere: " + sql);
-        try
-        {
-            c = this.getConnection();
-            st = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            rs = st.executeQuery(sql.toString());
-            return this.decodeResultSetAsList(rs, fieldList, startRow, numRows);
-        }
-        catch(SQLException e)
-        {
-            throw new ObjectRetrievalException(e);
-        }
-        finally
-        {
-            sql = null;
-            this.getManager().close(st, rs);
-            this.freeConnection(c);
-        }
+        ListAction action = new ListAction();
+        loadByWhereForAction(where,fieldList,startRow,numRows,action);              
+        return action.getList();
     }
-
+    /**
+     * Retrieves each row of $beanClass given a sql where clause and a list of fields, and startRow and numRows,
+     * and dealt wity action
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //9-3
+    public int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action action) throws DAOException
+    {
+        String sql=createSqlString(fieldList, where);
+        // System.out.println("loadByWhere: " + sql);
+        return this.loadBySqlForAction(sql, null, fieldList, startRow, numRows, action);
+    }
 
     /**
      * Deletes all rows from $tablename table.
@@ -960,7 +1112,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //18
-    public $beanClass loadUniqueUsingTemplate($beanClass bean) throws DAOException
+    public $beanClass loadUniqueUsingTemplate(${beanClass}Base bean) throws DAOException
     {
          $beanClass[] beans = this.loadUsingTemplate(bean);
          if (beans.length == 0) {
@@ -980,9 +1132,22 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //19
-    public $beanClass[] loadUsingTemplate($beanClass bean) throws DAOException
+    public $beanClass[] loadUsingTemplate(${beanClass}Base bean) throws DAOException
     {
         return this.loadUsingTemplate(bean, 1, -1);
+    }
+    /**
+     * Loads each row from a template one and dealt with action.
+     *
+     * @param bean the $beanClass template to look for
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //19-1
+    public int loadUsingTemplate(${beanClass}Base bean,Action action) throws DAOException
+    {
+        return this.loadUsingTemplate(bean, 1, -1,action);
     }
 
     /**
@@ -992,8 +1157,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return all the $beanClass matching the template
      * @throws DAOException
      */
-    //19
-    public List<$beanClass> loadUsingTemplateAsList($beanClass bean) throws DAOException
+    //19-2
+    public List<$beanClass> loadUsingTemplateAsList(${beanClass}Base bean) throws DAOException
     {
         return this.loadUsingTemplateAsList(bean, 1, -1);
     }
@@ -1008,11 +1173,25 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //20
-    public $beanClass[] loadUsingTemplate($beanClass bean, int startRow, int numRows) throws DAOException
+    public $beanClass[] loadUsingTemplate(${beanClass}Base bean, int startRow, int numRows) throws DAOException
     {
         return this.loadUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
     }
-
+    /**
+     * Loads each row from a template one, given the start row and number of rows and dealt with action.
+     *
+     * @param bean the $beanClass template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //20-1
+    public int loadUsingTemplate(${beanClass}Base bean, int startRow, int numRows,Action action) throws DAOException
+    {
+        return this.loadUsingTemplate(bean, null, startRow, numRows,SEARCH_EXACT, action);
+    }
     /**
      * Loads a list of $beanClass from a template one, given the start row and number of rows.
      *
@@ -1022,8 +1201,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return all the $beanClass matching the template
      * @throws DAOException
      */
-    //20
-    public List<$beanClass> loadUsingTemplateAsList($beanClass bean, int startRow, int numRows) throws DAOException
+    //20-2
+    public List<$beanClass> loadUsingTemplateAsList(${beanClass}Base bean, int startRow, int numRows) throws DAOException
     {
         return this.loadUsingTemplateAsList(bean, startRow, numRows, SEARCH_EXACT);
     }
@@ -1038,8 +1217,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return all the $beanClass matching the template
      * @throws DAOException
      */
-    //20
-    public $beanClass[] loadUsingTemplate($beanClass bean, int startRow, int numRows, int searchType) throws DAOException
+    //20-3
+    public $beanClass[] loadUsingTemplate(${beanClass}Base bean, int startRow, int numRows, int searchType) throws DAOException
     {
     	return ($beanClass[])this.loadUsingTemplateAsList(bean, startRow, numRows, searchType).toArray(new $beanClass[0]);
     }
@@ -1054,54 +1233,51 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return all the $beanClass matching the template
      * @throws DAOException
      */
-    //20
-    public List<$beanClass> loadUsingTemplateAsList($beanClass bean, int startRow, int numRows, int searchType) throws DAOException
+    //20-4
+    public List<$beanClass> loadUsingTemplateAsList(${beanClass}Base beanBase, int startRow, int numRows, int searchType) throws DAOException
     {
+        ListAction action = new ListAction();
+        loadUsingTemplate(beanBase,null,startRow,numRows,searchType, action);
+        return (List<$beanClass>) action.getList();
+        
+    }
+    /**
+     * Loads each row from a template one, given the start row and number of rows and dealt with action.
+     *
+     * @param bean the $beanClass template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ?
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    //20-5
+    public int loadUsingTemplate(${beanClass}Base beanBase, int[] fieldList, int startRow, int numRows,int searchType, Action action) throws DAOException
+    {
+        $beanClass bean=${beanClass}Base.toFullBean(beanBase);
         // System.out.println("loadUsingTemplate startRow:" + startRow + ", numRows:" + numRows + ", searchType:" + searchType);
-        Connection c = null;
-        PreparedStatement ps = null;
-        StringBuffer sql = new StringBuffer(128);
-        sql.append("SELECT ").append(ALL_FIELDS).append(" FROM $tablename ");
         StringBuilder sqlWhere = new StringBuilder("");
-
-        try
-        {
-            if (this.fillWhere(sqlWhere, bean, searchType) > 0)
-            {
-                sql.append(" WHERE ").append(sqlWhere);
-            }
-            else
-            {
-                // System.out.println("The bean to look is not initialized... loading all");
-            }
-            // System.out.println("loadUsingTemplate: " + sql.toString());
-
-            c = this.getConnection();
-            int scrollType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-            if (startRow != 1) {
-                scrollType = ResultSet.TYPE_SCROLL_SENSITIVE;
-            }
-            ps = c.prepareStatement(sql.toString(),
-                                    scrollType,
-                                    ResultSet.CONCUR_READ_ONLY);
+        String sql=createSqlString(fieldList,this.fillWhere(sqlWhere, bean, searchType) > 0?" WHERE "+sqlWhere.toString():null);
+        PreparedStatement ps = null;
+        Connection connection = null;
+        // logger.debug("sql string:\n" + sql + "\n");
+        try {
+            connection = this.getConnection();
+            ps = connection.prepareStatement(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY);
             this.fillPreparedStatement(ps, bean, searchType);
-
-            ps.executeQuery();
-            return this.loadByPreparedStatementAsList(ps, null, startRow, numRows);
-        }
-        catch(SQLException e)
-        {
-            throw new ObjectRetrievalException(e);
-        }
-        finally
-        {
+            return this.loadByPreparedStatement(ps, fieldList, startRow, numRows, action);
+        } catch (DAOException e) {
+            throw e;
+        }catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
             this.getManager().close(ps);
-            this.freeConnection(c);
-            sql = null;
-            sqlWhere = null;
+            this.freeConnection(connection);
         }
     }
-
     /**
      * Deletes rows using a $beanClass template.
      *
@@ -1110,8 +1286,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //21
-    public int deleteUsingTemplate($beanClass bean) throws DAOException
+    public int deleteUsingTemplate(${beanClass}Base beanBase) throws DAOException
     {
+        $beanClass bean=${beanClass}Base.toFullBean(beanBase);
 #if ( $table.countPrimaryKeys() == 1)
         if (bean.$table.getPrimaryKey().getInitializedMethod()()) {
             return this.deleteByPrimaryKey(bean.$table.getPrimaryKey().getGetMethod()());
@@ -1142,7 +1319,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             this.fillPreparedStatement(ps, bean, SEARCH_EXACT);
 
             int _rows = ps.executeUpdate();
-            this.afterDelete(bean); // listener callback
+            if(_rows>0)
+                this.afterDelete(bean); // listener callback
             return _rows;
         }
         catch(SQLException e)
@@ -1177,7 +1355,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public $beanClass[] loadBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
     {
-    	return ($beanClass[])this.loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end${column.getVarName()}#end).toArray(new $beanClass[0]);
+        return ($beanClass[])this.loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end${column.getVarName()}#end).toArray(new $beanClass[0]);
     }
     
     /**
@@ -1191,7 +1369,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public List<$beanClass> loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
     {
-        ${beanClass} bean = this.create${beanClass}();
+        ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
@@ -1209,7 +1387,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public int deleteBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
     {
-        ${beanClass} bean = this.create${beanClass}();
+        ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
@@ -1400,7 +1578,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //27
-    public int countUsingTemplate($beanClass bean) throws DAOException
+    public int countUsingTemplate(${beanClass}Base bean) throws DAOException
     {
         return this.countUsingTemplate(bean, -1, -1);
     }
@@ -1415,7 +1593,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //20
-    public int countUsingTemplate($beanClass bean, int startRow, int numRows) throws DAOException
+    public int countUsingTemplate(${beanClass}Base bean, int startRow, int numRows) throws DAOException
     {
         return this.countUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
     }
@@ -1431,8 +1609,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //20
-    public int countUsingTemplate($beanClass bean, int startRow, int numRows, int searchType) throws DAOException
+    public int countUsingTemplate(${beanClass}Base beanBase, int startRow, int numRows, int searchType) throws DAOException
     {
+        $beanClass bean=${beanClass}Base.toFullBean(beanBase);
         Connection c = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS MCOUNT FROM $tablename");
@@ -1587,7 +1766,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //28
     public $beanClass[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException
     {
-    	return ($beanClass[])this.decodeResultSetAsList(rs, fieldList, startRow, numRows).toArray(new $beanClass[0]);
+    	return this.decodeResultSetAsList(rs, fieldList, startRow, numRows).toArray(new $beanClass[0]);
     }
 
     /**
@@ -1600,34 +1779,53 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return the resulting $beanClass table
      * @throws DAOException
      */
-    //28
+    //28-1
     public List<$beanClass> decodeResultSetAsList(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException
     {
-        List<$beanClass> v = new ArrayList<$beanClass>();
-        try
-        {
-            if (rs.absolute(startRow) && numRows!=0)
-            {
-                int count = 0;
-                if(fieldList == null) {
-                    do
-                    {
-                        v.add(decodeRow(rs));
-                        count++;
-                    } while ( (count<numRows||numRows<0) && rs.next() );
-                }
-                else {
-                    do
-                    {
-                        v.add(decodeRow(rs, fieldList));
-                        count++;
-                    } while ( (count<numRows||numRows<0) && rs.next() );
+        ListAction action = new ListAction();
+        actionOnResultSet(rs, fieldList, numRows, numRows, action);
+        return action.getList();
+    }
+    /** decode a resultset and call action
+     * @param rs the resultset to decode
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action interface obj for do something
+     * @return the count dealt by action  
+     * @throws DAOException
+     * @throws IllegalArgumentException
+     */
+    //28-2
+    public int actionOnResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows, Action action) throws DAOException{
+        try{
+            int count = 0;
+            if(0!=numRows){
+                if( startRow<1 )
+                    throw new IllegalArgumentException("invalid argument:startRow (must >=1)");
+                if( null==action || null==rs )
+                    throw new IllegalArgumentException("invalid argument:action OR rs (must not be null)");                    
+                for(;startRow>1&&rs.next();--startRow);//skip to last of startRow
+                if (fieldList == null) {
+                    if(numRows<0)
+                        for(;rs.next();++count)
+                            action.call(decodeRow(rs, action.getBean()));
+                    else
+                        for(;rs.next() && count<numRows;++count)
+                            action.call(decodeRow(rs, action.getBean()));
+                }else {
+                    if(numRows<0)
+                        for(;rs.next();++count)
+                            action.call(decodeRow(rs, fieldList,action.getBean()));
+                    else
+                        for(;rs.next() && count<numRows;++count)
+                            action.call(decodeRow(rs, fieldList,action.getBean()));
                 }
             }
-            return v;
-        }
-        catch(SQLException e)
-        {
+            return count;
+        }catch(DAOException e){
+            throw e;
+        }catch(SQLException e){
             throw new DataAccessException(e);
         }
     }
@@ -1640,9 +1838,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //29
-    public $beanClass decodeRow(ResultSet rs) throws DAOException
+    public $beanClass decodeRow(ResultSet rs,$beanClass bean) throws DAOException
     {
-        $beanClass bean = this.create$beanClass();
+        if(null==bean)
+            bean = this.createBean();
         try
         {
 ## the set statement casts $velocityCount to a string
@@ -1670,9 +1869,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //30
-    public $beanClass decodeRow(ResultSet rs, int[] fieldList) throws DAOException
+    public $beanClass decodeRow(ResultSet rs, int[] fieldList,$beanClass bean) throws DAOException
     {
-        $beanClass bean = this.create$beanClass();
+        if(null==bean)
+            bean = this.createBean();
         int pos = 0;
         try
         {
@@ -1711,7 +1911,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //31
     public $beanClass metaDataDecodeRow(ResultSet rs) throws DAOException
     {
-        $beanClass bean = this.create$beanClass();
+        $beanClass bean = this.createBean();
         try
         {
 #foreach ( $column in $columns )
@@ -1770,7 +1970,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //33
     public $beanClass[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList) throws DAOException
     {
-        return ($beanClass[])this.loadByPreparedStatementAsList(ps, fieldList).toArray(new $beanClass[0]);
+        return this.loadByPreparedStatementAsList(ps, fieldList).toArray(new $beanClass[0]);
     }
 
     /**
@@ -1783,34 +1983,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     //33
     public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList) throws DAOException
-    {		        
-        ResultSet rs =  null;
-		List<$beanClass> v =  null;
-        try
-        {
-            rs =  ps.executeQuery();
-            v = new ArrayList<$beanClass>();
-			if(fieldList == null) {
-				while(rs.next()) {
-					v.add(decodeRow(rs));
-				}
-			}
-			else {
-				while(rs.next()) {
-					v.add(decodeRow(rs, fieldList));
-				}
-			}
-
-			return v;
-        }
-        catch(SQLException e)
-        {
-            throw new DataAccessException(e);
-        }
-        finally
-        {
-            getManager().close(rs);
-        }
+    { 
+        return loadByPreparedStatementAsList(ps,fieldList,1,-1);
     }
 
     /**
@@ -1827,20 +2001,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //34
     public $beanClass[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException
     {
-        ResultSet rs =  null;
-        try
-        {
-            rs = ps.executeQuery();
-            return this.decodeResultSet(rs, fieldList, startRow, numRows);
-        }
-        catch(SQLException e)
-        {
-            throw new DataAccessException(e);
-        }
-        finally
-        {
-            this.getManager().close(rs);
-        }
+        return loadByPreparedStatementAsList(ps,fieldList,startRow,numRows).toArray(new $beanClass[0]);
     }
 
     /**
@@ -1854,25 +2015,42 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return an array of $beanClass
      * @throws DAOException
      */
-    //34
+    //34-1
     public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException
     {
+        ListAction action = new ListAction();
+        loadByPreparedStatement(ps,fieldList,startRow,numRows,action);
+        return action.getList();
+    }
+    /**
+     * Loads each element using a prepared statement specifying a list of fields to be retrieved,
+     * and specifying the start row and the number of rows 
+     * and dealt by action.
+     *
+     * @param ps the PreparedStatement to be used
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param fieldList table of the field's associated constants
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */     
+    //34-2
+    public int loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows,Action action) throws DAOException
+    {
         ResultSet rs =  null;
-        try
-        {
+        try {
+            ps.setFetchSize(100);
             rs = ps.executeQuery();
-            return this.decodeResultSetAsList(rs, fieldList, startRow, numRows);
-        }
-        catch(SQLException e)
-        {
+            return this.actionOnResultSet(rs, fieldList, startRow, numRows, action);
+        } catch (DAOException e) {
+            throw e;
+        } catch (SQLException e) {
             throw new DataAccessException(e);
-        }
-        finally
-        {
+        } finally {
             this.getManager().close(rs);
         }
     }
-
     //_____________________________________________________________________
     //
     // LISTENER
@@ -1883,9 +2061,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * Registers a unique $listenerClass listener.
      */
     //35
-    public void registerListener($listenerClass listener)
+    public void registerListener(TableListener listener)
     {
-        this.listener = listener;
+        this.listener = ($listenerClass)listener;
     }
 
     /**
@@ -2004,6 +2182,150 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         catch(SQLException e)
         {
             throw new DataAccessException(e);
+        }
+    }
+    /**
+     * return true if @{code column}(case insensitive)is primary key,otherwise return false <br>
+     * return false if @{code column} is null or empty 
+     * @param column
+     * @return
+     * @author guyadong
+     */
+    //43
+    public static boolean isPrimaryKey(String column){
+        for(String c:PRIMARYKEY_NAMES)if(c.equalsIgnoreCase(column))return true;
+        return false;
+    }
+    /**
+     * Fill the given prepared statement with the values in argList
+     * @param ps the PreparedStatement that will be filled
+     * @param argList the arguments to use fill given prepared statement
+     * @throws DAOException
+     */
+    private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws DAOException{
+        try {
+            if (!(argList == null || ps == null)) {
+                for (int i = 0; i < argList.length; i++) {
+                    if (argList[i].getClass().equals(byte[].class)) {
+                        ps.setBytes(i + 1, (byte[]) argList[i]);
+                    } else
+                        ps.setObject(i + 1, argList[i]);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+    
+    /**
+     * Load all the elements using a SQL statement specifying a list of fields to be retrieved.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @return an array of $beanClass
+     * @throws DAOException 
+     */
+    public $beanClass[] loadBySql(String sql, Object[] argList, int[] fieldList) throws DAOException {
+        return loadBySqlAsList(sql, argList, fieldList).toArray(new $beanClass[0]);
+    }
+    /**
+     * Load all elements using a SQL statement specifying a list of fields to be retrieved.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @return an list of $beanClass
+     * @throws DAOException
+     */
+    public List<$beanClass> loadBySqlAsList(String sql, Object[] argList, int[] fieldList) throws DAOException{
+        ListAction action = new ListAction();
+        loadBySqlForAction(sql,argList,fieldList,1,-1,action);
+        return action.getList();
+    }
+    /**
+     * Load each the elements using a SQL statement specifying a list of fields to be retrieved and dealt by action.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+     * @throws DAOException
+     */
+    public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action action) throws DAOException{
+        PreparedStatement ps = null;
+        Connection connection = null;
+        // logger.debug("sql string:\n" + sql + "\n");
+        try {
+            connection = this.getConnection();
+            ps = connection.prepareStatement(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY);
+            fillPrepareStatement(ps, argList);
+            return this.loadByPreparedStatement(ps, fieldList, startRow, numRows, action);
+        } catch (DAOException e) {
+            throw e;
+        }catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            this.getManager().close(ps);
+            this.freeConnection(connection);
+        }
+    }
+    private String createSqlString(int[] fieldList,String where){
+        StringBuffer sql = new StringBuffer(128);
+        if(fieldList == null) {
+            sql.append("SELECT ").append(ALL_FIELDS);
+        } else{
+            sql.append("SELECT ");
+            for(int i = 0; i < fieldList.length; ++i){
+                if(i != 0) {
+                    sql.append(",");
+                }
+                sql.append(FULL_FIELD_NAMES[fieldList[i]]);
+            }            
+        }
+        sql.append(" FROM $tablename ");
+        if(null!=where)
+            sql.append(where);
+        return sql.toString();
+    }
+    
+    class ListAction implements Action {
+        final List<$beanClass> list;
+        protected ListAction(List<$beanClass> list) {
+            if(null==list)
+                throw new IllegalArgumentException("list must not be null");
+            this.list = list;
+        }
+
+        protected ListAction() {
+            list=new ArrayList<$beanClass>();
+        }
+
+        public List<$beanClass> getList() {
+            return list;
+        }
+
+        @Override
+        public void call($beanClass bean) {
+            list.add(bean);
+        }
+
+        @Override
+        public $beanClass getBean() {
+            return null;
+        }
+    }
+    public static abstract class NoListAction implements Action {
+        SoftReference<$beanClass> sf=new SoftReference<$beanClass>(new $beanClass());
+        @Override
+        public final $beanClass getBean() {
+            $beanClass bean = sf.get();
+            if(null==bean){
+                sf=new SoftReference<$beanClass>(bean=new $beanClass());
+            }
+            return bean.clean();
         }
     }
 }

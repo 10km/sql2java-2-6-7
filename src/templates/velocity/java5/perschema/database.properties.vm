@@ -1,8 +1,27 @@
 ##$Id: database.properties.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
 #parse( "schema.include.vm" )
 #parse( "header.include.vm" )
-$codewriter.setCurrentJavaFilename($pkg, "database.properties")
-jdbc.driver=$db.getDriver()
-jdbc.url=$db.getUrl()
-jdbc.username=$db.getUsername()
-jdbc.password=$db.getPassword()
+$codewriter.setCurrentJavaFilename($codewriter.getProperty("database.properties.dir"), $codewriter.getProperty("database.properties"))
+#configuation for database connection
+#whether use debug config.set to 'true' use config with 'debug' prefix,otherwise use 'work' config.
+isDebug=$codewriter.getProperty("database.properties.isdebug")
+
+#work parameter
+work.jdbc.driver=$db.getDriver()
+work.jdbc.url=$db.getUrl()
+work.jdbc.username=$db.getUsername()
+work.jdbc.password=$db.getPassword()
+work.c3p0.minPoolSize=10
+work.c3p0.maxPoolSize=100
+work.c3p0.maxIdleTime=120
+work.c3p0.idleConnectionTestPeriod=120
+
+#debug parameter
+debug.jdbc.driver=$db.getDriver()
+debug.jdbc.url=$db.getUrl()
+debug.jdbc.username=$db.getUsername()
+debug.jdbc.password=$db.getPassword()
+debug.c3p0.minPoolSize=10
+debug.c3p0.maxPoolSize=100
+debug.c3p0.maxIdleTime=120
+debug.c3p0.idleConnectionTestPeriod=120
