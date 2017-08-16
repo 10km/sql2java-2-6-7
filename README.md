@@ -14,5 +14,5 @@
 	# 推送到远程仓库
 	git push
 
-## author
+# author
 	GuYaDong 10km0811@sohu.com
