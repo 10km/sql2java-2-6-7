@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="update_sql2java" default="all" basedir=".">
+		<!--
+			用于编译 sql2java.jar反编译代码的 ant 脚本
+		-->
     <property name="build"              value="${basedir}/build"/>
     <!-- sql2java.jar 反编译代码位置 -->
     <property name="src"                value="${basedir}/sql2java.jar.src"/>
@@ -24,18 +27,17 @@
 		    </copy>
 	  </target>
 
-    <!-- CLEAN ALL -->
+    <!-- clean all -->
     <target name="clean" description="remove all classes">
         <delete includeEmptyDirs="true" dir="${build}"/>
     </target>
 
-    <!-- REBUILD -->
+    <!-- rebuild -->
     <target name="rebuild" depends="clean,compile" description="clean, then recompile the project"/>
 
-    <!-- RUN THE SAMPLE USING THE GENERATED API TO ACCESS YOUR DB -->
     <target name="all" depends="rebuild,update" description="clean build, compile and update to jar"/>
 
-    <!-- COMPILE THE SOURCE CODE API TO ACCESS YOUR DB -->
+    <!-- compile the source code decompiled from sql2java.jar -->
     <target name="compile" depends="prepare" description="compile java source">
         <javac target="1.6" source="1.6"
                 destdir="${build}/classes"
@@ -44,7 +46,7 @@
         </javac>
     </target>
 
-    <!-- udate sql2java.jar -->
+    <!-- update sql2java.jar -->
     <target name="update" depends="compile" description="update class file to sql2java.jar">
     		<echo message="update class file to ${jar}"/>
 				<jar destfile="${jar}" update="true" >
