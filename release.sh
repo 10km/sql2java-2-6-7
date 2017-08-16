@@ -15,6 +15,6 @@ echo update $sql2java_jar to master branch
 git checkout master
 git checkout dev $sql2java_jar
 exit_on_error
-echo update manager.java.vm to master branch
-git checkout dev src/templates/velocity/java5/perschema/manager.java.vm
-exit_on_error
+#echo update manager.java.vm to master branch
+#git checkout dev src/templates/velocity/java5/perschema/manager.java.vm
+#exit_on_error
