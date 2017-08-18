@@ -5,9 +5,6 @@ $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
 
 import ${pkg}.FullBean;
-#foreach ($foreignTable in $foreignTables)
-import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
-#end
 
 /**
  * $beanClass is a mapping of $table.getName() Table.
@@ -19,7 +16,6 @@ import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
 #end
  * @author sql2java
 */
-@SuppressWarnings("unchecked")
 public class ${beanClass}
     extends ${beanClass}Base
     implements FullBean<${beanClass}Base>
@@ -40,7 +36,7 @@ public class ${beanClass}
     /**
      * Prefered methods to create a $beanClass is via the create$beanClass method in $managerClass or
      * via the factory class $factoryClass create method
-     * 为了能在webservice中传递对象，此处从protected改为public
+     * 涓轰簡鑳藉湪webservice涓紶閫掑璞★紝姝ゅ浠巔rotected鏀逛负public
      */
     public ${beanClass}(){
         super();

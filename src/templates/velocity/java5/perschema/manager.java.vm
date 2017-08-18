@@ -837,13 +837,13 @@ public final class Manager
 		return sb.append(")}").toString();
 	}
 		/**
-	 * ÓÃÖ¸¶¨µÄSQLÓï¾ä²éÑ¯taskÊı¾İ¿â
+	 * ç”¨æŒ‡å®šçš„SQLè¯­å¥æŸ¥è¯¢taskæ•°æ®åº“
 	 * 
 	 * @param sql
-	 *            sqlÓï¾ä×Ö·û´®
+	 *            sqlè¯­å¥å­—ç¬¦ä¸²
 	 * @param argList
-	 *            sqlÓï¾äÖĞ£¿´ú±íµÄ²ÎÊıÊı×é£¬Ë³Ğò±ØĞëÓësqlÓï¾äÖĞ?³öÏÖµÄÎ»ÖÃË³Ğò±£³ÖÒ»ÖÂ
-	 * @return °üº¬²éÑ¯½á¹ûµÄ¶ÔÏóÊı×é
+	 *            sqlè¯­å¥ä¸­ï¼Ÿä»£è¡¨çš„å‚æ•°æ•°ç»„ï¼Œé¡ºåºå¿…é¡»ä¸sqlè¯­å¥ä¸­?å‡ºç°çš„ä½ç½®é¡ºåºä¿æŒä¸€è‡´
+	 * @return åŒ…å«æŸ¥è¯¢ç»“æœçš„å¯¹è±¡æ•°ç»„
 	 */
 	public boolean runSql(String sql, Object[] argList) {
 		PreparedStatement ps = null;
@@ -866,11 +866,11 @@ public final class Manager
 		return false;
 	}
 	/**
-	 * Ìî³äPreparedStatementÖĞµÄ²ÎÊı¶ÔÏó
+	 * å¡«å……PreparedStatementä¸­çš„å‚æ•°å¯¹è±¡
 	 * 
 	 * @param ps
 	 * @param argList
-	 * @return ³ö´íÔò·µ»Ønull;
+	 * @return å‡ºé”™åˆ™è¿”å›null;
 	 */
 	private void fillPrepareStatement(PreparedStatement ps, Object[] argList) {
 		try {
