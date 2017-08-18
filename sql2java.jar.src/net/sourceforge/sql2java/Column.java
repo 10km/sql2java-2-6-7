@@ -848,7 +848,6 @@ public class Column implements Cloneable, Comparable {
         	throw new IllegalArgumentException(String.format("Not match found %s", var));
         }
 		String v = m.group(2);
-		System.out.printf("v:%s\n", v);
 		sb.append("if (").append(v).append(" == null) { ps.setNull(").append(pos).append(", ")
 				.append(this.getJavaTypeAsTypeName()).append("); } else { ");
 		end.append(" }");
