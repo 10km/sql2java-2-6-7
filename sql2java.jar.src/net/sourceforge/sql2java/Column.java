@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.ConfigHelper;
 import net.sourceforge.sql2java.Database;
@@ -839,11 +842,16 @@ public class Column implements Cloneable, Comparable {
 		StringBuffer sb = new StringBuffer();
 		StringBuffer end = new StringBuffer();
 		end.append(pos).append(", ").append(var).append(");");
-		if ('\"' != var.charAt(0)) {
-			sb.append("if (").append(var).append(" == null) { ps.setNull(").append(pos).append(", ")
-					.append(this.getJavaTypeAsTypeName()).append("); } else { ");
-			end.append(" }");
-		}
+        Pattern p = Pattern.compile("^((?:\"%+\"\\s*\\+)*)([\\w\\. \\(\\)-]*)((?:\\+\\s*\"%+\")*)$");
+        Matcher m = p.matcher(var);
+        if(!m.matches()){
+        	throw new IllegalArgumentException(String.format("Not match found %s", var));
+        }
+		String v = m.group(2);
+		System.out.printf("v:%s\n", v);
+		sb.append("if (").append(v).append(" == null) { ps.setNull(").append(pos).append(", ")
+				.append(this.getJavaTypeAsTypeName()).append("); } else { ");
+		end.append(" }");
 		switch (this.getMappedType()) {
 			case M_ARRAY : {
 				return sb.append("ps.setArray(").append(end).toString();
