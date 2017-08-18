@@ -12,7 +12,7 @@ import java.util.Comparator;
  * Comparator class is used to sort the $beanClass objects.
  * @author sql2java
  */
-public class $comparatorClass implements Comparator
+public class $comparatorClass implements Comparator<$beanClass>
 {
     /**
      * Holds the field on which the comparison is performed.
@@ -73,10 +73,8 @@ public class $comparatorClass implements Comparator
     /**
      * Implementation of the compare method.
      */
-    public int compare(Object pObj1, Object pObj2)
+    public int compare($beanClass b1, $beanClass b2)
     {
-        $beanClass b1 = ($beanClass)pObj1;
-        $beanClass b2 = ($beanClass)pObj2;
         int iReturn = 0;
         switch(iType)
         {
