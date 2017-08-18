@@ -1723,11 +1723,11 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         $column.getPreparedStatementMethod("${Q}%${Q} + bean.$column.getGetMethod()() + ${Q}%${Q}", "++_dirtyCount")
                         break;
                     case SEARCH_STARTING_LIKE:
-                        // System.out.println("Setting for " + _dirtyCount + " [" + bean.$column.getGetMethod()() + "%]");
+                        // System.out.println("Setting for " + _dirtyCount + " [%" + bean.$column.getGetMethod()() + "]");
                         $column.getPreparedStatementMethod("${Q}%${Q} + bean.$column.getGetMethod()()", "++_dirtyCount")
                         break;
                     case SEARCH_ENDING_LIKE:
-                        // System.out.println("Setting for " + _dirtyCount + " [%" + bean.$column.getGetMethod()() + "]");
+                        // System.out.println("Setting for " + _dirtyCount + " [" + bean.$column.getGetMethod()() + "%]");
                         $column.getPreparedStatementMethod("bean.$column.getGetMethod()() + ${Q}%${Q}", "++_dirtyCount")
                         break;
                     default:
