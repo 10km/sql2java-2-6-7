@@ -5,9 +5,6 @@ $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
 
 import ${pkg}.FullBean;
-#foreach ($foreignTable in $foreignTables)
-import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
-#end
 
 /**
  * $beanClass is a mapping of $table.getName() Table.
