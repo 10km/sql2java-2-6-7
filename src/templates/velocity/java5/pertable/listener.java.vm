@@ -13,6 +13,35 @@ import ${pkg}.TableListener;
 public interface $listenerClass extends TableListener
 {
     /**
+     * This adapter class provides default implementations for the
+     * methods described by the {@link $listenerClass} interface.<br>
+     * 
+     * @see $listenerClass
+     * @author sql2java
+     *
+     */
+    public static class Adapter implements $listenerClass{
+
+        @Override
+        public void beforeInsert($beanClass bean) throws DAOException {}
+
+        @Override
+        public void afterInsert($beanClass bean) throws DAOException {
+        }
+
+        @Override
+        public void beforeUpdate($beanClass bean) throws DAOException {}
+
+        @Override
+        public void afterUpdate($beanClass bean) throws DAOException {}
+
+        @Override
+        public void beforeDelete($beanClass bean) throws DAOException {}
+
+        @Override
+        public void afterDelete($beanClass bean) throws DAOException {}
+    }
+    /**
      * Invoked just before inserting a $beanClass record into the database.
      *
      * @param bean the $beanClass that is about to be inserted
