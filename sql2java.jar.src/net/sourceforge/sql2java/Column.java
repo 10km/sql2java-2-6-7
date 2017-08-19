@@ -689,7 +689,7 @@ public class Column implements Cloneable, Comparable {
 				return true;
 			}
 			case M_BOOLEAN : {
-				return false;
+				return true;
 			}
 			case M_BYTES : {
 				return false;
