@@ -28,7 +28,7 @@ public class ${beanClass}Base
 #if ($extendsClass)
     extends $extendsClass
 #end
-    implements Serializable,BaseBean<${beanClass}Base>
+    implements Serializable,BaseBean<${beanClass}Base>,Comparable<$beanClass>
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
 #end
@@ -37,6 +37,11 @@ public class ${beanClass}Base
 	
 #foreach ( $column in $columns )
 ##    private $column.getJavaType() $column.getVarName();   // generation without default values
+#if ( $column.getRemarks().length() > 0 )
+    /**
+     * comments:$column.getRemarks()
+     */
+#end
     protected $column.getJavaType() $column.getVarName()#if ( $column.getDefaultValue().length() > 0) =#if ($column.isString())"$column.getDefaultValue()"#else$column.getDefaultValue()#end#end;
 
 #end
@@ -84,8 +89,7 @@ public class ${beanClass}Base
     }
 #foreach ( $column in $columns )
     /**
-     * Getter method for $column.getVarName().
-     * <br>
+     * Getter method for {@link #$column.getVarName()}.<br>
 #if ( $column.isPrimaryKey() )
      * PRIMARY KEY.<br>
 #end
@@ -114,8 +118,7 @@ public class ${beanClass}Base
         return $column.getVarName();
     }
     /**
-     * Setter method for $column.getVarName().
-     * <br>
+     * Setter method for {@link #$column.getVarName()}.<br>
 #if ( $column.hasCompareTo() )
      * The new value is set only if compareTo() says it is different,
      * or if one of either the new value or the current value is null.
@@ -163,8 +166,7 @@ public class ${beanClass}Base
 
 #if ( $column.hasPrimaryType() )
     /**
-     * Setter method for $column.getVarName().
-     * <br>
+     * Setter method for {@link #$column.getVarName()}.<br>
      * Convenient for those who do not want to deal with Objects for primary types.
      *
      * @param newVal the new value to be assigned to $column.getVarName()
@@ -197,15 +199,13 @@ public class ${beanClass}Base
     public $importedClass get${importedClass}() {
         return this.$referencedBean;
     }
-    /** Setter method for ${importedClass}. */
+    /** Setter method for {@link #${referencedBean}}. */
     public void set${importedClass}($importedClass reference) {
         this.$referencedBean = reference;
     }    
 #end
 #end
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
+    @Override
     public boolean equals(Object object)
     {
         if (!(object instanceof ${beanClass})) {
@@ -220,9 +220,7 @@ public class ${beanClass}Base
             .isEquals();
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode()
     {
         return new HashCodeBuilder(-82280557, -700257973)
@@ -232,9 +230,7 @@ public class ${beanClass}Base
             .toHashCode();
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[\n")
 #foreach ( $column in $columns )
@@ -244,17 +240,16 @@ public class ${beanClass}Base
             .toString();
     }
 
-
-    public int compareTo(Object object){
-        $beanClass obj = ($beanClass) object;
+    @Override
+    public int compareTo($beanClass object){
         return new CompareToBuilder()
 #foreach ( $column in $columns )
-            .append(${column.getGetMethod()}(), obj.${column.getGetMethod()}())
+            .append(${column.getGetMethod()}(), object.${column.getGetMethod()}())
 #end
             .toComparison();
     }
     /**
-    * Copies proterty of the passed bean into the current bean.<br>
+    * Copies property of the passed bean into the current bean.<br>
     * if bean.isNew() is true, call {@link #copyIfNotNull(GfCodeBeanBase)}
     * @param bean the bean to copy into the current bean
     * @author guyadong
@@ -271,7 +266,7 @@ public class ${beanClass}Base
         }
     }
     /**
-    * Copies proterty of the passed bean into the current bean if property not null.
+    * Copies property of the passed bean into the current bean if property not null.
     *
     * @param bean the bean to copy into the current bean
     * @author guyadong
