@@ -5,6 +5,7 @@ $codewriter.setCurrentJavaFilename($pkg, "Manager.java")
 package $pkg;
 
 import java.sql.Connection;
+import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,10 +19,6 @@ import javax.sql.DataSource;
 //guyadong change datasource pool to c3p0 2014/10/09
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
-//guyadong added to use slf4j
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * The Manager provides connections and manages transactions transparently.
@@ -37,9 +34,10 @@ import org.slf4j.LoggerFactory;
  */
 public final class Manager
 {
-	private static Logger logger = LoggerFactory.getLogger(Manager.class);    
     private static Manager instance = new Manager();
     private static InheritableThreadLocal<Connection> transactionConnection = new InheritableThreadLocal<Connection>();
+    
+    private PrintWriter pw = new PrintWriter(System.out);
     private DataSource ds = null;
     private String jdbcDriver = null;
     private String jdbcUrl = null;
@@ -75,7 +73,7 @@ public final class Manager
         try{
             DataSources.destroy(ds);
         }catch (Exception e) {
-            logger.error("dispose pool wrong ..." + e);
+            log("dispose pool wrong ..." + e);
         }
     }
     
@@ -94,14 +92,14 @@ public final class Manager
         maxIdleTime = properties.getProperty(prefix+".c3p0.maxIdleTime").trim();
         idleConnectionTestPeriod = properties.getProperty(prefix+".c3p0.idleConnectionTestPeriod").trim();
         
-        logger.info(String.format("database using %s environment parameter: ",prefix));
-        logger.info("jdbcUrl = " +jdbcUrl);
-        logger.info("jdbcUsername = " +jdbcUsername);
-        logger.info("jdbcPassword = " +jdbcPassword);
-        logger.info("maxPoolSize = " +maxPoolSize);
-        logger.info("minPoolSize = " +minPoolSize);
-        logger.info("maxIdleTime = " +maxIdleTime);
-        logger.info("idleConnectionTestPeriod = " +idleConnectionTestPeriod);
+        log(String.format("database using %s environment parameter: ",prefix));
+        log("jdbcUrl = " +jdbcUrl);
+        log("jdbcUsername = " +jdbcUsername);
+        log("jdbcPassword = " +jdbcPassword);
+        log("maxPoolSize = " +maxPoolSize);
+        log("minPoolSize = " +minPoolSize);
+        log("maxIdleTime = " +maxIdleTime);
+        log("idleConnectionTestPeriod = " +idleConnectionTestPeriod);
     }
     
     /**
@@ -162,7 +160,7 @@ public final class Manager
                 c.close();
             }
         }catch (SQLException x){
-            logger.error("Could not release the connection: "+x.toString());
+            log("Could not release the connection: "+x.toString());
         }
     }
 
@@ -206,11 +204,7 @@ public final class Manager
             {
                 c.rollback();
             }
-        }catch (SQLException e) {
-			// TODO: handle exception
-        	logger.error(e.getMessage(),e);
-        	throw e;
-		}
+        }
         finally
         {
             c.setAutoCommit(true);
@@ -219,7 +213,17 @@ public final class Manager
         }
     }
 
-    
+    /**
+     * Sets the PrintWriter where logs are printed.
+     * <br>
+     * You may pass 'null' to disable logging.
+     *
+     * @param pw the PrintWriter for log messages
+     */
+    public void setLogWriter(PrintWriter pw)
+    {
+        this.pw = pw;
+    }
 
 ////////////////////////////////////////////////////
 // cleaning method
@@ -230,7 +234,28 @@ public final class Manager
      */
     public void log(String message)
     {
-        logger.error(message);
+        if (pw != null) {
+            pw.println(message);
+        }
+    }
+
+    /**
+     * Logs a message using the underlying logwriter, if not null.
+     */
+    public void log(Throwable cause)
+    {	
+    	if(pw != null && null != cause){
+    		cause.printStackTrace(pw);
+    	}
+    }
+    
+    /**
+     * Logs a message using the underlying logwriter, if not null.
+     */
+    public void log(String message,Throwable cause)
+    {	
+    	log(message);
+    	log(cause);
     }
     
     /**
@@ -246,7 +271,7 @@ public final class Manager
         }
         catch (SQLException x)
         {
-            logger.error("Could not close statement!: " + x.toString());
+            log("Could not close statement!: " + x.toString());
         }
     }
 
@@ -263,7 +288,7 @@ public final class Manager
         }
         catch (SQLException x)
         {
-            logger.error("Could not close result set!: " + x.toString());
+            log("Could not close result set!: " + x.toString());
         }
     }
 
@@ -836,34 +861,33 @@ public final class Manager
 		}
 		return sb.append(")}").toString();
 	}
-		/**
-	 * 用指定的SQL语句查询task数据库
+	/**
+	 * 用指定的SQL语句查询数据库
 	 * 
 	 * @param sql
 	 *            sql语句字符串
 	 * @param argList
 	 *            sql语句中？代表的参数数组，顺序必须与sql语句中?出现的位置顺序保持一致
 	 * @return 包含查询结果的对象数组
+	 * @throws SQLException 
 	 */
-	public boolean runSql(String sql, Object[] argList) {
+	public boolean runSql(String sql, Object[] argList) throws SQLException {
 		PreparedStatement ps = null;
 		Connection c = null;
 		if (sql == null)
 			return false;
-		logger.info("sql string:\n" + sql + "\n");
+		// log("sql string:\n" + sql + "\n");
 		try {
 			c = getConnection();
 			ps = c.prepareStatement(sql);
 			fillPrepareStatement(ps, argList);
 			return ps.execute();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			logger.warn(e.getMessage(), e.getCause());
 		} finally {
-			close(ps);
-			releaseConnection(c);
+			if(null != ps)
+				close(ps);
+			if(null != c)
+				releaseConnection(c);
 		}
-		return false;
 	}
 	/**
 	 * 填充PreparedStatement中的参数对象
@@ -871,20 +895,16 @@ public final class Manager
 	 * @param ps
 	 * @param argList
 	 * @return 出错则返回null;
+	 * @throws SQLException
 	 */
-	private void fillPrepareStatement(PreparedStatement ps, Object[] argList) {
-		try {
-			if (!(argList == null || ps == null)) {
-				for (int i = 0; i < argList.length; i++) {
-					if (argList[i].getClass().equals(byte[].class)) {
-						ps.setBytes(i + 1, (byte[]) argList[i]);
-					} else
-						ps.setObject(i + 1, argList[i]);
-				}
+	private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws SQLException {
+		if (!(argList == null || ps == null)) {
+			for (int i = 0; i < argList.length; i++) {
+				if (argList[i].getClass().equals(byte[].class)) {
+					ps.setBytes(i + 1, (byte[]) argList[i]);
+				} else
+					ps.setObject(i + 1, argList[i]);
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			logger.error(e.getMessage());
 		}
 	}
 }
