@@ -70,9 +70,7 @@ public class $comparatorClass implements Comparator<$beanClass>
         this.bReverse = bReverse;
     }
 
-    /**
-     * Implementation of the compare method.
-     */
+    @Override
     public int compare($beanClass b1, $beanClass b2)
     {
         int iReturn = 0;
