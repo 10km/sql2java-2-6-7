@@ -1,7 +1,6 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
-import java.io.PrintStream;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,7 +19,7 @@ import net.sourceforge.sql2java.Main;
 import net.sourceforge.sql2java.StringUtilities;
 import net.sourceforge.sql2java.Table;
 
-public class Column implements Cloneable, Comparable {
+public class Column implements Cloneable, Comparable<Column> {
 	public static final int M_ARRAY = 0;
 	public static final int M_BIGDECIMAL = 1;
 	public static final int M_BOOLEAN = 2;
@@ -55,8 +54,8 @@ public class Column implements Cloneable, Comparable {
 	private boolean isPrimaryKey;
 	private String strCheckingType = "";
 	private Database db;
-	private List foreignKeys = new Vector();
-	private List importedKeys = new Vector();
+	private List<Column> foreignKeys = new Vector<Column>();
+	private List<Column> importedKeys = new Vector<Column>();
 	private String typeName = "";
 	private static Random rand = new Random();
 
@@ -662,14 +661,14 @@ public class Column implements Cloneable, Comparable {
 	}
 
 	public boolean isString() {
-		return 13 == this.getMappedType();
+		return M_STRING == this.getMappedType();
 	}
 
 	public boolean isDate() {
 		switch (this.getMappedType()) {
-			case 6 :
-			case 14 :
-			case 15 : {
+			case M_UTILDATE :
+			case M_TIME :
+			case M_TIMESTAMP : {
 				return true;
 			}
 		}
@@ -677,7 +676,7 @@ public class Column implements Cloneable, Comparable {
 	}
 
 	public boolean isCalendar() {
-		return this.getMappedType() == 18;
+		return this.getMappedType() == M_CALENDAR;
 	}
 
 	public boolean hasCompareTo() throws Exception {
@@ -761,72 +760,72 @@ public class Column implements Cloneable, Comparable {
 
 	public String getResultSetMethodObject(String resultSet, String pos) {
 		switch (this.getMappedType()) {
-			case 0 : {
+			case M_ARRAY : {
 				return resultSet + ".getArray(" + pos + ")";
 			}
-			case 11 : {
+			case M_LONG : {
 				return CodeWriter.MGR_CLASS + ".getLong(" + resultSet + ", " + pos + ")";
 			}
-			case 3 : {
+			case M_BYTES : {
 				return resultSet + ".getBytes(" + pos + ")";
 			}
 			case M_BLOB : {
 				return CodeWriter.MGR_CLASS + ".getBlob(" + resultSet + ", " + pos + ")";
 			}
-			case 2 : {
+			case M_BOOLEAN : {
 				return CodeWriter.MGR_CLASS + ".getBoolean(" + resultSet + ", " + pos + ")";
 			}
-			case 13 : {
+			case M_STRING : {
 				return resultSet + ".getString(" + pos + ")";
 			}
 			case M_CLOB : {
 				return CodeWriter.MGR_CLASS + ".getClob(" + resultSet + ", " + pos + ")";
 			}
-			case 16 : {
+			case M_URL : {
 				return resultSet + ".getURL(" + pos + ")";
 			}
-			case 1 : {
+			case M_BIGDECIMAL : {
 				return resultSet + ".getBigDecimal(" + pos + ")";
 			}
-			case 7 : {
+			case M_DOUBLE : {
 				return CodeWriter.MGR_CLASS + ".getDouble(" + resultSet + ", " + pos + ")";
 			}
-			case 8 : {
+			case M_FLOAT : {
 				return CodeWriter.MGR_CLASS + ".getFloat(" + resultSet + ", " + pos + ")";
 			}
-			case 10 : {
+			case M_INTEGER : {
 				return CodeWriter.MGR_CLASS + ".getInteger(" + resultSet + ", " + pos + ")";
 			}
-			case 17 : {
+			case M_OBJECT : {
 				return resultSet + ".getObject(" + pos + ")";
 			}
-			case 12 : {
+			case M_REF : {
 				return resultSet + ".getRef(" + pos + ")";
 			}
-			case 5 : {
+			case M_SQLDATE : {
 				return resultSet + ".getDate(" + pos + ")";
 			}
-			case 14 : {
+			case M_TIME : {
 				return resultSet + ".getTime(" + pos + ")";
 			}
-			case 15 : {
+			case M_TIMESTAMP : {
 				return resultSet + ".getTimestamp(" + pos + ")";
 			}
-			case 6 : {
+			case M_UTILDATE : {
 				switch (this.getType()) {
-					case 92 : {
+					case Types.TIME : {
 						return resultSet + ".getTime(" + pos + ")";
 					}
-					case 93 : {
+					case Types.TIMESTAMP : {
 						return resultSet + ".getTimestamp(" + pos + ")";
 					}
-					case 91 : {
+					case Types.DATE : {
 						return resultSet + ".getDate(" + pos + ")";
 					}
 				}
 				this.tuoe();
 			}
-			case 18 : {
+			case M_CALENDAR : {
 				return CodeWriter.MGR_CLASS + ".getCalendar(" + resultSet + ", " + pos + ")";
 			}
 		}
@@ -935,33 +934,33 @@ public class Column implements Cloneable, Comparable {
 
 	public String getStringConvertionMethod() {
 		switch (this.getMappedType()) {
-			case 1 : {
+			case M_BIGDECIMAL : {
 				return "new java.math.BigDecimal";
 			}
-			case 2 : {
+			case M_BOOLEAN : {
 				return "new Boolean";
 			}
-			case 5 : {
+			case M_SQLDATE : {
 				return "new java.sql.Date";
 			}
-			case 7 : {
+			case M_DOUBLE : {
 				return "new Double";
 			}
-			case 8 : {
+			case M_FLOAT : {
 				return "new Float";
 			}
-			case 10 : {
+			case M_INTEGER : {
 				return "new Integer";
 			}
-			case 11 : {
+			case M_LONG : {
 				return "new Long";
 			}
-			case 13 : {
+			case M_STRING : {
 				return "";
 			}
-			case 6 :
-			case 14 :
-			case 15 : {
+			case M_UTILDATE :
+			case M_TIME :
+			case M_TIMESTAMP : {
 				if ("java.util.GregorianCalendar".equals(CodeWriter.dateClassName)) {
 					return "GregorianDate";
 				}
@@ -981,29 +980,29 @@ public class Column implements Cloneable, Comparable {
 			return "TextAreaWidget";
 		}
 		switch (this.getMappedType()) {
-			case 2 : {
+			case M_BOOLEAN : {
 				return "BooleanWidget";
 			}
-			case 5 :
-			case 6 :
-			case 14 :
-			case 15 : {
+			case M_SQLDATE :
+			case M_UTILDATE :
+			case M_TIME :
+			case M_TIMESTAMP : {
 				return "DateWidget";
 			}
-			case 1 :
-			case 7 :
-			case 8 :
-			case 10 :
-			case 11 : {
+			case M_BIGDECIMAL :
+			case M_DOUBLE :
+			case M_FLOAT :
+			case M_INTEGER :
+			case M_LONG : {
 				return "NumericWidget";
 			}
-			case 0 :
-			case 3 :
-			case 4 :
-			case 12 :
-			case 13 :
-			case 16 :
-			case 17 : {
+			case M_ARRAY :
+			case M_BYTES :
+			case M_CLOB :
+			case M_REF :
+			case M_STRING :
+			case M_URL :
+			case M_OBJECT : {
 				return "InputWidget";
 			}
 		}
@@ -1033,7 +1032,7 @@ public class Column implements Cloneable, Comparable {
 		this.getTable().addForeignKey(this);
 	}
 
-	public List getForeignKeys() {
+	public List<Column> getForeignKeys() {
 		return this.foreignKeys;
 	}
 
@@ -1042,7 +1041,7 @@ public class Column implements Cloneable, Comparable {
 		this.getTable().addImportedKey(col);
 	}
 
-	public List getImportedKeys() {
+	public List<Column> getImportedKeys() {
 		return this.importedKeys;
 	}
 
@@ -1320,7 +1319,7 @@ public class Column implements Cloneable, Comparable {
 		this.typeName = typeName;
 	}
 
-	public int compareTo(Object obj) {
-		return ((Column) obj).ordinal - this.ordinal;
+	public int compareTo(Column obj) {
+		return obj.ordinal - this.ordinal;
 	}
 }
