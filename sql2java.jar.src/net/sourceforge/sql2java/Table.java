@@ -2,6 +2,8 @@
 package net.sourceforge.sql2java;
 
 import java.io.PrintStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -624,4 +626,48 @@ public class Table {
 	public long getSerialVersionUID() {
 		return this.aleatorio.nextLong();
 	}
+	/**
+	 * 生成MD5校验码
+	 * 
+	 * @param source
+	 * @return
+	 */
+	static public byte[] getMD5(byte[] source) {
+		if (null==source)
+			return null;
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			return md.digest(source);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	/**
+	 * 将字节数组转为long<br>
+	 * 如果input为null,或offset指定的剩余数组长度不足8字节则抛出异常
+	 * @param input 
+	 * @param offset 起始偏移量
+	 * @param littleEndian 输入数组是否小端模式
+	 * @return
+	 */
+	public static long longFrom8Bytes(byte[] input, int offset, boolean littleEndian){
+		if(offset <0 || offset+8>input.length)
+			throw new IllegalArgumentException(String.format("less than 8 bytes from index %d  is insufficient for long",offset));
+		long value=0;
+		for(int  count=0;count<8;++count){
+			int shift=(littleEndian?count:(7-count))<<3;
+			value |=((long)0xff<< shift) & ((long)input[offset+count] << shift);
+		}
+		return value;
+	}
+	/**
+	 * 根据输入的String返回唯一的UID(long)
+	 * @param input
+	 * @return
+	 */
+	public long getSerialVersionUID(String input){
+		byte[] md5 = getMD5(input.getBytes());
+		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
+	}
+
 }

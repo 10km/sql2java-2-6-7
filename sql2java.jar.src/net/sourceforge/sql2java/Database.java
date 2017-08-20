@@ -154,11 +154,7 @@ public class Database {
 	public void load() throws SQLException, ClassNotFoundException {
 		Class.forName(this.driver);
 		System.out.println("Connecting to " + this.username + " on " + this.url + " ...");
-        java.util.Properties info = new java.util.Properties();
-        info.put("user", this.username);
-        info.put("password", this.password);
-        info.put("useInformationSchema", "true"); // for retrieve comment of table from MySQL
-		this.pConnection = DriverManager.getConnection(this.url, info);
+		this.pConnection = DriverManager.getConnection(this.url, this.username, this.password);
 		System.out.println("    Connected.");
 		try {
 			if (this.pConnection instanceof OracleConnection) {
@@ -219,7 +215,7 @@ public class Database {
 						(String) "tables.exclude"))
 					continue;
 				this.addTable(table);
-				System.out.printf("    table %s found, remarks:[%s]\n" , table.getName(),  table.getRemarks());
+				System.out.println("    table " + table.getName() + " found");
 			}
 			resultSet.close();
 		}

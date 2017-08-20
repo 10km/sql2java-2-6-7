@@ -40,6 +40,7 @@
     <!-- compile the source code decompiled from sql2java.jar -->
     <target name="compile" depends="prepare" description="compile java source">
         <javac target="1.6" source="1.6"
+        	      encoding="utf-8"
                 destdir="${build}/classes"
                 srcdir="${src}" >
             <classpath refid="lib" />
@@ -50,8 +51,8 @@
     <target name="update" depends="compile" description="update class file to sql2java.jar">
     		<echo message="update class file to ${jar}"/>
 				<jar destfile="${jar}" update="true" >
-						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class **/Database*.class"/>
-						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java **/Database.java"/>
+						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class **/Table*.class"/>
+						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java **/Table.java"/>
 				</jar>
 		    <copy file="${basedir}/release.sh" todir="${build}" overwrite="true"/>
     </target>
