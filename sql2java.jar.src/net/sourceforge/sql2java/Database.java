@@ -1,12 +1,12 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -176,6 +176,7 @@ public class Database {
 		this.loadImportedKeys();
 		this.loadIndexes();
 		this.loadProcedures();
+		this.sortElements();
 		this.pConnection.close();
 	}
 
@@ -427,5 +428,16 @@ public class Database {
 			vector.add(table.getPackage());
 		}
 		return vector.toArray(new String[vector.size()]);
+	}
+	/**
+	 * sort foreign keys and Import keys of all column
+	 */
+	private void sortElements(){
+		for(Table table:this.tables){
+			for(Column column:table.getColumns()){
+				Collections.sort(column.getForeignKeys());
+				Collections.sort(column.getImportedKeys());
+			}
+		}
 	}
 }
