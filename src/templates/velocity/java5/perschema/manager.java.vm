@@ -15,10 +15,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import javax.sql.DataSource;
 //guyadong change datasource pool to c3p0 2014/10/09
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
+
+import net.gdface.facelog.dborm.exception.DAOException;
 
 /**
  * The Manager provides connections and manages transactions transparently.
@@ -212,7 +215,59 @@ public final class Manager
             releaseConnection(c);
         }
     }
+    /**
+     * Run {@code Callable<T>} as a transaction.<br>
+     * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
+     * throw {@code NullPointerException} if {@code fun} be {@code null}<br>
+     * @param <T>  type of return result
+     * @param fun
+     * @return
+     * @throws DAOException
+     * @see #beginTransaction()
+     * @see #endTransaction(boolean)
+     */
+    public <T>T runAsTransaction(Callable<T> fun) throws DAOException{
+        if(null==fun) 
+            throw new NullPointerException();
+        try {
+            Manager.getInstance().beginTransaction();
+            boolean commit = false;
+            try {
+                T result = fun.call();
+                commit = true;
+                return result;
+            } catch (SQLException e) {
+                throw e;
+            } catch (RuntimeException e) {
+                throw e;
+            }catch (Exception e) {
+                throw new RuntimeException(e);
+            }finally {
+                Manager.getInstance().endTransaction(commit);
+            }
+        } catch (DAOException e) {
+            throw e;
+        }catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+    /**
+     * Run {@code Runnable} as a transaction.no return
+     * @param fun
+     * @throws DAOException
+     * @see #runAsTransaction(Callable)
+     */
+    public void runAsTransaction(final Runnable fun) throws DAOException{
+        if(null==fun) 
+            throw new NullPointerException();
+        runAsTransaction(new Callable<Object>(){
 
+            @Override
+            public Object call() throws Exception {
+                fun.run();
+                return null;
+            }});
+    }
     /**
      * Sets the PrintWriter where logs are printed.
      * <br>
