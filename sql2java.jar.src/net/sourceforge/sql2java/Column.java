@@ -1230,6 +1230,22 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getSetMethod() {
 		return this.convertName("set_" + this.escape());
 	}
+	
+	public String getReferencedVarName(){
+		return this.convertName("referenced_by_" + this.name);
+	}
+	
+	public String getReferencedVarGetMethod() {
+		return this.convertName("get_" + "referenced_by_" + this.name);
+	}
+	
+	public String getReferencedVarSetMethod(){
+		return this.convertName("set_" + "referenced_by_" + this.name);
+	}
+
+	public String getImportedBeansGetMethod() {		
+		return this.convertName("get_" + this.getTable().getName() + "_beans_by_" + this.name);
+	}
 
 	public String getModifiedMethod() {
 		return this.convertName("is_" + this.escape() + "_modified");
@@ -1310,7 +1326,7 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getForeignKeyModifiedMethod(String col) {
 		return this.convertName("is_" + this.escape() + "_object_modified");
 	}
-
+	
 	public String getTypeName() {
 		return this.typeName;
 	}
