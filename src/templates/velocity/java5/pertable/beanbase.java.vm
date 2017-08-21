@@ -176,35 +176,33 @@ public class ${beanClass}Base
     }
 #end
 
+#end
 
-#end
-#set ( $keysDones = [] )
-#foreach ($impKey in $importedKeys)
-#set ( $importedTable = $impKey.getTable() )
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#if ( !$keysDones.contains( $importedClass ) )
-#if ( $keysDones.add($importedClass) )#*squelch*##end
-## I don't know what I should be doing right here ???
-#end
-#end
 #foreach ($impKey in $foreignKeys)
+#if ( $velocityCount == 1 )
+    //////////////////////////////////////
+    // referenced bean for FOREIGN KEYS
+    //////////////////////////////////////
+#end
 #set ( $importedTable = $impKey.getForeignColumn().getTable() )
 #set ( $importedClass = "$importedTable.asBeanClass()" )
-#if ( !$keysDones.contains( $importedClass ) )
 #if ( $keysDones.add($importedClass) )#*squelch*##end
-#set ( $referencedBean = "referenced$importedTable.asCoreClass()" )
-    /** The $importedTable.asCoreClass() referenced by this bean. */
+#set ( $referencedBean = $impKey.getReferencedVarName() )
+    /** 
+     * The referenced {@link $importedClass} by {@link #$impKey.getVarName()}. <br>
+     * FOREIGN KEY ($impKey.name) REFERENCES ${importedTable.name}($impKey.getForeignColumn().name)
+     */
     private $importedClass $referencedBean;
-    /** Getter method for ${importedClass}. */
-    public $importedClass get${importedClass}() {
+    /** Getter method for {@link #${referencedBean}}. */
+    public $importedClass $impKey.getReferencedVarGetMethod()() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
-    public void set${importedClass}($importedClass reference) {
+    public void $impKey.getReferencedVarSetMethod()($importedClass reference) {
         this.$referencedBean = reference;
     }    
 #end
-#end
+
     @Override
     public boolean equals(Object object)
     {

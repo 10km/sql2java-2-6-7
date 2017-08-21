@@ -325,17 +325,16 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #set ( $importedTable = $impKey.getTable() )
 #set ( $importedClass = "$importedTable.asBeanClass()" )
 #set ( $importedClassManager = "$importedTable.asManagerClass()" )
-#if ( !$keysDones.contains( $importedClass ) )
 #if ( $keysDones.add($importedClass) )#*squelch*##end
     /**
-     * Retrieves the $importedClass object from the $tablename.$impKey.getName() field.
+     * Retrieves the {@link $importedClass} object from the $importedTable.name.$impKey.name field.
      *
      * @param bean the $beanClass
      * @return the associated $importedClass bean
      * @throws DAOException
      */
     //3.1 GET IMPORTED
-    public $importedClass[] get${importedClass}s($beanClass bean) throws DAOException
+    public $importedClass[] ${impKey.getImportedBeansGetMethod()}($beanClass bean) throws DAOException
     {
         $importedClass other = ${importedClassManager}.getInstance().createBean();
         other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
@@ -343,35 +342,19 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }
 
     /**
-     * Retrieves the $importedClass object from the $tablename.$impKey.getName() field.
+     * Retrieves the {@link $importedClass} object from the $importedTable.name.$impKey.name field.
      *
      * @param bean the $beanClass
      * @return the associated $importedClass bean
      * @throws DAOException
      */
     //3.1 GET IMPORTED
-    public List<$importedClass> get${importedClass}sAsList($beanClass bean) throws DAOException
+    public List<$importedClass> ${impKey.getImportedBeansGetMethod()}AsList($beanClass bean) throws DAOException
     {
         $importedClass other = ${importedClassManager}.getInstance().createBean();
         other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
         return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other);
     }
-
-    /**
-     * Associates the $beanClass object to the $importedClass object.
-     *
-     * @param bean the $beanClass object to use
-     * @param beanToSet the $importedClass object to associate to the $beanClass
-     * @return the associated $importedClass bean
-     */
-    //4.1 SET IMPORTED
-    public $beanClass set${importedClass}($beanClass bean,$importedClass beanToSet)
-    {
-        bean.$impKey.getForeignColumn().getSetMethod()(beanToSet.$impKey.getGetMethod()());
-        return bean;
-    }
-
-#end
 #end
 
 ## ======================================================
@@ -387,17 +370,17 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #set ( $importedTable = $impKey.getForeignColumn().getTable() )
 #set ( $importedClass = "$importedTable.asBeanClass()" )
 #set ( $importedClassManager = "$importedTable.asManagerClass()" )
-#if ( !$keysDones.contains( $importedClass ) )
+##if ( !$keysDones.contains( $importedClass ) )
 #if ( $keysDones.add($importedClass) )#*squelch*##end
     /**
-     * Retrieves the $importedClass object from the $tablename.$impKey.getName() field.
+     * Retrieves the {@link $importedClass} object from the $tablename.$impKey.getName() field.
      *
      * @param bean the $beanClass
      * @return the associated $importedClass bean
      * @throws DAOException
      */
-    //3.2 GET IMPORTED VALUES
-    public $importedClass get${importedClass}($beanClass bean) throws DAOException
+    //3.2 GET REFERENCED VALUE
+    public $importedClass $impKey.getReferencedVarGetMethod()($beanClass bean) throws DAOException
     {
         $importedClass other = ${importedClassManager}.getInstance().createBean();
 #foreach ( $fk in $foreignKeys ) 
@@ -405,41 +388,26 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
         other.$fk.getForeignColumn().getSetMethod()(bean.$fk.getGetMethod()()); 
 #end 
 #end 
-        bean.set${importedClass}(${importedClassManager}.getInstance().loadUniqueUsingTemplate(other)); 
-        return bean.get${importedClass}();
+        bean.$impKey.getReferencedVarSetMethod()(${importedClassManager}.getInstance().loadUniqueUsingTemplate(other)); 
+        return bean.$impKey.getReferencedVarGetMethod()();
     }
 
     /**
-     * Associates the $beanClass object to the $importedClass object.
+     * Associates the {@link $beanClass} object to the {@link $importedClass} object.
      *
      * @param bean the $beanClass object to use
      * @param beanToSet the $importedClass object to associate to the $beanClass
      * @return the associated $importedClass bean
      * @throws Exception
      */
-    //4.2 ADD IMPORTED VALUE
-    public $importedClass add${importedClass}($importedClass beanToSet, $beanClass bean) throws Exception
-    {
-        beanToSet.$impKey.getForeignColumn().getSetMethod()(bean.$impKey.getGetMethod()());
-        return ${importedClassManager}.getInstance().save(beanToSet);
-    }
-
-    /**
-     * Associates the $beanClass object to the $importedClass object.
-     *
-     * @param bean the $beanClass object to use
-     * @param beanToSet the $importedClass object to associate to the $beanClass
-     * @return the associated $importedClass bean
-     * @throws Exception
-     */
-    //5.2 SET IMPORTED
-    public $importedClass set${importedClass}($beanClass bean, $importedClass beanToSet) throws Exception
+    //5.2 SET REFERENCED 
+    public $importedClass $impKey.getReferencedVarSetMethod()($beanClass bean, $importedClass beanToSet) throws DAOException
     {
         bean.$impKey.getSetMethod()(beanToSet.${impKey.getForeignColumn().getGetMethod()}());
         return ${importedClassManager}.getInstance().save(beanToSet);
     }
 
-#end
+##end
 #end
 
 
