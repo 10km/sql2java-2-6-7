@@ -296,14 +296,25 @@ public class Database {
 				String colName = resultSet.getString("FKCOLUMN_NAME");
 				String foreignTabName = resultSet.getString("PKTABLE_NAME");
 				String foreignColName = resultSet.getString("PKCOLUMN_NAME");
+				String foreignKeyName = resultSet.getString("FK_NAME");
+				if(null==foreignKeyName|| foreignKeyName.isEmpty()){
+					Column[] primaryKeys = this.getTable(tabName).getPrimaryKeys();
+					if(1==primaryKeys.length){
+						// make a fake name
+						foreignKeyName="fk_"+ tabName + "_" +primaryKeys[0].getName();
+					}else
+						System.out.println("WARN: FK_NAME return empty,the generated code  may be incorrected.");
+				}
+					
+				short seq = resultSet.getShort("KEY_SEQ");
 				Column col = this.getTable(tabName).getColumn(colName);
 				Table foreignTable = this.getTable(foreignTabName);
 				if (null == foreignTable)
 					continue;
 				Column foreignCol = foreignTable.getColumn(foreignColName);
-				col.addForeignKey(foreignCol);
+				col.addForeignKey(foreignCol, foreignKeyName, seq);
 				foreignCol.addImportedKey(col);
-				System.out.println("    " + col.getFullName() + " -> " + foreignCol.getFullName() + " found ");
+				System.out.println("    " + col.getFullName() + " -> " + foreignCol.getFullName() + " found seq:"+ seq+" foreign key name:"+ foreignKeyName);
 			}
 			resultSet.close();
 		}

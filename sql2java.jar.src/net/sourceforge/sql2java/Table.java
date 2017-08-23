@@ -1,17 +1,20 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
-import java.io.PrintStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
+
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.Column;
 import net.sourceforge.sql2java.ConfigHelper;
@@ -37,6 +40,8 @@ public class Table {
 	private String remarks;
 	private Vector<Column> foreignKeys = new Vector<Column>();
 	private Vector<Column> importedKeys = new Vector<Column>();
+	/* FK_NAME 为索引保存所有 foreign keys */
+	private Map<String,Vector<Column>> fkNameMap = new HashMap<String,Vector<Column>>();
 	private List<Procedure> procedures = new ArrayList<Procedure>();
 	private HashMap<String,Procedure> procHash = new HashMap<String,Procedure>();
 	private Random aleatorio = new Random(new Date().getTime());
@@ -249,12 +254,84 @@ public class Table {
 		return this.countForeignKeys() > 0;
 	}
 
-	public void addForeignKey(Column col) {
+	public void addForeignKey(Column col, String fkName, short keySeq) {
 		if (!this.foreignKeys.contains((Object) col)) {
 			this.foreignKeys.add(col);
 		}
+		if(null!=fkName&&!fkName.isEmpty()){
+			if(keySeq<=0)
+				throw new IllegalArgumentException("the argument 'keySeq' must >0");
+			if(null==this.fkNameMap.get(fkName)){
+				this.fkNameMap.put(fkName, new Vector<Column>());
+			}
+			Vector<Column> fkCols = fkNameMap.get(fkName);
+			if(keySeq > fkCols.size()){
+				fkCols.setSize(keySeq);
+			}
+			fkCols.set(keySeq-1, col);
+		}
+	}
+	
+	/**
+	 * 返回所有 foreign key name ( FK_NAME )
+	 * @return
+	 */
+	public String[] getFkMapNames() {		
+		String[] res=this.fkNameMap.keySet().toArray(new String[0]);
+		Arrays.sort(res);
+		return res;
 	}
 
+	/**
+	 * 检索外键引用指定表(tableName)的所有 FK_NAME<br>
+	 * 没有结果则返回空数组
+	 * @param tableName
+	 * @return
+	 */
+	public String[] getFkMapNames(String tableName) {
+		Vector<String> names=new Vector<String>();
+		// System.out.printf("getFkMapNames of %s for %s\n", this.getName(),tableName);
+		for(Entry<String, Vector<Column>> entry:this.fkNameMap.entrySet()){
+			for(Column col:entry.getValue().get(0).getForeignKeys()){
+				if(col.getTableName().equals(tableName)){
+					// System.out.printf("    %s\n",entry.getKey());
+					names.add(entry.getKey());
+					break;
+				}
+			}
+		}
+		Collections.sort(names);
+		
+		return names.toArray(new String[0]);
+	}
+
+	/**
+	 * 检索指定 FK_NAME 包含的所有字段<br>
+	 * 没有结果则返回空数组
+	 * @param fkName
+	 * @return
+	 */
+	public Column[] getForeignKeysByFkName(String fkName) {		
+		Vector<Column> keys=this.fkNameMap.get(fkName);
+		return null==keys?new Column[0]:keys.toArray( new Column[keys.size()]);
+	}
+
+	private String toUniversalFkName(String fkName) {
+		Vector<Column> keys = this.fkNameMap.get(fkName);
+		if(null!=keys){
+			Vector<String> names=new Vector<String>();
+			for(Column k:keys)names.add(k.getName());
+			StringBuilder sb=new StringBuilder();
+			for(int i=0;i<keys.size();++i){
+				if(i>0)
+					sb.append("_");
+				sb.append(keys.get(i).getName());
+			}
+			return sb.toString();
+		}
+		return "";
+	}
+	
 	public Column[] getForeignKeys() {
 		return this.foreignKeys.toArray( new Column[this.foreignKeys.size()]);
 	}
@@ -668,6 +745,21 @@ public class Table {
 	public long getSerialVersionUID(String input){
 		byte[] md5 = getMD5(input.getBytes());
 		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
+	}	
+	
+	public String getReferencedVarName(String fkName){
+		return StringUtilities.convertName("referenced_by_" + toUniversalFkName(fkName),true);
 	}
-
+	
+	public String getReferencedVarGetMethod(String fkName) {
+		return StringUtilities.convertName("get_" + "referenced_by_" + toUniversalFkName(fkName),true);
+	}
+	
+	public String getReferencedVarSetMethod(String fkName){
+		return StringUtilities.convertName("set_" + "referenced_by_" + toUniversalFkName(fkName),true);
+	}
+	
+	public String getImportedBeansGetMethod(String fkName) {		
+		return "get" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
+	}
 }
