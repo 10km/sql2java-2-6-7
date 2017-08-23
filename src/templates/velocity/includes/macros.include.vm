@@ -5,3 +5,4 @@
 ## #end
 ##
 ## call your macro with #myFunction("un","dos","three")
+#macro (join $elements $do $separator)#foreach($e in $elements)#if ( $velocityCount > 1 )$separator#end$do#end#end

@@ -7,6 +7,8 @@
 #set ( $tableName = $table.getJavaName() )
 #set ( $columns = $table.getColumns() )
 #set ( $foreignKeys = $table.getForeignKeys() )
+#set ( $importedTables= $table.getImportedTables() )
+#set ( $fkNames = $table.getFkMapNames() )
 #set ( $importedKeys = $table.getImportedKeys() )
 #set ( $primaryKeys = $table.getPrimaryKeys() )
 ##set ( $primaryKey = $table.getPrimaryKey() )

@@ -314,102 +314,107 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ## ======================================================
 ## xImportedKeys template
 ## ======================================================
-#set ( $keysDones = [] )
-#foreach ($impKey in $importedKeys)
+#foreach ($importedTable in $importedTables)
 #if ( $velocityCount == 1 )
 
     //////////////////////////////////////
     // GET/SET IMPORTED KEY BEAN METHOD
     //////////////////////////////////////
 #end
-#set ( $importedTable = $impKey.getTable() )
 #set ( $importedClass = "$importedTable.asBeanClass()" )
 #set ( $importedClassManager = "$importedTable.asManagerClass()" )
-#if ( $keysDones.add($importedClass) )#*squelch*##end
+#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
     /**
-     * Retrieves the {@link $importedClass} object from the $importedTable.name.$impKey.name field.
-     *
-     * @param bean the $beanClass
-     * @return the associated $importedClass bean
+     * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME : $fkName 
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $importedClass} bean or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     //3.1 GET IMPORTED
-    public $importedClass[] ${impKey.getImportedBeansGetMethod()}($beanClass bean) throws DAOException
+    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean) throws DAOException
     {
+        if(null == bean)return null;
         $importedClass other = ${importedClassManager}.getInstance().createBean();
-        other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
+#foreach ( $fk in $columnsOfFk ) 
+        other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
+#end
         return ${importedClassManager}.getInstance().loadUsingTemplate(other);
     }
 
     /**
-     * Retrieves the {@link $importedClass} object from the $importedTable.name.$impKey.name field.
-     *
-     * @param bean the $beanClass
-     * @return the associated $importedClass bean
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $importedClass} bean or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     //3.1 GET IMPORTED
-    public List<$importedClass> ${impKey.getImportedBeansGetMethod()}AsList($beanClass bean) throws DAOException
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean) throws DAOException
     {
+        if(null == bean)return null;
         $importedClass other = ${importedClassManager}.getInstance().createBean();
-        other.$impKey.getSetMethod()(bean.$impKey.getForeignColumn().getGetMethod()());
+#foreach ( $fk in $columnsOfFk ) 
+        other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
+#end
         return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other);
     }
+#end
 #end
 
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================
-#foreach ($impKey in $foreignKeys)
+#foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
-
     //////////////////////////////////////
     // GET/SET FOREIGN KEY BEAN METHOD
     //////////////////////////////////////
 #end
-#set ( $importedTable = $impKey.getForeignColumn().getTable() )
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#set ( $importedClassManager = "$importedTable.asManagerClass()" )
-##if ( !$keysDones.contains( $importedClass ) )
-#if ( $keysDones.add($importedClass) )#*squelch*##end
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+
     /**
-     * Retrieves the {@link $importedClass} object from the $tablename.$impKey.getName() field.
-     *
-     * @param bean the $beanClass
-     * @return the associated $importedClass bean
+     * Retrieves the {@link $foreignClass} object referenced by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.<br>
+     * FK_NAME : $fkName
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     //3.2 GET REFERENCED VALUE
-    public $importedClass $impKey.getReferencedVarGetMethod()($beanClass bean) throws DAOException
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DAOException
     {
-        $importedClass other = ${importedClassManager}.getInstance().createBean();
-#foreach ( $fk in $foreignKeys ) 
-#if ( $importedTable.getName() == $fk.getForeignColumn().getTable().getName() ) 
+        if(null == bean)return null;
+        $foreignClass other = ${foreignClassManager}.getInstance().createBean();
+#foreach ( $fk in $columnsOfFk ) 
         other.$fk.getForeignColumn().getSetMethod()(bean.$fk.getGetMethod()()); 
 #end 
-#end 
-        bean.$impKey.getReferencedVarSetMethod()(${importedClassManager}.getInstance().loadUniqueUsingTemplate(other)); 
-        return bean.$impKey.getReferencedVarGetMethod()();
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignClassManager}.getInstance().loadUniqueUsingTemplate(other)); 
+        return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 
     /**
-     * Associates the {@link $beanClass} object to the {@link $importedClass} object.
+     * Associates the {@link $beanClass} object to the {@link $foreignClass} object by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.
      *
-     * @param bean the $beanClass object to use
-     * @param beanToSet the $importedClass object to associate to the $beanClass
-     * @return the associated $importedClass bean
+     * @param bean the {@link $beanClass} object to use
+     * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass}
+     * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws Exception
      */
     //5.2 SET REFERENCED 
-    public $importedClass $impKey.getReferencedVarSetMethod()($beanClass bean, $importedClass beanToSet) throws DAOException
+    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
     {
-        bean.$impKey.getSetMethod()(beanToSet.${impKey.getForeignColumn().getGetMethod()}());
-        return ${importedClassManager}.getInstance().save(beanToSet);
+        if(null == bean || null == beanToSet) return null;
+#foreach ( $fk in $columnsOfFk ) 
+        bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
+#end 
+        return ${foreignClassManager}.getInstance().save(beanToSet);
     }
-
-##end
 #end
-
+#end
 
     //////////////////////////////////////
     // LOAD ALL

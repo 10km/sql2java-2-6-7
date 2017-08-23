@@ -178,29 +178,31 @@ public class ${beanClass}Base
 
 #end
 
-#foreach ($impKey in $foreignKeys)
+#foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
     //////////////////////////////////////
     // referenced bean for FOREIGN KEYS
     //////////////////////////////////////
 #end
-#set ( $importedTable = $impKey.getForeignColumn().getTable() )
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#if ( $keysDones.add($importedClass) )#*squelch*##end
-#set ( $referencedBean = $impKey.getReferencedVarName() )
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+#set ( $referencedBean = $table.getReferencedVarName($fkName) )
     /** 
-     * The referenced {@link $importedClass} by {@link #$impKey.getVarName()}. <br>
-     * FOREIGN KEY ($impKey.name) REFERENCES ${importedTable.name}($impKey.getForeignColumn().name)
+     * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
+     * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
-    private $importedClass $referencedBean;
+    private $foreignClass $referencedBean;
     /** Getter method for {@link #${referencedBean}}. */
-    public $importedClass $impKey.getReferencedVarGetMethod()() {
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
-    public void $impKey.getReferencedVarSetMethod()($importedClass reference) {
+    public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
-    }    
+    }
+#end        
 #end
 
     @Override
