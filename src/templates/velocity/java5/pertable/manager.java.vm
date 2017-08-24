@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.ArrayList;
 
@@ -393,7 +394,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     //3.4 SET IMPORTED
-    public <T extends java.util.Collection<$importedClass>> T ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , T importedBeans) throws DAOException
+    public <T extends Collection<$importedClass>> T ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , T importedBeans) throws DAOException
     {
         if(null != bean && null != importedBeans){
             for( $importedClass importBean : importedBeans ){
@@ -513,7 +514,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     public $beanClass save($beanClass bean
         #foreachForeignTables( ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables( ", Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         if(null == bean) return null;
 #foreach($foreignTable in $foreignTables)
@@ -551,13 +552,13 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }   
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", java.util.Collection " '' ''))}
+     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", Collection " '' ''))}
      */
     //3.8 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables( ",final  Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
@@ -1329,7 +1330,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //15-2
-    public List<$beanClass> save(List<$beanClass> beans) throws DAOException
+    public <T extends Collection<$beanClass>>T save(T beans) throws DAOException
     {
         for ($beanClass bean : beans) 
         {
@@ -1362,10 +1363,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #save(List)
      */
     //15-4
-    public List<$beanClass> saveAsTransaction(final List<$beanClass> beans) throws DAOException {
-        return Manager.getInstance().runAsTransaction(new Callable<List<$beanClass>>(){
+    public <T extends Collection<$beanClass>> T saveAsTransaction(final T beans) throws DAOException {
+        return Manager.getInstance().runAsTransaction(new Callable<T>(){
             @Override
-            public List<$beanClass> call() throws Exception {
+            public T call() throws Exception {
                 return save(beans);
             }});
     }
@@ -1390,7 +1391,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //16-2
-    public List<$beanClass> insert(List<$beanClass> beans) throws DAOException
+    public <T extends Collection<$beanClass>> T insert(T beans) throws DAOException
     {
         return this.save(beans);
     }
@@ -1418,7 +1419,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #saveAsTransaction(List)
      */
     //16-4
-    public List<$beanClass> insertAsTransaction(List<$beanClass> beans) throws DAOException
+    public <T extends Collection<$beanClass>> T insertAsTransaction(T beans) throws DAOException
     {
         return this.saveAsTransaction(beans);
     }
@@ -1445,7 +1446,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //17-2
-    public List<$beanClass> update(List<$beanClass> beans) throws DAOException
+    public <T extends Collection<$beanClass>> T update(T beans) throws DAOException
     {
         return this.save(beans);
     }
@@ -1473,7 +1474,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #saveAsTransaction(List)
      */
     //17-4
-    public List<$beanClass> updateAsTransaction(List<$beanClass> beans) throws DAOException
+    public <T extends Collection<$beanClass>> T updateAsTransaction(T beans) throws DAOException
     {
         return this.saveAsTransaction(beans);
     }
