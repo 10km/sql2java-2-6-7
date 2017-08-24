@@ -276,9 +276,9 @@ public class Table {
 	 * 返回所有 foreign key name ( FK_NAME )
 	 * @return
 	 */
-	public String[] getFkMapNames() {		
-		String[] res=this.fkNameMap.keySet().toArray(new String[0]);
-		Arrays.sort(res);
+	public Vector<String> getFkMapNames() {		
+		Vector<String> res=new Vector<String>(this.fkNameMap.keySet());
+		Collections.sort(res);
 		return res;
 	}
 
@@ -288,7 +288,7 @@ public class Table {
 	 * @param tableName
 	 * @return
 	 */
-	public String[] getFkMapNames(String tableName) {
+	public Vector<String> getFkMapNames(String tableName) {
 		Vector<String> names=new Vector<String>();
 		// System.out.printf("getFkMapNames of %s for %s\n", this.getName(),tableName);
 		for(Entry<String, Vector<Column>> entry:this.fkNameMap.entrySet()){
@@ -302,7 +302,7 @@ public class Table {
 		}
 		Collections.sort(names);
 		
-		return names.toArray(new String[0]);
+		return names;
 	}
 
 	/**
@@ -311,9 +311,9 @@ public class Table {
 	 * @param fkName
 	 * @return
 	 */
-	public Column[] getForeignKeysByFkName(String fkName) {		
+	public Vector<Column> getForeignKeysByFkName(String fkName) {		
 		Vector<Column> keys=this.fkNameMap.get(fkName);
-		return null==keys?new Column[0]:keys.toArray( new Column[keys.size()]);
+		return null==keys?new Vector<Column>():keys;
 	}
 
 	private String toUniversalFkName(String fkName) {
@@ -332,6 +332,10 @@ public class Table {
 		return "";
 	}
 	
+	public Table getForeignTableByFkName(String fkName){
+		Vector<Column> keys = this.getForeignKeysByFkName(fkName);
+		return 0==keys.size()? null:keys.get(0).getForeignColumn().getTable();		
+	}
 	public Column[] getForeignKeys() {
 		return this.foreignKeys.toArray( new Column[this.foreignKeys.size()]);
 	}
@@ -747,6 +751,13 @@ public class Table {
 		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
 	}	
 	
+	
+	public String asRefArg(String fkName){
+		return StringUtilities.convertName("ref_"+ this.getForeignTableByFkName(fkName).getName() +"by_" + toUniversalFkName(fkName),true);
+	}
+	public String asImpArg(String fkName){
+		return StringUtilities.convertName("imp_"+ this.getName() +"by_" + toUniversalFkName(fkName),true);
+	}
 	public String getReferencedVarName(String fkName){
 		return StringUtilities.convertName("referenced_by_" + toUniversalFkName(fkName),true);
 	}
@@ -762,4 +773,8 @@ public class Table {
 	public String getImportedBeansGetMethod(String fkName) {		
 		return "get" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
 	}
+	public String getImportedBeansSetMethod(String fkName) {		
+		return "set" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
+	}
+
 }
