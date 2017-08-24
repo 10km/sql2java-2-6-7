@@ -552,7 +552,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }} ;
     /**
      * Retrieves the bean object referenced by fkName.<br>
-     *
+     * @param <T>
      * <ul>
     #foreachForeignTables(" *     <li> ${table.asRefArg($m_fkName)} -> ${m_foreignClass}</li>" '    ' 'true')
      * </ul>
@@ -592,6 +592,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     /**
      * Associates the {@link $beanClass} object to the bean object by fkName field.<br>
      * 
+     * @param <T>
      * <ul>
     #foreachForeignTables(" *     <li> ${table.asRefArg($m_fkName)} -> ${m_foreignClass}</li>" '    ' 'true')
      * </ul>
