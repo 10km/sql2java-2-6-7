@@ -171,7 +171,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ## part 2
 #set ( $sql = "$sql$pk.getName()=?" )
 #end     
-     * @return a unique $beanClass
+     * @return a unique $beanClass or {@code null} if not found
      * @throws DAOException
      */
     //1
@@ -191,8 +191,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
             $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
 #end
             List<$beanClass> pReturn = this.loadByPreparedStatementAsList(ps);
-            if (pReturn.size() == 0) {
-                throw new ObjectRetrievalException();
+            if (0 == pReturn.size()) {
+                return null;
             } else {
                 return pReturn.get(0);
             }
@@ -209,13 +209,14 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }
 
     /**
-     * Get Primary Key fileds as parameters from the parameter{@code bean},
-     * then call {@link #loadByPrimaryKey($keys)},loads a $beanClass from the $tablename.
+     * Get Primary Key fileds as parameters from the parameter {@code bean},
+     * loads a {@link $beanClass} from the $tablename.<br>
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
-     * @param bean the $beanClass with key fields
-     * @return a unique $beanClass
+     * @param bean the {@link $beanClass} with key fields
+     * @return a unique {@link $beanClass} or {@code null} if not found
      * @throws DAOException
+     * @see {@link #loadByPrimaryKey($keys)}
      */
     //1.1
     public $beanClass loadByPrimaryKey(${beanClass}Base bean) throws DAOException
@@ -232,7 +233,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 
 #set ( $sql = "" )
     /**
-     * Deletes rows according to its keys.
+     * Delete row according to its keys.
      *
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
@@ -280,13 +281,13 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
         }
     }
     /**
-     * Get Primary Key fileds as parameters from the parameter{@code bean},
-     * then call {@link #deleteByPrimaryKey($keys)}.<br>
+     * Delete row according to Primary Key fileds of the parameter{@code bean},
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
      * @param bean the $beanClass with key fields
      * @return the number of deleted rows
      * @throws DAOException
+     * @see {@link #deleteByPrimaryKey($keys)}
      */
     //2.1
     public int deleteByPrimaryKey(${beanClass}Base bean) throws DAOException
@@ -434,7 +435,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ## ======================================================
 #if( $table.hasForeignTables() || $table.hasImportedTables() )
     /**
-     * Saves the $beanClass bean and primary key imported bean into the database.
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
     #foreachForeignTables(" * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
@@ -481,10 +482,26 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #end
 #end
         return bean;
-    }   
+    } 
+    /**
+     * Transaction version for sync save
+     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", $m_importedClass[] " '' ''))}
+     */
+    //3.6 SYNC SAVE AS TRANSACTION
+    public $beanClass saveAsTransaction(final $beanClass bean
+        #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables( ",final $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+    {
+        return this.runAsTransaction(new Callable<$beanClass>(){
+            @Override
+            public $beanClass call() throws Exception {
+                return save(bean #foreachForeignTables( ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables( ", $m_importedTable.asImpArg($m_fkName) " '' ''));
+            }});
+    }
 #if( $table.hasImportedTables() )
     /**
-     * Saves the $beanClass bean and primary key imported bean into the database.
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
     #foreachForeignTables(" * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
@@ -492,7 +509,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DAOException
      */
-    //3.6 SYNC SAVE 
+    //3.7 SYNC SAVE 
     public $beanClass save($beanClass bean
         #foreachForeignTables( ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
@@ -532,8 +549,24 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #end
         return bean;
     }   
+    /**
+     * Transaction version for sync save
+     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", java.util.Collection " '' ''))}
+     */
+    //3.8 SYNC SAVE AS TRANSACTION
+    public $beanClass saveAsTransaction(final $beanClass bean
+        #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables( ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+    {
+        return this.runAsTransaction(new Callable<$beanClass>(){
+            @Override
+            public $beanClass call() throws Exception {
+                return save(bean #foreachForeignTables( ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables( ", $m_importedTable.asImpArg($m_fkName) " '' ''));
+            }});
+    }
 #end ## $table.hasImportedTables()
-#end
+#end ## $table.hasForeignTables() || $table.hasImportedTables()
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================
@@ -557,18 +590,19 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     #foreachForeignTables(" *     <li> ${table.asRefArg($m_fkName)} -> ${m_foreignClass}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid value: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T getReferencedBean($beanClass bean,String fkName)throws DAOException{
-        Object[] objs = REF_METHODS.get(fkName);
-        if(null==objs)
+        Object[] params = REF_METHODS.get(fkName);
+        if(null==params)
             throw new IllegalArgumentException("invalid fkName " + fkName);
         try {
-            return (T) this.getClass().getMethod((String)objs[0],bean.getClass()).invoke(this,bean);
+            return (T) this.getClass().getMethod((String)params[0],bean.getClass()).invoke(this,bean);
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -598,24 +632,25 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
-     * @param fkName valid value: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T setReferencedBean($beanClass bean,T beanToSet,String fkName)throws DAOException{
-        Object[] objs = REF_METHODS.get(fkName);
-        if(null==objs)
+        Object[] params = REF_METHODS.get(fkName);
+        if(null==params)
             throw new IllegalArgumentException("invalid fkName " + fkName);
         if(null==bean || null==beanToSet)
             throw new NullPointerException();
-        Class<?> resultClass = (Class<?>)objs[2];
+        Class<?> resultClass = (Class<?>)params[2];
         if(!resultClass.isAssignableFrom(beanToSet.getClass()) ){
             throw new IllegalArgumentException("the argument 'beanToSet' be invalid type,expect type:" + resultClass.getName());
         }
         try {            
-            return (T) this.getClass().getMethod((String)objs[1],bean.getClass(),resultClass).invoke(this,bean,beanToSet);
+            return (T) this.getClass().getMethod((String)params[1],bean.getClass(),resultClass).invoke(this,bean,beanToSet);
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {

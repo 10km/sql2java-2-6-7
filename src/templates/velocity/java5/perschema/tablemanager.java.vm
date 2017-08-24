@@ -144,12 +144,14 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
      * @return
      * @throws DAOException
      */
-    public <T>T runAsTransaction(Callable<T> fun) throws DAOException;
+    public abstract<T> T runAsTransaction(Callable<T> fun) throws DAOException;
     /**
      * Run {@code Runnable} as a transaction.no return
      * @param fun
      * @throws DAOException
      * @see #runAsTransaction(Runnable)
      */
-    public void runAsTransaction(final Runnable fun) throws DAOException;
+    public abstract void runAsTransaction(final Runnable fun) throws DAOException;
+    public abstract <T> T getReferencedBean(B2 bean,String fkName)throws DAOException;
+    public abstract <T> T setReferencedBean(B2 bean,T beanToSet,String fkName)throws DAOException;
 }
