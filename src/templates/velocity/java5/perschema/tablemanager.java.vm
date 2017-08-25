@@ -82,6 +82,8 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
     public abstract List<B2> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException;
 
     public abstract B2 loadByPrimaryKey(B1 bean) throws DAOException;
+    
+    public abstract boolean existsPrimaryKey(B1 bean) throws DAOException;
 
     public abstract B2[] loadByWhere(String where) throws DAOException;
 

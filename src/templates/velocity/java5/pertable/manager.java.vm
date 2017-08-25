@@ -162,7 +162,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ##set ( $noWhereSelect = "SELECT \" + ALL_FIELDS + \" FROM \" + $tablename" )
 ##set ( $baseSelect = "$noWhereSelect WHERE " )
     /**
-     * Loads a $beanClass from the $tablename using its key fields.
+     * Loads a {@link $beanClass} from the $tablename using primary key fields.
      *
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
@@ -210,16 +210,15 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }
 
     /**
-     * Get Primary Key fileds as parameters from the parameter {@code bean},
-     * loads a {@link $beanClass} from the $tablename.<br>
+     * Loads a {@link $beanClass} from the $tablename using primary key fields of {@code bean}.
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
-     * @param bean the {@link $beanClass} with key fields
+     * @param bean the {@link $beanClass} with primary key fields
      * @return a unique {@link $beanClass} or {@code null} if not found
      * @throws DAOException
      * @see {@link #loadByPrimaryKey($keys)}
      */
-    //1.1
+    //1.2
     public $beanClass loadByPrimaryKey(${beanClass}Base bean) throws DAOException
     {
 #set ( $methods = "" ) 
@@ -231,7 +230,43 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #end     
         return bean==null?null:loadByPrimaryKey($methods);
     }
+#set( $keys = "" )    
+    /**
+     * Returns true if this $tablename contains row with primary key fields.
+     * @author guyadong
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+## part 1
+#if ( $velocityCount > 1 )#set( $keys = "$keys, " )#set ( $sql = "$sql and " )#end
+#set ( $keys = "$keys${pk.getJavaType()} $pk.getVarName()" )
+## part 2
+#set ( $sql = "$sql$pk.getName()=?" )
+#end     
+     * @throws DAOException
+     * @see #loadByPrimaryKey($keys)
+     */
+    //1.3
+    public boolean existsPrimaryKey($keys) throws DAOException
+    {
+        return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
+    }
 
+    /**
+     * Returns true if this $tablename contains row specified by primary key fields of {@link $beanClass}.<br>
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param bean the {@link $beanClass} with primary key fields
+     * @return 
+     * @throws DAOException
+     * @see {@link #loadByPrimaryKey(${beanClass}Base bean)}
+     */
+    //1.4
+    @Override
+    public boolean existsPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+        return null!=loadByPrimaryKey(bean);
+    }
+    
 #set ( $sql = "" )
     /**
      * Delete row according to its keys.
@@ -285,7 +320,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * Delete row according to Primary Key fileds of the parameter{@code bean},
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
-     * @param bean the $beanClass with key fields
+     * @param bean the $beanClass with primary key fields
      * @return the number of deleted rows
      * @throws DAOException
      * @see {@link #deleteByPrimaryKey($keys)}
@@ -307,12 +342,15 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     {
         throw new UnsupportedOperationException();
     }
+    public boolean existsPrimaryKey(${beanClass}Base bean) throws DAOException
+    {
+        throw new UnsupportedOperationException();
+    }
     public int deleteByPrimaryKey(${beanClass}Base bean) throws DAOException
     {
         throw new UnsupportedOperationException();
     }
-
-#end
+#end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template
 ## ======================================================
