@@ -1320,6 +1320,6 @@ public class Column implements Cloneable, Comparable<Column> {
 	}
 
 	public int compareTo(Column obj) {
-		return obj.ordinal - this.ordinal;
+		return  this.ordinal - obj.ordinal;
 	}
 }
