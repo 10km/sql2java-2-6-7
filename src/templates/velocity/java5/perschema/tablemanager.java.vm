@@ -155,6 +155,16 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
      * @see #runAsTransaction(Runnable)
      */
     public abstract void runAsTransaction(final Runnable fun) throws DAOException;
+    
     public abstract <T> T getReferencedBean(B2 bean,String fkName)throws DAOException;
+    
     public abstract <T> T setReferencedBean(B2 bean,T beanToSet,String fkName)throws DAOException;
+    
+    public <T> T[] getImportedBeans(B2 bean,String fkName)throws DAOException;
+    
+    public <T> List<T> getImportedBeansAsList(B2 bean,String fkName)throws DAOException;
+    
+    public <T> T[] setImportedBeans(B2 bean,T[] importedBeans,String fkName)throws DAOException;
+    
+    public <T extends Collection<? extends FullBean<?>>> T setImportedBeans(B2 bean,T importedBeans,String fkName)throws DAOException;
 }
