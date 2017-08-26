@@ -404,7 +404,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @param bean the {@link $beanClass} object to use
      * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
-     * @return importedBeans always
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
@@ -444,7 +444,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @param bean the {@link $beanClass} object to use
      * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
-     * @return importedBeans always
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
@@ -601,7 +601,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
      * @param bean the {@link $beanClass}
-     * @return the associated {@link $importedClass} bean or {@code null} if {@code bean} is {@code null}
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     //3.1 GET IMPORTED
@@ -619,7 +619,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
      * @param bean the {@link $beanClass}
-     * @return the associated {@link $importedClass} bean or {@code null} if {@code bean} is {@code null}
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     //3.2 GET IMPORTED
