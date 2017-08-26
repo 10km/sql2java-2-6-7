@@ -38,6 +38,7 @@ public class Table {
 	private String name;
 	private String type;
 	private String remarks;
+	private Database database;
 	private Vector<Column> foreignKeys = new Vector<Column>();
 	private Vector<Column> importedKeys = new Vector<Column>();
 	/* FK_NAME 为索引保存所有 foreign keys */
@@ -575,7 +576,16 @@ public class Table {
 	public String asBeanClass() {
 		return this.convertName("Bean");
 	}
-
+	
+	public String asBeanClassNSP() {
+		String basename = "";
+		String nsp = this.getName().replaceFirst(this.getDatabase().getSamePrefix(), "");
+		basename = "".equals(CodeWriter.getClassPrefix())
+				? nsp
+				: CodeWriter.getClassPrefix() + "_" + nsp;
+		return StringUtilities.convertName((String) (basename + "_" + "Bean"), (boolean) false);		
+	}
+	
 	public String asCacheClass() {
 		return this.convertName("Cache");
 	}
@@ -775,6 +785,14 @@ public class Table {
 	}
 	public String getImportedBeansSetMethod(String fkName) {		
 		return "set" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
+	}
+
+	protected Database getDatabase() {
+		return database;
+	}
+
+	protected void setDatabase(Database database) {
+		this.database = database;
 	}
 
 }

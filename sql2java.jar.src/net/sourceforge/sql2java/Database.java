@@ -38,7 +38,10 @@ public class Database {
 	private String activeConnections;
 	private String idleConnections;
 	private String maxWait;
-
+	/**
+	 * 所有表名的共同前缀
+	 */
+	private String samePrefix = "";
 	public void setOracleRetrieveRemarks(boolean retrieveRemarks) {
 		this.retrieveRemarks = retrieveRemarks;
 	}
@@ -171,6 +174,7 @@ public class Database {
 		this.tables = new Vector<Table>();
 		this.tableHash = new Hashtable<String,Table>();
 		this.loadTables();
+		this.initSamePrefix();
 		this.loadColumns();
 		this.loadPrimaryKeys();
 		this.loadImportedKeys();
@@ -212,6 +216,7 @@ public class Database {
 				table.setName(resultSet.getString("TABLE_NAME"));
 				table.setType(resultSet.getString("TABLE_TYPE"));
 				table.setRemarks(resultSet.getString("REMARKS"));
+				table.setDatabase(this);
 				if (!CodeWriter.authorizeProcess((String) table.getName(), (String) "tables.include",
 						(String) "tables.exclude"))
 					continue;
@@ -450,5 +455,30 @@ public class Database {
 				Collections.sort(column.getImportedKeys());
 			}
 		}
+	}
+	
+	public String getSamePrefix()  {		
+		return this.samePrefix;
+	}	
+	/**
+	 * 计算所有表名的共同前缀
+	 */
+	private void initSamePrefix()  {
+		int index=-1;
+		if(0==this.tables.size())return;
+		String first=this.tables.get(0).getName();
+		try{
+			for(int i=0;i<first.length();++i){
+				for(int j=1;j<this.tables.size();++j){
+					String c=this.tables.get(j).getName();
+					if(c.charAt(i)!=first.charAt(i))
+						throw new IndexOutOfBoundsException();
+				}
+				index=i;
+			}
+		}catch(IndexOutOfBoundsException e){			
+		}
+		this.samePrefix= index<0?"":first.substring(0, index+1);
+		System.out.printf("samePrefix = [%s]\n", this.samePrefix);
 	}
 }
