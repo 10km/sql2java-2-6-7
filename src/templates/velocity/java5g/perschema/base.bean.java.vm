@@ -1,0 +1,13 @@
+##$Id: base.bean.java.vm,v 1.3 2007/11/12 14:06:30 kameleono Exp $
+#parse( "header.include.vm" )
+#set($npkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($npkg, "BaseBean.java")
+package $npkg;
+
+/**
+ * @author guyadong
+ */
+public interface BaseBean {
+    public abstract boolean isNew();
+    public abstract void isNew(boolean isNew);
+}

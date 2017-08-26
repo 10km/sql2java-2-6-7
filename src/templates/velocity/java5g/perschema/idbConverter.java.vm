@@ -1,0 +1,24 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#set($npkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($npkg, "IDbConverter.java")
+package $npkg;
+
+#foreach ( $table in $tables )
+import ${table.getPackage()}.${table.asBeanClass()}Base;
+#end
+
+public interface IDbConverter {
+#foreach ( $table in $tables )
+    public abstract IBeanConverter<${table.asBeanClassNSP()}, ${table.asBeanClass()}Base> get${table.asBeanClassNSP()}Converter();
+#end
+
+	/**
+	 * @param <G> general type
+	 * @param <N> native type
+	 * @param clazz
+	 * @return
+	 */
+	<G extends BaseBean, N> IBeanConverter<G,N> getBeanConverter(Class<G> clazz);
+
+}
