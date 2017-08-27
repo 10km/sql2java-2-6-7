@@ -1,7 +1,7 @@
 #parse( "header.include.vm" )
-#set($npkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename($npkg, "HashCodeBuilder.java")
-package $npkg;
+#set($gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($gpkg, "HashCodeBuilder.java")
+package $gpkg;
 
 /*
  * Copyright 2002-2005 The Apache Software Foundation.

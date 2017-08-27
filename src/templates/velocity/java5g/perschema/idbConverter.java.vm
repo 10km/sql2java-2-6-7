@@ -1,8 +1,8 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-#set($npkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename($npkg, "IDbConverter.java")
-package $npkg;
+#set($gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($gpkg, "IDbConverter.java")
+package $gpkg;
 
 #foreach ( $table in $tables )
 import ${table.getPackage()}.${table.asBeanClass()}Base;

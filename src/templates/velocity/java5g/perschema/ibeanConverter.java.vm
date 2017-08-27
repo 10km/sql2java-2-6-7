@@ -1,7 +1,7 @@
 #parse( "header.include.vm" )
-#set($npkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename($npkg, "IBeanConverter.java")
-package $npkg;
+#set($gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($gpkg, "IBeanConverter.java")
+package $gpkg;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

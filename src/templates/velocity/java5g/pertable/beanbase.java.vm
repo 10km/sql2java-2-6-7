@@ -2,9 +2,9 @@
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
 #set ( $beanClass = $table.asBeanClassNSP() )
-#set($npkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename("$npkg", "${beanClass}.java")
-package $npkg;
+#set($gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename("$gpkg", "${beanClass}.java")
+package $gpkg;
 import java.io.Serializable;
 
 

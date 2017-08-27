@@ -1,16 +1,16 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-#set($npkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename("${npkg}.orm", "DbConverter.java")
-package ${npkg}.orm;
+#set($gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename("${gpkg}.orm", "DbConverter.java")
+package ${gpkg}.orm;
 
 import java.util.Vector;
-import ${npkg}.IBeanConverter;
-import ${npkg}.IDbConverter;
-import ${npkg}.BaseBean;
+import ${gpkg}.IBeanConverter;
+import ${gpkg}.IDbConverter;
+import ${gpkg}.BaseBean;
 
 #foreach ( $table in $tables )
-import ${npkg}.${table.asBeanClassNSP()};
+import ${gpkg}.${table.asBeanClassNSP()};
 #end
 #foreach ( $table in $tables )
 import ${table.getPackage()}.${table.asBeanClass()}Base;
