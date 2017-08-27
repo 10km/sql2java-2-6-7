@@ -225,16 +225,24 @@ public class ${beanClass}
     public String toString() {
         return new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[\n")
 #foreach ( $column in $columns )
+#if($column.getJavaType().equals('byte[]'))
+            .append("\t$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes\n")
+#else
             .append("\t$column.getName()=").append(${column.getGetMethod()}()).append("\n")
-#end
+#end#end
             .append("]\n")
             .toString();
     }
 
     @Override
     public int compareTo($beanClass object){
+#if($table.hasPrimaryKey())
+#set ($compareColumns = $primaryKeys)
+#else
+#set ($compareColumns = $columns)
+#end
         return new CompareToBuilder()
-#foreach ( $column in $columns )
+#foreach ( $column in $compareColumns )
             .append(${column.getGetMethod()}(), object.${column.getGetMethod()}())
 #end
             .toComparison();

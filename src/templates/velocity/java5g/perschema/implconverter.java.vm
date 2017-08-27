@@ -50,7 +50,7 @@ public class DbConverter implements IDbConverter {
 #end
 
     private final Vector<Object[]> converters= new Vector<Object[]>(){
-        private static final long serialVersionUID = -2915982403974349774L;
+        private static final long serialVersionUID = 1L;
         {
 #foreach ( $table in $tables )
             add(new Object[]{${table.asBeanClassNSP()}.class,${table.asBeanClass()}Base.class,#convertVar(${table.asBeanClassNSP()})});
