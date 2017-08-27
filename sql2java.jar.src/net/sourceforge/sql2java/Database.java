@@ -481,4 +481,8 @@ public class Database {
 		this.samePrefix= index<0?"":first.substring(0, index+1);
 		System.out.printf("samePrefix = [%s]\n", this.samePrefix);
 	}
+	
+	public String engineAsSubPackage() {
+		return this.engine.replaceAll("[\\W_]", "").toLowerCase();
+	}
 }
