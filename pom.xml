@@ -19,6 +19,8 @@
 	  -->
     <sql2java-config>../sql2java.properties</sql2java-config>
     <generated-src>../src/main/java</generated-src>
+    <!-- 当生成接口层代码时用于，指定数据库层代码的位置,不指定会导致编译报错,但不影响生成代码结果,  -->
+    <native-src></native-src>
     <!--<driver-jar>../lib/mysql-connector-java-5.1.43-bin.jar</driver-jar>-->
   </properties>
 	<build>
@@ -34,6 +36,7 @@
 						<property name="sql2java-config" value="${sql2java-config}"/>
 						<property name="generated-src" value="${generated-src}"/>
 						<property name="driver-jar" value="${driver-jar}"/>
+						<property name="ext-src" value="${native-src}"/>
 					</ant>
 				</target>
 				</configuration>
