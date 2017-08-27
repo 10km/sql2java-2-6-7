@@ -1,8 +1,10 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-#set($gpkg = $codewriter.getProperty('general.package') )
-$codewriter.setCurrentJavaFilename("${gpkg}.orm", "DbConverter.java")
-package ${gpkg}.orm;
+#set( $gpkg = $codewriter.getProperty('general.package') )
+#set( $subpkg=$db.engineAsSubPackage() )
+#set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+$codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "DbConverter.java")
+package ${gpkg}.${subpkg};
 
 import java.util.Vector;
 import ${gpkg}.IBeanConverter;
@@ -15,20 +17,36 @@ import ${gpkg}.${table.asBeanClassNSP()};
 #foreach ( $table in $tables )
 import ${table.getPackage()}.${table.asBeanClass()}Base;
 #end
-#macro( convertVar $c)_convert$c#end
+#macro( convertVar $c)_converter$c#end
 public class DbConverter implements IDbConverter {
 #foreach ( $table in $tables )
     public final IBeanConverter<${table.asBeanClassNSP()},${table.asBeanClass()}Base> #convertVar(${table.asBeanClassNSP()})=new IBeanConverter.AbstractHandle<${table.asBeanClassNSP()},${table.asBeanClass()}Base>(){
 
         @Override
         public ${table.asBeanClassNSP()} fromNative(${table.asBeanClass()}Base bean) {
-            return null;
+            ${table.asBeanClassNSP()} generalBean= new ${table.asBeanClassNSP()}();
+            generalBean.isNew(bean.isNew());
+#foreach ( $column in $table.columns )
+            if(bean.${column.getGetMethod()}() != null)
+                generalBean.$column.getSetMethod()(bean.${column.getGetMethod()}());
+#end
+            return generalBean;
         }
 
         @Override
         public ${table.asBeanClass()}Base toNative(${table.asBeanClassNSP()} bean) {
-            return null;
+            ${table.getPackage()}.${table.asBeanClass()} nativeBean= new ${table.getPackage()}.${table.asBeanClass()}();
+            nativeBean.isNew(bean.isNew());
+#foreach ( $column in $table.columns )
+#if( $ignorefields.contains($column.name) )// ignore field $column.name
+#end
+#if( $ignorefields.contains($column.name) )// #end            if(bean.${column.getGetMethod()}() != null)
+#if( $ignorefields.contains($column.name) )// #end                nativeBean.$column.getSetMethod()(bean.${column.getGetMethod()}());
+
+#end
+            return nativeBean;
         }};
+        
 #end
 
     private final Vector<Object[]> converters= new Vector<Object[]>(){
