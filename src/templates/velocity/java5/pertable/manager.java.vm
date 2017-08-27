@@ -700,7 +700,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
-#set ( $columnsOfFk = $foreignTable.getForeignKeysByFkName($fkName) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
         if( null != $table.asRefArg($fkName)) {
             $table.asRefArg($fkName) = ${foreignClassManager}.getInstance().save( $table.asRefArg($fkName) );
 #foreach ( $fk in $columnsOfFk ) 
