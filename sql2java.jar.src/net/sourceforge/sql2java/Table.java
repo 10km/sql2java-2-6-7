@@ -627,6 +627,10 @@ public class Table {
 		return this.convertName("Listener");
 	}
 
+	public String asListenerClassNSP() {
+		return this.convertNameNSP("Listener");
+	}
+	
 	public String asRendererClass() {
 		return this.convertName("Renderer");
 	}
