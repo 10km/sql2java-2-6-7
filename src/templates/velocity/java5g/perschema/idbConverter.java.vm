@@ -20,7 +20,7 @@ public interface IDbConverter {
      * @param nClass
      * @return
      */
-    public abstract<G extends BaseBean, N> IBeanConverter<G,N> getBeanConverter(Class<G> gClass,Class<N> nClass);
+    public abstract<G, N> IBeanConverter<G,N> getBeanConverter(Class<G> gClass,Class<N> nClass);
     /**
      * @param <G> general type
      * @param <N> native type
@@ -28,6 +28,6 @@ public interface IDbConverter {
      * @param nClass
      * @param converter
      */
-    public abstract <G extends BaseBean, N> void setBeanConverter(Class<G> gClass, Class<N> nClass, IBeanConverter<G,N>converter);
+    public abstract <G, N> void setBeanConverter(Class<G> gClass, Class<N> nClass, IBeanConverter<G,N>converter);
 
 }

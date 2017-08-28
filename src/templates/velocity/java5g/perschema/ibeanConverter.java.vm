@@ -12,7 +12,7 @@ import java.util.List;
  * @param <G> general type
  * @param <N> native type
  */
-public interface IBeanConverter<G extends BaseBean,N> {
+public interface IBeanConverter<G,N> {
 
 	/**
 	 * Default abstract implementation of {@link IBeanConverter}<br>
@@ -22,7 +22,7 @@ public interface IBeanConverter<G extends BaseBean,N> {
 	 * @param <G> general type
 	 * @param <N> native type
 	 */
-	public static abstract class  AbstractHandle <G extends BaseBean,N>implements IBeanConverter<G, N> {
+	public static abstract class  AbstractHandle <G,N>implements IBeanConverter<G, N> {
 		public AbstractHandle() {
 		}
 
