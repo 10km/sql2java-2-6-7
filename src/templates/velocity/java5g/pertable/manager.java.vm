@@ -26,11 +26,6 @@ import ${gpkg}.${linkedTable.asBeanClassNSP()};
 import ${gpkg}.TableListener;
 
 import ${pkg}.exception.DAOException;
-
-#foreach ($linkedTable in $linkedTables)
-import ${linkedTable.getPackage()}.${linkedTable.asBeanClass()};
-import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
-#end
 import ${table.getPackage()}.${managerClass};
 import ${table.getPackage()}.${nativeClass};
 import ${table.getPackage()}.${nativeListener};
@@ -653,7 +648,7 @@ public class $managerClassNSP
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-    put("${table.asRefArg($fkName)}",new Class<?>[]{${foreignClass}.class,${foreignNative}.class});
+    put("${table.asRefArg($fkName)}",new Class<?>[]{${foreignClass}.class,${foreignTable.getPackage()}.${foreignNative}.class});
 #end
 #end
     }} ;
@@ -765,12 +760,13 @@ public class $managerClassNSP
     //5.2 SET REFERENCED 
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
     {
-        if(null == bean || null == beanToSet) return null;
-#foreach ( $fk in $columnsOfFk ) 
-        bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
-#end 
-        bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
-        return this.dbConverter.get${foreignClass}Converter().fromNative(${foreignClassManager}.getInstance().save(this.dbConverter.get${foreignClass}Converter().toNative(beanToSet)));
+        try{
+            return this.dbConverter.get${foreignClass}Converter().fromNative(this.nativeManager.$table.getReferencedVarSetMethod($fkName)(this.beanConverter.toNative(bean),this.dbConverter.get${foreignClass}Converter().toNative(beanToSet)));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 #end
 #end
