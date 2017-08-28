@@ -1,0 +1,96 @@
+##$Id: listener.java.vm,v 1.1 2008/04/22 12:11:33 kameleono Exp $
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+#set ( $gpkg = $codewriter.getProperty('general.package') )
+#set ( $subpkg=$db.engineAsSubPackage() )
+#set ( $beanClass = $table.asBeanClassNSP() )
+#set ( $listenerClass = $table.asListenerClassNSP() )
+$codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${listenerClass}.java")
+package ${gpkg}.${subpkg};
+
+import ${gpkg}.TableListener;
+import ${gpkg}.${beanClass};
+
+/**
+ * Listener that is notified of $tablename table changes.
+ * @author guyadong
+ */
+public interface $listenerClass extends TableListener
+{
+    /**
+     * This adapter class provides default implementations for the
+     * methods described by the {@link $listenerClass} interface.<br>
+     * 
+     * @see $listenerClass
+     * @author sql2java
+     *
+     */
+    public static class Adapter implements $listenerClass{
+
+        @Override
+        public void beforeInsert($beanClass bean) {}
+
+        @Override
+        public void afterInsert($beanClass bean) {
+        }
+
+        @Override
+        public void beforeUpdate($beanClass bean) {}
+
+        @Override
+        public void afterUpdate($beanClass bean) {}
+
+        @Override
+        public void beforeDelete($beanClass bean) {}
+
+        @Override
+        public void afterDelete($beanClass bean) {}
+    }
+    /**
+     * Invoked just before inserting a $beanClass record into the database.
+     *
+     * @param bean the $beanClass that is about to be inserted
+     */
+    public void beforeInsert($beanClass bean);
+
+
+    /**
+     * Invoked just after a $beanClass record is inserted in the database.
+     *
+     * @param bean the $beanClass that was just inserted
+     */
+    public void afterInsert($beanClass bean);
+
+
+    /**
+     * Invoked just before updating a $beanClass record in the database.
+     *
+     * @param bean the $beanClass that is about to be updated
+     */
+    public void beforeUpdate($beanClass bean);
+
+
+    /**
+     * Invoked just after updating a $beanClass record in the database.
+     *
+     * @param bean the $beanClass that was just updated
+     */
+    public void afterUpdate($beanClass bean);
+
+
+    /**
+     * Invoked just before deleting a $beanClass record in the database.
+     *
+     * @param bean the $beanClass that is about to be deleted
+     */
+    public void beforeDelete($beanClass bean);
+
+
+    /**
+     * Invoked just after deleting a $beanClass record in the database.
+     *
+     * @param bean the $beanClass that was just deleted
+     */
+    public void afterDelete($beanClass bean);
+
+}
