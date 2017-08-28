@@ -5,11 +5,9 @@
 #set ( $subpkg=$db.engineAsSubPackage() )
 #set ( $beanClass = $table.asBeanClassNSP() )
 #set ( $listenerClass = $table.asListenerClassNSP() )
-$codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${listenerClass}.java")
-package ${gpkg}.${subpkg};
+$codewriter.setCurrentJavaFilename("${gpkg}", "${listenerClass}.java")
+package ${gpkg};
 
-import ${gpkg}.TableListener;
-import ${gpkg}.${beanClass};
 
 /**
  * Listener that is notified of $tablename table changes.

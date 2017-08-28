@@ -24,6 +24,7 @@ import ${gpkg}.IDbConverter;
 import ${gpkg}.${linkedTable.asBeanClassNSP()};
 #end
 import ${gpkg}.TableListener;
+import ${gpkg}.${listenerClass};
 
 import ${pkg}.exception.DAOException;
 import ${table.getPackage()}.${managerClass};
@@ -1669,7 +1670,7 @@ public class $managerClassNSP
     //_____________________________________________________________________
 
     /**
-     * Registers a unique $listenerClass listener.
+     * Registers a unique {@link $listenerClass} listener.
      */
     //35
     public void registerListener(TableListener listener)
