@@ -770,7 +770,7 @@ public class $managerClassNSP
         bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
 #end 
         bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
-        return ($www)this.dbConverter.get${foreignClass}Converter().fromNative(${foreignClassManager}.getInstance().save(this.dbConverter.get${foreignClass}Converter().toNative(beanToSet)));
+        return this.dbConverter.get${foreignClass}Converter().fromNative(${foreignClassManager}.getInstance().save(this.dbConverter.get${foreignClass}Converter().toNative(beanToSet)));
     }
 #end
 #end
