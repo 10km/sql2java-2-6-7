@@ -15,12 +15,17 @@ import ${gpkg}.${table.asBeanClassNSP()};
 #end
 #macro( convertVar $c)_converter$c#end
 
+/**
+ * {@link IDbConverter} implemention for $db.engine
+ * @author guyadong
+ *
+ */
 public class DbConverter implements IDbConverter {
 #foreach ( $table in $tables )
     public static final IBeanConverter<${table.asBeanClassNSP()},${table.getPackage()}.${table.asBeanClass()}> #convertVar(${table.asBeanClassNSP()})=new IBeanConverter.AbstractHandle<${table.asBeanClassNSP()},${table.getPackage()}.${table.asBeanClass()}>(){
 
         @Override
-        public ${table.asBeanClassNSP()} fromNative(${table.getPackage()}.${table.asBeanClass()} bean) {
+        public ${table.asBeanClassNSP()} fromRight(${table.getPackage()}.${table.asBeanClass()} bean) {
             ${table.asBeanClassNSP()} generalBean= new ${table.asBeanClassNSP()}();
             generalBean.isNew(bean.isNew());
 #foreach ( $column in $table.columns )
@@ -31,7 +36,7 @@ public class DbConverter implements IDbConverter {
         }
 
         @Override
-        public ${table.getPackage()}.${table.asBeanClass()} toNative(${table.asBeanClassNSP()} bean) {
+        public ${table.getPackage()}.${table.asBeanClass()} toRight(${table.asBeanClassNSP()} bean) {
             ${table.getPackage()}.${table.asBeanClass()} nativeBean= new ${table.getPackage()}.${table.asBeanClass()}();
             nativeBean.isNew(bean.isNew());
 #foreach ( $column in $table.columns )
@@ -57,28 +62,28 @@ public class DbConverter implements IDbConverter {
 #end
         }};
     
-    private static final <G,N> int getIndex(Class<G> gClass,Class<N> nClass){
+    private static final <L,R> int getIndex(Class<L> lClass,Class<R> rClass){
             Vector<Integer>find= new Vector<Integer>();
-            if(null!=gClass && null != nClass){
+            if(null!=lClass && null != rClass){
                 for(int i=0;i<converters.size();++i){
                     Object[] converter = converters.get(i);
-                    if(((Class<?>)converter[0]).isAssignableFrom(gClass) 
-                            && ((Class<?>)converter[1]).isAssignableFrom(nClass)){
+                    if(((Class<?>)converter[0]).isAssignableFrom(lClass) 
+                            && ((Class<?>)converter[1]).isAssignableFrom(rClass)){
                         return i;
                     }
                 }
-            }else if(null != gClass){
+            }else if(null != lClass){
                 for(int i=0;i<converters.size();++i){
                     Object[] converter = converters.get(i);
-                    if(((Class<?>)converter[0]).isAssignableFrom(gClass) 
+                    if(((Class<?>)converter[0]).isAssignableFrom(lClass) 
                             ){
                         find.add(i);
                     }
                 }
-            }else if(null != nClass){
+            }else if(null != rClass){
                 for(int i=0;i<converters.size();++i){
                     Object[] converter = converters.get(i);
-                    if(((Class<?>)converter[1]).isAssignableFrom(nClass)){
+                    if(((Class<?>)converter[1]).isAssignableFrom(rClass)){
                         find.add(i);
                     }
                 }
@@ -88,22 +93,22 @@ public class DbConverter implements IDbConverter {
         
     @Override
     @SuppressWarnings("unchecked")
-    public <G,N>IBeanConverter<G,N>getBeanConverter(Class<G> gClass,Class<N> nClass){
-        int index = getIndex(gClass, nClass);
+    public <L,R>IBeanConverter<L,R>getBeanConverter(Class<L> lClass,Class<R> rClass){
+        int index = getIndex(lClass, rClass);
         if(index<0)
             throw new IllegalArgumentException(
                     String.format("not found converter for (%s,%s)"
-                            ,null==gClass?"null":gClass.getSimpleName()
-                            ,null==nClass?"null":nClass.getSimpleName()));
-        return (IBeanConverter<G, N>) converters.get(index)[2];
+                            ,null==lClass?"null":lClass.getSimpleName()
+                            ,null==rClass?"null":rClass.getSimpleName()));
+        return (IBeanConverter<L, R>) converters.get(index)[2];
     }
     
     @Override
-    public synchronized <G,N>void setBeanConverter(Class<G> gClass,Class<N> nClass,IBeanConverter<G,N>converter){
-        if(null == gClass || null == nClass || null == converter)
+    public synchronized <L,R>void setBeanConverter(Class<L> lClass,Class<R> rClass,IBeanConverter<L,R>converter){
+        if(null == lClass || null == rClass || null == converter)
             throw new NullPointerException();
-        Object[] c = new Object[]{gClass,nClass,converter};
-        int index = getIndex(gClass, nClass);
+        Object[] c = new Object[]{lClass,rClass,converter};
+        int index = getIndex(lClass, rClass);
         if(index<0){
             converters.add(c);
         }else{

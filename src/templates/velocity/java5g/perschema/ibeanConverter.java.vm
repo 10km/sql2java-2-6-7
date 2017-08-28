@@ -7,72 +7,73 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * 
  * @author guyadong
  *
- * @param <G> general type
- * @param <N> native type
+ * @param <L> left type
+ * @param <R> right type
  */
-public interface IBeanConverter<G,N> {
+public interface IBeanConverter<L,R> {
 
 	/**
 	 * Default abstract implementation of {@link IBeanConverter}<br>
 	 * 
 	 * @author guyadong
 	 *
-	 * @param <G> general type
-	 * @param <N> native type
+	 * @param <L> left type
+	 * @param <R> right type
 	 */
-	public static abstract class  AbstractHandle <G,N>implements IBeanConverter<G, N> {
+	public static abstract class  AbstractHandle <L,R>implements IBeanConverter<L, R> {
 		public AbstractHandle() {
 		}
 
 		@Override
-		public N[] toNative(G[] beans) {
+		public R[] toRight(L[] beans) {
 			if(null==beans)return null;
 			@SuppressWarnings("unchecked")
-			N[] na = (N[]) new Object[beans.length];
+			R[] na = (R[]) new Object[beans.length];
 			for(int i=0;i<beans.length;++i){
-				na[i]=this.toNative(beans[i]);
+				na[i]=this.toRight(beans[i]);
 			}				
 			return na;
 		}
 
 		@Override
-		public G[] fromNative(N[] beans) {
+		public L[] fromRight(R[] beans) {
 			if(null==beans)return null;
 			@SuppressWarnings("unchecked")
-			G[] na = (G[]) new Object[beans.length];
+			L[] na = (L[]) new Object[beans.length];
 			for(int i=0;i<beans.length;++i){
-				na[i]=this.fromNative(beans[i]);
+				na[i]=this.fromRight(beans[i]);
 			}				
 			return na;
 		}
 
 		@Override
-		public List<N> toNative(Collection<G> beans) {
+		public List<R> toRight(Collection<L> beans) {
 			if(null==beans)return null;
-			ArrayList<N> na = new ArrayList<N>();
-			for(G g:beans){
-				na.add(this.toNative(g));
+			ArrayList<R> na = new ArrayList<R>();
+			for(L g:beans){
+				na.add(this.toRight(g));
 			}
 			return na;
 		}
 
 		@Override
-		public List<G> fromNative(Collection<N> beans) {
+		public List<L> fromRight(Collection<R> beans) {
 			if(null==beans)return null;
-			ArrayList<G> na = new ArrayList<G>();
-			for(N n:beans){
-				na.add(this.fromNative(n));
+			ArrayList<L> na = new ArrayList<L>();
+			for(R n:beans){
+				na.add(this.fromRight(n));
 			}
 			return na;
 		}
 	}
-	public G fromNative(N bean);
-	public N toNative( G bean);
-	public N[] toNative(G[] beans);
-	public G[] fromNative(N[] beans);
-	public List<N> toNative(Collection<G> beans);
-	public List<G> fromNative(Collection<N> beans);
+	public L fromRight(R bean);
+	public R toRight( L bean);
+	public R[] toRight(L[] beans);
+	public L[] fromRight(R[] beans);
+	public List<R> toRight(Collection<L> beans);
+	public List<L> fromRight(Collection<R> beans);
 
 }

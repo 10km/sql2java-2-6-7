@@ -184,7 +184,7 @@ public class $managerClassNSP
     public $beanClass loadByPrimaryKey($keys)
     {
         try{
-            return this.beanConverter.fromNative(nativeManager.loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',')));
+            return this.beanConverter.fromRight(nativeManager.loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',')));
         }
         catch(DAOException e)
         {
@@ -204,7 +204,7 @@ public class $managerClassNSP
     public $beanClass loadByPrimaryKey(${beanClass} bean)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadByPrimaryKey(this.beanConverter.toNative(bean)));
+            return this.beanConverter.fromRight(this.nativeManager.loadByPrimaryKey(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -284,7 +284,7 @@ public class $managerClassNSP
     public int deleteByPrimaryKey(${beanClass} bean)
     {
         try{
-            return this.nativeManager.deleteByPrimaryKey(this.beanConverter.toNative(bean));
+            return this.nativeManager.deleteByPrimaryKey(this.beanConverter.toRight(bean));
         }
         catch(DAOException e)
         {
@@ -353,7 +353,7 @@ public class $managerClassNSP
     //@Override
     public <T> T[] getImportedBeans($beanClass bean,String fkName){
         try {
-            return nativeManager.getImportedBeans( this.beanConverter.toNative(bean),fkName);
+            return nativeManager.getImportedBeans( this.beanConverter.toRight(bean),fkName);
         }
         catch(DAOException e)
         {
@@ -374,7 +374,7 @@ public class $managerClassNSP
     //@Override
     public <T> List<T> getImportedBeansAsList($beanClass bean,String fkName){
         try {
-            return nativeManager.getImportedBeansAsList( this.beanConverter.toNative(bean),fkName);
+            return nativeManager.getImportedBeansAsList( this.beanConverter.toRight(bean),fkName);
         }
         catch(DAOException e)
         {
@@ -397,7 +397,7 @@ public class $managerClassNSP
     //@Override
     public <T> T[] setImportedBeans($beanClass bean,T[] importedBeans,String fkName){
         try {
-            return nativeManager.setImportedBeans( this.beanConverter.toNative(bean),importedBeans,fkName);
+            return nativeManager.setImportedBeans( this.beanConverter.toRight(bean),importedBeans,fkName);
         }
         catch(DAOException e)
         {
@@ -420,7 +420,7 @@ public class $managerClassNSP
     //@Override
     public <T extends Collection<$beanClass>> T setImportedBeans($beanClass bean,T importedBeans,String fkName){
         try {
-            return (T) this.beanConverter.fromNative(nativeManager.setImportedBeans( this.beanConverter.toNative(bean),this.beanConverter.toNative(importedBeans),fkName));
+            return (T) this.beanConverter.fromRight(nativeManager.setImportedBeans( this.beanConverter.toRight(bean),this.beanConverter.toRight(importedBeans),fkName));
         }
         catch(DAOException e)
         {
@@ -469,7 +469,7 @@ public class $managerClassNSP
     public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean)
     {
         try {
-            return this.dbConverter.get${importedClass}Converter().fromNative(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}( this.beanConverter.toNative(bean)));
+            return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}( this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -487,7 +487,7 @@ public class $managerClassNSP
     public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
     {
         try {
-            return this.dbConverter.get${importedClass}Converter().fromNative(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toNative(bean)));
+            return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -507,9 +507,9 @@ public class $managerClassNSP
     public $importedClass[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , $importedClass[] importedBeans)
     {
         try {
-            return this.dbConverter.get${importedClass}Converter().fromNative(this.nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
-                 this.beanConverter.toNative(bean),
-                this.dbConverter.get${importedClass}Converter().toNative(importedBeans)
+            return this.dbConverter.get${importedClass}Converter().fromRight(this.nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
+                 this.beanConverter.toRight(bean),
+                this.dbConverter.get${importedClass}Converter().toRight(importedBeans)
                 ));
         }
         catch(DAOException e)
@@ -531,9 +531,9 @@ public class $managerClassNSP
     public <T extends Collection<$importedClass>> T ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , T importedBeans)
     {
         try {
-            return (T) this.dbConverter.get${importedClass}Converter().fromNative(nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
-                 this.beanConverter.toNative(bean),
-                this.dbConverter.get${importedClass}Converter().toNative(importedBeans)
+            return (T) this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
+                 this.beanConverter.toRight(bean),
+                this.dbConverter.get${importedClass}Converter().toRight(importedBeans)
                 ));
         }
         catch(DAOException e)
@@ -565,9 +565,9 @@ public class $managerClassNSP
         #foreachImportedTables( ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
         try{
-            return this.beanConverter.fromNative(nativeManager.save(this.beanConverter.toNative(bean)
-            #foreachForeignTables( ", this.dbConverter.get${m_foreignClass}Converter().toNative($table.asRefArg($m_fkName)) " '' '')
-            #foreachImportedTables( ", this.dbConverter.get${m_importedClass}Converter().toNative($m_importedTable.asImpArg($m_fkName))  " '' '')));
+            return this.beanConverter.fromRight(nativeManager.save(this.beanConverter.toRight(bean)
+            #foreachForeignTables( ", this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName)) " '' '')
+            #foreachImportedTables( ", this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName))  " '' '')));
         }
         catch(DAOException e)
         {
@@ -606,9 +606,9 @@ public class $managerClassNSP
         #foreachImportedTables( ", Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
         try{
-            return this.beanConverter.fromNative(nativeManager.save(this.beanConverter.toNative(bean)
-            #foreachForeignTables( ", this.dbConverter.get${m_foreignClass}Converter().toNative($table.asRefArg($m_fkName)) " '' '')
-            #foreachImportedTables( ", this.dbConverter.get${m_importedClass}Converter().toNative($m_importedTable.asImpArg($m_fkName))  " '' '')));
+            return this.beanConverter.fromRight(nativeManager.save(this.beanConverter.toRight(bean)
+            #foreachForeignTables( ", this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName)) " '' '')
+            #foreachImportedTables( ", this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName))  " '' '')));
         }
         catch(DAOException e)
         {
@@ -667,7 +667,7 @@ public class $managerClassNSP
     //@Override
     public <T> T getReferencedBean($beanClass bean,String fkName){
         try {
-            return this.nativeManager.getReferencedBean( this.beanConverter.toNative(bean), fkName);
+            return this.nativeManager.getReferencedBean( this.beanConverter.toRight(bean), fkName);
         }
         catch(DAOException e)
         {
@@ -699,7 +699,7 @@ public class $managerClassNSP
             IBeanConverter converter=this.dbConverter.getBeanConverter(beanToSet.getClass(),types[1]);
             if( null == converter )
                 throw new IllegalArgumentException(String.format("invalid type of 'beanToSet' :%s",beanToSet.getClass().getName()));
-            return (T) converter.fromNative(this.nativeManager.setReferencedBean( this.beanConverter.toNative(bean), converter.toNative(beanToSet), fkName));
+            return (T) converter.fromRight(this.nativeManager.setReferencedBean( this.beanConverter.toRight(bean), converter.toRight(beanToSet), fkName));
         }
         catch(DAOException e)
         {
@@ -741,7 +741,7 @@ public class $managerClassNSP
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
     {
         try{
-            return this.dbConverter.get${foreignClass}Converter().fromNative(this.nativeManager.$table.getReferencedVarGetMethod($fkName)(this.beanConverter.toNative(bean)));
+            return this.dbConverter.get${foreignClass}Converter().fromRight(this.nativeManager.$table.getReferencedVarGetMethod($fkName)(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -762,7 +762,7 @@ public class $managerClassNSP
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
     {
         try{
-            return this.dbConverter.get${foreignClass}Converter().fromNative(this.nativeManager.$table.getReferencedVarSetMethod($fkName)(this.beanConverter.toNative(bean),this.dbConverter.get${foreignClass}Converter().toNative(beanToSet)));
+            return this.dbConverter.get${foreignClass}Converter().fromRight(this.nativeManager.$table.getReferencedVarSetMethod($fkName)(this.beanConverter.toRight(bean),this.dbConverter.get${foreignClass}Converter().toRight(beanToSet)));
         }
         catch(DAOException e)
         {
@@ -785,7 +785,7 @@ public class $managerClassNSP
     public $beanClass[] loadAll()
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadUsingTemplate(null));
+            return this.beanConverter.fromRight(this.nativeManager.loadUsingTemplate(null));
         }
         catch(DAOException e)
         {
@@ -977,7 +977,7 @@ public class $managerClassNSP
     public List<$beanClass> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadByWhereAsList(where,fieldList,startRow,numRows));
+            return this.beanConverter.fromRight(this.nativeManager.loadByWhereAsList(where,fieldList,startRow,numRows));
         }
         catch(DAOException e)
         {
@@ -1000,7 +1000,7 @@ public class $managerClassNSP
     public int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action action)
     {
         try{
-            return this.nativeManager.loadByWhereForAction(where,fieldList,startRow,numRows,this.toNative(action));
+            return this.nativeManager.loadByWhereForAction(where,fieldList,startRow,numRows,this.toRight(action));
         }
         catch(DAOException e)
         {
@@ -1068,7 +1068,7 @@ public class $managerClassNSP
     public $beanClass insert($beanClass bean)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.insert(this.beanConverter.toNative(bean)));
+            return this.beanConverter.fromRight(this.nativeManager.insert(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -1086,7 +1086,7 @@ public class $managerClassNSP
     public $beanClass update($beanClass bean)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.update(this.beanConverter.toNative(bean)));
+            return this.beanConverter.fromRight(this.nativeManager.update(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -1270,7 +1270,7 @@ public class $managerClassNSP
     public $beanClass loadUniqueUsingTemplate(${beanClass} bean)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadUniqueUsingTemplate(this.beanConverter.toNative(bean)));
+            return this.beanConverter.fromRight(this.nativeManager.loadUniqueUsingTemplate(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -1383,7 +1383,7 @@ public class $managerClassNSP
     public List<$beanClass> loadUsingTemplateAsList(${beanClass} beanBase, int startRow, int numRows, int searchType)
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadUsingTemplateAsList(this.beanConverter.toNative(beanBase),startRow,numRows,searchType));
+            return this.beanConverter.fromRight(this.nativeManager.loadUsingTemplateAsList(this.beanConverter.toRight(beanBase),startRow,numRows,searchType));
         }
         catch(DAOException e)
         {
@@ -1404,7 +1404,7 @@ public class $managerClassNSP
     public int loadUsingTemplate(${beanClass} beanBase, int[] fieldList, int startRow, int numRows,int searchType, Action action)
     {
         try {
-            return this.nativeManager.loadUsingTemplate(this.beanConverter.toNative(beanBase),fieldList,startRow,numRows,searchType,this.toNative(action));
+            return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(beanBase),fieldList,startRow,numRows,searchType,this.toRight(action));
         }
         catch(DAOException e)
         {
@@ -1421,7 +1421,7 @@ public class $managerClassNSP
     public int deleteUsingTemplate(${beanClass} beanBase)
     {
         try{
-            return this.nativeManager.deleteUsingTemplate(this.beanConverter.toNative(beanBase));
+            return this.nativeManager.deleteUsingTemplate(this.beanConverter.toRight(beanBase));
         }
         catch(DAOException e)
         {
@@ -1449,7 +1449,7 @@ public class $managerClassNSP
     public $beanClass loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
@@ -1469,7 +1469,7 @@ public class $managerClassNSP
     public $beanClass[] loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
@@ -1488,7 +1488,7 @@ public class $managerClassNSP
     public List<$beanClass> loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
@@ -1553,7 +1553,7 @@ public class $managerClassNSP
     //22 MANY TO MANY
     public $strLinkedBean[] load${strLinkedCore}Via$strRelationCore($beanClass bean) 
     {
-         return this.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toNative(bean), 1, -1);
+         return this.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toRight(bean), 1, -1);
     }
 
     /**
@@ -1569,7 +1569,7 @@ public class $managerClassNSP
     {
         try
         {
-            return this.dbConverter.get${$strLinkedBean}Converter.fromNative(this.nativeManager.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toNative(bean), 1, -1));
+            return this.dbConverter.get${$strLinkedBean}Converter.fromRight(this.nativeManager.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toRight(bean), 1, -1));
         }
         catch(DAOException e)
         {
@@ -1655,7 +1655,7 @@ public class $managerClassNSP
     public int countUsingTemplate(${beanClass} beanBase, int startRow, int numRows, int searchType)
     {
         try{
-            return this.nativeManager.countUsingTemplate(this.beanConverter.toNative(beanBase),startRow,numRows,searchType);
+            return this.nativeManager.countUsingTemplate(this.beanConverter.toRight(beanBase),startRow,numRows,searchType);
         }
         catch(DAOException e)
         {
@@ -1675,42 +1675,42 @@ public class $managerClassNSP
     //35
     public void registerListener(TableListener listener)
     {
-        this.nativeManager.registerListener(this.toNative(($listenerClass)listener));
+        this.nativeManager.registerListener(this.toRight(($listenerClass)listener));
     }
 
-    private $nativeListener toNative(final $listenerClass listener) {
+    private $nativeListener toRight(final $listenerClass listener) {
         return null == listener ?null:new $nativeListener (){
 
             @Override
             public void beforeInsert($nativeClass bean) throws DAOException {
-                listener.beforeInsert(${managerClassNSP}.this.beanConverter.fromNative(bean));                
+                listener.beforeInsert(${managerClassNSP}.this.beanConverter.fromRight(bean));                
             }
 
             @Override
             public void afterInsert($nativeClass bean) throws DAOException {
-                listener.afterInsert(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                listener.afterInsert(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 
             }
 
             @Override
             public void beforeUpdate($nativeClass bean) throws DAOException {
-                listener.beforeUpdate(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                listener.beforeUpdate(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 
             }
 
             @Override
             public void afterUpdate($nativeClass bean) throws DAOException {
-                listener.afterUpdate(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                listener.afterUpdate(${managerClassNSP}.this.beanConverter.fromRight(bean));
             }
 
             @Override
             public void beforeDelete($nativeClass bean) throws DAOException {
-                listener.beforeDelete(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                listener.beforeDelete(${managerClassNSP}.this.beanConverter.fromRight(bean));
             }
 
             @Override
             public void afterDelete($nativeClass bean) throws DAOException {
-                listener.afterDelete(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                listener.afterDelete(${managerClassNSP}.this.beanConverter.fromRight(bean));
             }};
     }
 
@@ -1752,7 +1752,7 @@ public class $managerClassNSP
      */
     public List<$beanClass> loadBySqlAsList(String sql, Object[] argList, int[] fieldList){
         try{
-            return this.beanConverter.fromNative(this.nativeManager.loadBySqlAsList(sql,argList,fieldList));
+            return this.beanConverter.fromRight(this.nativeManager.loadBySqlAsList(sql,argList,fieldList));
         }
         catch(DAOException e)
         {
@@ -1782,19 +1782,19 @@ public class $managerClassNSP
             throw new RuntimeException(e);
         }
     }
-    private ${managerClass}.Action toNative(final Action action){
+    private ${managerClass}.Action toRight(final Action action){
         if(null == action)
             throw new NullPointerException();
         return new ${managerClass}.Action(){
 
             @Override
             public void call($nativeClass bean) {
-                action.call(${managerClassNSP}.this.beanConverter.fromNative(bean));
+                action.call(${managerClassNSP}.this.beanConverter.fromRight(bean));
             }
 
             @Override
             public $nativeClass getBean() {
-                return  ${managerClassNSP}.this.beanConverter.toNative(action.getBean());
+                return  ${managerClassNSP}.this.beanConverter.toRight(action.getBean());
             }};
     }
 }
