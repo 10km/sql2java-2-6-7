@@ -1973,6 +1973,27 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //_____________________________________________________________________
 
 #foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+    /**
+     * Retrieves an unique $beanClass using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
+#end
+     * @return a list of $beanClass
+     * @throws DAOException
+     */
+    public $beanClass loadBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    {
+        ${beanClass} bean = this.createBean();
+#foreach ( $column in $index.getIndexColumnsList() )
+        if( null == ${column.getVarName()})
+            throw new IllegalArgumentException("the key '${column.getVarName()}'  must not be null");
+        bean.${column.getSetMethod()}(${column.getVarName()});
+#end
+        return loadUniqueUsingTemplate(bean);
+    }
+#else ## $index.isUnique()
     /**
      * Retrieves an array of $beanClass using the ${index.getName()} index.
      *
@@ -2004,7 +2025,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
         return loadUsingTemplateAsList(bean);
     }
-    
+#end ## $index.isUnique()    
     /**
      * Deletes rows using the ${index.getName()} index.
      *

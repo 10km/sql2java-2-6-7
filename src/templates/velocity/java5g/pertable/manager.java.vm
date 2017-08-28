@@ -1436,6 +1436,27 @@ public class $managerClassNSP
     //_____________________________________________________________________
 
 #foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+    /**
+     * Retrieves an unique $beanClass using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
+#end
+     * @return an array of $beanClass
+     */
+    public $beanClass loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    {
+        try{
+            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+#else ## $index.isUnique()
     /**
      * Retrieves an array of $beanClass using the ${index.getName()} index.
      *
@@ -1446,11 +1467,13 @@ public class $managerClassNSP
      */
     public $beanClass[] loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        $beanClass bean= new $beanClass ();
-#foreach ( $column in $index.getIndexColumnsList() )
-        bean.${column.getSetMethod()}(${column.getVarName()});
-#end
-        return loadUsingTemplate(bean);
+        try{
+            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
@@ -1461,15 +1484,18 @@ public class $managerClassNSP
 #end
      * @return a list of $beanClass
      */
-    public List<$beanClass> loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end)
+    public List<$beanClass> loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        ${beanClass} bean = new $beanClass ();
-#foreach ( $column in $index.getIndexColumnsList() )
-        bean.${column.getSetMethod()}(${column.getVarName()});
-#end
-        return loadUsingTemplateAsList(bean);
+        try{
+            return this.beanConverter.fromNative(this.nativeManager.loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
-    
+#end ## $index.isUnique()
+
     /**
      * Deletes rows using the ${index.getName()} index.
      *
@@ -1478,13 +1504,15 @@ public class $managerClassNSP
 #end
      * @return the number of deleted objects
      */
-    public int deleteBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end)
+    public int deleteBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        ${beanClass} bean = new $beanClass ();
-#foreach ( $column in $index.getIndexColumnsList() )
-        bean.${column.getSetMethod()}(${column.getVarName()});
-#end
-        return deleteUsingTemplate(bean);
+        try{
+            return this.nativeManager.deleteBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ','));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
     
 #end
