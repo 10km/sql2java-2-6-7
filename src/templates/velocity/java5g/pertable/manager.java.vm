@@ -131,8 +131,8 @@ public class $managerClassNSP
         return PRIMARYKEY_NAMES;
     }
     private $managerClass nativeManager = ${managerClass}.getInstance();
-    private IDbConverter dbConverter = new DbConverter();
-    private IBeanConverter<$beanClass,${nativeClass}> beanConverter;
+    private IDbConverter dbConverter = DbConverter.INSTANCE;
+    private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
 
     /**
