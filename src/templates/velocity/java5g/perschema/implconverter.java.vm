@@ -13,17 +13,14 @@ import ${gpkg}.IDbConverter;
 #foreach ( $table in $tables )
 import ${gpkg}.${table.asBeanClassNSP()};
 #end
-#foreach ( $table in $tables )
-import ${table.getPackage()}.${table.asBeanClass()};
-#end
 #macro( convertVar $c)_converter$c#end
 
 public class DbConverter implements IDbConverter {
 #foreach ( $table in $tables )
-    public static final IBeanConverter<${table.asBeanClassNSP()},${table.asBeanClass()}> #convertVar(${table.asBeanClassNSP()})=new IBeanConverter.AbstractHandle<${table.asBeanClassNSP()},${table.asBeanClass()}>(){
+    public static final IBeanConverter<${table.asBeanClassNSP()},${table.getPackage()}.${table.asBeanClass()}> #convertVar(${table.asBeanClassNSP()})=new IBeanConverter.AbstractHandle<${table.asBeanClassNSP()},${table.getPackage()}.${table.asBeanClass()}>(){
 
         @Override
-        public ${table.asBeanClassNSP()} fromNative(${table.asBeanClass()} bean) {
+        public ${table.asBeanClassNSP()} fromNative(${table.getPackage()}.${table.asBeanClass()} bean) {
             ${table.asBeanClassNSP()} generalBean= new ${table.asBeanClassNSP()}();
             generalBean.isNew(bean.isNew());
 #foreach ( $column in $table.columns )
@@ -34,7 +31,7 @@ public class DbConverter implements IDbConverter {
         }
 
         @Override
-        public ${table.asBeanClass()} toNative(${table.asBeanClassNSP()} bean) {
+        public ${table.getPackage()}.${table.asBeanClass()} toNative(${table.asBeanClassNSP()} bean) {
             ${table.getPackage()}.${table.asBeanClass()} nativeBean= new ${table.getPackage()}.${table.asBeanClass()}();
             nativeBean.isNew(bean.isNew());
 #foreach ( $column in $table.columns )
@@ -56,7 +53,7 @@ public class DbConverter implements IDbConverter {
         private static final long serialVersionUID = 1L;
         {
 #foreach ( $table in $tables )
-            add(new Object[]{${table.asBeanClassNSP()}.class,${table.asBeanClass()}.class,#convertVar(${table.asBeanClassNSP()})});
+            add(new Object[]{${table.asBeanClassNSP()}.class,${table.getPackage()}.${table.asBeanClass()}.class,#convertVar(${table.asBeanClassNSP()})});
 #end
         }};
     
@@ -116,7 +113,7 @@ public class DbConverter implements IDbConverter {
 #foreach ( $table in $tables )
 
     @Override
-    public IBeanConverter<${table.asBeanClassNSP()}, ${table.asBeanClass()}> get${table.asBeanClassNSP()}Converter() {
+    public IBeanConverter<${table.asBeanClassNSP()}, ${table.getPackage()}.${table.asBeanClass()}> get${table.asBeanClassNSP()}Converter() {
         return #convertVar(${table.asBeanClassNSP()});
     }
 #end    
