@@ -553,18 +553,32 @@ public class Table {
 	public String getJavaName() {
 		return this.convertName("");
 	}
-
+	
+	private String getBasename(boolean nsp){
+		String basename =nsp
+				? this.getName().replaceFirst(this.getDatabase().getSamePrefix(), "")
+				: this.getName();
+		return  "".equals(CodeWriter.getClassPrefix())
+				? basename
+				: CodeWriter.getClassPrefix() + "_" + basename;
+	}
+	
 	public String convertName(String value) {
-		String basename = "";
-		basename = "".equals(CodeWriter.getClassPrefix())
-				? this.getName()
-				: CodeWriter.getClassPrefix() + "_" + this.getName();
+		String basename = getBasename(false);
 		if ("".equals(value)) {
 			return StringUtilities.convertName((String) basename, (boolean) false);
 		}
 		return StringUtilities.convertName((String) (basename + "_" + value), (boolean) false);
 	}
-
+	
+	public String convertNameNSP(String value) {
+		String basename = getBasename(true) ;
+		if ("".equals(value)) {
+			return StringUtilities.convertName((String) basename, (boolean) false);
+		}
+		return StringUtilities.convertName((String) (basename + "_" + value), (boolean) false);
+	}
+	
 	public String asClass(String suffix) {
 		return this.convertName(suffix);
 	}
@@ -576,14 +590,9 @@ public class Table {
 	public String asBeanClass() {
 		return this.convertName("Bean");
 	}
-	
+		
 	public String asBeanClassNSP() {
-		String basename = "";
-		String nsp = this.getName().replaceFirst(this.getDatabase().getSamePrefix(), "");
-		basename = "".equals(CodeWriter.getClassPrefix())
-				? nsp
-				: CodeWriter.getClassPrefix() + "_" + nsp;
-		return StringUtilities.convertName((String) (basename + "_" + "Bean"), (boolean) false);		
+		return this.convertNameNSP("Bean");	
 	}
 	
 	public String asCacheClass() {
@@ -674,6 +683,10 @@ public class Table {
 		return this.convertName("Manager");
 	}
 
+	public String asManagerClassNSP() {
+		return this.convertNameNSP("Manager");
+	}
+	
 	public String asManagerImplClass() {
 		return this.convertName("Manager_Impl");
 	}
