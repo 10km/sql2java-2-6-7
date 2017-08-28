@@ -5,12 +5,12 @@ $codewriter.setCurrentJavaFilename($gpkg, "IDbConverter.java")
 package $gpkg;
 
 #foreach ( $table in $tables )
-import ${table.getPackage()}.${table.asBeanClass()}Base;
+import ${table.getPackage()}.${table.asBeanClass()};
 #end
 
 public interface IDbConverter {
 #foreach ( $table in $tables )
-    public abstract IBeanConverter<${table.asBeanClassNSP()}, ${table.asBeanClass()}Base> get${table.asBeanClassNSP()}Converter();
+    public abstract IBeanConverter<${table.asBeanClassNSP()}, ${table.asBeanClass()}> get${table.asBeanClassNSP()}Converter();
 #end
 
     /**

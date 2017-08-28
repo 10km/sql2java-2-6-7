@@ -13,19 +13,10 @@
 $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${managerClassNSP}.java")
 package ${gpkg}.${subpkg};
 
-import java.lang.ref.SoftReference;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
 import java.util.List;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.ArrayList;
 
-import ${gpkg}.BaseBean;
 import ${gpkg}.${beanClass};
 import ${gpkg}.IBeanConverter;
 import ${gpkg}.IDbConverter;
@@ -34,22 +25,15 @@ import ${gpkg}.${linkedTable.asBeanClassNSP()};
 #end
 import ${gpkg}.TableListener;
 
-import ${pkg}.Manager;
-import ${pkg}.TableManager;
-
 import ${pkg}.exception.DAOException;
-import ${pkg}.exception.DataAccessException;
-import ${pkg}.exception.ObjectRetrievalException;
 #if ( $table.hasVersionColumn() )
 import ${pkg}.exception.OptimisticLockingException;
 #end
 #foreach ($linkedTable in $linkedTables)
 import ${linkedTable.getPackage()}.${linkedTable.asBeanClass()};
-import ${linkedTable.getPackage()}.${linkedTable.asBeanClass()}Base;
 import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
 #end
 import ${table.getPackage()}.${managerClass};
-import ${table.getPackage()}.${nativeClass}Base;
 import ${table.getPackage()}.${nativeClass};
 import ${table.getPackage()}.${nativeListener};
 
@@ -154,7 +138,7 @@ public class $managerClassNSP
     }
     private $managerClass nativeManager = ${managerClass}.getInstance();
     private IDbConverter dbConverter = new DbConverter();
-    private IBeanConverter<$beanClass,${nativeClass}Base> beanConverter;
+    private IBeanConverter<$beanClass,${nativeClass}> beanConverter;
     private static $managerClassNSP singleton = new $managerClassNSP();
 
     /**
@@ -372,7 +356,6 @@ public class $managerClassNSP
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      */
-    @SuppressWarnings("unchecked")
     //@Override
     public <T> T[] getImportedBeans($beanClass bean,String fkName){
         try {
@@ -394,7 +377,6 @@ public class $managerClassNSP
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      */
-    @SuppressWarnings("unchecked")
     //@Override
     public <T> List<T> getImportedBeansAsList($beanClass bean,String fkName){
         try {
@@ -418,7 +400,6 @@ public class $managerClassNSP
 
      * @return importedBeans always
      */
-    @SuppressWarnings("unchecked")
     //@Override
     public <T> T[] setImportedBeans($beanClass bean,T[] importedBeans,String fkName){
         try {
@@ -445,7 +426,7 @@ public class $managerClassNSP
     //@Override
     public <T extends Collection<$beanClass>> T setImportedBeans($beanClass bean,T importedBeans,String fkName){
         try {        	
-            return (T) this.beanConverter.fromNative(nativeManager.setImportedBeans(($beanClass) this.beanConverter.toNative(bean),this.beanConverter.toNative(importedBeans),fkName));
+            return (T) this.beanConverter.fromNative(nativeManager.setImportedBeans(($nativeClass) this.beanConverter.toNative(bean),this.beanConverter.toNative(importedBeans),fkName));
         }
         catch(DAOException e)
         {
@@ -507,7 +488,6 @@ public class $managerClassNSP
      * FK_NAME:$fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
      */
     //3.2 GET IMPORTED
     public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
@@ -689,9 +669,7 @@ public class $managerClassNSP
      * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
-     * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
     //@Override
     public <T> T getReferencedBean($beanClass bean,String fkName){
         try {
@@ -714,11 +692,10 @@ public class $managerClassNSP
      * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
-     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     //@Override
-    public <T> T setReferencedBean($beanClass bean,T beanToSet,String fkName)throws DAOException{
+    public <T> T setReferencedBean($beanClass bean,T beanToSet,String fkName){
         try {
             if(null == beanToSet) return null;
             Class<?>[] types=REF_METHODS.get(fkName);
@@ -765,18 +742,18 @@ public class $managerClassNSP
      * FK_NAME : $fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
      */
     //3.2 GET REFERENCED VALUE
-    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DAOException
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
     {
-        if(null == bean)return null;
-        $foreignNative other = ${foreignClassManager}.getInstance().createBean();
-#foreach ( $fk in $columnsOfFk ) 
-        other.$fk.getForeignColumn().getSetMethod()(bean.$fk.getGetMethod()()); 
-#end 
-        bean.$table.getReferencedVarSetMethod($fkName)(this.dbConverter.get${foreignClass}Converter().fromNative(${foreignClassManager}.getInstance().loadUniqueUsingTemplate(other))); 
-        return bean.$table.getReferencedVarGetMethod($fkName)();
+        try{
+            return this.dbConverter.get${foreignClass}Converter().fromNative(this.nativeManager.$table.getReferencedVarGetMethod($fkName)(this.beanConverter.toNative(bean)));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        
     }
 
     /**
@@ -1158,7 +1135,6 @@ public class $managerClassNSP
      *
      * @param beans the $beanClass bean table to be saved
      * @return the saved $beanClass array.
-     * @throws DAOException
      * @see #save($beanClass[])
      */
     //15-3
@@ -1252,7 +1228,6 @@ public class $managerClassNSP
      *
      * @param beans the $beanClass bean table to be inserted
      * @return the saved $beanClass array.
-     * @throws DAOException
      */
     //17-2
     public <T extends Collection<$beanClass>> T update(T beans)
@@ -1351,7 +1326,6 @@ public class $managerClassNSP
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return all the $beanClass matching the template
-     * @throws DAOException
      */
     //20
     public $beanClass[] loadUsingTemplate(${beanClass} bean, int startRow, int numRows)
@@ -1478,19 +1452,11 @@ public class $managerClassNSP
      */
     public $beanClass[] loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        try{        
-            $beanClass bean= new $beanClass ();
+        $beanClass bean= new $beanClass ();
 #foreach ( $column in $index.getIndexColumnsList() )
-            bean.${column.getSetMethod()}(${column.getVarName()});
+        bean.${column.getSetMethod()}(${column.getVarName()});
 #end
-            return loadUsingTemplate(bean);
-##            return ($beanClass[])this.loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end${column.getVarName()}#end).toArray(new $beanClass[0]);
-        }
-        catch(DAOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
+        return loadUsingTemplate(bean);
     }
     
     /**
@@ -1500,9 +1466,8 @@ public class $managerClassNSP
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return a list of $beanClass
-     * @throws DAOException
      */
-    public List<$beanClass> loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public List<$beanClass> loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end)
     {
         ${beanClass} bean = new $beanClass ();
 #foreach ( $column in $index.getIndexColumnsList() )
@@ -1518,9 +1483,8 @@ public class $managerClassNSP
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return the number of deleted objects
-     * @throws DAOException
      */
-    public int deleteBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public int deleteBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end)
     {
         ${beanClass} bean = new $beanClass ();
 #foreach ( $column in $index.getIndexColumnsList() )
@@ -1550,7 +1514,8 @@ public class $managerClassNSP
     //_____________________________________________________________________
 #*      *##end
 #set ( $strLinkedCore = "$!{codewriter.getClassPrefix()}$lTable.asCoreClass()" )
-#set ( $strLinkedBean = "${lTable.asBeanClass()}" )
+#set ( $strLinkedBean = "${lTable.asBeanClassNSP()}" )
+#set ( $strLinkedNative = "${lTable.asBeanClass()}" )
 #set ( $strLinkedManager = "${lTable.asManagerClass()}" )
 #set ( $strRelationCore = "${rTable.asCoreClass()}" )
 #set ( $strRelationBean = "${rTable.asBeanClass()}" )
@@ -1561,12 +1526,11 @@ public class $managerClassNSP
      *
      * @param bean the $beanClass bean to be used
      * @return an array of $strLinkedBean
-     * @throws DAOException
      */
     //22 MANY TO MANY
-    public $strLinkedBean[] load${strLinkedCore}Via$strRelationCore($beanClass bean) throws DAOException
+    public $strLinkedBean[] load${strLinkedCore}Via$strRelationCore($beanClass bean) 
     {
-         return this.load${strLinkedCore}Via$strRelationCore(bean, 1, -1);
+         return this.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toNative(bean), 1, -1);
     }
 
     /**
@@ -1576,37 +1540,19 @@ public class $managerClassNSP
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return an array of $strLinkedBean
-     * @throws DAOException
      */
     //23 MANY TO MANY
-    public $strLinkedBean[] load${strLinkedCore}Via$strRelationCore($beanClass bean, int startRow, int numRows) throws DAOException
+    public $strLinkedBean[] load${strLinkedCore}Via$strRelationCore($beanClass bean, int startRow, int numRows)
     {
-         Connection c = null;
-         PreparedStatement ps = null;
-         String sql = " SELECT " + ${strLinkedManager}.ALL_FIELDS
-                         + " FROM $lName ${lName}L, $rName ${rName}R"
-                         + " WHERE "
-                         + "     ${rName}R.$localKey.getForeignColumn().getName() = ?"
-                         + " AND ${rName}R.$externalKey.getForeignColumn().getName() = ${lName}L.$externalKey.getName()";
-         try
-         {
-             c = this.getConnection();
-             ps = c.prepareStatement(sql,
-                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                     ResultSet.CONCUR_READ_ONLY);
-             $localKey.getPreparedStatementMethod("bean.$localKey.getGetMethod()()", 1)
-             return ${strLinkedManager}.getInstance().loadByPreparedStatement(ps, null, startRow, numRows);
-         }
-         catch (SQLException e)
-         {
-         	throw new DAOException(e.getMessage(), e);
-         }
-         finally
-         {
-            this.getManager().close(ps);
-            this.freeConnection(c);
-            sql = null;
-         }
+        try
+        {
+            return this.dbConverter.get${$strLinkedBean}Converter.fromNative(this.nativeManager.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toNative(bean), 1, -1));
+        }
+        catch(DAOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
     }
 #* *##end
 #* *##end
@@ -1783,7 +1729,7 @@ public class $managerClassNSP
      */
     public List<$beanClass> loadBySqlAsList(String sql, Object[] argList, int[] fieldList){
         try{
-            this.beanConverter.fromNative(this.nativeManager.loadBySqlAsList(sql,argList,fieldList));
+            return this.beanConverter.fromNative(this.nativeManager.loadBySqlAsList(sql,argList,fieldList));
         }
         catch(DAOException e)
         {
