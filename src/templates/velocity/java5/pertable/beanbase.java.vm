@@ -33,7 +33,7 @@ public class ${beanClass}Base
     #foreach( $implements in $implementsClasses )$implements #end
 #end
 {
-	private static final long serialVersionUID = ${table.getSerialVersionUID("${beanClass}Base")}L;
+	private static final long serialVersionUID = ${table.getSerialVersionUID("${table.getPackage()}.${beanClass}Base")}L;
 	
 #foreach ( $column in $columns )
 ##    private $column.getJavaType() $column.getVarName();   // generation without default values

@@ -25,6 +25,7 @@ import ${gpkg}.${linkedTable.asBeanClassNSP()};
 #end
 import ${gpkg}.TableListener;
 import ${gpkg}.${listenerClass};
+import ${gpkg}.WrapDAOException;
 
 import ${pkg}.exception.DAOException;
 import ${table.getPackage()}.${managerClass};
@@ -188,7 +189,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -208,7 +209,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #set( $keys = "" )    
@@ -269,7 +270,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -288,7 +289,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #else
@@ -357,7 +358,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -378,7 +379,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -401,7 +402,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -424,7 +425,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #else
@@ -473,7 +474,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -491,7 +492,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -514,7 +515,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -538,7 +539,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -571,7 +572,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     } 
     /**
@@ -612,7 +613,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }   
     /**
@@ -671,7 +672,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -703,7 +704,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #else
@@ -745,7 +746,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
         
     }
@@ -766,7 +767,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #end
@@ -789,7 +790,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -981,7 +982,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -1004,7 +1005,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1034,7 +1035,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1072,7 +1073,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1090,7 +1091,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1274,7 +1275,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
      }
 
@@ -1387,7 +1388,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }        
     }
     /**
@@ -1408,7 +1409,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     /**
@@ -1425,7 +1426,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1453,7 +1454,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1473,7 +1474,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     
@@ -1492,7 +1493,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 #end ## $index.isUnique()
@@ -1512,7 +1513,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     
@@ -1573,7 +1574,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
 
     }
@@ -1612,7 +1613,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1659,7 +1660,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1756,7 +1757,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
 
@@ -1768,7 +1769,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     
@@ -1779,7 +1780,7 @@ public class $managerClassNSP
         }
         catch(DAOException e)
         {
-            throw new RuntimeException(e);
+            throw new WrapDAOException(e);
         }
     }
     private ${managerClass}.Action toRight(final Action action){

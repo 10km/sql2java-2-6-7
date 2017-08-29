@@ -17,32 +17,8 @@ public class WrapDAOException extends RuntimeException
     /**
      * contructor
      */
-    public WrapDAOException()
-    {
-        super();
-    }
-
-    /**
-     * contructor
-     */
-    public WrapDAOException(String message)
-    {
-        super(message);
-    }
-
-    /**
-     * contructor
-     */
     public WrapDAOException(Throwable cause)
     {
         super(cause);
-    }
-
-    /**
-     * contructor
-     */
-    public WrapDAOException(String message, Throwable cause)
-    {
-        super(message, cause);
     }
 }

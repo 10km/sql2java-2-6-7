@@ -24,8 +24,8 @@ public class ${beanClass}
     #foreach( $implements in $implementsClasses )$implements #end
 #end
 {
-	private static final long serialVersionUID = ${table.getSerialVersionUID("${beanClass}")}L;
-	
+    private static final long serialVersionUID = ${table.getSerialVersionUID("${gpkg}.${beanClass}")}L;
+    
 #foreach ( $column in $columns )
 ##    private $column.getJavaType() $column.getVarName();   // generation without default values
 #if ( $column.getRemarks().length() > 0 )
