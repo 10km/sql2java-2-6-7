@@ -1573,10 +1573,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Saves a list of $beanClass beans into the database.
+     * Saves a collection of $beanClass beans into the database.
      *
      * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @return the saved $beanClass collection.
      * @throws DAOException
      */
     //15-2

@@ -33,7 +33,8 @@ import ${table.getPackage()}.${nativeClass};
 import ${table.getPackage()}.${nativeListener};
 
 /**
- * Handles database calls (save, load, count, etc...) for the $tablename table.
+ * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
+ * all {@link DAOException} be wrapped as {@link WrapDAOException} to throw.
 #if ( $table.hasRemarks() )
  * Remarks: $table.getRemarks()
 #end
@@ -131,15 +132,16 @@ public class $managerClassNSP
     public String[] getPrimarykeyNames() {
         return PRIMARYKEY_NAMES;
     }
+    
     private $managerClass nativeManager = ${managerClass}.getInstance();
     private IDbConverter dbConverter = DbConverter.INSTANCE;
     private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
 
     /**
-     * Get the $managerClassNSP singleton.
+     * Get the {@link $managerClassNSP} singleton.
      *
-     * @return $managerClassNSP
+     * @return {@link $managerClassNSP}
      */
     public static $managerClassNSP getInstance()
     {
@@ -158,7 +160,12 @@ public class $managerClassNSP
         return dbConverter;
     }
 
-    public void setDbConverter(IDbConverter dbConverter) {
+    /**
+     * set  {@link IDbConverter} as converter used by manager.<br>
+     * throw {@link NullPointerException} if {@code dbConverter} is null
+     * @param dbConverter
+     */
+    public synchronized void setDbConverter(IDbConverter dbConverter) {
         if( null == dbConverter)
             throw new NullPointerException();
         this.dbConverter = dbConverter;
