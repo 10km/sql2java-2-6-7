@@ -1001,7 +1001,7 @@ public class $managerClassNSP
     public int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action action)
     {
         try{
-            return this.nativeManager.loadByWhereForAction(where,fieldList,startRow,numRows,this.toRight(action));
+            return this.nativeManager.loadByWhereForAction(where,fieldList,startRow,numRows,this.toNative(action));
         }
         catch(DAOException e)
         {
@@ -1405,7 +1405,7 @@ public class $managerClassNSP
     public int loadUsingTemplate(${beanClass} beanBase, int[] fieldList, int startRow, int numRows,int searchType, Action action)
     {
         try {
-            return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(beanBase),fieldList,startRow,numRows,searchType,this.toRight(action));
+            return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(beanBase),fieldList,startRow,numRows,searchType,this.toNative(action));
         }
         catch(DAOException e)
         {
@@ -1676,10 +1676,10 @@ public class $managerClassNSP
     //35
     public void registerListener(TableListener listener)
     {
-        this.nativeManager.registerListener(this.toRight(($listenerClass)listener));
+        this.nativeManager.registerListener(this.toNative(($listenerClass)listener));
     }
 
-    private $nativeListener toRight(final $listenerClass listener) {
+    private $nativeListener toNative(final $listenerClass listener) {
         return null == listener ?null:new $nativeListener (){
 
             @Override
@@ -1783,7 +1783,7 @@ public class $managerClassNSP
             throw new WrapDAOException(e);
         }
     }
-    private ${managerClass}.Action toRight(final Action action){
+    private ${managerClass}.Action toNative(final Action action){
         if(null == action)
             throw new NullPointerException();
         return new ${managerClass}.Action(){
