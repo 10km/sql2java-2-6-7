@@ -516,7 +516,7 @@ public class $managerClassNSP
     {
         try {
             return this.dbConverter.get${importedClass}Converter().fromRight(this.nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
-                 this.beanConverter.toRight(bean),
+                this.beanConverter.toRight(bean),
                 this.dbConverter.get${importedClass}Converter().toRight(importedBeans)
                 ));
         }
@@ -540,7 +540,7 @@ public class $managerClassNSP
     {
         try {
             return (T) this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
-                 this.beanConverter.toRight(bean),
+                this.beanConverter.toRight(bean),
                 this.dbConverter.get${importedClass}Converter().toRight(importedBeans)
                 ));
         }
@@ -1076,7 +1076,7 @@ public class $managerClassNSP
     public $beanClass insert($beanClass bean)
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.insert(this.beanConverter.toRight(bean)));
+            return this.beanConverter.fromRight(bean,this.nativeManager.insert(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
@@ -1094,7 +1094,7 @@ public class $managerClassNSP
     public $beanClass update($beanClass bean)
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.update(this.beanConverter.toRight(bean)));
+            return this.beanConverter.fromRight(bean,this.nativeManager.update(this.beanConverter.toRight(bean)));
         }
         catch(DAOException e)
         {
