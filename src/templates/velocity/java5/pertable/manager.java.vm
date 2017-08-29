@@ -411,8 +411,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     @Override
     public <T> T[] getImportedBeans($beanClass bean,String fkName)throws DAOException{
         Object[] params = IMPORT_METHODS.get(fkName);
-        if(null==params)
-            throw new IllegalArgumentException("invalid fkName " + fkName);
+        if(null == params)
+            throw new IllegalArgumentException("invalid fkName: " + fkName);
         try {
             return (T[]) this.getClass().getMethod((String)params[0],bean.getClass()).invoke(this,bean);
         } catch (SecurityException e) {
@@ -538,14 +538,14 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Collection<?extends ${pkg}.FullBean<?>>> T setImportedBeans($beanClass bean,T importedBeans,String fkName)throws DAOException{
+    public <C extends Collection<?>> C setImportedBeans($beanClass bean,C importedBeans,String fkName)throws DAOException{
         Object[] params = IMPORT_METHODS.get(fkName);
         if(null==params)
             throw new IllegalArgumentException("invalid fkName " + fkName);
         if(null==bean || null==importedBeans)
             throw new NullPointerException();
         try {            
-            return (T) this.getClass().getMethod((String)params[1],bean.getClass(),Object.class).invoke(this,bean,importedBeans);
+            return (C) this.getClass().getMethod((String)params[1],bean.getClass(),Object.class).invoke(this,bean,importedBeans);
         } catch (SecurityException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
@@ -581,7 +581,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
         throw new UnsupportedOperationException();
     }    
     @Override
-    public <T extends Collection<? extends ${pkg}.FullBean<?>>> T setImportedBeans($beanClass bean,T importedBeans,String fkName)throws DAOException{
+    public <T extends Collection<?>> T setImportedBeans($beanClass bean,T importedBeans,String fkName)throws DAOException{
         throw new UnsupportedOperationException();
     }
 #end ## $table.hasImportedKeys()

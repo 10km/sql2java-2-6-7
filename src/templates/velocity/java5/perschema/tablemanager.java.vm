@@ -166,5 +166,5 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
     
     public <T> T[] setImportedBeans(B2 bean,T[] importedBeans,String fkName)throws DAOException;
     
-    public <T extends Collection<? extends FullBean<?>>> T setImportedBeans(B2 bean,T importedBeans,String fkName)throws DAOException;
+    public <C extends Collection<?>> C setImportedBeans(B2 bean,C importedBeans,String fkName)throws DAOException;
 }
