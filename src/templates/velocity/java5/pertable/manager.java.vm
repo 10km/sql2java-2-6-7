@@ -581,7 +581,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
         throw new UnsupportedOperationException();
     }    
     @Override
-    public <T extends Collection<?>> T setImportedBeans($beanClass bean,T importedBeans,String fkName)throws DAOException{
+    public <C extends Collection<?>> C setImportedBeans($beanClass bean,C importedBeans,String fkName)throws DAOException{
         throw new UnsupportedOperationException();
     }
 #end ## $table.hasImportedKeys()
@@ -645,7 +645,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     //3.3 SET IMPORTED
     public $importedClass[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , $importedClass[] importedBeans) throws DAOException
     {
-        if(null != bean && null != importedBeans){
+        if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
                 ${importedClassManager}.getInstance().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
@@ -663,9 +663,9 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     //3.4 SET IMPORTED
-    public <T extends Collection<$importedClass>> T ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , T importedBeans) throws DAOException
+    public <C extends Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans) throws DAOException
     {
-        if(null != bean && null != importedBeans){
+        if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
                 ${importedClassManager}.getInstance().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
@@ -767,13 +767,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $foreignTable.getForeignKeysByFkName($fkName) )
-        if( null != $table.asRefArg($fkName)) {
-            $table.asRefArg($fkName) = ${foreignClassManager}.getInstance().save( $table.asRefArg($fkName) );
-#foreach ( $fk in $columnsOfFk ) 
-            bean.$fk.getSetMethod()($table.asRefArg($fkName).$fk.getForeignColumn().getGetMethod()()); 
-#end 
-            bean.$table.getReferencedVarSetMethod($fkName)($table.asRefArg($fkName));
-        }
+        this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
 #end
 #end
         bean = this.save( bean );
@@ -783,15 +777,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        if( null != $impVar) {
-            for ( $importedClass imp : $impVar ){
-#foreach ( $fk in $columnsOfFk ) 
-                imp.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()()); 
-#end 
-                imp.$importedTable.getReferencedVarSetMethod($fkName)(bean);
-                ${importedClassManager}.getInstance().save( imp );
-            }
-        }
+        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+        ${importedClassManager}.getInstance().save( $impVar );
 #end
 #end
         return bean;
@@ -884,7 +871,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
      * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
 
-     * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
+     * @return always beanToSet saved
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
@@ -893,10 +880,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
         Object[] params = REF_METHODS.get(fkName);
         if(null==params)
             throw new IllegalArgumentException("invalid fkName " + fkName);
-        if(null==bean || null==beanToSet)
-            throw new NullPointerException();
         Class<?> resultClass = (Class<?>)params[2];
-        if(!resultClass.isAssignableFrom(beanToSet.getClass()) ){
+        if(null != beanToSet && !resultClass.isAssignableFrom(beanToSet.getClass()) ){
             throw new IllegalArgumentException("the argument 'beanToSet' be invalid type,expect type:" + resultClass.getName());
         }
         try {            
@@ -969,18 +954,26 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      *
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass}
-     * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
+     * @return always beanToSet saved
      * @throws Exception
      */
     //5.2 SET REFERENCED 
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
     {
-        if(null == bean || null == beanToSet) return null;
+        if(null != bean){
+            ${foreignClassManager}.getInstance().save(beanToSet);
+            bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
+            if( null == beanToSet){
 #foreach ( $fk in $columnsOfFk ) 
-        bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
+                bean.$fk.getSetMethod()(null);
 #end 
-        bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
-        return ${foreignClassManager}.getInstance().save(beanToSet);
+            }else{
+#foreach ( $fk in $columnsOfFk ) 
+                bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
+#end 
+            }
+        }
+        return beanToSet;
     }
 #end
 #end
@@ -1583,7 +1576,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //15-2
-    public <T extends Collection<$beanClass>>T save(T beans) throws DAOException
+    public <C extends Collection<$beanClass>>C save(C beans) throws DAOException
     {
         if(null != beans){
             for ($beanClass bean : beans) 
@@ -1618,10 +1611,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #save(List)
      */
     //15-4
-    public <T extends Collection<$beanClass>> T saveAsTransaction(final T beans) throws DAOException {
-        return Manager.getInstance().runAsTransaction(new Callable<T>(){
+    public <C extends Collection<$beanClass>> C saveAsTransaction(final C beans) throws DAOException {
+        return Manager.getInstance().runAsTransaction(new Callable<C>(){
             @Override
-            public T call() throws Exception {
+            public C call() throws Exception {
                 return save(beans);
             }});
     }
@@ -1646,7 +1639,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //16-2
-    public <T extends Collection<$beanClass>> T insert(T beans) throws DAOException
+    public <C extends Collection<$beanClass>> C insert(C beans) throws DAOException
     {
         return this.save(beans);
     }
@@ -1674,7 +1667,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #saveAsTransaction(List)
      */
     //16-4
-    public <T extends Collection<$beanClass>> T insertAsTransaction(T beans) throws DAOException
+    public <C extends Collection<$beanClass>> C insertAsTransaction(C beans) throws DAOException
     {
         return this.saveAsTransaction(beans);
     }
@@ -1701,7 +1694,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DAOException
      */
     //17-2
-    public <T extends Collection<$beanClass>> T update(T beans) throws DAOException
+    public <C extends Collection<$beanClass>> C update(C beans) throws DAOException
     {
         return this.save(beans);
     }
@@ -1729,7 +1722,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @see #saveAsTransaction(List)
      */
     //17-4
-    public <T extends Collection<$beanClass>> T updateAsTransaction(T beans) throws DAOException
+    public <C extends Collection<$beanClass>> C updateAsTransaction(C beans) throws DAOException
     {
         return this.saveAsTransaction(beans);
     }

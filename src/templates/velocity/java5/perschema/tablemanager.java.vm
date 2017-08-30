@@ -55,11 +55,11 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
 
     public abstract B2[] insert(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T insert(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C insert(C beans) throws DAOException;
 
     public abstract B2[] insertAsTransaction(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T insertAsTransaction(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C insertAsTransaction(C beans) throws DAOException;
 
     public abstract B2[] loadAll() throws DAOException;
 
@@ -119,21 +119,21 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
 
     public abstract B2[] save(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T saveAsTransaction(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C saveAsTransaction(C beans) throws DAOException;
 
     public abstract B2[] saveAsTransaction(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T save(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C save(C beans) throws DAOException;
 
     public abstract B2 update(B2 bean) throws DAOException;
 
     public abstract B2[] update(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T update(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C update(C beans) throws DAOException;
     
     public abstract B2[] updateAsTransaction(B2[] beans) throws DAOException;
 
-    public abstract <T extends Collection<B2>> T updateAsTransaction(T beans) throws DAOException;
+    public abstract <C extends Collection<B2>> C updateAsTransaction(C beans) throws DAOException;
 
     public abstract B2[] loadBySql(String sql, Object[] argList, int[] fieldList) throws DAOException;
     

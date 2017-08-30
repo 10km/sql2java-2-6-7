@@ -1,0 +1,204 @@
+##$Id: tablemanager.java.vm,v 1.3 2007/11/12 14:06:30 kameleono Exp $
+#parse( "header.include.vm" )
+#set ( $gpkg = $codewriter.getProperty('general.package') )
+$codewriter.setCurrentJavaFilename($gpkg, "TableManager.java")
+package $gpkg;
+
+import java.util.List;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+/**
+ * Interface to handle database calls (save, load, count, etc...) for table.
+ * @author guyadong
+ */
+public interface TableManager<B extends BaseBean> {
+    public interface Action<B>{
+        void call(B bean);
+        B getBean();
+   }
+
+    public abstract int countAll();
+
+    public abstract int countUsingTemplate( B bean);
+
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows);
+
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows, int searchType);
+
+    public abstract int countWhere(String where);
+
+    public abstract int deleteAll();
+
+    public abstract int deleteByWhere(String where);
+
+    public abstract int deleteUsingTemplate(B bean);
+
+    public abstract int deleteByPrimaryKey(B bean);
+
+    public abstract String[] getFieldNames();
+
+    public abstract String[] getPrimarykeyNames();
+
+    public abstract String getTableName();
+
+    public abstract B insert(B bean);
+
+    public abstract B[] insert(B[] beans);
+
+    public abstract <C extends Collection<B>> C insert(C beans);
+
+    public abstract B[] insertAsTransaction(B[] beans);
+
+    public abstract <C extends Collection<B>> C insertAsTransaction(C beans);
+
+    public abstract B[] loadAll();
+    
+    public abstract int loadAll(Action<B> action);
+
+    public abstract B[] loadAll(int startRow, int numRows);
+    
+    public abstract int loadAll(int startRow, int numRows,Action<B> action);
+
+    public abstract List<B> loadAllAsList();
+
+    public abstract List<B> loadAllAsList(int startRow, int numRows);
+
+    public abstract B loadByPrimaryKey(B bean);
+    
+    public abstract boolean existsPrimaryKey(B bean);
+
+    public abstract B[] loadByWhere(String where);
+    
+    public abstract int loadByWhere(String where,Action<B> action);
+
+    public abstract B[] loadByWhere(String where, int[] fieldList);
+    
+    public abstract int loadByWhere(String where, int[] fieldList,Action<B> action);
+
+    public abstract B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows);
+    
+    public abstract int loadByWhere(String where, int[] fieldList, int startRow, int numRows,Action<B> action);
+
+    public abstract List<B> loadByWhereAsList(String where);
+
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList);
+
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows);
+
+    public abstract B loadUniqueUsingTemplate(B bean);
+
+    public abstract B[] loadUsingTemplate(B bean);
+    
+    public abstract int loadUsingTemplate(B bean,Action<B> action);
+
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows);
+    
+    public abstract int loadUsingTemplate(B bean, int startRow, int numRows,Action<B> action);
+    
+    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,int searchType, Action<B> action);
+
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType);
+
+    public abstract List<B> loadUsingTemplateAsList(B bean);
+
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows);
+
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType);
+
+    public abstract <L extends TableListener> void registerListener(L listener);
+
+    public abstract B save(B bean);
+
+    public abstract B[] save(B[] beans);
+    
+    public abstract <C extends Collection<B>> C saveAsTransaction(C beans);
+
+    public abstract B[] saveAsTransaction(B[] beans);
+
+    public abstract <C extends Collection<B>> C save(C beans);
+
+    public abstract B update(B bean);
+
+    public abstract B[] update(B[] beans);
+
+    public abstract <C extends Collection<B>> C update(C beans);
+    
+    public abstract B[] updateAsTransaction(B[] beans);
+
+    public abstract <C extends Collection<B>> C updateAsTransaction(C beans);
+
+    public abstract B[] loadBySql(String sql, Object[] argList, int[] fieldList);
+    
+    public abstract List<B> loadBySqlAsList(String sql, Object[] argList, int[] fieldList);
+    /**
+     * Run {@code Callable<T>} as a transaction.<br>
+     * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
+     * throw {@code NullPointerException} if {@code fun} be {@code null}<br>
+     * @param <T>  type of return result
+     * @param fun
+     * @return
+     * @
+     */
+    public abstract<T> T runAsTransaction(Callable<T> fun);
+    /**
+     * Run {@code Runnable} as a transaction.no return
+     * @param fun
+     * @
+     * @see #runAsTransaction(Runnable)
+     */
+    public abstract void runAsTransaction(final Runnable fun);
+    
+    /**
+     * Retrieves the T object referenced by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
+     */
+    public abstract <T extends BaseBean> T getReferencedBean(B bean,String fkName);
+    
+    /**
+     * Associates the B object to the T object by fkName field.<br>
+     * @param bean the B object to use
+     * @param beanToSet the T object to associate to the B bean
+     * @param fkName
+     * @return always beanToSet saved
+     */
+    public abstract <T extends BaseBean> T setReferencedBean(B bean,T beanToSet,String fkName);
+    
+    /**
+     * Retrieves imported T objects by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+     */
+    public <T extends BaseBean> T[] getImportedBeans(B bean,String fkName);
+    
+    /**
+     * Retrieves imported T objects by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+     */
+    public <T extends BaseBean> List<T> getImportedBeansAsList(B bean,String fkName);
+    
+    /**
+     * Set the importedBeans associates to the bean by fkName<br>
+     * 
+     * @param bean the bean object to use
+     * @param importedBeans the T object to associate to bean
+     * @param fkName foreign key name. for detail see implementation class
+     * @return importedBeans always
+     */
+    public <T extends BaseBean> T[] setImportedBeans(B bean,T[] importedBeans,String fkName);
+    
+    /**
+     * Set the importedBeans associates to the bean by fkName<br>
+     * 
+     * @param bean the bean object to use
+     * @param importedBeans the T object to associate to bean
+     * @param fkName foreign key name. for detail see implementation class
+     * @return importedBeans always
+     */
+    public <T extends BaseBean,C extends Collection<T>> C setImportedBeans(B bean,C importedBeans,String fkName);
+}
