@@ -1273,15 +1273,16 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     // SAVE
     //_____________________________________________________________________
     /**
-     * Saves the $beanClass bean into the database.
+     * Saves the {@link $beanClass} bean into the database.
      *
-     * @param bean the $beanClass bean to be saved
-     * @return the inserted or updated bean
+     * @param bean the {@link $beanClass} bean to be saved
+     * @return the inserted or updated bean,or null if bean is null
      * @throws DAOException
      */
     //12
     public $beanClass save($beanClass bean) throws DAOException
     {
+        if(null == bean)return null;
         if (bean.isNew()) {
             return this.insert(bean);
         } else {
@@ -1290,17 +1291,17 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }
 
     /**
-     * Insert the $beanClass bean into the database.
-     *
-     * @param bean the $beanClass bean to be saved
-     * @return the inserted bean
+     * Insert the {@link $beanClass} bean into the database.
+     * 
+     * @param bean the {@link $beanClass} bean to be saved
+     * @return the inserted bean or null if bean is null
      * @throws DAOException
      */
     //13
     public $beanClass insert($beanClass bean) throws DAOException
     {
         // mini checks
-        if (!bean.isModified()) {
+        if (null == bean || !bean.isModified()) {
             return bean; // should not we log something ?
         }
         if (!bean.isNew()){
@@ -1448,17 +1449,17 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     }
 
     /**
-     * Update the $beanClass bean record in the database according to the changes.
+     * Update the {@link $beanClass} bean record in the database according to the changes.
      *
-     * @param bean the $beanClass bean to be updated
-     * @return the updated bean
+     * @param bean the {@link $beanClass} bean to be updated
+     * @return the updated bean or null if bean is null
      * @throws DAOException
      */
     //14
     public $beanClass update($beanClass bean) throws DAOException
     {
         // mini checks
-        if (!bean.isModified()) {
+        if (null == bean || !bean.isModified()) {
             return bean; // should not we log something ?
         }
         if (bean.isNew()){
@@ -1556,43 +1557,47 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Saves an array of $beanClass beans into the database.
+     * Saves an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      * @throws DAOException
      */
     //15
     public $beanClass[] save($beanClass[] beans) throws DAOException
     {
-        for ($beanClass bean : beans) 
-        {
-            this.save(bean);
+        if(null != beans){
+            for ($beanClass bean : beans) 
+            {
+                this.save(bean);
+            }
         }
         return beans;
     }
 
     /**
-     * Saves a collection of $beanClass beans into the database.
+     * Saves a collection of {@link $beanClass} beans into the database.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass collection.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      * @throws DAOException
      */
     //15-2
     public <T extends Collection<$beanClass>>T save(T beans) throws DAOException
     {
-        for ($beanClass bean : beans) 
-        {
-            this.save(bean);
+        if(null != beans){
+            for ($beanClass bean : beans) 
+            {
+                this.save(bean);
+            }
         }
         return beans;
     }
     /**
-     * Saves an array of $beanClass beans as transaction into the database.
+     * Saves an array of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #save($beanClass[])
      */
@@ -1605,10 +1610,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             }});
     }
     /**
-     * Saves a list of $beanClass beans as transaction into the database.
+     * Saves a collection of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #save(List)
      */
@@ -1621,10 +1626,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             }});
     }
     /**
-     * Insert an array of $beanClass beans into the database.
+     * Insert an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      */
     //16
@@ -1634,10 +1639,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Insert a list of $beanClass beans into the database.
+     * Insert a collection of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      */
     //16-2
@@ -1647,10 +1652,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     
     /**
-     * Insert an array of $beanClass beans as transaction into the database.
+     * Insert an array of {@link $beanClass} beans into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link {@link $beanClass}} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #saveAsTransaction($beanClass[])
      */
@@ -1661,10 +1666,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Insert a list of $beanClass beans as transaction into the database.
+     * Insert a collection of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #saveAsTransaction(List)
      */
@@ -1676,10 +1681,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 
 
     /**
-     * Updates an array of $beanClass beans into the database.
+     * Update an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      */
     //17
@@ -1689,10 +1694,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Updates a list of $beanClass beans into the database.
+     * Update a list of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} beans table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      */
     //17-2
@@ -1702,10 +1707,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     
     /**
-     * Updates an array of $beanClass beans as transaction into the database.
+     * Update an array of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} beans table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #saveAsTransaction($beanClass[])
      */
@@ -1716,10 +1721,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Updates a list of $beanClass beans as transaction into the database.
+     * Update a collection of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} beans table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @throws DAOException
      * @see #saveAsTransaction(List)
      */

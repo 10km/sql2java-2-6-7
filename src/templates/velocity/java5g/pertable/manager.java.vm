@@ -1108,14 +1108,15 @@ public class $managerClassNSP
     // SAVE
     //_____________________________________________________________________
     /**
-     * Saves the $beanClass bean into the database.
+     * Saves the {@link $beanClass} bean into the database.
      *
-     * @param bean the $beanClass bean to be saved
-     * @return the inserted or updated bean
+     * @param bean the {@link $beanClass} bean to be saved
+     * @return the inserted or updated bean,or null if bean is null
      */
     //12
     public $beanClass save($beanClass bean)
     {
+        if(null == bean)return null;
         if (bean.isNew()) {
             return this.insert(bean);
         } else {
@@ -1124,10 +1125,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Insert the $beanClass bean into the database.
+     * Insert the {@link $beanClass} bean into the database.
      *
-     * @param bean the $beanClass bean to be saved
-     * @return the inserted bean
+     * @param bean the {@link $beanClass} bean to be saved
+     * @return the inserted bean or null if bean is null
      */
     //13
     public $beanClass insert($beanClass bean)
@@ -1142,10 +1143,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Update the $beanClass bean record in the database according to the changes.
+     * Update the {@link $beanClass} bean record in the database according to the changes.
      *
-     * @param bean the $beanClass bean to be updated
-     * @return the updated bean
+     * @param bean the {@link $beanClass} bean to be updated
+     * @return the updated bean or null if bean is null
      */
     //14
     public $beanClass update($beanClass bean)
@@ -1160,41 +1161,45 @@ public class $managerClassNSP
     }
 
     /**
-     * Saves an array of $beanClass beans into the database.
+     * Saves an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      */
     //15
     public $beanClass[] save($beanClass[] beans)
     {
-        for ($beanClass bean : beans) 
-        {
-            this.save(bean);
+        if(null !=beans){
+            for ($beanClass bean : beans) 
+            {
+                this.save(bean);
+            }
         }
         return beans;
     }
 
     /**
-     * Saves a list of $beanClass beans into the database.
+     * Saves a list of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      */
     //15-2
     public <T extends Collection<$beanClass>>T save(T beans)
     {
-        for ($beanClass bean : beans) 
-        {
-            this.save(bean);
+        if(null != beans){
+            for ($beanClass bean : beans) 
+            {
+                this.save(bean);
+            }
         }
         return beans;
     }
     /**
-     * Saves an array of $beanClass beans as transaction into the database.
+     * Saves an array of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans.
      * @see #save($beanClass[])
      */
     //15-3
@@ -1206,10 +1211,10 @@ public class $managerClassNSP
             }});
     }
     /**
-     * Saves a list of $beanClass beans as transaction into the database.
+     * Saves a collection of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be saved
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be saved
+     * @return the saved {@link $beanClass} beans.
      * @see #save(List)
      */
     //15-4
@@ -1221,10 +1226,10 @@ public class $managerClassNSP
             }});
     }
     /**
-     * Insert an array of $beanClass beans into the database.
+     * Insert an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      */
     //16
     public $beanClass[] insert($beanClass[] beans)
@@ -1233,10 +1238,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Insert a list of $beanClass beans into the database.
+     * Insert a collection of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      */
     //16-2
     public <T extends Collection<$beanClass>> T insert(T beans)
@@ -1245,10 +1250,10 @@ public class $managerClassNSP
     }
     
     /**
-     * Insert an array of $beanClass beans as transaction into the database.
+     * Insert an array of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @see #saveAsTransaction($beanClass[])
      */
     //16-3
@@ -1258,10 +1263,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Insert a list of $beanClass beans as transaction into the database.
+     * Insert a collection of {@link $beanClass} bean as transaction into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @see #saveAsTransaction(List)
      */
     //16-4
@@ -1272,10 +1277,10 @@ public class $managerClassNSP
 
 
     /**
-     * Updates an array of $beanClass beans into the database.
+     * Update an array of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      */
     //17
     public $beanClass[] update($beanClass[] beans)
@@ -1284,10 +1289,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Updates a list of $beanClass beans into the database.
+     * Update a collection of {@link $beanClass} bean into the database.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      */
     //17-2
     public <T extends Collection<$beanClass>> T update(T beans)
@@ -1296,10 +1301,10 @@ public class $managerClassNSP
     }
     
     /**
-     * Updates an array of $beanClass beans as transaction into the database.
+     * Update an array of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} beans table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @see #saveAsTransaction($beanClass[])
      */
     //17-3
@@ -1309,10 +1314,10 @@ public class $managerClassNSP
     }
 
     /**
-     * Updates a list of $beanClass beans as transaction into the database.
+     * Update a collection of {@link $beanClass} bean into the database as transaction.
      *
-     * @param beans the $beanClass bean table to be inserted
-     * @return the saved $beanClass array.
+     * @param beans the {@link $beanClass} bean table to be inserted
+     * @return the saved {@link $beanClass} beans.
      * @see #saveAsTransaction(List)
      */
     //17-4
