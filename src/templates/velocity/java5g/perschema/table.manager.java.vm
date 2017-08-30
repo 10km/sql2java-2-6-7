@@ -86,6 +86,8 @@ public interface TableManager<B extends BaseBean> {
 
     public abstract List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows);
 
+    public abstract int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action<B> action);
+    
     public abstract B loadUniqueUsingTemplate(B bean);
 
     public abstract B[] loadUsingTemplate(B bean);

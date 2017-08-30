@@ -1081,6 +1081,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * @return the count dealt by action
      */
     //9-3
+    @Override
     public int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action<$beanClass> action)
     {
         try{
