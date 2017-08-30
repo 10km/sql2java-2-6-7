@@ -47,7 +47,7 @@ import ${importedTable.getPackage()}.${importedTable.asBeanClass()};
 #end
  * @author guyadong
  */
-public class $managerClassNSP extends TableManager.Adapter<$beanClass>
+public class $managerClassNSP implements TableManager<$beanClass>
 {
 
     /* set =QUERY for loadUsingTemplate */
@@ -1094,6 +1094,17 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }
 
     /**
+     * Deletes all rows from $tablename table.
+     * @return the number of deleted rows.
+     */
+    //10
+    @Override
+    public int deleteAll()
+    {
+        return this.deleteByWhere("");
+    }
+
+    /**
      * Deletes rows from the $tablename table using a 'where' clause.
      * It is up to you to pass the 'WHERE' in your where clausis.
      * <br>Attention, if 'WHERE' is omitted it will delete all records.
@@ -1178,7 +1189,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Saves an array of {@link $beanClass} bean into the database.
      *
      * @param beans the {@link $beanClass} bean table to be saved
-     * @return the saved {@link $beanClass} beans.
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      */
     //15
     public $beanClass[] save($beanClass[] beans)
@@ -1193,10 +1204,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }
 
     /**
-     * Saves a collection of {@link $beanClass} bean into the database.
+     * Saves a list of {@link $beanClass} bean into the database.
      *
      * @param beans the {@link $beanClass} bean table to be saved
-     * @return the saved {@link $beanClass} beans.
+     * @return the saved {@link $beanClass} beans or null if beans is null.
      */
     //15-2
     @Override
@@ -1687,7 +1698,22 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #* *##end
 #end
 
+    //_____________________________________________________________________
+    //
+    // COUNT
+    //_____________________________________________________________________
 
+    /**
+     * Retrieves the number of rows of the table $tablename.
+     *
+     * @return the number of rows returned
+     */
+    //24
+    @Override
+    public int countAll() 
+    {
+        return this.countWhere("");
+    }
 
     /**
      * Retrieves the number of rows of the table $tablename with a 'where' clause.
@@ -1709,6 +1735,33 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
     }
 
+    /**
+     * count the number of elements of a specific $beanClass bean
+     *
+     * @param bean the $beanClass bean to look for ant count
+     * @return the number of rows returned
+     */
+    //27
+    @Override
+    public int countUsingTemplate(${beanClass} bean)
+    {
+        return this.countUsingTemplate(bean, -1, -1);
+    }
+
+    /**
+     * count the number of elements of a specific $beanClass bean , given the start row and number of rows.
+     *
+     * @param bean the $beanClass template to look for and count
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return the number of rows returned
+     */
+    //20
+    @Override
+    public int countUsingTemplate(${beanClass} bean, int startRow, int numRows)
+    {
+        return this.countUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
+    }
 
     /**
      * count the number of elements of a specific $beanClass bean given the start row and number of rows and the search type
