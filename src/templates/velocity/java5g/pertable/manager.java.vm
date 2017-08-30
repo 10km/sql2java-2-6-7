@@ -1204,7 +1204,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     }
 
     /**
-     * Saves a list of {@link $beanClass} bean into the database.
+     * Saves a collection of {@link $beanClass} bean into the database.
      *
      * @param beans the {@link $beanClass} bean table to be saved
      * @return the saved {@link $beanClass} beans or null if beans is null.

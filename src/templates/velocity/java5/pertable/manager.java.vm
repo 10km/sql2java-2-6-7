@@ -1687,7 +1687,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 
     /**
-     * Update a list of {@link $beanClass} bean into the database.
+     * Update a collection of {@link $beanClass} bean into the database.
      *
      * @param beans the {@link $beanClass} beans table to be inserted
      * @return the saved {@link $beanClass} beans.
