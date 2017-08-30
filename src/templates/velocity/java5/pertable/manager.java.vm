@@ -13,7 +13,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import ${pkg}.Manager;
 import ${pkg}.TableListener;
@@ -2948,7 +2948,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
 
         protected ListAction() {
-            list=new ArrayList<$beanClass>();
+            list=new LinkedList<$beanClass>();
         }
 
         public List<$beanClass> getList() {
