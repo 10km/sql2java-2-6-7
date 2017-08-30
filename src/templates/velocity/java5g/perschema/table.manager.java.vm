@@ -5,6 +5,7 @@ $codewriter.setCurrentJavaFilename($gpkg, "TableManager.java")
 package $gpkg;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
@@ -17,23 +18,385 @@ public interface TableManager<B extends BaseBean> {
         void call(B bean);
         B getBean();
    }
+    /* set =QUERY for loadUsingTemplate */
+    public static final int SEARCH_EXACT = 0;
+    /* set %QUERY% for loadLikeTemplate */
+    public static final int SEARCH_LIKE = 1;
+    /* set %QUERY for loadLikeTemplate */
+    public static final int SEARCH_STARTING_LIKE = 2;
+    /* set QUERY% for loadLikeTemplate */
+    public static final int SEARCH_ENDING_LIKE = 3;
+    public abstract static class Adapter<B extends BaseBean> implements TableManager<B>{
 
+        private class ListAction implements Action<B> {
+            final List<B> list;
+            protected ListAction() {
+                list=new ArrayList<B>();
+            }
+
+            public List<B> getList() {
+                return list;
+            }
+
+            @Override
+            public void call(B bean) {
+                list.add(bean);
+            }
+
+            @Override
+            public B getBean() {
+                return null;
+            }
+        }
+        @Override
+        public int countAll() {
+            return this.countWhere("");
+        }
+
+        @Override
+        public int countUsingTemplate(B bean) {
+            return this.countUsingTemplate(bean, -1, -1);
+        }
+
+        @Override
+        public int countUsingTemplate(B bean, int startRow, int numRows) {
+            return this.countUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
+        }
+
+        @Override
+        public int deleteAll() {
+            return this.deleteByWhere("");
+        }
+
+        @Override
+        public B[] insert(B[] beans) {
+            return this.save(beans);
+        }
+
+        @Override
+        public <C extends Collection<B>> C insert(C beans) {
+            return this.save(beans);
+        }
+
+        @Override
+        public B[] insertAsTransaction(B[] beans) {
+            return this.saveAsTransaction(beans);
+        }
+
+        @Override
+        public <C extends Collection<B>> C insertAsTransaction(C beans) {
+            return this.saveAsTransaction(beans);
+        }
+
+        @Override
+        public B[] loadAll() {
+            return this.loadUsingTemplate(null);
+        }
+
+        @Override
+        public int loadAll(net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadUsingTemplate(null,action);
+        }
+
+        @Override
+        public B[] loadAll(int startRow, int numRows) {
+            return this.loadUsingTemplate(null, startRow, numRows);
+        }
+
+        @Override
+        public int loadAll(int startRow, int numRows, net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadUsingTemplate(null, startRow, numRows,action);
+        }
+
+        @Override
+        public List<B> loadAllAsList() {
+            return this.loadUsingTemplateAsList(null);
+        }
+
+        @Override
+        public List<B> loadAllAsList(int startRow, int numRows) {
+            return this.loadUsingTemplateAsList(null, startRow, numRows);
+        }
+
+        @Override
+        public boolean existsPrimaryKey(B bean) {
+            return null!=loadByPrimaryKey(bean);
+        }
+
+        @Override
+        public B[] loadByWhere(String where) {
+            return this.loadByWhere(where, (int[])null);
+        }
+
+        @Override
+        public int loadByWhere(String where, net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadByWhere(where, null,action);
+        }
+
+        @Override
+        public B[] loadByWhere(String where, int[] fieldList) {
+            return this.loadByWhere(where, fieldList, 1, -1);
+        }
+
+        @Override
+        public int loadByWhere(String where, int[] fieldList, net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadByWhere(where, fieldList, 1, -1,action);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows) {
+            return this.loadByWhereAsList(where, fieldList, startRow, numRows).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public int loadByWhere(String where, int[] fieldList, int startRow, int numRows,
+                net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadByWhereForAction(where, fieldList, startRow, numRows,action);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where) {
+            return this.loadByWhereAsList(where, null);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where, int[] fieldList) {
+            return this.loadByWhereAsList(where, fieldList, 1, -1);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows) {
+            ListAction action = new ListAction();
+            loadByWhereForAction(where,fieldList,startRow,numRows,action);              
+            return action.getList();
+        }
+
+        @Override
+        public B[] loadUsingTemplate(B bean) {
+            return this.loadUsingTemplate(bean, 1, -1);
+        }
+
+        @Override
+        public int loadUsingTemplate(B bean, net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadUsingTemplate(bean, 1, -1,action);
+        }
+
+        @Override
+        public B[] loadUsingTemplate(B bean, int startRow, int numRows) {
+            return this.loadUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
+        }
+
+        @Override
+        public int loadUsingTemplate(B bean, int startRow, int numRows,
+                net.gdface.facelog.db.TableManager.Action<B> action) {
+            return this.loadUsingTemplate(bean, null, startRow, numRows,SEARCH_EXACT, action);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType) {
+            return this.loadUsingTemplateAsList(bean, startRow, numRows, searchType).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean) {
+            return this.loadUsingTemplateAsList(bean, 1, -1);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows) {
+            return this.loadUsingTemplateAsList(bean, startRow, numRows, SEARCH_EXACT);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType) {
+            ListAction action = new ListAction();
+            loadUsingTemplate(bean,null,startRow,numRows,searchType, action);
+            return action.getList();
+        }
+
+        @Override
+        public B save(B bean) {
+            if(null == bean)return null;
+            if (bean.isNew()) {
+                return this.insert(bean);
+            } else {
+                return this.update(bean);
+            }
+        }
+
+        @Override
+        public B[] save(B[] beans) {
+            if(null != beans){
+                for (B bean : beans) 
+                {
+                    this.save(bean);
+                }
+            }
+            return beans;
+        }
+
+        @Override
+        public <C extends Collection<B>> C saveAsTransaction(final C beans) {
+            return this.runAsTransaction(new Callable<C>(){
+                @Override
+                public C call() throws Exception {
+                    return save(beans);
+                }});
+        }
+
+        @Override
+        public B[] saveAsTransaction(final B[] beans) {
+            return this.runAsTransaction(new Callable<B[]>(){
+                @Override
+                public B[] call() throws Exception {
+                    return save(beans);
+                }});
+        }
+
+        @Override
+        public <C extends Collection<B>> C save(C beans) {
+            if(null != beans){
+                for (B bean : beans) 
+                {
+                    this.save(bean);
+                }
+            }
+            return beans;
+        }
+
+        @Override
+        public B[] update(B[] beans) {
+            return this.save(beans);
+        }
+
+        @Override
+        public <C extends Collection<B>> C update(C beans) {
+            return this.save(beans);
+        }
+
+        @Override
+        public B[] updateAsTransaction(B[] beans) {
+            return this.saveAsTransaction(beans);
+        }
+
+        @Override
+        public <C extends Collection<B>> C updateAsTransaction(C beans) {
+            return this.saveAsTransaction(beans);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadBySql(String sql, Object[] argList, int[] fieldList) {
+            return loadBySqlAsList(sql, argList, fieldList).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public <T extends BaseBean> T getReferencedBean(B bean, String fkName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T extends BaseBean> T setReferencedBean(B bean, T beanToSet, String fkName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T extends BaseBean> T[] getImportedBeans(B bean, String fkName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T extends BaseBean> List<T> getImportedBeansAsList(B bean, String fkName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T extends BaseBean> T[] setImportedBeans(B bean, T[] importedBeans, String fkName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T extends BaseBean, C extends Collection<T>> C setImportedBeans(B bean, C importedBeans,
+                String fkName) {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+    //_____________________________________________________________________
+    //
+    // COUNT
+    //_____________________________________________________________________
+    /**
+     * Retrieves the number of rows of the table.
+     *
+     * @return the number of rows returned
+     */
     public abstract int countAll();
 
+    /**
+     * count the number of elements of a specific bean
+     *
+     * @param bean the bean to look for ant count
+     * @return the number of rows returned
+     */
     public abstract int countUsingTemplate( B bean);
-
+    /**
+     * count the number of elements of a specific bean , given the start row and number of rows.
+     *
+     * @param bean the template to look for and count
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return the number of rows returned
+     */
     public abstract int countUsingTemplate(B bean, int startRow, int numRows);
-
+    /**
+     * count the number of elements of a specific bean given the start row and number of rows and the search type
+     *
+     * @param bean the template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ?
+     * @return the number of rows returned
+     */
     public abstract int countUsingTemplate(B bean, int startRow, int numRows, int searchType);
-
+    /**
+     * Retrieves the number of rows of the table with a 'where' clause.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the restriction clause
+     * @return the number of rows returned
+     */
     public abstract int countWhere(String where);
-
+    /**
+     * Deletes all rows from table.
+     * @return the number of deleted rows.
+     */
     public abstract int deleteAll();
-
+    /**
+     * Deletes rows from the table using a 'where' clause.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     * <br>Attention, if 'WHERE' is omitted it will delete all records.
+     *
+     * @param where the sql 'where' clause
+     * @return the number of deleted rows
+     */
     public abstract int deleteByWhere(String where);
-
+    /**
+     * Deletes rows using a template.
+     *
+     * @param bean the template object(s) to be deleted
+     * @return the number of deleted objects
+     */
     public abstract int deleteUsingTemplate(B bean);
-
+    /**
+     * Delete row according to Primary Key fileds of the parameter{@code bean},
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param bean the bean with primary key fields
+     * @return the number of deleted rows
+     */
     public abstract int deleteByPrimaryKey(B bean);
 
     public abstract String[] getFieldNames();
