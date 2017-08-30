@@ -13,6 +13,16 @@ import java.util.concurrent.Callable;
  * @author guyadong
  */
 public interface TableManager<B extends BaseBean> {
+    public enum SearchType{
+         /** set =QUERY for loadUsingTemplate */
+        SEARCH_EXACT,
+         /** set %QUERY% for loadLikeTemplate */
+        SEARCH_LIKE,
+         /** set %QUERY for loadLikeTemplate */
+        SEARCH_STARTING_LIKE,
+        /** set QUERY% for loadLikeTemplate */
+        SEARCH_ENDING_LIKE
+    }
     public interface Action<B>{
         void call(B bean);
         B getBean();
@@ -24,7 +34,7 @@ public interface TableManager<B extends BaseBean> {
 
     public abstract int countUsingTemplate(B bean, int startRow, int numRows);
 
-    public abstract int countUsingTemplate(B bean, int startRow, int numRows, int searchType);
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows, SearchType searchType);
 
     public abstract int countWhere(String where);
 
@@ -98,15 +108,15 @@ public interface TableManager<B extends BaseBean> {
     
     public abstract int loadUsingTemplate(B bean, int startRow, int numRows,Action<B> action);
     
-    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,int searchType, Action<B> action);
+    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,SearchType searchType, Action<B> action);
 
-    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType);
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, SearchType searchType);
 
     public abstract List<B> loadUsingTemplateAsList(B bean);
 
     public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows);
 
-    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType);
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType);
 
     public abstract <L extends TableListener> void registerListener(L listener);
 
