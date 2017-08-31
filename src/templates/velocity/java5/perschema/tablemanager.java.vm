@@ -113,7 +113,7 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
 
     public abstract B2 metaDataDecodeRow(ResultSet rs) throws DAOException;
 
-    public abstract <L extends TableListener> void registerListener(L listener);
+    public abstract void registerListener(TableListener<B2> listener);
 
     public abstract B2 save(B2 bean) throws DAOException;
 

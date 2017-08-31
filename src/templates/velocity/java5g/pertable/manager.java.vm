@@ -31,7 +31,6 @@ import ${gpkg}.WrapDAOException;
 import ${pkg}.exception.DAOException;
 import ${table.getPackage()}.${managerClass};
 import ${table.getPackage()}.${nativeClass};
-import ${table.getPackage()}.${nativeListener};
 #foreach ($foreighTable in $foreighTables)
 import ${foreighTable.getPackage()}.${foreighTable.asBeanClass()};
 #end
@@ -1791,8 +1790,8 @@ public class $managerClassNSP implements TableManager<$beanClass>
         this.nativeManager.registerListener(this.toNative(listener));
     }
 
-    private $nativeListener toNative(final TableListener<$beanClass> listener) {
-        return null == listener ?null:new $nativeListener (){
+    private ${pkg}.TableListener<$nativeClass> toNative(final TableListener<$beanClass> listener) {
+        return null == listener ?null:new ${pkg}.TableListener<$nativeClass> (){
 
             @Override
             public void beforeInsert($nativeClass bean) throws DAOException {

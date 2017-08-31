@@ -2703,15 +2703,15 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //
     // LISTENER
     //_____________________________________________________________________
-    private $listenerClass listener = null;
+    private TableListener<$beanClass> listener = null;
 
     /**
      * Registers a unique $listenerClass listener.
      */
     //35
-    public void registerListener(TableListener listener)
+    public void registerListener(TableListener<$beanClass> listener)
     {
-        this.listener = ($listenerClass)listener;
+        this.listener = listener;
     }
 
     /**
