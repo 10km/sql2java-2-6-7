@@ -587,6 +587,10 @@ public class Table {
 		return this.convertName("");
 	}
 
+	public String asCoreClassNSP() {
+		return this.convertNameNSP("");
+	}
+	
 	public String asBeanClass() {
 		return this.convertName("Bean");
 	}
