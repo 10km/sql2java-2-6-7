@@ -190,7 +190,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
      * @param bean the {@link $beanClass} with primary key fields
-     * @return a unique {@link $beanClass} or {@code null} if not found
+     * @return a unique {@link $beanClass} or {@code null} if not found or bean is null
      * @see {@link #loadByPrimaryKey($keys)}
      */
     //1.2
@@ -277,7 +277,8 @@ public class $managerClassNSP implements TableManager<$beanClass>
     
 #set ( $sql = "" )
     /**
-     * Delete row according to its primary keys.
+     * Delete row according to its primary keys.<br>
+     * all keys must not be null
      *
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount

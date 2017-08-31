@@ -172,12 +172,16 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ## part 2
 #set ( $sql = "$sql$pk.getName()=?" )
 #end     
-     * @return a unique $beanClass or {@code null} if not found
+     * @return a unique $beanClass or {@code null} if not found or have null argument
      * @throws DAOException
      */
     //1
+    @SuppressWarnings("unused")
     public $beanClass loadByPrimaryKey($keys) throws DAOException
     {
+        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+            return null;
+        }
         Connection c = null;
         PreparedStatement ps = null;
         try
@@ -214,7 +218,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * when you don't know which is primary key of table,you can use the method.
      * @author guyadong
      * @param bean the {@link $beanClass} with primary key fields
-     * @return a unique {@link $beanClass} or {@code null} if not found
+     * @return a unique {@link $beanClass} or {@code null} if not found or bean is null
      * @throws DAOException
      * @see {@link #loadByPrimaryKey($keys)}
      */
@@ -269,8 +273,9 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
     
 #set ( $sql = "" )
     /**
-     * Delete row according to its primary keys.
-     *
+     * Delete row according to its primary keys.<br>
+     * all keys must not be null
+     * 
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 ## part 1     
@@ -281,8 +286,12 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
      * @throws DAOException
      */
     //2
+    @SuppressWarnings("unused")
     public int deleteByPrimaryKey($keys) throws DAOException
     {
+        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+            throw new IllegalArgumentException("primary keys must no be null ");
+        }
         Connection c = null;
         PreparedStatement ps = null;
         try
