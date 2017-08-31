@@ -26,7 +26,6 @@ import ${gpkg}.TableManager;
 import ${gpkg}.${linkedTable.asBeanClassNSP()};
 #end
 import ${gpkg}.TableListener;
-import ${gpkg}.${listenerClass};
 import ${gpkg}.WrapDAOException;
 
 import ${pkg}.exception.DAOException;
@@ -1787,12 +1786,12 @@ public class $managerClassNSP implements TableManager<$beanClass>
      */
     //35
     @Override
-    public void registerListener(TableListener listener)
+    public void registerListener(TableListener<$beanClass> listener)
     {
-        this.nativeManager.registerListener(this.toNative(($listenerClass)listener));
+        this.nativeManager.registerListener(this.toNative(listener));
     }
 
-    private $nativeListener toNative(final $listenerClass listener) {
+    private $nativeListener toNative(final TableListener<$beanClass> listener) {
         return null == listener ?null:new $nativeListener (){
 
             @Override

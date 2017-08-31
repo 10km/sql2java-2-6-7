@@ -7,4 +7,77 @@ package $gpkg;
  * Listener that is notified of table changes.
  * @author guyadong
  */
-public interface TableListener{}
+public interface TableListener<B>{
+    /**
+     * This adapter class provides default implementations for the
+     * methods declared by the {@link TableListener} interface.<br>
+     * 
+     * @author guyadong
+     */
+    public static class Adapter<B> implements TableListener<B>{
+
+        @Override
+        public void beforeInsert(B bean) {}
+
+        @Override
+        public void afterInsert(B bean) {}
+
+        @Override
+        public void beforeUpdate(B bean) {}
+
+        @Override
+        public void afterUpdate(B bean) {}
+
+        @Override
+        public void beforeDelete(B bean) {}
+
+        @Override
+        public void afterDelete(B bean) {}
+    }
+    /**
+     * Invoked just before inserting a B record into the database.
+     *
+     * @param bean the B that is about to be inserted
+     */
+    public void beforeInsert(B bean);
+
+
+    /**
+     * Invoked just after a B record is inserted in the database.
+     *
+     * @param bean the B that was just inserted
+     */
+    public void afterInsert(B bean);
+
+
+    /**
+     * Invoked just before updating a B record in the database.
+     *
+     * @param bean the B that is about to be updated
+     */
+    public void beforeUpdate(B bean);
+
+
+    /**
+     * Invoked just after updating a B record in the database.
+     *
+     * @param bean the B that was just updated
+     */
+    public void afterUpdate(B bean);
+
+
+    /**
+     * Invoked just before deleting a B record in the database.
+     *
+     * @param bean the B that is about to be deleted
+     */
+    public void beforeDelete(B bean);
+
+
+    /**
+     * Invoked just after deleting a B record in the database.
+     *
+     * @param bean the B that was just deleted
+     */
+    public void afterDelete(B bean);
+}

@@ -118,7 +118,7 @@ public interface TableManager<B extends BaseBean> {
 
     public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType);
 
-    public abstract <L extends TableListener> void registerListener(L listener);
+    public abstract void registerListener(TableListener<B> listener);
 
     public abstract B save(B bean);
 
