@@ -250,7 +250,11 @@ public class Database {
 				c.setRemarks(resultSet.getString("REMARKS"));
 				c.setDefaultValue(resultSet.getString("COLUMN_DEF"));
 				c.setOrdinalPosition(resultSet.getInt("ORDINAL_POSITION"));
+				c.setAutoincrement(resultSet.getString("IS_AUTOINCREMENT"));
+				System.out.printf("        %s %s %s\n", c.getFullName(),c.getTypeName(),c.isAutoincrement()?"AUTOINCREMENT":"");
 				table.addColumn(c);
+				if(c.isAutoincrement())
+					table.setAutoincrement(c);
 			}
 			resultSet.close();
 			System.out.println("    " + table.getName() + " found " + table.countColumns() + " columns");

@@ -33,6 +33,7 @@ public class Table {
 	private Hashtable<String,Index> indNonUniHash = new Hashtable<String,Index>();
 	private Vector<Index> nonUniqueIndices = new Vector<Index>();
 	private Vector<Column> priKey = new Vector<Column>();
+	private Column autoincrement;
 	private String catalog;
 	private String schema;
 	private String name;
@@ -814,6 +815,14 @@ public class Table {
 
 	protected void setDatabase(Database database) {
 		this.database = database;
+	}
+
+	public Column getAutoincrement() {
+		return autoincrement;
+	}
+
+	public void setAutoincrement(Column autoincrement) {
+		this.autoincrement = autoincrement;
 	}
 
 }

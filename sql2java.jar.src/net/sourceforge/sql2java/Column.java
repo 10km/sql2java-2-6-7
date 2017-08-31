@@ -53,6 +53,7 @@ public class Column implements Cloneable, Comparable<Column> {
 	private short type;
 	private boolean isPrimaryKey;
 	private String strCheckingType = "";
+	private String autoincrement;
 	private Database db;
 	private List<Column> foreignKeys = new Vector<Column>();
 	private List<Column> importedKeys = new Vector<Column>();
@@ -1321,5 +1322,16 @@ public class Column implements Cloneable, Comparable<Column> {
 
 	public int compareTo(Column obj) {
 		return  this.ordinal - obj.ordinal;
+	}
+
+	public String getAutoincrement() {
+		return autoincrement;
+	}
+
+	public void setAutoincrement(String autoincrement) {
+		this.autoincrement = autoincrement;
+	}
+	public boolean isAutoincrement(){
+		return "YES".equals(this.autoincrement);
 	}
 }
