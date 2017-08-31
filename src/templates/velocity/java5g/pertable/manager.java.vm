@@ -184,6 +184,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
         }
     }
 
+
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields of {@code bean}.
      * when you don't know which is primary key of table,you can use the method.
@@ -203,6 +204,28 @@ public class $managerClassNSP implements TableManager<$beanClass>
             throw new WrapDAOException(e);
         }
     }
+    /**
+     * Loads a {@link $beanClass} from the $tablename using primary key fields.
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param keys primary keys value:<br> 
+     *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
+     
+     * @return a unique {@link $beanClass} or {@code null} if not found
+     * @see {@link #loadByPrimaryKey($keys)}
+     */
+    //1.3
+    public $beanClass loadByPrimaryKey(Object ...keys){
+        if(keys.length != $table.countPrimaryKeys() )
+            throw new IllegalArgumentException("argument number mismatch with primary key number");
+#foreach ( $pk in $primaryKeys )
+#set( $kidx = $velocityCount - 1 )
+        if(! (keys[$kidx] instanceof $pk.getJavaType()))
+            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
+#end        
+        return loadByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+    }
+    
 #set( $keys = "" )    
     /**
      * Returns true if this $tablename contains row with primary key fields.
@@ -217,13 +240,25 @@ public class $managerClassNSP implements TableManager<$beanClass>
 #end     
      * @see #loadByPrimaryKey($keys)
      */
-    //1.3
+    //1.4
     public boolean existsPrimaryKey($keys)
     {
         return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
 
     }
-
+    /**
+     * Returns true if this $tablename contains row with primary key fields.
+     * @param keys primary keys value:<br>
+     *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
+     
+     * @author guyadong
+     * @see #loadByPrimaryKey(Object...)
+     */
+    //1.5
+    public boolean existsPrimaryKey(Object ...keys)
+    {
+        return null!=loadByPrimaryKey(keys);
+    }
     /**
      * Returns true if this $tablename contains row specified by primary key fields of {@link $beanClass}.<br>
      * when you don't know which is primary key of table,you can use the method.
@@ -232,7 +267,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * @return 
      * @see {@link #loadByPrimaryKey(${beanClass} bean)}
      */
-    //1.4
+    //1.6
     @Override
     public boolean existsPrimaryKey(${beanClass} bean)
     {
@@ -264,6 +299,27 @@ public class $managerClassNSP implements TableManager<$beanClass>
             throw new WrapDAOException(e);
         }
     }
+
+    /**
+     * Delete row according to its primary keys.
+     *
+     * @param keys primary keys value:<br> 
+     *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
+     
+     * @return the number of deleted rows
+     * @see {@link #deleteByPrimaryKey($keys)}
+     */   
+    //2.1
+    public int deleteByPrimaryKey(Object ...keys){
+        if(keys.length != $table.countPrimaryKeys() )
+            throw new IllegalArgumentException("argument number mismatch with primary key number");
+#foreach ( $pk in $primaryKeys )
+#set( $kidx = $velocityCount - 1 )
+        if(! (keys[$kidx] instanceof $pk.getJavaType()))
+            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
+#end        
+        return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+    }
     /**
      * Delete row according to Primary Key fileds of the parameter{@code bean},
      * when you don't know which is primary key of table,you can use the method.
@@ -272,7 +328,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * @return the number of deleted rows
      * @see {@link #deleteByPrimaryKey($keys)}
      */
-    //2.1
+    //2.2
     @Override
     public int deleteByPrimaryKey(${beanClass} bean)
     {
@@ -290,15 +346,29 @@ public class $managerClassNSP implements TableManager<$beanClass>
     {
         throw new UnsupportedOperationException();
     }
-    
+    @Override
+    public $beanClass loadByPrimaryKey(Object ...keys)
+    {
+        throw new UnsupportedOperationException();
+    }    
     @Override
     public boolean existsPrimaryKey(${beanClass} bean)
+    {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public boolean existsPrimaryKey(Object ...keys)
     {
         throw new UnsupportedOperationException();
     }
     
     @Override
     public int deleteByPrimaryKey(${beanClass} bean)
+    {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public int deleteByPrimaryKey(Object ...keys)
     {
         throw new UnsupportedOperationException();
     }

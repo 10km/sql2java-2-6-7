@@ -62,7 +62,7 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
     	
     }
 
-    private static final Vector<Object[]> converters= new Vector<Object[]>(){
+    private static final Vector<Object[]> CONVERTERS= new Vector<Object[]>(){
         private static final long serialVersionUID = 1L;
         {
 #foreach ( $table in $tables )
@@ -75,24 +75,24 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
     private static final <L,R> int getIndex(Class<L> lClass,Class<R> rClass){
             Vector<Integer>find= new Vector<Integer>();
             if(null!=lClass && null != rClass){
-                for(int i=0;i<converters.size();++i){
-                    Object[] converter = converters.get(i);
+                for(int i=0;i<CONVERTERS.size();++i){
+                    Object[] converter = CONVERTERS.get(i);
                     if(((Class<?>)converter[0]).isAssignableFrom(lClass) 
                             && ((Class<?>)converter[1]).isAssignableFrom(rClass)){
                         return i;
                     }
                 }
             }else if(null != lClass){
-                for(int i=0;i<converters.size();++i){
-                    Object[] converter = converters.get(i);
+                for(int i=0;i<CONVERTERS.size();++i){
+                    Object[] converter = CONVERTERS.get(i);
                     if(((Class<?>)converter[0]).isAssignableFrom(lClass) 
                             ){
                         find.add(i);
                     }
                 }
             }else if(null != rClass){
-                for(int i=0;i<converters.size();++i){
-                    Object[] converter = converters.get(i);
+                for(int i=0;i<CONVERTERS.size();++i){
+                    Object[] converter = CONVERTERS.get(i);
                     if(((Class<?>)converter[1]).isAssignableFrom(rClass)){
                         find.add(i);
                     }
@@ -110,7 +110,7 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
                     String.format("not found converter for (%s,%s)"
                             ,null==lClass?"null":lClass.getSimpleName()
                             ,null==rClass?"null":rClass.getSimpleName()));
-        return (IBeanConverter<L, R>) converters.get(index)[2];
+        return (IBeanConverter<L, R>) CONVERTERS.get(index)[2];
     }
     
     @Override
@@ -120,9 +120,9 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
         Object[] c = new Object[]{lClass,rClass,converter};
         int index = getIndex(lClass, rClass);
         if(index<0){
-            converters.add(c);
+            CONVERTERS.add(c);
         }else{
-            converters.set(index, c);
+            CONVERTERS.set(index, c);
         }
     }
 #foreach ( $table in $tables )

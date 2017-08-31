@@ -45,6 +45,8 @@ public interface TableManager<B extends BaseBean> {
     public abstract int deleteUsingTemplate(B bean);
 
     public abstract int deleteByPrimaryKey(B bean);
+    
+    public abstract int deleteByPrimaryKey(Object ...keys);
 
     public abstract String[] getFieldNames();
 
@@ -76,8 +78,12 @@ public interface TableManager<B extends BaseBean> {
 
     public abstract B loadByPrimaryKey(B bean);
     
+    public abstract B loadByPrimaryKey(Object ...keys);
+    
     public abstract boolean existsPrimaryKey(B bean);
 
+    public abstract boolean existsPrimaryKey(Object ...keys);
+    
     public abstract B[] loadByWhere(String where);
     
     public abstract int loadByWhere(String where,Action<B> action);
