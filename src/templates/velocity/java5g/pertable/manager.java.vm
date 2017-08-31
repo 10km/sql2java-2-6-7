@@ -1207,7 +1207,6 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * @return the inserted bean or null if bean is null
      */
     //13
-    @Override
     public $beanClass insert($beanClass bean)
     {
         try{
@@ -1226,7 +1225,6 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * @return the updated bean or null if bean is null
      */
     //14
-    @Override
     public $beanClass update($beanClass bean)
     {
         try{
@@ -1305,114 +1303,6 @@ public class $managerClassNSP implements TableManager<$beanClass>
             public C call() throws Exception {
                 return save(beans);
             }});
-    }
-    /**
-     * Insert an array of {@link $beanClass} bean into the database.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     */
-    //16
-    @Override
-    public $beanClass[] insert($beanClass[] beans)
-    {
-        return this.save(beans);
-    }
-
-    /**
-     * Insert a collection of {@link $beanClass} bean into the database.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     */
-    //16-2
-    @Override
-    public <C extends Collection<$beanClass>> C insert(C beans)
-    {
-        return this.save(beans);
-    }
-    
-    /**
-     * Insert an array of {@link $beanClass} bean into the database as transaction.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     * @see #saveAsTransaction($beanClass[])
-     */
-    //16-3
-    @Override
-    public $beanClass[] insertAsTransaction($beanClass[] beans)
-    {
-        return this.saveAsTransaction(beans);
-    }
-
-    /**
-     * Insert a collection of {@link $beanClass} bean as transaction into the database.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     * @see #saveAsTransaction(List)
-     */
-    //16-4
-    @Override
-    public <C extends Collection<$beanClass>> C insertAsTransaction(C beans)
-    {
-        return this.saveAsTransaction(beans);
-    }
-
-
-    /**
-     * Update an array of {@link $beanClass} bean into the database.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     */
-    //17
-    @Override
-    public $beanClass[] update($beanClass[] beans)
-    {
-        return this.save(beans);
-    }
-
-    /**
-     * Update a collection of {@link $beanClass} bean into the database.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     */
-    //17-2
-    @Override
-    public <C extends Collection<$beanClass>> C update(C beans)
-    {
-        return this.save(beans);
-    }
-    
-    /**
-     * Update an array of {@link $beanClass} bean into the database as transaction.
-     *
-     * @param beans the {@link $beanClass} beans table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     * @see #saveAsTransaction($beanClass[])
-     */
-    //17-3
-    @Override
-    public $beanClass[] updateAsTransaction($beanClass[] beans)
-    {
-        return this.saveAsTransaction(beans);
-    }
-
-    /**
-     * Update a collection of {@link $beanClass} bean into the database as transaction.
-     *
-     * @param beans the {@link $beanClass} bean table to be inserted
-     * @return the saved {@link $beanClass} beans.
-     * @see #saveAsTransaction(List)
-     */
-    //17-4
-    @Override
-    public <C extends Collection<$beanClass>> C updateAsTransaction(C beans)
-    {
-        return this.saveAsTransaction(beans);
     }
     
     //_____________________________________________________________________
