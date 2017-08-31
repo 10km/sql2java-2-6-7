@@ -15,35 +15,35 @@ import ${pkg}.exception.DAOException;
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong
  */
-public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
+public interface TableManager<B extends FullBean<?>> {
 
     public abstract int countAll() throws DAOException;
 
-    public abstract int countUsingTemplate( B1 bean) throws DAOException;
+    public abstract int countUsingTemplate( B bean) throws DAOException;
 
-    public abstract int countUsingTemplate(B1 bean, int startRow, int numRows) throws DAOException;
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows) throws DAOException;
 
-    public abstract int countUsingTemplate(B1 bean, int startRow, int numRows, int searchType) throws DAOException;
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows, int searchType) throws DAOException;
 
     public abstract int countWhere(String where) throws DAOException;
 
-    public abstract B2 createBean();
+    public abstract B createBean();
 
-    public abstract B2[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException;
+    public abstract B[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException;
 
-    public abstract List<B2> decodeResultSetAsList(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException;
+    public abstract List<B> decodeResultSetAsList(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException;
 
-    public abstract B2 decodeRow(ResultSet rs, B2 bean) throws DAOException;
+    public abstract B decodeRow(ResultSet rs, B bean) throws DAOException;
 
-    public abstract B2 decodeRow(ResultSet rs, int[] fieldList, B2 bean) throws DAOException;
+    public abstract B decodeRow(ResultSet rs, int[] fieldList, B bean) throws DAOException;
 
     public abstract int deleteAll() throws DAOException;
 
     public abstract int deleteByWhere(String where) throws DAOException;
 
-    public abstract int deleteUsingTemplate(B1 bean) throws DAOException;
+    public abstract int deleteUsingTemplate(B bean) throws DAOException;
 
-    public abstract int deleteByPrimaryKey(B1 bean) throws DAOException;
+    public abstract int deleteByPrimaryKey(B bean) throws DAOException;
 
     public abstract String[] getFieldNames();
 
@@ -51,73 +51,73 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
 
     public abstract String getTableName();
 
-    public abstract B2[] loadAll() throws DAOException;
+    public abstract B[] loadAll() throws DAOException;
 
-    public abstract B2[] loadAll(int startRow, int numRows) throws DAOException;
+    public abstract B[] loadAll(int startRow, int numRows) throws DAOException;
 
-    public abstract List<B2> loadAllAsList() throws DAOException;
+    public abstract List<B> loadAllAsList() throws DAOException;
 
-    public abstract List<B2> loadAllAsList(int startRow, int numRows) throws DAOException;
+    public abstract List<B> loadAllAsList(int startRow, int numRows) throws DAOException;
 
-    public abstract B2[] loadByPreparedStatement(PreparedStatement ps) throws DAOException;
+    public abstract B[] loadByPreparedStatement(PreparedStatement ps) throws DAOException;
 
-    public abstract B2[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList) throws DAOException;
+    public abstract B[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList) throws DAOException;
 
-    public abstract B2[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException;
+    public abstract B[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException;
 
-    public abstract List<B2> loadByPreparedStatementAsList(PreparedStatement ps) throws DAOException;
+    public abstract List<B> loadByPreparedStatementAsList(PreparedStatement ps) throws DAOException;
 
-    public abstract List<B2> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList) throws DAOException;
+    public abstract List<B> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList) throws DAOException;
 
-    public abstract List<B2> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException;
+    public abstract List<B> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException;
 
-    public abstract B2 loadByPrimaryKey(B1 bean) throws DAOException;
+    public abstract B loadByPrimaryKey(B bean) throws DAOException;
     
-    public abstract boolean existsPrimaryKey(B1 bean) throws DAOException;
+    public abstract boolean existsPrimaryKey(B bean) throws DAOException;
 
-    public abstract B2[] loadByWhere(String where) throws DAOException;
+    public abstract B[] loadByWhere(String where) throws DAOException;
 
-    public abstract B2[] loadByWhere(String where, int[] fieldList) throws DAOException;
+    public abstract B[] loadByWhere(String where, int[] fieldList) throws DAOException;
 
-    public abstract B2[] loadByWhere(String where, int[] fieldList, int startRow, int numRows) throws DAOException;
+    public abstract B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows) throws DAOException;
 
-    public abstract List<B2> loadByWhereAsList(String where) throws DAOException;
+    public abstract List<B> loadByWhereAsList(String where) throws DAOException;
 
-    public abstract List<B2> loadByWhereAsList(String where, int[] fieldList) throws DAOException;
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList) throws DAOException;
 
-    public abstract List<B2> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)throws DAOException;
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)throws DAOException;
 
-    public abstract B2 loadUniqueUsingTemplate(B1 bean) throws DAOException;
+    public abstract B loadUniqueUsingTemplate(B bean) throws DAOException;
 
-    public abstract B2[] loadUsingTemplate(B1 bean) throws DAOException;
+    public abstract B[] loadUsingTemplate(B bean) throws DAOException;
 
-    public abstract B2[] loadUsingTemplate(B1 bean, int startRow, int numRows) throws DAOException;
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows) throws DAOException;
 
-    public abstract B2[] loadUsingTemplate(B1 bean, int startRow, int numRows, int searchType) throws DAOException;
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType) throws DAOException;
 
-    public abstract List<B2> loadUsingTemplateAsList(B1 bean) throws DAOException;
+    public abstract List<B> loadUsingTemplateAsList(B bean) throws DAOException;
 
-    public abstract List<B2> loadUsingTemplateAsList(B1 bean, int startRow, int numRows) throws DAOException;
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows) throws DAOException;
 
-    public abstract List<B2> loadUsingTemplateAsList(B1 bean, int startRow, int numRows, int searchType)throws DAOException;
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType)throws DAOException;
 
-    public abstract B2 metaDataDecodeRow(ResultSet rs) throws DAOException;
+    public abstract B metaDataDecodeRow(ResultSet rs) throws DAOException;
 
-    public abstract void registerListener(TableListener<B2> listener);
+    public abstract void registerListener(TableListener<B> listener);
 
-    public abstract B2 save(B2 bean) throws DAOException;
+    public abstract B save(B bean) throws DAOException;
 
-    public abstract B2[] save(B2[] beans) throws DAOException;
+    public abstract B[] save(B[] beans) throws DAOException;
 
-    public abstract <C extends Collection<B2>> C saveAsTransaction(C beans) throws DAOException;
+    public abstract <C extends Collection<B>> C saveAsTransaction(C beans) throws DAOException;
 
-    public abstract B2[] saveAsTransaction(B2[] beans) throws DAOException;
+    public abstract B[] saveAsTransaction(B[] beans) throws DAOException;
 
-    public abstract <C extends Collection<B2>> C save(C beans) throws DAOException;
+    public abstract <C extends Collection<B>> C save(C beans) throws DAOException;
 
-    public abstract B2[] loadBySql(String sql, Object[] argList, int[] fieldList) throws DAOException;
+    public abstract B[] loadBySql(String sql, Object[] argList, int[] fieldList) throws DAOException;
     
-    public abstract List<B2> loadBySqlAsList(String sql, Object[] argList, int[] fieldList) throws DAOException;
+    public abstract List<B> loadBySqlAsList(String sql, Object[] argList, int[] fieldList) throws DAOException;
     /**
      * Run {@code Callable<T>} as a transaction.<br>
      * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
@@ -136,15 +136,15 @@ public interface TableManager<B1 extends BaseBean<?>,B2 extends FullBean<B1>> {
      */
     public abstract void runAsTransaction(final Runnable fun) throws DAOException;
     
-    public abstract <T> T getReferencedBean(B2 bean,String fkName)throws DAOException;
+    public abstract <T> T getReferencedBean(B bean,String fkName)throws DAOException;
     
-    public abstract <T> T setReferencedBean(B2 bean,T beanToSet,String fkName)throws DAOException;
+    public abstract <T> T setReferencedBean(B bean,T beanToSet,String fkName)throws DAOException;
     
-    public <T> T[] getImportedBeans(B2 bean,String fkName)throws DAOException;
+    public <T> T[] getImportedBeans(B bean,String fkName)throws DAOException;
     
-    public <T> List<T> getImportedBeansAsList(B2 bean,String fkName)throws DAOException;
+    public <T> List<T> getImportedBeansAsList(B bean,String fkName)throws DAOException;
     
-    public <T> T[] setImportedBeans(B2 bean,T[] importedBeans,String fkName)throws DAOException;
+    public <T> T[] setImportedBeans(B bean,T[] importedBeans,String fkName)throws DAOException;
     
-    public <C extends Collection<?>> C setImportedBeans(B2 bean,C importedBeans,String fkName)throws DAOException;
+    public <C extends Collection<?>> C setImportedBeans(B bean,C importedBeans,String fkName)throws DAOException;
 }
