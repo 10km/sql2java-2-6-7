@@ -1320,8 +1320,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 ##-------------writePreInsert
 #set( $genKeyRetrieve = $codewriter.getProperty("generatedkey.retrieve", "") )
 #set ( $hint = $codewriter.getProperty("generatedkey.statement").replaceAll("<TABLE>", $tablename) )
-#if ( $table.countPrimaryKeys() == 1 )
-	#set ( $pKey = $table.getPrimaryKey() )
+#if ( $table.getAutoincrement() )
+#set($pKey = $table.getAutoincrement())
 #if ( $genKeyRetrieve == "before" && $pKey.isColumnNumeric() )
             if (!bean.$pKey.getModifiedMethod()())
             {
@@ -1347,7 +1347,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
                 }
             }
 #end
-#end
+#end## $table.getAutoincrement()
 ##------------/writePreInsert
             this.beforeInsert(bean); // listener callback
             int _dirtyCount = 0;
@@ -1391,9 +1391,8 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
 
             ps.executeUpdate();
 ##------------------writePostInsert
-#if ( $table.countPrimaryKeys() == 1 )
-#set($pKey = $table.getPrimaryKey())
-#if ( $pKey.isColumnNumeric() )
+#if ( $table.getAutoincrement() )
+#set($pKey = $table.getAutoincrement())
 #set ( $hint = $codewriter.getProperty("generatedkey.statement").replaceAll("<TABLE>", $tablename) )
 #if ( $genKeyRetrieve == "after" )
 
@@ -1429,8 +1428,7 @@ public class $managerClass implements TableManager<${beanClass}Base,$beanClass>
                 }
             }
 #end
-#end
-#end
+#end## $table.getAutoincrement()
 ##-------------------/writePostInsert
 
             bean.isNew(false);
