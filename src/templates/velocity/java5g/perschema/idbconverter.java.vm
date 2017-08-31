@@ -4,18 +4,14 @@
 $codewriter.setCurrentJavaFilename($gpkg, "IDbConverter.java")
 package $gpkg;
 
-#foreach ( $table in $tables )
-import ${table.getPackage()}.${table.asBeanClass()};
-#end
-
 /**
  * converter between general type({@code <L>}) and native type ({@code <R>}) for  all Beans
  * @author guyadong
  *
  */
-public interface IDbConverter {
+public interface IDbConverter<#join($tables "N_${e.asCoreClassNSP().toUpperCase()}" ',')> {
 #foreach ( $table in $tables )
-    public abstract IBeanConverter<${table.asBeanClassNSP()}, ${table.asBeanClass()}> get${table.asBeanClassNSP()}Converter();
+    public abstract IBeanConverter<${table.asBeanClassNSP()}, N_${table.asCoreClassNSP().toUpperCase()}> get${table.asBeanClassNSP()}Converter();
 #end
 
     /**

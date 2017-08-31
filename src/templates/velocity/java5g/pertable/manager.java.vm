@@ -125,7 +125,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     }
     
     private $managerClass nativeManager = ${managerClass}.getInstance();
-    private IDbConverter dbConverter = DbConverter.INSTANCE;
+    private IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> dbConverter = DbConverter.INSTANCE;
     private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
 
@@ -147,7 +147,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
         this.nativeManager = nativeManager;
     }
     
-    public IDbConverter getDbConverter() {
+    public IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> getDbConverter() {
         return dbConverter;
     }
 
@@ -156,6 +156,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      * throw {@link NullPointerException} if {@code dbConverter} is null
      * @param dbConverter
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void setDbConverter(IDbConverter dbConverter) {
         if( null == dbConverter)
             throw new NullPointerException();
