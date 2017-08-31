@@ -1925,9 +1925,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     public int deleteUsingTemplate(${beanClass}Base beanBase) throws DAOException
     {
         $beanClass bean=${beanClass}Base.toFullBean(beanBase);
-#if ( $table.countPrimaryKeys() == 1)
-        if (bean.$table.getPrimaryKey().getInitializedMethod()()) {
-            return this.deleteByPrimaryKey(bean.$table.getPrimaryKey().getGetMethod()());
+#if ( $table.countPrimaryKeys() > 0)
+        if(#join($primaryKeys "bean.$e.getInitializedMethod()() && null != bean.$e.getGetMethod()()" ' && ' )){
+            return this.deleteByPrimaryKey(#join($primaryKeys "bean.$e.getGetMethod()()" ', '));
         }
 #end
         Connection c = null;
