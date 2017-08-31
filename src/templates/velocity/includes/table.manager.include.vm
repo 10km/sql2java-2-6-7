@@ -1,0 +1,510 @@
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+$!importThrows
+
+/**
+ * Interface to handle database calls (save, load, count, etc...) for table.
+ * @author guyadong
+ */
+public interface $javaClassName<B extends $parentClass> {    
+    public enum SearchType{
+         /** set =QUERY for loadUsingTemplate */
+        SEARCH_EXACT,
+         /** set %QUERY% for loadLikeTemplate */
+        SEARCH_LIKE,
+         /** set %QUERY for loadLikeTemplate */
+        SEARCH_STARTING_LIKE,
+        /** set QUERY% for loadLikeTemplate */
+        SEARCH_ENDING_LIKE
+    }
+    public interface Action<B>{
+        void call(B bean);
+        B getBean();
+   }
+    public abstract static class Adapter<B${B_extends}> implements $javaClassName<B>{
+
+        private class ListAction implements Action<B> {
+            final List<B> list;
+            protected ListAction() {
+                list=new LinkedList<B>();
+            }
+
+            public List<B> getList() {
+                return list;
+            }
+
+            @Override
+            public void call(B bean) {
+                list.add(bean);
+            }
+
+            @Override
+            public B getBean() {
+                return null;
+            }
+        }
+        @Override
+        public int countAll()$!throwsString{
+            return this.countWhere("");
+        }
+
+        @Override
+        public int countUsingTemplate(B bean)$!throwsString{
+            return this.countUsingTemplate(bean, -1, -1);
+        }
+
+        @Override
+        public int countUsingTemplate(B bean, int startRow, int numRows)$!throwsString{
+            return this.countUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        }
+
+        @Override
+        public int deleteAll()$!throwsString{
+            return this.deleteByWhere("");
+        }
+
+
+        @Override
+        public B[] loadAll()$!throwsString{
+            return this.loadUsingTemplate(null);
+        }
+
+        @Override
+        public int loadAll(Action<B> action)$!throwsString{
+            return this.loadUsingTemplate(null,action);
+        }
+
+        @Override
+        public B[] loadAll(int startRow, int numRows)$!throwsString{
+            return this.loadUsingTemplate(null, startRow, numRows);
+        }
+
+        @Override
+        public int loadAll(int startRow, int numRows, Action<B> action)$!throwsString{
+            return this.loadUsingTemplate(null, startRow, numRows,action);
+        }
+
+        @Override
+        public List<B> loadAllAsList()$!throwsString{
+            return this.loadUsingTemplateAsList(null);
+        }
+
+        @Override
+        public List<B> loadAllAsList(int startRow, int numRows)$!throwsString{
+            return this.loadUsingTemplateAsList(null, startRow, numRows);
+        }
+
+        @Override
+        public boolean existsPrimaryKey(B bean)$!throwsString{
+            return null!=loadByPrimaryKey(bean);
+        }
+
+        @Override
+        public B[] loadByWhere(String where)$!throwsString{
+            return this.loadByWhere(where, (int[])null);
+        }
+
+        @Override
+        public int loadByWhere(String where, Action<B> action)$!throwsString{
+            return this.loadByWhere(where, null,action);
+        }
+
+        @Override
+        public B[] loadByWhere(String where, int[] fieldList)$!throwsString{
+            return this.loadByWhere(where, fieldList, 1, -1);
+        }
+
+        @Override
+        public int loadByWhere(String where, int[] fieldList, Action<B> action)$!throwsString{
+            return this.loadByWhere(where, fieldList, 1, -1,action);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows)$!throwsString{
+            return this.loadByWhereAsList(where, fieldList, startRow, numRows).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public int loadByWhere(String where, int[] fieldList, int startRow, int numRows,
+                Action<B> action)$!throwsString{
+            return this.loadByWhereForAction(where, fieldList, startRow, numRows,action);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where)$!throwsString{
+            return this.loadByWhereAsList(where, null);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where, int[] fieldList)$!throwsString{
+            return this.loadByWhereAsList(where, fieldList, 1, -1);
+        }
+
+        @Override
+        public List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)$!throwsString{
+            ListAction action = new ListAction();
+            loadByWhereForAction(where,fieldList,startRow,numRows,action);              
+            return action.getList();
+        }
+
+        @Override
+        public B[] loadUsingTemplate(B bean)$!throwsString{
+            return this.loadUsingTemplate(bean, 1, -1);
+        }
+
+        @Override
+        public int loadUsingTemplate(B bean, Action<B> action)$!throwsString{
+            return this.loadUsingTemplate(bean, 1, -1,action);
+        }
+
+        @Override
+        public B[] loadUsingTemplate(B bean, int startRow, int numRows)$!throwsString{
+            return this.loadUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        }
+
+        @Override
+        public int loadUsingTemplate(B bean, int startRow, int numRows,
+                Action<B> action)$!throwsString{
+            return this.loadUsingTemplate(bean, null, startRow, numRows,SearchType.SEARCH_EXACT, action);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString{
+            return this.loadUsingTemplateAsList(bean, startRow, numRows, searchType).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean)$!throwsString{
+            return this.loadUsingTemplateAsList(bean, 1, -1);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows)$!throwsString{
+            return this.loadUsingTemplateAsList(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        }
+
+        @Override
+        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType)$!throwsString{
+            ListAction action = new ListAction();
+            loadUsingTemplate(bean,null,startRow,numRows,searchType, action);
+            return action.getList();
+        }
+
+        @Override
+        public B[] save(B[] beans)$!throwsString{
+            if(null != beans){
+                for (B bean : beans) 
+                {
+                    this.save(bean);
+                }
+            }
+            return beans;
+        }
+
+        @Override
+        public <C extends Collection<B>> C saveAsTransaction(final C beans)$!throwsString{
+            return this.runAsTransaction(new Callable<C>(){
+                @Override
+                public C call() throws Exception {
+                    return save(beans);
+                }});
+        }
+
+        @Override
+        public B[] saveAsTransaction(final B[] beans)$!throwsString{
+            return this.runAsTransaction(new Callable<B[]>(){
+                @Override
+                public B[] call() throws Exception {
+                    return save(beans);
+                }});
+        }
+
+        @Override
+        public <C extends Collection<B>> C save(C beans)$!throwsString{
+            if(null != beans){
+                for (B bean : beans) 
+                {
+                    this.save(bean);
+                }
+            }
+            return beans;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B[] loadBySql(String sql, Object[] argList, int[] fieldList)$!throwsString{
+            return loadBySqlAsList(sql, argList, fieldList).toArray((B[])new Object[0]);
+        }
+
+        @Override
+        public <T${T_extends}> T getReferencedBean(B bean, String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T${T_extends}> T setReferencedBean(B bean, T beanToSet, String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T${T_extends}> T[] getImportedBeans(B bean, String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T${T_extends}> List<T> getImportedBeansAsList(B bean, String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T${T_extends}> T[] setImportedBeans(B bean, T[] importedBeans, String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T${T_extends}, C extends Collection<T>> C setImportedBeans(B bean, C importedBeans,
+                String fkName)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+    //_____________________________________________________________________
+    //
+    // COUNT
+    //_____________________________________________________________________
+    /**
+     * Retrieves the number of rows of the table.
+     *
+     * @return the number of rows returned
+     */
+    public abstract int countAll()$!throwsString;
+    
+    /**
+     * count the number of elements of a specific bean
+     *
+     * @param bean the bean to look for ant count
+     * @return the number of rows returned
+     */
+    public abstract int countUsingTemplate( B bean)$!throwsString;
+
+    /**
+     * count the number of elements of a specific bean , given the start row and number of rows.
+     *
+     * @param bean the template to look for and count
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return the number of rows returned
+     */
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows)$!throwsString;
+    
+    /**
+     * count the number of elements of a specific bean given the start row and number of rows and the search type
+     *
+     * @param bean the template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ?
+     * @return the number of rows returned
+     */
+    public abstract int countUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+
+    /**
+     * Retrieves the number of rows of the table with a 'where' clause.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the restriction clause
+     * @return the number of rows returned
+     */
+    public abstract int countWhere(String where)$!throwsString;
+
+    /**
+     * Deletes all rows from table.
+     * @return the number of deleted rows.
+     */
+    public abstract int deleteAll()$!throwsString;
+
+    /**
+     * Deletes rows from the table using a 'where' clause.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     * <br>Attention, if 'WHERE' is omitted it will delete all records.
+     *
+     * @param where the sql 'where' clause
+     * @return the number of deleted rows
+     */
+    public abstract int deleteByWhere(String where)$!throwsString;
+
+    /**
+     * Deletes rows using a template.
+     *
+     * @param bean the template object(s) to be deleted
+     * @return the number of deleted objects
+     */
+    public abstract int deleteUsingTemplate(B bean)$!throwsString;
+
+    /**
+     * Delete row according to Primary Key fileds of the parameter{@code bean},
+     * when you don't know which is primary key of table,you can use the method.
+     * @author guyadong
+     * @param bean the bean with primary key fields
+     * @return the number of deleted rows
+     */
+    public abstract int deleteByPrimaryKey(B bean)$!throwsString;
+    
+    public abstract int deleteByPrimaryKey(Object ...keys)$!throwsString;
+
+    public abstract String[] getFieldNames()$!throwsString;
+
+    public abstract String[] getPrimarykeyNames()$!throwsString;
+
+    public abstract String getTableName()$!throwsString;
+
+    public abstract B[] loadAll()$!throwsString;
+    
+    public abstract int loadAll(Action<B> action)$!throwsString;
+
+    public abstract B[] loadAll(int startRow, int numRows)$!throwsString;
+    
+    public abstract int loadAll(int startRow, int numRows,Action<B> action)$!throwsString;
+
+    public abstract List<B> loadAllAsList()$!throwsString;
+
+    public abstract List<B> loadAllAsList(int startRow, int numRows)$!throwsString;
+
+    public abstract B loadByPrimaryKey(B bean)$!throwsString;
+    
+    public abstract B loadByPrimaryKey(Object ...keys)$!throwsString;
+    
+    public abstract boolean existsPrimaryKey(B bean)$!throwsString;
+
+    public abstract boolean existsPrimaryKey(Object ...keys)$!throwsString;
+    
+    public abstract B[] loadByWhere(String where)$!throwsString;
+    
+    public abstract int loadByWhere(String where,Action<B> action)$!throwsString;
+
+    public abstract B[] loadByWhere(String where, int[] fieldList)$!throwsString;
+    
+    public abstract int loadByWhere(String where, int[] fieldList,Action<B> action)$!throwsString;
+
+    public abstract B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows)$!throwsString;
+    
+    public abstract int loadByWhere(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString;
+
+    public abstract List<B> loadByWhereAsList(String where)$!throwsString;
+
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList)$!throwsString;
+
+    public abstract List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)$!throwsString;
+
+    public abstract int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString;
+    
+    public abstract B loadUniqueUsingTemplate(B bean)$!throwsString;
+
+    public abstract B[] loadUsingTemplate(B bean)$!throwsString;
+    
+    public abstract int loadUsingTemplate(B bean,Action<B> action)$!throwsString;
+
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows)$!throwsString;
+    
+    public abstract int loadUsingTemplate(B bean, int startRow, int numRows,Action<B> action)$!throwsString;
+    
+    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,SearchType searchType, Action<B> action)$!throwsString;
+
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+
+    public abstract List<B> loadUsingTemplateAsList(B bean)$!throwsString;
+
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows)$!throwsString;
+
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+
+    public abstract void registerListener(TableListener<B> listener)$!throwsString;
+
+    public abstract B save(B bean)$!throwsString;
+
+    public abstract B[] save(B[] beans)$!throwsString;
+    
+    public abstract <C extends Collection<B>> C saveAsTransaction(C beans)$!throwsString;
+
+    public abstract B[] saveAsTransaction(B[] beans)$!throwsString;
+
+    public abstract <C extends Collection<B>> C save(C beans)$!throwsString;
+
+    public abstract B[] loadBySql(String sql, Object[] argList, int[] fieldList)$!throwsString;
+    
+    public abstract List<B> loadBySqlAsList(String sql, Object[] argList, int[] fieldList)$!throwsString;
+    /**
+     * Run {@code Callable<T>} as a transaction.<br>
+     * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
+     * throw {@code NullPointerException} if {@code fun} be {@code null}<br>
+     * @param <T>  type of return result
+     * @param fun
+     * @return
+     * @
+     */
+    public abstract<T> T runAsTransaction(Callable<T> fun)$!throwsString;
+    /**
+     * Run {@code Runnable} as a transaction.no return
+     * @param fun
+     * @
+     * @see #runAsTransaction(Runnable)
+     */
+    public abstract void runAsTransaction(final Runnable fun)$!throwsString;
+    
+    /**
+     * Retrieves the T object referenced by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
+     */
+    public abstract <T${T_extends}> T getReferencedBean(B bean,String fkName)$!throwsString;
+    
+    /**
+     * Associates the B object to the T object by fkName field.<br>
+     * @param bean the B object to use
+     * @param beanToSet the T object to associate to the B bean
+     * @param fkName
+     * @return always beanToSet saved
+     */
+    public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,String fkName)$!throwsString;
+    
+    /**
+     * Retrieves imported T objects by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+     */
+    public <T${T_extends}> T[] getImportedBeans(B bean,String fkName)$!throwsString;
+    
+    /**
+     * Retrieves imported T objects by fkName.<br>
+     * @param bean the B object to use
+     * @param fkName foreign key name. for detail see implementation class
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+     */
+    public <T${T_extends}> List<T> getImportedBeansAsList(B bean,String fkName)$!throwsString;
+    
+    /**
+     * Set the importedBeans associates to the bean by fkName<br>
+     * 
+     * @param bean the bean object to use
+     * @param importedBeans the T object to associate to bean
+     * @param fkName foreign key name. for detail see implementation class
+     * @return importedBeans always
+     */
+    public <T${T_extends}> T[] setImportedBeans(B bean,T[] importedBeans,String fkName)$!throwsString;
+    
+    /**
+     * Set the importedBeans associates to the bean by fkName<br>
+     * 
+     * @param bean the bean object to use
+     * @param importedBeans the T object to associate to bean
+     * @param fkName foreign key name. for detail see implementation class
+     * @return importedBeans always
+     */
+    public <T${T_extends},C extends Collection<T>> C setImportedBeans(B bean,C importedBeans,String fkName)$!throwsString;
+}
