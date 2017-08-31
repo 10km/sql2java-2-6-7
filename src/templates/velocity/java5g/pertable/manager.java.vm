@@ -346,7 +346,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
 #set ( $importedClassManager = "$importedTable.asManagerClass()" )
 #foreach( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
-    put("${importedTable.asImpArg($fkName)}",new Class<?>[]{${importedClass}.class,${importedNative}.class});
+        put("${importedTable.asImpArg($fkName)}",new Class<?>[]{${importedClass}.class,${importedNative}.class});
 #end
 #end
     }} ;

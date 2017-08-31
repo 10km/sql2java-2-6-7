@@ -66,7 +66,9 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
         private static final long serialVersionUID = 1L;
         {
 #foreach ( $table in $tables )
-            add(new Object[]{${leftClass}.class,${rightClass}.class,#convertVar(${leftClass})});
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
+            add(new Object[]{${leftClass}.class, ${rightClass}.class, #convertVar(${leftClass})});
 #end
         }};
     
