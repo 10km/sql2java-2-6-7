@@ -12,8 +12,6 @@
 $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${managerClassNSP}.java")
 package ${gpkg}.${subpkg};
 
-import java.util.List;
-import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import ${gpkg}.${beanClass};
@@ -135,16 +133,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
     }
 
-
-    /**
-     * Loads a {@link $beanClass} from the $tablename using primary key fields of {@code bean}.
-     * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
-     * @param bean the {@link $beanClass} with primary key fields
-     * @return a unique {@link $beanClass} or {@code null} if not found or bean is null
-     * @see {@link #loadByPrimaryKey($keys)}
-     */
     //1.2
+    @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean)
     {
         try{
@@ -158,7 +148,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
      * @param keys primary keys value:<br> 
      *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
      
@@ -180,7 +169,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #set( $keys = "" )    
     /**
      * Returns true if this $tablename contains row with primary key fields.
-     * @author guyadong
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 ## part 1
@@ -195,7 +183,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     public boolean existsPrimaryKey($keys)
     {
         return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
-
     }
     
 #set ( $sql = "" )
@@ -244,14 +231,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end        
         return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
-    /**
-     * Delete row according to Primary Key fileds of the parameter{@code bean},
-     * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
-     * @param bean the $beanClass with primary key fields
-     * @return the number of deleted rows
-     * @see {@link #deleteByPrimaryKey($keys)}
-     */
+
     //2.2
     @Override
     public int deleteByPrimaryKey(${beanClass} bean)
@@ -355,7 +335,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      */
     @Override
-    public <T extends BaseBean> List<T> getImportedBeansAsList($beanClass bean,String fkName){
+    public <T extends BaseBean> java.util.List<T> getImportedBeansAsList($beanClass bean,String fkName){
         try {
             IBeanConverter<T,Object> resultConverter = getBeanConverter(fkName);
             return resultConverter.fromRight(nativeManager.getImportedBeansAsList( this.beanConverter.toRight(bean),fkName));
@@ -396,7 +376,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Set the importedBeans associates to the bean by fkName<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass} Collection</li>" '    ' 'true')
+    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass} java.util.Collection</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
@@ -406,11 +386,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends BaseBean,C extends Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,String fkName){
+    public <T extends BaseBean,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,String fkName){
         try {
             IBeanConverter<T,Object> resultConverter = getBeanConverter(fkName);
-            if(importedBeans instanceof List){
-                resultConverter.fromRight((List<T>)importedBeans,nativeManager.setImportedBeans( 
+            if(importedBeans instanceof java.util.List){
+                resultConverter.fromRight((java.util.List<T>)importedBeans,nativeManager.setImportedBeans( 
                         this.beanConverter.toRight(bean),
                         resultConverter.toRight(importedBeans),
                         fkName));            	
@@ -467,7 +447,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      */
     //3.2 GET IMPORTED
-    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
     {
         try {
             return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toRight(bean)));
@@ -504,7 +484,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }
 
     /**
-     * set  the {@link $importedClass} object collection associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * set  the {@link $importedClass} object java.util.Collection associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
      * @param bean the referenced {@link $beanClass} 
      * @param importedBeans imported beans from $importedTable.name 
@@ -512,12 +492,12 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     //3.4 SET IMPORTED
-    public <C extends Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans)
+    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans)
     {
         try {
             IBeanConverter<$importedClass,$importedNative> importedConverter = this.dbConverter.get${importedClass}Converter();
-            if(importedBeans instanceof List){
-                importedConverter.fromRight((List<$importedClass>)importedBeans,nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
+            if(importedBeans instanceof java.util.List){
+                importedConverter.fromRight((java.util.List<$importedClass>)importedBeans,nativeManager.${importedTable.getImportedBeansSetMethod($fkName)}(
                     this.beanConverter.toRight(bean),
                     importedConverter.toRight(importedBeans)
                     ));
@@ -597,7 +577,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     public $beanClass save($beanClass bean
         #foreachForeignTables( ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ", Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
+        #foreachImportedTables( ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
         try{
             return this.beanConverter.fromRight(bean,nativeManager.save(this.beanConverter.toRight(bean)
@@ -611,13 +591,13 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }   
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", Collection " '' ''))}
+     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", java.util.Collection " '' ''))}
      */
     //3.8 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ",final  Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables( ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
@@ -770,14 +750,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     // SQL 'WHERE' METHOD
     //////////////////////////////////////
 
-    /**
-     * Deletes rows from the $tablename table using a 'where' clause.
-     * It is up to you to pass the 'WHERE' in your where clauses.
-     * <br>Attention, if 'WHERE' is omitted it will delete all records.
-     *
-     * @param where the sql 'where' clause
-     * @return the number of deleted rows
-     */
     //11
     @Override
     public int deleteByWhere(String where)
@@ -796,14 +768,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     // SAVE
     //_____________________________________________________________________
 
-
-    /**
-     * Insert the {@link $beanClass} bean into the database.
-     *
-     * @param bean the {@link $beanClass} bean to be saved
-     * @return the inserted bean or null if bean is null
-     */
     //13
+    @Override
     protected $beanClass insert($beanClass bean)
     {
         try{
@@ -815,13 +781,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
     }
 
-    /**
-     * Update the {@link $beanClass} bean record in the database according to the changes.
-     *
-     * @param bean the {@link $beanClass} bean to be updated
-     * @return the updated bean or null if bean is null
-     */
     //14
+    @Override
     protected $beanClass update($beanClass bean)
     {
         try{
@@ -837,12 +798,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     //
     // USING TEMPLATE
     //_____________________________________________________________________
-    /**
-     * Loads a unique $beanClass bean from a template one giving a c
-     *
-     * @param bean the $beanClass bean to look for
-     * @return the bean matching the template
-     */
     //18
     @Override
     public $beanClass loadUniqueUsingTemplate(${beanClass} bean)
@@ -856,16 +811,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
      }
 
-    /**
-     * Loads each row from a template one, given the start row and number of rows and dealt with action.
-     *
-     * @param bean the $beanClass template to look for
-     * @param startRow the start row to be used (first row = 1, last row=-1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param searchType exact ?  like ? starting like ?
-     * @param action Action object for do something(not null)
-     * @return the count dealt by action
-     */
     //20-5
     @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)
@@ -878,12 +823,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
             throw new WrapDAOException(e);
         }
     }
-    /**
-     * Deletes rows using a $beanClass template.
-     *
-     * @param bean the $beanClass object(s) to be deleted
-     * @return the number of deleted objects
-     */
+
     //21
     @Override
     public int deleteUsingTemplate(${beanClass} bean)
@@ -953,7 +893,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end
      * @return a list of $beanClass
      */
-    public List<$beanClass> loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public java.util.List<$beanClass> loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
             return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
@@ -1048,19 +988,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #* *##end
 #* *##end
 #end
-
     //_____________________________________________________________________
     //
     // COUNT
     //_____________________________________________________________________
-
-    /**
-     * Retrieves the number of rows of the table $tablename with a 'where' clause.
-     * It is up to you to pass the 'WHERE' in your where clauses.
-     *
-     * @param where the restriction clause
-     * @return the number of rows returned
-     */
     //25
     @Override
     public int countWhere(String where)
@@ -1074,14 +1005,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
     }
 
-    /**
-     * count the number of elements of a specific $beanClass bean given the search type
-     *
-     * @param bean the $beanClass template to look for
-     * @param searchType exact ?  like ? starting like ?
-     * @return the number of rows returned
-     * @throws DAOException
-     */
     //20
     @Override
     public int countUsingTemplate(${beanClass} bean, int searchType)
@@ -1101,9 +1024,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     // LISTENER
     //_____________________________________________________________________
 
-    /**
-     * Registers a unique {@link $listenerClass} listener.
-     */
     //35
     @Override
     public void registerListener(TableListener<$beanClass> listener)
@@ -1152,19 +1072,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     // UTILS
     //_____________________________________________________________________
 
-
-    /**
-     * return true if @{code column}(case insensitive)is primary key,otherwise return false <br>
-     * return false if @{code column} is null or empty 
-     * @param column
-     * @return
-     * @author guyadong
-     */
     //43
+    @Override
     public boolean isPrimaryKey(String column){
         return this.nativeManager.isPrimaryKey(column);
     }
-    
     
     @Override
     public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action<$beanClass> action){

@@ -36,15 +36,6 @@ import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
 public class $managerClass extends TableManager.Adapter<$beanClass>
 {
 
-    /* set =QUERY for loadUsingTemplate */
-    public static final int SEARCH_EXACT = 0;
-    /* set %QUERY% for loadLikeTemplate */
-    public static final int SEARCH_LIKE = 1;
-    /* set %QUERY for loadLikeTemplate */
-    public static final int SEARCH_STARTING_LIKE = 2;
-    /* set QUERY% for loadLikeTemplate */
-    public static final int SEARCH_ENDING_LIKE = 3;
-
 #foreach ( $column in $columns ) #set ( $vcmo = $velocityCount - 1 )
     /**
      * Identify the $column.getName() field.
@@ -212,16 +203,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         }
     }
 
-    /**
-     * Loads a {@link $beanClass} from the $tablename using primary key fields of {@code bean}.
-     * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
-     * @param bean the {@link $beanClass} with primary key fields
-     * @return a unique {@link $beanClass} or {@code null} if not found or bean is null
-     * @throws DAOException
-     * @see {@link #loadByPrimaryKey($keys)}
-     */
     //1.2
+    @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean) throws DAOException
     {
 #set ( $methods = "" ) 
@@ -237,7 +220,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
      * @param keys primary keys value:<br> 
      *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
      
@@ -259,7 +241,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set( $keys = "" )    
     /**
      * Returns true if this $tablename contains row with primary key fields.
-     * @author guyadong
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 ## part 1
@@ -354,16 +335,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
     
-    /**
-     * Delete row according to Primary Key fileds of the parameter{@code bean},
-     * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
-     * @param bean the $beanClass with primary key fields
-     * @return the number of deleted rows
-     * @throws DAOException
-     * @see {@link #deleteByPrimaryKey($keys)}
-     */
     //2.2
+    @Override
     public int deleteByPrimaryKey(${beanClass} bean) throws DAOException
     {
 #set ( $methods = "" ) 
@@ -988,6 +961,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * @throws DAOException
      */
     //11
+    @Override
     public int deleteByWhere(String where) throws DAOException
     {
         Connection c = null;
@@ -1017,14 +991,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     // SAVE
     //_____________________________________________________________________
 
-    /**
-     * Insert the {@link $beanClass} bean into the database.
-     * 
-     * @param bean the {@link $beanClass} bean to be saved
-     * @return the inserted bean or null if bean is null
-     * @throws DAOException
-     */
     //13
+    @Override
     public $beanClass insert($beanClass bean) throws DAOException
     {
         // mini checks
@@ -1173,14 +1141,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         }
     }
 
-    /**
-     * Update the {@link $beanClass} bean record in the database according to the changes.
-     *
-     * @param bean the {@link $beanClass} bean to be updated
-     * @return the updated bean or null if bean is null
-     * @throws DAOException
-     */
     //14
+    @Override
     public $beanClass update($beanClass bean) throws DAOException
     {
         // mini checks
@@ -1285,14 +1247,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //
     // USING TEMPLATE
     //_____________________________________________________________________
-    /**
-     * Loads a unique $beanClass bean from a template one giving a c
-     *
-     * @param bean the $beanClass bean to look for
-     * @return the bean matching the template
-     * @throws DAOException
-     */
     //18
+    @Override
     public $beanClass loadUniqueUsingTemplate(${beanClass} bean) throws DAOException
     {
          $beanClass[] beans = this.loadUsingTemplate(bean);
@@ -1305,18 +1261,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
          return beans[0];
      }
 
-    /**
-     * Loads each row from a template one, given the start row and number of rows and dealt with action.
-     *
-     * @param bean the $beanClass template to look for
-     * @param startRow the start row to be used (first row = 1, last row=-1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param searchType exact ?  like ? starting like ?
-     * @param action Action object for do something(not null)
-     * @return the count dealt by action
-     * @throws DAOException
-     */
     //20-5
+    @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action) throws DAOException
     {
         // System.out.println("loadUsingTemplate startRow:" + startRow + ", numRows:" + numRows + ", searchType:" + searchType);
@@ -1341,14 +1287,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             this.freeConnection(connection);
         }
     }
-    /**
-     * Deletes rows using a $beanClass template.
-     *
-     * @param bean the $beanClass object(s) to be deleted
-     * @return the number of deleted objects
-     * @throws DAOException
-     */
+
     //21
+    @Override
     public int deleteUsingTemplate(${beanClass} bean) throws DAOException
     {
 #if ( $table.countPrimaryKeys() > 0)
@@ -1562,15 +1503,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     // COUNT
     //_____________________________________________________________________
 
-    /**
-     * Retrieves the number of rows of the table $tablename with a 'where' clause.
-     * It is up to you to pass the 'WHERE' in your where clauses.
-     *
-     * @param where the restriction clause
-     * @return the number of rows returned
-     * @throws DAOException
-     */
     //25
+    @Override
     public int countWhere(String where) throws DAOException
     {
         String sql = "SELECT COUNT(*) AS MCOUNT FROM $tablename " + where;
@@ -2221,18 +2155,14 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             throw new DataAccessException(e);
         }
     }
-    /**
-     * return true if @{code column}(case insensitive)is primary key,otherwise return false <br>
-     * return false if @{code column} is null or empty 
-     * @param column
-     * @return
-     * @author guyadong
-     */
+
     //43
+    @Override
     public boolean isPrimaryKey(String column){
         for(String c:PRIMARYKEY_NAMES)if(c.equalsIgnoreCase(column))return true;
         return false;
     }
+    
     /**
      * Fill the given prepared statement with the values in argList
      * @param ps the PreparedStatement that will be filled
@@ -2254,17 +2184,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
     }
     
-    /**
-     * Load each the elements using a SQL statement specifying a list of fields to be retrieved and dealt by action.
-     * @param sql the SQL statement for retrieving
-     * @param argList the arguments to use fill given prepared statement,may be null
-     * @param fieldList table of the field's associated constants
-     * @param startRow the start row to be used (first row = 1, last row = -1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param action Action object for do something(not null)
-     * @return the count dealt by action
-     * @throws DAOException
-     */
+    @Override    
     public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action<$beanClass> action) throws DAOException{
         PreparedStatement ps = null;
         Connection connection = null;

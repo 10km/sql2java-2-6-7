@@ -24,8 +24,29 @@ public interface $javaClassName<B extends $B_parentClass> {
         B getBean();
    }
     public abstract static class Adapter<B${B_extends}> implements $javaClassName<B>{
+       /**
+         * Insert the B bean into the database.
+         * 
+         * @param bean the B bean to be saved
+         * @return the inserted bean
+#if($throwsString)
+         * @$!throwsString
+#end    
+         */
+        //13
         protected abstract B insert(B bean)$!throwsString;
+        /**
+         * Update the B bean record in the database according to the changes.
+         *
+         * @param bean the B bean to be updated
+         * @return the updated bean
+#if($throwsString)
+         * @$!throwsString
+#end         
+         */
+        //14
         protected abstract B update(B bean)$!throwsString;
+        
         public class ListAction implements Action<B> {
             final List<B> list;
             public ListAction() {
@@ -348,6 +369,13 @@ public interface $javaClassName<B extends $B_parentClass> {
     
     public abstract String[] getFullFieldNames();
     
+    /**
+     * return true if @{code column}(case insensitive)is primary key,otherwise return false <br>
+     * return false if @{code column} is null or empty 
+     * @param column
+     * @return
+     */
+    //43
     public abstract boolean isPrimaryKey(String column);
     
     //_____________________________________________________________________
