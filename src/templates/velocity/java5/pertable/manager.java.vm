@@ -2112,7 +2112,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             listeners.clear();
         }    
     }
-    private ListenerContainer listenerContainer = new ListenerContainer();
+    private final ListenerContainer listenerContainer = new ListenerContainer();
 
     //35
     @Override
