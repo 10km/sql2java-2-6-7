@@ -935,6 +935,12 @@ public interface $javaClassName<B extends $B_parentClass> {
     //35
     public abstract void registerListener(TableListener<B> listener);
 
+    /**
+     * remove listener.
+     */
+    //36
+    public abstract void unregisterListener(TableListener<B> listener);
+
     //_____________________________________________________________________
     //
     // SAVE

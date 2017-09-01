@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import ${pkg}.Manager;
@@ -118,7 +120,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     public String[] getPrimarykeyNames() {
         return PRIMARYKEY_NAMES;
     }
-	
+
     private static $managerClass singleton = new $managerClass();
 
     /**
@@ -287,7 +289,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #foreach ( $pk in $primaryKeys )
             bean.${pk.getSetMethod()}(${pk.getVarName()});
 #end
-            this.beforeDelete(bean); // listener callback
+            this.listenerContainer.beforeDelete(bean); // listener callback
             c = this.getConnection();
             StringBuilder sql = new StringBuilder("DELETE FROM $tablename WHERE $sql");
             // System.out.println("deleteByPrimaryKey: " + sql);
@@ -299,7 +301,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
             int _rows=ps.executeUpdate();
             if(_rows>0)
-                this.afterDelete(bean); // listener callback
+                this.listenerContainer.afterDelete(bean); // listener callback
             return _rows;
         }
         catch(SQLException e)
@@ -1042,7 +1044,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
 #end## $table.getAutoincrement()
 ##------------/writePreInsert
-            this.beforeInsert(bean); // listener callback
+            this.listenerContainer.beforeInsert(bean); // listener callback
             int _dirtyCount = 0;
 #if ( $table.hasVersionColumn() )
 #set ($lockColumn = $table.getVersionColumn())
@@ -1126,7 +1128,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 
             bean.isNew(false);
             bean.resetIsModified();
-            this.afterInsert(bean); // listener callback
+            this.listenerContainer.afterInsert(bean); // listener callback
             return bean;
         }
         catch(SQLException e)
@@ -1164,7 +1166,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #if ( $table.countPrimaryKeys() == 0 )
 $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
-            this.beforeUpdate(bean); // listener callback
+            this.listenerContainer.beforeUpdate(bean); // listener callback
 #if ( $table.hasVersionColumn )
 #set ($lockColumn = $table.getVersionColumn() )
             $lockColumn.getJavaType() oldLockValue = bean.$lockColumn.getGetMethod()();
@@ -1227,7 +1229,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             ps.executeUpdate();
 #end
             bean.resetIsModified();
-            this.afterUpdate(bean); // listener callback
+            this.listenerContainer.afterUpdate(bean); // listener callback
 
             return bean;
         }
@@ -2026,91 +2028,92 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //
     // LISTENER
     //_____________________________________________________________________
-    private TableListener<$beanClass> listener = null;
+    class ListenerContainer implements TableListener<$beanClass> {
+        private final Set<TableListener<$beanClass>> listeners = new TreeSet<TableListener<$beanClass>>();
+        public ListenerContainer() {
+        }
+    
+        @Override
+        public void beforeInsert($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.beforeInsert(bean);
+            }
+        }
+    
+        @Override
+        public void afterInsert($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.afterInsert(bean);
+            }
+        }
+    
+        @Override
+        public void beforeUpdate($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.beforeUpdate(bean);
+            }
+        }
+    
+        @Override
+        public void afterUpdate($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.afterUpdate(bean);
+            }
+        }
+    
+        @Override
+        public void beforeDelete($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.beforeDelete(bean);
+            }
+        }
+    
+        @Override
+        public void afterDelete($beanClass bean) throws DAOException {
+            for(TableListener<$beanClass> listener:listeners){
+                listener.afterDelete(bean);
+            }
+        }
+    
+        public boolean isEmpty() {
+            return listeners.isEmpty();
+        }
+    
+        public boolean contains(TableListener<$beanClass> o) {
+            return listeners.contains(o);
+        }
+    
+        public synchronized boolean add(TableListener<$beanClass> e) {
+            if(null == e)
+                throw new NullPointerException();
+            return listeners.add(e);
+        }
+    
+        public synchronized boolean remove(TableListener<$beanClass> o) {
+            return null == o? false : listeners.remove(o);
+        }
+    
+        public synchronized void clear() {
+            listeners.clear();
+        }    
+    }
+    private ListenerContainer listenerContainer = new ListenerContainer();
 
-    /**
-     * Registers a unique $listenerClass listener.
-     */
     //35
+    @Override
     public void registerListener(TableListener<$beanClass> listener)
     {
-        this.listener = listener;
+        this.listenerContainer.add(listener);
     }
 
     /**
-     * Before the save of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be saved
+     * remove listener.
      */
     //36
-    private void beforeInsert($beanClass bean) throws DAOException
+    @Override
+    public void unregisterListener(TableListener<$beanClass> listener)
     {
-        if (listener != null) {
-            listener.beforeInsert(bean);
-        }
-    }
-
-    /**
-     * After the save of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be saved
-     */
-    //37
-    private void afterInsert($beanClass bean) throws DAOException
-    {
-        if (listener != null) {
-            listener.afterInsert(bean);
-        }
-    }
-
-    /**
-     * Before the update of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be updated
-     */
-    //38
-    private void beforeUpdate($beanClass bean) throws DAOException
-    {
-        if (listener != null) {
-            listener.beforeUpdate(bean);
-        }
-    }
-
-    /**
-     * After the update of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be updated
-     */
-    //39
-    private void afterUpdate($beanClass bean) throws DAOException
-    {
-        if (listener != null) {
-            listener.afterUpdate(bean);
-        }
-    }
-
-    /**
-     * Before the delete of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be deleted
-     */
-    private void beforeDelete($beanClass bean) throws DAOException
-    {
-        if (listener != null) {
-            listener.beforeDelete(bean);
-        }
-    }
-
-    /**
-     * After the delete of the $beanClass bean.
-     *
-     * @param bean the $beanClass bean to be deleted
-     */
-    private void afterDelete($beanClass bean) throws DAOException
-    {
-        if (listener != null) {
-            listener.afterDelete(bean);
-        }
+        this.listenerContainer.remove(listener);
     }
 
     //_____________________________________________________________________

@@ -1031,6 +1031,13 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         this.nativeManager.registerListener(this.toNative(listener));
     }
 
+    //36
+    @Override
+    public void unregisterListener(TableListener<$beanClass> listener)
+    {
+        this.nativeManager.unregisterListener(this.toNative(listener));
+    }
+    
     private ${pkg}.TableListener<$nativeClass> toNative(final TableListener<$beanClass> listener) {
         return null == listener ?null:new ${pkg}.TableListener<$nativeClass> (){
 
