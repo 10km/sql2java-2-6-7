@@ -8,26 +8,27 @@ $!importThrows
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong
  */
-public interface $javaClassName<B extends $parentClass> {    
-    public enum SearchType{
-         /** set =QUERY for loadUsingTemplate */
-        SEARCH_EXACT,
-         /** set %QUERY% for loadLikeTemplate */
-        SEARCH_LIKE,
-         /** set %QUERY for loadLikeTemplate */
-        SEARCH_STARTING_LIKE,
-        /** set QUERY% for loadLikeTemplate */
-        SEARCH_ENDING_LIKE
-    }
+public interface $javaClassName<B extends $B_parentClass> {    
+
+    /** set =QUERY for loadUsingTemplate */
+    public static final int SEARCH_EXACT = 0;
+    /** set %QUERY% for loadLikeTemplate */
+    public static final int SEARCH_LIKE = 1;
+    /** set %QUERY for loadLikeTemplate */
+    public static final int SEARCH_STARTING_LIKE = 2;
+    /** set QUERY% for loadLikeTemplate */
+    public static final int SEARCH_ENDING_LIKE = 3;
+    
     public interface Action<B>{
         void call(B bean);
         B getBean();
    }
     public abstract static class Adapter<B${B_extends}> implements $javaClassName<B>{
-
-        private class ListAction implements Action<B> {
+        protected abstract B insert(B bean)$!throwsString;
+        protected abstract B update(B bean)$!throwsString;
+        public class ListAction implements Action<B> {
             final List<B> list;
-            protected ListAction() {
+            public ListAction() {
                 list=new LinkedList<B>();
             }
 
@@ -52,12 +53,7 @@ public interface $javaClassName<B extends $parentClass> {
 
         @Override
         public int countUsingTemplate(B bean)$!throwsString{
-            return this.countUsingTemplate(bean, -1, -1);
-        }
-
-        @Override
-        public int countUsingTemplate(B bean, int startRow, int numRows)$!throwsString{
-            return this.countUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+            return this.countUsingTemplate(bean, SEARCH_EXACT);
         }
 
         @Override
@@ -100,7 +96,12 @@ public interface $javaClassName<B extends $parentClass> {
         public boolean existsPrimaryKey(B bean)$!throwsString{
             return null!=loadByPrimaryKey(bean);
         }
-
+        
+        @Override
+        public boolean existsPrimaryKey(Object ...keys)$!throwsString{
+            return null!=loadByPrimaryKey(keys);
+        }
+        
         @Override
         public B[] loadByWhere(String where)$!throwsString{
             return this.loadByWhere(where, (int[])null);
@@ -149,7 +150,14 @@ public interface $javaClassName<B extends $parentClass> {
             loadByWhereForAction(where,fieldList,startRow,numRows,action);              
             return action.getList();
         }
-
+    
+        @Override
+        public int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString{
+            String sql=createSelectSql(fieldList, where);
+            // System.out.println("loadByWhere: " + sql);
+            return this.loadBySqlForAction(sql, null, fieldList, startRow, numRows, action);
+        }
+    
         @Override
         public B[] loadUsingTemplate(B bean)$!throwsString{
             return this.loadUsingTemplate(bean, 1, -1);
@@ -162,18 +170,18 @@ public interface $javaClassName<B extends $parentClass> {
 
         @Override
         public B[] loadUsingTemplate(B bean, int startRow, int numRows)$!throwsString{
-            return this.loadUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+            return this.loadUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
         }
 
         @Override
         public int loadUsingTemplate(B bean, int startRow, int numRows,
                 Action<B> action)$!throwsString{
-            return this.loadUsingTemplate(bean, null, startRow, numRows,SearchType.SEARCH_EXACT, action);
+            return this.loadUsingTemplate(bean, null, startRow, numRows,SEARCH_EXACT, action);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public B[] loadUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString{
+        public B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType)$!throwsString{
             return this.loadUsingTemplateAsList(bean, startRow, numRows, searchType).toArray((B[])new Object[0]);
         }
 
@@ -184,16 +192,26 @@ public interface $javaClassName<B extends $parentClass> {
 
         @Override
         public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows)$!throwsString{
-            return this.loadUsingTemplateAsList(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+            return this.loadUsingTemplateAsList(bean, startRow, numRows, SEARCH_EXACT);
         }
 
         @Override
-        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType)$!throwsString{
+        public List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType)$!throwsString{
             ListAction action = new ListAction();
             loadUsingTemplate(bean,null,startRow,numRows,searchType, action);
             return action.getList();
         }
 
+        @Override
+        public B save(B bean)$!throwsString{
+            if(null == bean)return null;
+            if (bean.isNew()) {
+                return this.insert(bean);
+            } else {
+                return this.update(bean);
+            }
+        }
+        
         @Override
         public B[] save(B[] beans)$!throwsString{
             if(null != beans){
@@ -205,6 +223,17 @@ public interface $javaClassName<B extends $parentClass> {
             return beans;
         }
 
+        @Override
+        public <C extends Collection<B>> C save(C beans)$!throwsString{
+            if(null != beans){
+                for (B bean : beans) 
+                {
+                    this.save(bean);
+                }
+            }
+            return beans;
+        }
+        
         @Override
         public <C extends Collection<B>> C saveAsTransaction(final C beans)$!throwsString{
             return this.runAsTransaction(new Callable<C>(){
@@ -223,23 +252,39 @@ public interface $javaClassName<B extends $parentClass> {
                 }});
         }
 
-        @Override
-        public <C extends Collection<B>> C save(C beans)$!throwsString{
-            if(null != beans){
-                for (B bean : beans) 
-                {
-                    this.save(bean);
-                }
-            }
-            return beans;
-        }
-
         @SuppressWarnings("unchecked")
         @Override
         public B[] loadBySql(String sql, Object[] argList, int[] fieldList)$!throwsString{
             return loadBySqlAsList(sql, argList, fieldList).toArray((B[])new Object[0]);
         }
 
+        @Override
+        public List<B> loadBySqlAsList(String sql, Object[] argList, int[] fieldList)$!throwsString{
+            ListAction action = new ListAction();
+            loadBySqlForAction(sql,argList,fieldList,1,-1,action);
+            return action.getList();
+        }
+        
+        @Override
+        public String createSelectSql(int[] fieldList,String where){
+            StringBuffer sql = new StringBuffer(128);
+            if(fieldList == null) {
+                sql.append("SELECT ").append(this.getFieldNamesAsString());
+            } else{
+                sql.append("SELECT ");
+                for(int i = 0; i < fieldList.length; ++i){
+                    if(i != 0) {
+                        sql.append(",");
+                    }
+                    sql.append(this.getFullFieldNames()[fieldList[i]]);
+                }            
+            }
+            sql.append(" FROM " + this.getTableName() + " ");
+            if(null!=where)
+                sql.append(where);
+            return sql.toString();
+        }
+                
         @Override
         public <T${T_extends}> T getReferencedBean(B bean, String fkName)$!throwsString{
             throw new UnsupportedOperationException();
@@ -270,8 +315,41 @@ public interface $javaClassName<B extends $parentClass> {
                 String fkName)$!throwsString{
             throw new UnsupportedOperationException();
         }
-        
+
+        @Override
+        public B loadByPrimaryKey(B bean)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public B loadByPrimaryKey(Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int deleteByPrimaryKey(B bean)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int deleteByPrimaryKey(Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+
     }
+
+    public abstract String[] getFieldNames();
+
+    public abstract String[] getPrimarykeyNames();
+
+    public abstract String getTableName();
+    
+    public abstract String getFieldNamesAsString();
+    
+    public abstract String[] getFullFieldNames();
+    
+    public abstract boolean isPrimaryKey(String column);
+    
     //_____________________________________________________________________
     //
     // COUNT
@@ -280,7 +358,11 @@ public interface $javaClassName<B extends $parentClass> {
      * Retrieves the number of rows of the table.
      *
      * @return the number of rows returned
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //24
     public abstract int countAll()$!throwsString;
     
     /**
@@ -288,29 +370,31 @@ public interface $javaClassName<B extends $parentClass> {
      *
      * @param bean the bean to look for ant count
      * @return the number of rows returned
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //27
     public abstract int countUsingTemplate( B bean)$!throwsString;
-
+  
     /**
-     * count the number of elements of a specific bean , given the start row and number of rows.
-     *
-     * @param bean the template to look for and count
-     * @param startRow the start row to be used (first row = 1, last row=-1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @return the number of rows returned
-     */
-    public abstract int countUsingTemplate(B bean, int startRow, int numRows)$!throwsString;
-    
-    /**
-     * count the number of elements of a specific bean given the start row and number of rows and the search type
+     * count the number of elements of a specific bean given the search type
      *
      * @param bean the template to look for
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @param searchType exact ?  like ? starting like ?
+     * @param searchType exact ?  like ? starting like ? ending link ? <br>
+     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
+     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
+     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
+     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
      * @return the number of rows returned
+#if($throwsString)
+     * @$!throwsString
+#end
      */
-    public abstract int countUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+    //20
+    public abstract int countUsingTemplate(B bean, int searchType)$!throwsString;
 
     /**
      * Retrieves the number of rows of the table with a 'where' clause.
@@ -318,13 +402,21 @@ public interface $javaClassName<B extends $parentClass> {
      *
      * @param where the restriction clause
      * @return the number of rows returned
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //25
     public abstract int countWhere(String where)$!throwsString;
 
     /**
      * Deletes all rows from table.
      * @return the number of deleted rows.
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //10
     public abstract int deleteAll()$!throwsString;
 
     /**
@@ -334,7 +426,11 @@ public interface $javaClassName<B extends $parentClass> {
      *
      * @param where the sql 'where' clause
      * @return the number of deleted rows
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //11
     public abstract int deleteByWhere(String where)$!throwsString;
 
     /**
@@ -342,101 +438,578 @@ public interface $javaClassName<B extends $parentClass> {
      *
      * @param bean the template object(s) to be deleted
      * @return the number of deleted objects
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //21
     public abstract int deleteUsingTemplate(B bean)$!throwsString;
 
     /**
      * Delete row according to Primary Key fileds of the parameter{@code bean},
      * when you don't know which is primary key of table,you can use the method.
-     * @author guyadong
      * @param bean the bean with primary key fields
      * @return the number of deleted rows
+#if($throwsString)
+     * @$!throwsString
+#end
      */
+    //2
     public abstract int deleteByPrimaryKey(B bean)$!throwsString;
     
+    /**
+     * Delete row according to its primary keys.
+     *
+     * @param keys primary keys value
+     * @return the number of deleted rows
+#if($throwsString)
+     * @$!throwsString
+#end
+     */   
+    //2.1
     public abstract int deleteByPrimaryKey(Object ...keys)$!throwsString;
 
-    public abstract String[] getFieldNames()$!throwsString;
+    //////////////////////////////////////
+    // LOAD ALL
+    //////////////////////////////////////
 
-    public abstract String[] getPrimarykeyNames()$!throwsString;
-
-    public abstract String getTableName()$!throwsString;
-
+    /**
+     * Loads all the rows from table.
+     *
+     * @return an array of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //5
     public abstract B[] loadAll()$!throwsString;
-    
+
+    /**
+     * Loads each row from table and dealt with action.
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //5-1    
     public abstract int loadAll(Action<B> action)$!throwsString;
 
+    /**
+     * Loads the given number of rows from table, given the start row.
+     *
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return an array of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //6
     public abstract B[] loadAll(int startRow, int numRows)$!throwsString;
-    
+
+    /**
+     *  Loads the given number of rows from table, given the start row and dealt with action.
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //6-1    
     public abstract int loadAll(int startRow, int numRows,Action<B> action)$!throwsString;
 
+    /**
+     * Loads all the rows from table.
+     *
+     * @return a list of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //5-2
     public abstract List<B> loadAllAsList()$!throwsString;
 
+    /**
+     * Loads the given number of rows from table, given the start row.
+     *
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return a list of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //6-2
     public abstract List<B> loadAllAsList(int startRow, int numRows)$!throwsString;
 
+    /**
+     * Loads a B bean from the table using primary key fields of {@code bean}.
+     * when you don't know which is primary key of table,you can use the method.
+     * @param bean the B bean with primary key fields
+     * @return a unique B or {@code null} if not found or bean is null
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.2
     public abstract B loadByPrimaryKey(B bean)$!throwsString;
     
+    /**
+     * Loads a B bean from the table using primary key fields.
+     * when you don't know which is primary key of table,you can use the method.
+     * @param keys primary keys value:<br> 
+     * @return a unique B or {@code null} if not found
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.3
     public abstract B loadByPrimaryKey(Object ...keys)$!throwsString;
     
-    public abstract boolean existsPrimaryKey(B bean)$!throwsString;
-
+    /**
+     * Returns true if this table contains row with primary key fields.
+     * @param keys primary keys value:<br>
+     * @see #loadByPrimaryKey(Object...)
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.5
     public abstract boolean existsPrimaryKey(Object ...keys)$!throwsString;
     
+    /**
+     * Returns true if this table contains row specified by primary key fields of B.<br>
+     * when you don't know which is primary key of table,you can use the method.
+     * @param bean the B bean with primary key fields
+     * @return 
+     * @see {@link #loadByPrimaryKey(B bean)}
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.6
+    public abstract boolean existsPrimaryKey(B bean)$!throwsString;
+   
+    //////////////////////////////////////
+    // SQL 'WHERE' METHOD
+    //////////////////////////////////////
+    /**
+     * Retrieves an array of B given a sql 'where' clause.
+     *
+     * @param where the sql 'where' clause
+     * @return 
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //7 
     public abstract B[] loadByWhere(String where)$!throwsString;
     
+    /**
+     * Retrieves each row of B bean given a sql 'where' clause and dealt with action.
+     * @param where the sql 'where' clause
+     * @param action  Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //7-1
     public abstract int loadByWhere(String where,Action<B> action)$!throwsString;
 
+    /**
+     * Retrieves an array of B bean given a sql where clause, and a list of fields.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'WHERE' clause
+     * @param fieldList array of field's ID
+     * @return 
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //8
     public abstract B[] loadByWhere(String where, int[] fieldList)$!throwsString;
-    
+   
+    /**
+     * Retrieves each row of B bean given a sql where clause, and a list of fields,
+     * and dealt with action.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     * @param where the sql 'WHERE' clause
+     * @param fieldList array of field's ID
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //8-1 
     public abstract int loadByWhere(String where, int[] fieldList,Action<B> action)$!throwsString;
 
+    /**
+     * Retrieves an array of B bean given a sql where clause and a list of fields, and startRow and numRows.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return 
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //9
     public abstract B[] loadByWhere(String where, int[] fieldList, int startRow, int numRows)$!throwsString;
-    
-    public abstract int loadByWhere(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString;
 
+    /**
+     * Retrieves each row of B bean given a sql where clause and a list of fields, and startRow and numRows,
+     * and dealt wity action.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //9-1    
+    public abstract int loadByWhere(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString;
+    /**
+     * Retrieves a list of B bean given a sql 'where' clause.
+     *
+     * @param where the sql 'where' clause
+     * @return
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //7
     public abstract List<B> loadByWhereAsList(String where)$!throwsString;
 
+    /**
+     * Retrieves a list of B bean given a sql where clause, and a list of fields.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'WHERE' clause
+     * @param fieldList array of field's ID
+     * @return
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //8
     public abstract List<B> loadByWhereAsList(String where, int[] fieldList)$!throwsString;
-
+    
+    /**
+     * Retrieves a list of B bean given a sql where clause and a list of fields, and startRow and numRows.
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //9-2
     public abstract List<B> loadByWhereAsList(String where, int[] fieldList, int startRow, int numRows)$!throwsString;
 
+    /**
+     * Retrieves each row of B bean given a sql where clause and a list of fields, and startRow and numRows,
+     * and dealt wity action
+     * It is up to you to pass the 'WHERE' in your where clausis.
+     *
+     * @param where the sql 'where' clause
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //9-3
     public abstract int loadByWhereForAction(String where, int[] fieldList, int startRow, int numRows,Action<B> action)$!throwsString;
-    
+
+    //_____________________________________________________________________
+    //
+    // USING TEMPLATE
+    //_____________________________________________________________________
+    /**
+     * Loads a unique B bean from a template one giving a c
+     *
+     * @param bean the B bean to look for
+     * @return the bean matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //18   
     public abstract B loadUniqueUsingTemplate(B bean)$!throwsString;
 
+    /**
+     * Loads an array of B from a template one.
+     *
+     * @param bean the B bean template to look for
+     * @return all the B beans matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //19
     public abstract B[] loadUsingTemplate(B bean)$!throwsString;
     
+    /**
+     * Loads each row from a template one and dealt with action.
+     *
+     * @param bean the B bean template to look for
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //19-1
     public abstract int loadUsingTemplate(B bean,Action<B> action)$!throwsString;
 
+    /**
+     * Loads an array of B bean from a template one, given the start row and number of rows.
+     *
+     * @param bean the B bean template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return all the B matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20
     public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows)$!throwsString;
     
+    /**
+     * Loads each row from a template one, given the start row and number of rows and dealt with action.
+     *
+     * @param bean the B bean template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20-1
     public abstract int loadUsingTemplate(B bean, int startRow, int numRows,Action<B> action)$!throwsString;
-    
-    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,SearchType searchType, Action<B> action)$!throwsString;
 
-    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+    /**
+     * Loads each row from a template one, given the start row and number of rows and dealt with action.
+     *
+     * @param bean the B template to look for
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ? ending link ? <br>
+     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
+     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
+     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
+     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20-5
+    public abstract int loadUsingTemplate(B bean, int[] fieldList, int startRow, int numRows,int searchType, Action<B> action)$!throwsString;
+    /**
+     * Loads a list of B bean from a template one, given the start row and number of rows.
+     *
+     * @param bean the B bean template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ? ending link ? <br>
+     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
+     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
+     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
+     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     * @return all the B bean matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20-4
+    public abstract B[] loadUsingTemplate(B bean, int startRow, int numRows, int searchType)$!throwsString;
 
+    /**
+     * Loads a list of B bean from a template one.
+     *
+     * @param bean the B bean template to look for
+     * @return all the B beans matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //19-2
     public abstract List<B> loadUsingTemplateAsList(B bean)$!throwsString;
 
+    /**
+     * Loads a list of B bean from a template one, given the start row and number of rows.
+     *
+     * @param bean the B bean template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return all the B bean matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20-2
     public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows)$!throwsString;
 
-    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, SearchType searchType)$!throwsString;
+    /**
+     * Loads an array of B bean from a template one, given the start row and number of rows.
+     *
+     * @param bean the B bean template to look for
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param searchType exact ?  like ? starting like ? ending link? <br>
+     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
+     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
+     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
+     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     * @return all the B beans matching the template
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //20-3
+    public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType)$!throwsString;
+    
+    //_____________________________________________________________________
+    //
+    // LISTENER
+    //_____________________________________________________________________
 
-    public abstract void registerListener(TableListener<B> listener)$!throwsString;
+    /**
+     * Registers a unique {@link TableListener} listener.
+     */
+    //35
+    public abstract void registerListener(TableListener<B> listener);
 
+    //_____________________________________________________________________
+    //
+    // SAVE
+    //_____________________________________________________________________
+    /**
+     * Saves the B bean into the database.
+     *
+     * @param bean the B bean to be saved
+     * @return the inserted or updated bean,or null if bean is null
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //12
     public abstract B save(B bean)$!throwsString;
 
+    /**
+     * Saves an array of B bean into the database.
+     *
+     * @param beans the array of  B bean to be saved
+     * @return alwarys beans saved
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //15
     public abstract B[] save(B[] beans)$!throwsString;
     
+    /**
+     * Saves a collection of B bean into the database.
+     *
+     * @param beans the B bean table to be saved
+     * @return alwarys beans saved
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //15-2
     public abstract <C extends Collection<B>> C saveAsTransaction(C beans)$!throwsString;
-
+    
+    /**
+     * Saves an array of B bean into the database as transaction.
+     *
+     * @param beans the B bean table to be saved
+     * @return alwarys beans saved
+     * @see #save(B[])
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //15-3
     public abstract B[] saveAsTransaction(B[] beans)$!throwsString;
 
+    /**
+     * Saves a collection of B bean into the database as transaction.
+     *
+     * @param beans the B bean table to be saved
+     * @return alwarys beans saved
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //15-4
     public abstract <C extends Collection<B>> C save(C beans)$!throwsString;
 
+    /**
+     * Load all the elements using a SQL statement specifying a list of fields to be retrieved.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @return an array of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
     public abstract B[] loadBySql(String sql, Object[] argList, int[] fieldList)$!throwsString;
     
+    /**
+     * Load all elements using a SQL statement specifying a list of fields to be retrieved.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @return an list of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
     public abstract List<B> loadBySqlAsList(String sql, Object[] argList, int[] fieldList)$!throwsString;
+    
+    /**
+     * Load each the elements using a SQL statement specifying a list of fields to be retrieved and dealt by action.
+     * @param sql the SQL statement for retrieving
+     * @param argList the arguments to use fill given prepared statement,may be null
+     * @param fieldList table of the field's associated constants
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @param action Action object for do something(not null)
+     * @return the count dealt by action
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action<B> action)$!throwsString;
     /**
      * Run {@code Callable<T>} as a transaction.<br>
      * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
@@ -444,7 +1017,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param <T>  type of return result
      * @param fun
      * @return
-     * @
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public abstract<T> T runAsTransaction(Callable<T> fun)$!throwsString;
     /**
@@ -452,6 +1027,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param fun
      * @
      * @see #runAsTransaction(Runnable)
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public abstract void runAsTransaction(final Runnable fun)$!throwsString;
     
@@ -460,6 +1038,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param bean the B object to use
      * @param fkName foreign key name. for detail see implementation class
      * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public abstract <T${T_extends}> T getReferencedBean(B bean,String fkName)$!throwsString;
     
@@ -469,6 +1050,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param beanToSet the T object to associate to the B bean
      * @param fkName
      * @return always beanToSet saved
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,String fkName)$!throwsString;
     
@@ -477,6 +1061,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param bean the B object to use
      * @param fkName foreign key name. for detail see implementation class
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public <T${T_extends}> T[] getImportedBeans(B bean,String fkName)$!throwsString;
     
@@ -485,6 +1072,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param bean the B object to use
      * @param fkName foreign key name. for detail see implementation class
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public <T${T_extends}> List<T> getImportedBeansAsList(B bean,String fkName)$!throwsString;
     
@@ -495,6 +1085,9 @@ public interface $javaClassName<B extends $parentClass> {
      * @param importedBeans the T object to associate to bean
      * @param fkName foreign key name. for detail see implementation class
      * @return importedBeans always
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public <T${T_extends}> T[] setImportedBeans(B bean,T[] importedBeans,String fkName)$!throwsString;
     
@@ -505,6 +1098,11 @@ public interface $javaClassName<B extends $parentClass> {
      * @param importedBeans the T object to associate to bean
      * @param fkName foreign key name. for detail see implementation class
      * @return importedBeans always
+#if($throwsString)
+     * @$!throwsString
+#end
      */
     public <T${T_extends},C extends Collection<T>> C setImportedBeans(B bean,C importedBeans,String fkName)$!throwsString;
+    
+    public String createSelectSql(int[] fieldList,String where);
 }
