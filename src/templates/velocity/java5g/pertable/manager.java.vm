@@ -1379,7 +1379,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     @Override
     public $beanClass[] loadUsingTemplate(${beanClass} bean, int startRow, int numRows)
     {
-        return this.loadUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        return this.loadUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
     }
     /**
      * Loads each row from a template one, given the start row and number of rows and dealt with action.
@@ -1394,7 +1394,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     @Override
     public int loadUsingTemplate(${beanClass} bean, int startRow, int numRows,Action<$beanClass> action)
     {
-        return this.loadUsingTemplate(bean, null, startRow, numRows,SearchType.SEARCH_EXACT, action);
+        return this.loadUsingTemplate(bean, null, startRow, numRows,SEARCH_EXACT, action);
     }
     /**
      * Loads a list of $beanClass from a template one, given the start row and number of rows.
@@ -1408,7 +1408,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     @Override
     public List<$beanClass> loadUsingTemplateAsList(${beanClass} bean, int startRow, int numRows)
     {
-        return this.loadUsingTemplateAsList(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        return this.loadUsingTemplateAsList(bean, startRow, numRows, SEARCH_EXACT);
     }
 
     /**
@@ -1422,7 +1422,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
      */
     //20-3
     @Override
-    public $beanClass[] loadUsingTemplate(${beanClass} bean, int startRow, int numRows, SearchType searchType)
+    public $beanClass[] loadUsingTemplate(${beanClass} bean, int startRow, int numRows, int searchType)
     {
         return this.loadUsingTemplateAsList(bean, startRow, numRows, searchType).toArray(new $beanClass[0]);
     }
@@ -1438,10 +1438,10 @@ public class $managerClassNSP implements TableManager<$beanClass>
      */
     //20-4
     @Override
-    public List<$beanClass> loadUsingTemplateAsList(${beanClass} bean, int startRow, int numRows, SearchType searchType)
+    public List<$beanClass> loadUsingTemplateAsList(${beanClass} bean, int startRow, int numRows, int searchType)
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadUsingTemplateAsList(this.beanConverter.toRight(bean),startRow,numRows,searchType.ordinal()));
+            return this.beanConverter.fromRight(this.nativeManager.loadUsingTemplateAsList(this.beanConverter.toRight(bean),startRow,numRows,searchType));
         }
         catch(DAOException e)
         {
@@ -1460,10 +1460,10 @@ public class $managerClassNSP implements TableManager<$beanClass>
      */
     //20-5
     @Override
-    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,SearchType searchType, Action<$beanClass> action)
+    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)
     {
         try {
-            return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(bean),fieldList,startRow,numRows,searchType.ordinal(),this.toNative(action));
+            return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(bean),fieldList,startRow,numRows,searchType,this.toNative(action));
         }
         catch(DAOException e)
         {
@@ -1703,7 +1703,7 @@ public class $managerClassNSP implements TableManager<$beanClass>
     @Override
     public int countUsingTemplate(${beanClass} bean, int startRow, int numRows)
     {
-        return this.countUsingTemplate(bean, startRow, numRows, SearchType.SEARCH_EXACT);
+        return this.countUsingTemplate(bean, startRow, numRows, SEARCH_EXACT);
     }
 
     /**
@@ -1717,10 +1717,10 @@ public class $managerClassNSP implements TableManager<$beanClass>
      */
     //20
     @Override
-    public int countUsingTemplate(${beanClass} bean, int startRow, int numRows, SearchType searchType)
+    public int countUsingTemplate(${beanClass} bean, int startRow, int numRows, int searchType)
     {
         try{
-            return this.nativeManager.countUsingTemplate(this.beanConverter.toRight(bean),startRow,numRows,searchType.ordinal());
+            return this.nativeManager.countUsingTemplate(this.beanConverter.toRight(bean),startRow,numRows,searchType);
         }
         catch(DAOException e)
         {
