@@ -3,7 +3,18 @@ import java.util.LinkedList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 $!importThrows
-
+#macro(defineFkConst $m_table)
+#set ( $m_fkIndex = 0)
+#foreach($m_foreignTable in $m_table.foreignTables)
+#set ( $m_foreignClass = "$m_foreignTable.asBeanClass()" )
+#foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
+#set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
+    /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
+    public static final int ${m_table.asFKNameConst($m_fkName)}=$m_fkIndex;
+#set ( $m_fkIndex = $m_fkIndex +1 )
+#end
+#end
+#end
 /**
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong
@@ -19,6 +30,13 @@ public interface $javaClassName<B extends $B_parentClass> {
     /** set QUERY% for loadLikeTemplate */
     public static final int SEARCH_ENDING_LIKE = 3;
     
+    //////////////////////////////////////
+    // FOREIGN KEY INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineFkConst($t)
+#end
+
     public interface Action<B>{
         public abstract class Adapter<B> implements Action<B>{
             @Override
@@ -316,12 +334,12 @@ public interface $javaClassName<B extends $B_parentClass> {
         }
         
         @Override
-        public <T${T_extends}> T getReferencedBean(B bean, String fkName)$!throwsString{
+        public <T${T_extends}> T getReferencedBean(B bean, int fkName)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T${T_extends}> T setReferencedBean(B bean, T beanToSet, String fkName)$!throwsString{
+        public <T${T_extends}> T setReferencedBean(B bean, T beanToSet, int fkName)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
@@ -1082,7 +1100,7 @@ public interface $javaClassName<B extends $B_parentClass> {
      * @$!throwsString
 #end
      */
-    public abstract <T${T_extends}> T getReferencedBean(B bean,String fkName)$!throwsString;
+    public abstract <T${T_extends}> T getReferencedBean(B bean,int fkName)$!throwsString;
     
     /**
      * Associates the B object to the T object by fkName field.<br>
@@ -1094,7 +1112,7 @@ public interface $javaClassName<B extends $B_parentClass> {
      * @$!throwsString
 #end
      */
-    public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,String fkName)$!throwsString;
+    public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,int fkName)$!throwsString;
     
     /**
      * Retrieves imported T objects by fkName.<br>

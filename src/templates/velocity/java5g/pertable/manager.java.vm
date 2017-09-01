@@ -602,7 +602,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     //////////////////////////////////////
     // FOREIGN KEY GENERIC METHOD
     //////////////////////////////////////
-    private static final  java.util.HashMap<String, Class<?>[]> REF_METHODS=new java.util.HashMap<String,Class<?>[]>(){
+    private static final  java.util.Vector<Class<?>[]> REF_METHODS=new java.util.Vector<Class<?>[]>(){
         private static final long serialVersionUID = 1L;
     {        
 #foreach($foreignTable in $foreignTables)
@@ -611,7 +611,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-    put("${table.asRefArg($fkName)}",new Class<?>[]{${foreignClass}.class,${foreignTable.getPackage()}.${foreignNative}.class});
+        add(new Class<?>[]{${foreignClass}.class,${foreignTable.getPackage()}.${foreignNative}.class});
 #end
 #end
     }} ;
@@ -619,15 +619,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Retrieves the bean object referenced by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables(" *     <li> ${table.asRefArg($m_fkName)} -> ${m_foreignClass}</li>" '    ' 'true')
+    #foreachForeignTables(" *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
+     * @param fkName valid values: <br>
+     *        #foreachForeignTables("{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      */
     @Override
-    public <T extends BaseBean> T getReferencedBean($beanClass bean,String fkName){
+    public <T extends BaseBean> T getReferencedBean($beanClass bean,int fkName){
         try {
             return this.nativeManager.getReferencedBean( this.beanConverter.toRight(bean), fkName);
         }
@@ -641,44 +642,36 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * 
      * @param <T>
      * <ul>
-    #foreachForeignTables(" *     <li> ${table.asRefArg($m_fkName)} -> ${m_foreignClass}</li>" '    ' 'true')
+    #foreachForeignTables(" *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
-     * @param fkName valid values: #foreachForeignTables("${table.asRefArg($m_fkName)}" ',' '')
+     * @param fkName valid values: <br>
+     *        #foreachForeignTables("{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
 
      * @return always beanToSet saved
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends BaseBean> T setReferencedBean($beanClass bean,T beanToSet,String fkName){
+    public <T extends BaseBean> T setReferencedBean($beanClass bean,T beanToSet,int fkName){
         try {
             if(null == beanToSet) return null;
+            if(fkName >= REF_METHODS.size() || fkName <0)
+                throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
             Class<?>[] types=REF_METHODS.get(fkName);
-            if(null == types)
-                throw new IllegalArgumentException(String.format("invalid fkName :%s",fkName));
             @SuppressWarnings("rawtypes")
             IBeanConverter converter=this.dbConverter.getBeanConverter(beanToSet.getClass(),types[1]);
             if( null == converter )
                 throw new IllegalArgumentException(String.format("invalid type of 'beanToSet' :%s",beanToSet.getClass().getName()));
-            return (T) converter.fromRight(beanToSet,this.nativeManager.setReferencedBean( this.beanConverter.toRight(bean), converter.toRight(beanToSet), fkName));
+            return (T) converter.fromRight(beanToSet,
+                    this.nativeManager.setReferencedBean( this.beanConverter.toRight(bean), converter.toRight(beanToSet), fkName));
         }
         catch(DAOException e)
         {
             throw new WrapDAOException(e);
         }
     }
-#else
-
-    @Override
-    public <T extends BaseBean> T getReferencedBean($beanClass bean,String fkName){
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public <T extends BaseBean> T setReferencedBean($beanClass bean,T beanToSet,String fkName){
-        throw new UnsupportedOperationException();
-    }
-#end ## $table.hasForeignKeys()
+#end## $table.hasForeignKeys()
     
 #foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
