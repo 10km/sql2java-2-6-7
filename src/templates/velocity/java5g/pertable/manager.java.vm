@@ -232,18 +232,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
 
-    //2.2
-    @Override
-    public int deleteByPrimaryKey(${beanClass} bean)
-    {
-        try{
-            return this.nativeManager.deleteByPrimaryKey(this.beanConverter.toRight(bean));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
-    }
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template

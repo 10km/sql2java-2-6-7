@@ -355,19 +355,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         return delete(bean);
     }
     
-    //2.2
-    @Override
-    public int deleteByPrimaryKey(${beanClass} bean) throws DAOException
-    {
-#set ( $methods = "" ) 
-#foreach ( $pk in $primaryKeys )
-## part 1
-#if ( $velocityCount > 1 )#set( $methods = "$methods, " )#end
-## part 2
-#set ( $methods = "$methods bean.${pk.getGetMethod()}()" )
-#end     
-        return bean==null?0:deleteByPrimaryKey($methods);
-    }
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template

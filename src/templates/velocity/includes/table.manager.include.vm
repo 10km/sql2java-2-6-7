@@ -357,11 +357,6 @@ public interface $javaClassName<B extends $B_parentClass> {
         }
 
         @Override
-        public int deleteByPrimaryKey(B bean)$!throwsString{
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public int deleteByPrimaryKey(Object ...keys)$!throwsString{
             throw new UnsupportedOperationException();
         }
@@ -483,22 +478,11 @@ public interface $javaClassName<B extends $B_parentClass> {
     public abstract int deleteUsingTemplate(B bean)$!throwsString;
 
     /**
-     * Delete row according to Primary Key fileds of the parameter{@code bean},
-     * when you don't know which is primary key of table,you can use the method.
-     * @param bean the bean with primary key fields
-     * @return the number of deleted rows
-#if($throwsString)
-     * @$!throwsString
-#end
-     */
-    //2
-    public abstract int deleteByPrimaryKey(B bean)$!throwsString;
-    
-    /**
      * Delete row according to its primary keys.
      *
      * @param keys primary keys value
      * @return the number of deleted rows
+     * @see #delete(B)
 #if($throwsString)
      * @$!throwsString
 #end
@@ -506,12 +490,11 @@ public interface $javaClassName<B extends $B_parentClass> {
     //2.1
     public abstract int deleteByPrimaryKey(Object ...keys)$!throwsString;
 
-
     /**
-     * Delete bean.<br>
-     * equivalent to {@link #deleteByPrimaryKey(B)}
-     * @param bean will be delete
-     * @return the number of deleted rows
+     * Delete row according to primary keys of bean.<br>
+     * 
+     * @param bean will be deleted ,all keys must not be null
+     * @return the number of deleted rows,0 returned if bean is null
 #if($throwsString)
      * @$!throwsString
 #end
