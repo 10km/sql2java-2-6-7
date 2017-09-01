@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ${pkg}.Manager;
 import ${pkg}.TableListener;
@@ -48,7 +49,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     /**
      * Tablename.
      */
-		public static final String TABLE_NAME="$tablename";
+    public static final String TABLE_NAME="$tablename";
     /**
      * Contains all the full fields of the $tablename table.
      */
@@ -273,22 +274,37 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end     
      * @return the number of deleted rows
      * @throws DAOException
+     * @see {@link #delete($beanClass)}
      */
     //2
-    @SuppressWarnings("unused")
     public int deleteByPrimaryKey($keys) throws DAOException
     {
-        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+        ${beanClass} bean=createBean();
+#foreach ( $pk in $primaryKeys )
+        bean.${pk.getSetMethod()}(${pk.getVarName()});
+#end
+        return this.delete(bean);
+    }
+
+    /**
+     * Delete row according to primary keys of bean.<br>
+     * 
+     * @param bean will be deleted ,all keys must not be null
+     * @return the number of deleted rows,0 returned if bean is null
+     * @throws DAOException
+     */
+    //2
+    @Override
+    public int delete($beanClass bean) throws DAOException
+    {
+        if(null == bean) return 0;
+        if(#join($primaryKeys "null == bean.${e.getGetMethod()}()" ' || ')){
             throw new IllegalArgumentException("primary keys must no be null ");
         }
         Connection c = null;
         PreparedStatement ps = null;
         try
         {
-            ${beanClass} bean=createBean();
-#foreach ( $pk in $primaryKeys )
-            bean.${pk.getSetMethod()}(${pk.getVarName()});
-#end
             this.listenerContainer.beforeDelete(bean); // listener callback
             c = this.getConnection();
             StringBuilder sql = new StringBuilder("DELETE FROM $tablename WHERE $sql");
@@ -297,7 +313,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
 #foreach( $pk in $primaryKeys )
-            $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
+            $pk.getPreparedStatementMethod("bean.${pk.getGetMethod()}()", $velocityCount)
 #end
             int _rows=ps.executeUpdate();
             if(_rows>0)
@@ -315,7 +331,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         }
     }
 
-
     /**
      * Delete row according to its primary keys.
      *
@@ -323,18 +338,21 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
      
      * @return the number of deleted rows
-     * @see {@link #deleteByPrimaryKey($keys)}
+     * @see {@link #delete($beanClass)}
      */   
     //2.1
+    @Override
     public int deleteByPrimaryKey(Object ...keys) throws DAOException{
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
+        ${beanClass} bean=createBean();   
 #foreach ( $pk in $primaryKeys )
 #set( $kidx = $velocityCount - 1 )
-        if(! (keys[$kidx] instanceof $pk.getJavaType()))
+        if(null!= keys[$kidx] && !(keys[$kidx] instanceof $pk.getJavaType()))
             throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
-#end        
-        return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+        bean.${pk.getSetMethod()}(($pk.getJavaType())keys[$kidx]);
+#end    
+        return delete(bean);
     }
     
     //2.2
@@ -966,6 +984,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public int deleteByWhere(String where) throws DAOException
     {
+        if( !this.listenerContainer.isEmpty()){
+            final DeleteBeanAction action = new DeleteBeanAction(); 
+            this.loadByWhere(where,action);
+            return action.getCount();
+        }
         Connection c = null;
         PreparedStatement ps = null;
 
@@ -1299,6 +1322,11 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             return this.deleteByPrimaryKey(#join($primaryKeys "bean.$e.getGetMethod()()" ', '));
         }
 #end
+        if( !this.listenerContainer.isEmpty()){
+            final DeleteBeanAction action=new DeleteBeanAction(); 
+            this.loadUsingTemplate(bean,action);
+            return action.getCount();
+        }
         Connection c = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder("DELETE FROM $tablename ");
@@ -1431,7 +1459,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #* *##foreach ( $lTable in $lTables )
 #*      *##set ( $lName = $lTable.getName() )
 #*      *##if ( $velocityCount == 1 && $oVelocityCount == 1 )
-	
+    
     //_____________________________________________________________________
     //
     // MANY TO MANY: LOAD OTHER BEAN VIA JUNCTION TABLE
@@ -1487,7 +1515,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
          }
          catch (SQLException e)
          {
-         	throw new DAOException(e.getMessage(), e);
+             throw new DAOException(e.getMessage(), e);
          }
          finally
          {
@@ -1739,7 +1767,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //28
     public $beanClass[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException
     {
-    	return this.decodeResultSetAsList(rs, fieldList, startRow, numRows).toArray(new $beanClass[0]);
+        return this.decodeResultSetAsList(rs, fieldList, startRow, numRows).toArray(new $beanClass[0]);
     }
 
     /**
@@ -2218,5 +2246,16 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     public void runAsTransaction(final Runnable fun) throws DAOException{
         Manager.getInstance().runAsTransaction(fun);
     }
-
+    
+    class DeleteBeanAction extends Action.Adapter<$beanClass>{
+        private final AtomicInteger count=new AtomicInteger(0);
+        @Override
+        public void call($beanClass bean) throws DAOException {
+                ${managerClass}.this.delete(bean);
+                count.incrementAndGet();
+        }
+        int getCount(){
+            return count.get();
+        }
+    }
 }

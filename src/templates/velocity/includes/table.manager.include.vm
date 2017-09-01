@@ -20,9 +20,13 @@ public interface $javaClassName<B extends $B_parentClass> {
     public static final int SEARCH_ENDING_LIKE = 3;
     
     public interface Action<B>{
-        void call(B bean);
+        public abstract class Adapter<B> implements Action<B>{
+            @Override
+            public B getBean() {return null;}            
+        }
+        void call(B bean)$!throwsString;
         B getBean();
-   }
+    }
     public abstract static class Adapter<B${B_extends}> implements $javaClassName<B>{
        /**
          * Insert the B bean into the database.
@@ -305,7 +309,12 @@ public interface $javaClassName<B extends $B_parentClass> {
                 sql.append(where);
             return sql.toString();
         }
-                
+
+        @Override
+        public int delete(B bean)$!throwsString{
+            return deleteByPrimaryKey(bean);
+        }
+        
         @Override
         public <T${T_extends}> T getReferencedBean(B bean, String fkName)$!throwsString{
             throw new UnsupportedOperationException();
@@ -496,6 +505,20 @@ public interface $javaClassName<B extends $B_parentClass> {
      */   
     //2.1
     public abstract int deleteByPrimaryKey(Object ...keys)$!throwsString;
+
+
+    /**
+     * Delete bean.<br>
+     * equivalent to {@link #deleteByPrimaryKey(B)}
+     * @param bean will be delete
+     * @return the number of deleted rows
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //2.2
+    public abstract int delete(B bean)$!throwsString;
+
 
     //////////////////////////////////////
     // LOAD ALL
