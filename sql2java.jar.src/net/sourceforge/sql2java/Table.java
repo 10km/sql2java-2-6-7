@@ -782,7 +782,10 @@ public class Table {
 		byte[] md5 = getMD5(input.getBytes());
 		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
 	}	
-	
+
+	public String asFKNameConst(String fkName){
+		return (this.name+"_FK_" + toUniversalFkName(fkName)).toUpperCase();
+	}
 	
 	public String asRefArg(String fkName){
 		return StringUtilities.convertName("ref_"+ this.getForeignTableByFkName(fkName).getName() +"by_" + toUniversalFkName(fkName),true);
