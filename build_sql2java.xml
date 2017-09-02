@@ -51,8 +51,8 @@
     <target name="update" depends="compile" description="update class file to sql2java.jar">
     		<echo message="update class file to ${jar}"/>
 				<jar destfile="${jar}" update="true" >
-						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class **/Table*.class **/Database*.class"/>
-						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java **/Table.java **/Database.java"/>
+						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class **/Table*.class **/Database*.class **/Index*.class"/>
+						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java **/Table.java **/Database.java **/Index.java"/>
 				</jar>
 		    <copy file="${basedir}/release.sh" todir="${build}" overwrite="true"/>
     </target>

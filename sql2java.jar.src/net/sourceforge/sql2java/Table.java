@@ -783,16 +783,23 @@ public class Table {
 		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
 	}	
 
-	public String asFKNameConst(String fkName){
+	public String asFKConst(String fkName){
 		return (this.name+"_FK_" + toUniversalFkName(fkName)).toUpperCase();
+	}
+
+	public String asIKConst(String fkName){
+		Table foreignTable = this.getForeignTableByFkName(fkName);
+		return (null==foreignTable?"":foreignTable.getName() + "_IK_" + this.name +"_" + toUniversalFkName(fkName)).toUpperCase();
 	}
 	
 	public String asRefArg(String fkName){
 		return StringUtilities.convertName("ref_"+ this.getForeignTableByFkName(fkName).getName() +"by_" + toUniversalFkName(fkName),true);
 	}
+	
 	public String asImpArg(String fkName){
 		return StringUtilities.convertName("imp_"+ this.getName() +"by_" + toUniversalFkName(fkName),true);
 	}
+
 	public String getReferencedVarName(String fkName){
 		return StringUtilities.convertName("referenced_by_" + toUniversalFkName(fkName),true);
 	}

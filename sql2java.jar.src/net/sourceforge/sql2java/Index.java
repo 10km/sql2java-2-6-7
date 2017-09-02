@@ -2,7 +2,6 @@
 package net.sourceforge.sql2java;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,7 @@ public class Index {
 	private Table table;
 	private String name;
 	private boolean unique;
-	private Map columns;
+	private Map<String,Column> columns;
 
 	public Index() {
 		this("");
@@ -26,10 +25,10 @@ public class Index {
 	}
 
 	public Index(String name, Table table) {
-		this(name, table, new HashMap());
+		this(name, table, new HashMap<String,Column>());
 	}
 
-	public Index(String name, Table table, Map columns) {
+	public Index(String name, Table table, Map<String,Column> columns) {
 		this.name = name;
 		this.table = table;
 		this.columns = columns;
@@ -62,12 +61,12 @@ public class Index {
 		return this.unique;
 	}
 
-	public Map getIndexColumns() {
+	public Map<String,Column> getIndexColumns() {
 		return this.columns;
 	}
 
-	public List getIndexColumnsList() {
-		ArrayList list = new ArrayList();
+	public List<Column> getIndexColumnsList() {
+		ArrayList<Column> list = new ArrayList<Column>();
 		list.addAll(this.columns.values());
 		Collections.sort(list);
 		return list;
@@ -83,5 +82,21 @@ public class Index {
 
 	public void setTable(Table table) {
 		this.table = table;
+	}
+	
+	public String asIndexName(){
+		StringBuilder buf=new StringBuilder("index");
+		List<Column> list = getIndexColumnsList();
+		for(int i=0;i<list.size();++i){			
+			buf.append('_').append(list.get(i).getName());
+		}
+		return buf.toString();
+	}
+	
+	public String asCamelCaseName(){
+		return StringUtilities.convertName(this.asIndexName(),true);
+	}
+	public String asConstName(){
+		return (this.table.getName() + "_" +this.asIndexName()).toUpperCase();
 	}
 }
