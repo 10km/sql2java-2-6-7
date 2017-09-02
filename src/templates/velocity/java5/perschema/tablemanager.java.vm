@@ -8,4 +8,5 @@ package $pkg;
 #set ( $throwsString = "throws DAOException" )
 #set ( $B_extends = " extends FullBean<?>" )
 #set ( $T_extends = "" )
+###set ( $M_native = '' )
 #parse( "table.manager.include.vm" )

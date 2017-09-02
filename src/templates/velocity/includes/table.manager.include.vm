@@ -353,33 +353,33 @@ public interface $javaClassName<B extends $B_parentClass> {
         }
         
         @Override
-        public <T${T_extends}> T getReferencedBean(B bean, int fkName)$!throwsString{
+        public <T${T_extends}> T getReferencedBean(B bean, int fkIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T${T_extends}> T setReferencedBean(B bean, T beanToSet, int fkName)$!throwsString{
+        public <T${T_extends}> T setReferencedBean(B bean, T beanToSet, int fkIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T${T_extends}> T[] getImportedBeans(B bean, String fkName)$!throwsString{
+        public <T${T_extends}> T[] getImportedBeans(B bean, int ikIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T${T_extends}> List<T> getImportedBeansAsList(B bean, String fkName)$!throwsString{
+        public <T${T_extends}> List<T> getImportedBeansAsList(B bean, int ikIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T${T_extends}> T[] setImportedBeans(B bean, T[] importedBeans, String fkName)$!throwsString{
+        public <T${T_extends}> T[] setImportedBeans(B bean, T[] importedBeans, int ikIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
         @Override
         public <T${T_extends}, C extends Collection<T>> C setImportedBeans(B bean, C importedBeans,
-                String fkName)$!throwsString{
+                int ikIndex)$!throwsString{
             throw new UnsupportedOperationException();
         }
 
@@ -1112,74 +1112,108 @@ public interface $javaClassName<B extends $B_parentClass> {
     
     /**
      * Retrieves the T object referenced by fkName.<br>
+     * @param <T>
+#foreach($t in $tables)
+#if($t.hasForeignTables())
+     * <ul>
+     *     <li> for $t.name:
+    #foreachForeignTables("$M_native" $t " *     <li> {@link #${t.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+     * </ul>
+#end
+#end
      * @param bean the B object to use
-     * @param fkName foreign key name. for detail see implementation class
+     * @param fkIndex foreign key name.<br>
+#foreach($t in $tables)
+#if($t.hasForeignTables())
+     *        for for $t.name:<br>
+     *        #foreachForeignTables("$M_native" $t "{@link #${t.asFKConst($m_fkName)}}" ',' '')<br>
+#end
+#end
      * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public abstract <T${T_extends}> T getReferencedBean(B bean,int fkName)$!throwsString;
+    public abstract <T${T_extends}> T getReferencedBean(B bean,int fkIndex)$!throwsString;
     
     /**
      * Associates the B object to the T object by fkName field.<br>
+     * @param <T> see {@link #getReferencedBean(B, int)}
      * @param bean the B object to use
      * @param beanToSet the T object to associate to the B bean
-     * @param fkName
+     * @param fkIndex see {@link #getReferencedBean(B, int)}
      * @return always beanToSet saved
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,int fkName)$!throwsString;
+    public abstract <T${T_extends}> T setReferencedBean(B bean,T beanToSet,int fkIndex)$!throwsString;
     
     /**
-     * Retrieves imported T objects by fkName.<br>
+     * Retrieves imported T objects by fkIndex.<br>
+     * @param <T>
+#foreach($t in $tables)
+#if($t.hasImportedTables())
+     * <ul>
+     *     <li> for $t.name:
+    #foreachImportedTables("$M_native" $t " *     <li> {@link #${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+     * </ul>
+#end
+#end
      * @param bean the B object to use
-     * @param fkName foreign key name. for detail see implementation class
+     * @param ikIndex foreign key name.<br>
+#foreach($t in $tables)
+#if($t.hasImportedTables())
+     *        for for $t.name:<br>
+     *        #foreachImportedTables("$M_native" $t "{@link #${m_importedTable.asFKConst($m_fkName)}}" ',' '')<br>
+#end
+#end
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public <T${T_extends}> T[] getImportedBeans(B bean,String fkName)$!throwsString;
+    public <T${T_extends}> T[] getImportedBeans(B bean,int ikIndex)$!throwsString;
     
     /**
-     * Retrieves imported T objects by fkName.<br>
+     * Retrieves imported T objects by ikIndex.<br>
+     * @param <T> see {@link #getImportedBeans(B, int)}
      * @param bean the B object to use
-     * @param fkName foreign key name. for detail see implementation class
+     * @param ikIndex foreign key name.see {@link #getImportedBeans(B, int)}
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public <T${T_extends}> List<T> getImportedBeansAsList(B bean,String fkName)$!throwsString;
+    public <T${T_extends}> List<T> getImportedBeansAsList(B bean,int ikIndex)$!throwsString;
     
     /**
-     * Set the importedBeans associates to the bean by fkName<br>
+     * Set the importedBeans associates to the bean by fkIndex<br>
      * 
+     * @param <T> see {@link #getImportedBeans(B, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param fkName foreign key name. for detail see implementation class
+     * @param fkIndex foreign key name.see {@link #getImportedBeans(B, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public <T${T_extends}> T[] setImportedBeans(B bean,T[] importedBeans,String fkName)$!throwsString;
+    public <T${T_extends}> T[] setImportedBeans(B bean,T[] importedBeans,int ikIndex)$!throwsString;
     
     /**
-     * Set the importedBeans associates to the bean by fkName<br>
+     * Set the importedBeans associates to the bean by fkIndex<br>
      * 
+     * @param <T> see {@link #getImportedBeans(B, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param fkName foreign key name. for detail see implementation class
+     * @param fkIndex foreign key name. see {@link #getImportedBeans(B, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString
 #end
      */
-    public <T${T_extends},C extends Collection<T>> C setImportedBeans(B bean,C importedBeans,String fkName)$!throwsString;
+    public <T${T_extends},C extends Collection<T>> C setImportedBeans(B bean,C importedBeans,int ikIndex)$!throwsString;
     
     public String createSelectSql(int[] fieldList,String where);
 }

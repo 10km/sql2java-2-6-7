@@ -10,4 +10,5 @@ package $gpkg;
 ###set ( $throwsString = "" )
 #set ( $B_extends = " extends BaseBean" )
 #set ( $T_extends = " extends BaseBean" )
+#set ( $M_native = 'native' )
 #parse( "table.manager.include.vm" )

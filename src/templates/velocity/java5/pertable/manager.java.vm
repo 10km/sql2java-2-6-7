@@ -364,188 +364,121 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //////////////////////////////////////
     // IMPORT KEY GENERIC METHOD
     //////////////////////////////////////
-    private static final  java.util.HashMap<String, Object[]> IMPORT_METHODS=new java.util.HashMap<String,Object[]>(){
-        private static final long serialVersionUID = 1L;
-    {        
+
+    /**
+     * Retrieves imported T objects by fkName.<br>
+     * @param <T>
+     * <ul>
+    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+     * </ul>
+     * @param bean the {@link $beanClass} object to use
+     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+
+     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
+     * @throws DAOException
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T[] getImportedBeans($beanClass bean,int ikIndex)throws DAOException{
+        switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
 #set ( $importedClassManager = "$importedTable.asManagerClass()" )
 #foreach( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
-    put("${importedTable.asImpArg($fkName)}",new Object[]{"${importedTable.getImportedBeansGetMethod($fkName)}","${importedTable.getImportedBeansSetMethod($fkName)}",${importedClass}[].class});
+        case ${importedTable.asIKConst($fkName)}:
+            return (T[])this.${importedTable.getImportedBeansGetMethod($fkName)}(bean);
 #end
 #end
-    }} ;
-    /**
-     * Retrieves imported T objects by fkName.<br>
-     * @param <T>
-     * <ul>
-    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
-     * </ul>
-     * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
-
-     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T[] getImportedBeans($beanClass bean,String fkName)throws DAOException{
-        Object[] params = IMPORT_METHODS.get(fkName);
-        if(null == params)
-            throw new IllegalArgumentException("invalid fkName: " + fkName);
-        try {
-            return (T[]) this.getClass().getMethod((String)params[0],bean.getClass()).invoke(this,bean);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
         }
+        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
      * Retrieves imported T objects by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> getImportedBeansAsList($beanClass bean,String fkName)throws DAOException{
-        Object[] params = IMPORT_METHODS.get(fkName);
-        if(null==params)
-            throw new IllegalArgumentException("invalid fkName " + fkName);
-        try {
-            return (List<T>) this.getClass().getMethod((String)params[0]+"AsList",bean.getClass()).invoke(this,bean);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
+    public <T> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DAOException{
+        switch(ikIndex){
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClass()" )
+#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+        case ${importedTable.asIKConst($fkName)}:
+            return (List<T>)this.${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean);
+#end
+#end
         }
+        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
      * Set the T objects as imported beans of bean object by fkName.<br>
      * @param <T>
      * 
      * <ul>
-    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
-     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T[] setImportedBeans($beanClass bean,T[] importedBeans,String fkName)throws DAOException{
-        Object[] params = IMPORT_METHODS.get(fkName);
-        if(null==params)
-            throw new IllegalArgumentException("invalid fkName " + fkName);
-        if(null==bean || null==importedBeans)
-            throw new NullPointerException();
-        Class<?> resultClass = (Class<?>)params[2];
-        if(!resultClass.isAssignableFrom(importedBeans.getClass()) ){
-            throw new IllegalArgumentException("the argument 'importedBeans' be invalid type,expect type:" + resultClass.getName());
+    public <T> T[] setImportedBeans($beanClass bean,T[] importedBeans,int ikIndex)throws DAOException{
+        switch(ikIndex){
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClass()" )
+#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+        case ${importedTable.asIKConst($fkName)}:
+            return (T[])${importedTable.getImportedBeansSetMethod($fkName)}(bean,(${importedClass}[])importedBeans);
+#end
+#end
         }
-        try {            
-            return (T[]) this.getClass().getMethod((String)params[1],bean.getClass(),resultClass).invoke(this,bean,importedBeans);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
-        }
+        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
      * Set the importedBeans associates to the bean by fkName<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass} java.util.Collection</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
-     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,String fkName)throws DAOException{
-        Object[] params = IMPORT_METHODS.get(fkName);
-        if(null==params)
-            throw new IllegalArgumentException("invalid fkName " + fkName);
-        if(null==bean || null==importedBeans)
-            throw new NullPointerException();
-        try {            
-            return (C) this.getClass().getMethod((String)params[1],bean.getClass(),Object.class).invoke(this,bean,importedBeans);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
+    public <T,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,int ikIndex)throws DAOException{
+        switch(ikIndex){
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClass()" )
+#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+        case ${importedTable.asIKConst($fkName)}:
+            return (C)${importedTable.getImportedBeansSetMethod($fkName)}(bean,(java.util.Collection<${importedClass}>)importedBeans);
+#end
+#end
         }
+        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
 #end ## $table.hasImportedKeys()
 
@@ -773,13 +706,13 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //////////////////////////////////////
 
     /**
-     * Retrieves the bean object referenced by fkName.<br>
+     * Retrieves the bean object referenced by fkIndex.<br>
      * @param <T>
      * <ul>
     #foreachForeignTables('' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: <br>
+     * @param fkIndex valid values: <br>
      *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
@@ -787,8 +720,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getReferencedBean($beanClass bean,int fkName)throws DAOException{
-        switch(fkName){
+    public <T> T getReferencedBean($beanClass bean,int fkIndex)throws DAOException{
+        switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
@@ -799,11 +732,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
 #end
         }
-        throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
+        throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
     }
     
     /**
-     * Associates the {@link $beanClass} object to the bean object by fkName field.<br>
+     * Associates the {@link $beanClass} object to the bean object by fkIndex field.<br>
      * 
      * @param <T>
      * <ul>
@@ -811,7 +744,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
-     * @param fkName valid values: <br>
+     * @param fkIndex valid values: <br>
      *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return always beanToSet saved
@@ -819,8 +752,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T setReferencedBean($beanClass bean,T beanToSet,int fkName)throws DAOException{
-        switch(fkName){
+    public <T> T setReferencedBean($beanClass bean,T beanToSet,int fkIndex)throws DAOException{
+        switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
@@ -831,7 +764,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
 #end
         }
-        throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
+        throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
     }
 #end ## $table.hasForeignKeys()
     
