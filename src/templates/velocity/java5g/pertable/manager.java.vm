@@ -558,15 +558,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     /**
      * Associates the {@link $beanClass} object to the bean object by fkIndex field.<br>
      * 
-     * @param <T>
-     * <ul>
-    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
-     * </ul>
+     * @param <T> see also {@link #getReferencedBean($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
-     * @param fkIndex valid values: <br>
-     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
-
+     * @param fkIndex valid values: see also {@link #getReferencedBean($beanClass,int)}
      * @return always beanToSet saved
      */
     @SuppressWarnings("unchecked")

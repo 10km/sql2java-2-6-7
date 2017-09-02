@@ -393,17 +393,13 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         }
         throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
+
     /**
      * Set the T objects as imported beans of bean object by fkName.<br>
-     * @param <T>
-     * 
-     * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
-     * </ul>
+     * @param <T> see also {@link #getImportedBeansAsList($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
-
+     * @param ikIndex valid values: see also {@link #getImportedBeansAsList($beanClass,int)}
      * @return importedBeans always
      * @throws DAOException
      */
@@ -425,13 +421,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     }
     /**
      * Set the importedBeans associates to the bean by fkName<br>
-     * @param <T>
-     * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
-     * </ul>
+     * @param <T> see also {@link #getImportedBeansAsList($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: see also {@link #getImportedBeansAsList($beanClass,int)}
 
      * @return importedBeans always
      * @throws DAOException
@@ -453,7 +446,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
 #end ## $table.hasImportedKeys()
-
+########################################
 #foreach ($importedTable in $importedTables)
 #if ( $velocityCount == 1 )
 
@@ -705,15 +698,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     /**
      * Associates the {@link $beanClass} object to the bean object by fkIndex field.<br>
      * 
-     * @param <T>
-     * <ul>
-    #foreachForeignTables('' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
-     * </ul>
+     * @param <T> see also {@link #getReferencedBean($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
-     * @param fkIndex valid values: <br>
-     *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
-
+     * @param fkIndex valid values: see also {@link #getReferencedBean($beanClass,int)}
      * @return always beanToSet saved
      * @throws DAOException
      */

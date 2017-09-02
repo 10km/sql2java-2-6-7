@@ -3,73 +3,11 @@ import java.util.LinkedList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 $!importThrows
-#####################
-#macro(defineFkConst $m_table)
-#set ( $m_fkIndex = 0)
-#foreach($m_foreignTable in $m_table.foreignTables)
-#foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
-#set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
-    /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
-    public static final int ${m_table.asFKConst($m_fkName)} = $m_fkIndex;
-#set ( $m_fkIndex = $m_fkIndex +1 )
-#end
-#end
-#end
-#####################
-#macro(defineIkConst $m_table)
-#set ( $m_ikIndex = 0)
-#foreach($m_importedTable in $m_table.importedTables)
-#foreach( $m_ikName in $m_importedTable.getFkMapNames($m_table.name) )
-#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_ikName) )
-    /** imported key ${m_importedTable.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_table.name */
-    public static final int ${m_importedTable.asIKConst($m_ikName)} = $m_ikIndex;
-#set ( $m_ikIndex = $m_ikIndex +1 )
-#end
-#end
-#end
-#####################
-#macro(defineIndexConst $m_table)
-#set ( $m_idxIndex = 0)
-#foreach($m_index in $m_table.getIndices())
-    /** $m_index.table.name index (#join($m_index.getIndexColumnsList() "$e.name" ',')) */
-    public static final int ${m_index.asConstName()} = $m_idxIndex;
-#set ( $m_idxIndex = $m_idxIndex +1 )
-#end
-#end
-#####################
 /**
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong
  */
-public interface $javaClassName<B extends $B_parentClass> {    
-
-    /** set =QUERY for loadUsingTemplate */
-    public static final int SEARCH_EXACT = 0;
-    /** set %QUERY% for loadLikeTemplate */
-    public static final int SEARCH_LIKE = 1;
-    /** set %QUERY for loadLikeTemplate */
-    public static final int SEARCH_STARTING_LIKE = 2;
-    /** set QUERY% for loadLikeTemplate */
-    public static final int SEARCH_ENDING_LIKE = 3;
-    
-    //////////////////////////////////////
-    // FOREIGN KEY INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineFkConst($t)
-#end
-    //////////////////////////////////////
-    // IMPORTED KEY INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineIkConst($t)
-#end
-    //////////////////////////////////////
-    // INDEX INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineIndexConst($t)
-#end
+public interface $javaClassName<B extends $B_parentClass> extends Constant {
 
     public interface Action<B>{
         public abstract class Adapter<B> implements Action<B>{
@@ -377,6 +315,7 @@ public interface $javaClassName<B extends $B_parentClass> {
             throw new UnsupportedOperationException();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T${T_extends}> T[] getImportedBeans(B bean, int ikIndex)$!throwsString{
             return this.getImportedBeansAsList(bean,ikIndex).toArray((T[])new Object[0]);
@@ -413,6 +352,7 @@ public interface $javaClassName<B extends $B_parentClass> {
             throw new UnsupportedOperationException();
         }
         
+        @SuppressWarnings("unchecked")
         @Override
         public B[] loadByIndex(int keyIndex,Object ...keys)$!throwsString{
             return this.loadByIndexAsList(keyIndex,keys).toArray((B[])new Object[0]);
@@ -1002,7 +942,7 @@ public interface $javaClassName<B extends $B_parentClass> {
     //_____________________________________________________________________    
     /**
      * Retrieves a array of B bean using the index specified by keyIndex.
-     * @param keyIndex valid values:see {@link #loadByIndexAsList(int,Object ...)}
+     * @param keyIndex valid values:see also {@link #loadByIndexAsList(int,Object ...)}
      * @param keys key values of index
      * @return
 #if($throwsString)
@@ -1031,7 +971,7 @@ public interface $javaClassName<B extends $B_parentClass> {
     
     /**
      * Deletes rows using key.
-     * @param keyIndex valid values: see {@link #loadByIndexAsList(int,Object ...)}
+     * @param keyIndex valid values: see also {@link #loadByIndexAsList(int,Object ...)}
      * @param keys key values of index
      * @return the number of deleted objects
 #if($throwsString)
@@ -1210,10 +1150,10 @@ public interface $javaClassName<B extends $B_parentClass> {
     
     /**
      * Associates the B object to the T object by fkName field.<br>
-     * @param <T> see {@link #getReferencedBean(B, int)}
+     * @param <T> see also {@link #getReferencedBean(B, int)}
      * @param bean the B object to use
      * @param beanToSet the T object to associate to the B bean
-     * @param fkIndex see {@link #getReferencedBean(B, int)}
+     * @param fkIndex see also {@link #getReferencedBean(B, int)}
      * @return always beanToSet saved
 #if($throwsString)
      * @$!throwsString
@@ -1227,7 +1167,7 @@ public interface $javaClassName<B extends $B_parentClass> {
 #foreach($t in $tables)
 #if($t.hasImportedTables())
      * <ul>
-     *     <li> for $t.name:
+     *     <li> for $t.name table:
     #foreachImportedTables("$M_native" $t " *     <li> {@link #${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
 #end
@@ -1236,7 +1176,7 @@ public interface $javaClassName<B extends $B_parentClass> {
      * @param ikIndex foreign key name.<br>
 #foreach($t in $tables)
 #if($t.hasImportedTables())
-     *        for for $t.name table:<br>
+     *        for $t.name table:<br>
      *        #foreachImportedTables("$M_native" $t "{@link #${m_importedTable.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
@@ -1249,9 +1189,9 @@ public interface $javaClassName<B extends $B_parentClass> {
     
     /**
      * Retrieves imported T objects by ikIndex.<br>
-     * @param <T> see {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link #getImportedBeans(B, int)}
      * @param bean the B object to use
-     * @param ikIndex foreign key name.see {@link #getImportedBeans(B, int)}
+     * @param ikIndex foreign key name.see also {@link #getImportedBeans(B, int)}
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
 #if($throwsString)
      * @$!throwsString
@@ -1262,10 +1202,10 @@ public interface $javaClassName<B extends $B_parentClass> {
     /**
      * Set the importedBeans associates to the bean by fkIndex<br>
      * 
-     * @param <T> see {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link #getImportedBeans(B, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param fkIndex foreign key name.see {@link #getImportedBeans(B, int)}
+     * @param fkIndex foreign key name.see also {@link #getImportedBeans(B, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString
@@ -1276,10 +1216,10 @@ public interface $javaClassName<B extends $B_parentClass> {
     /**
      * Set the importedBeans associates to the bean by fkIndex<br>
      * 
-     * @param <T> see {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link #getImportedBeans(B, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param fkIndex foreign key name. see {@link #getImportedBeans(B, int)}
+     * @param fkIndex foreign key name. see also {@link #getImportedBeans(B, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString
