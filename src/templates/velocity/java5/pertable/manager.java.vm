@@ -38,14 +38,6 @@ import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
  */
 public class $managerClass extends TableManager.Adapter<$beanClass>
 {
-
-#foreach ( $column in $columns ) #set ( $vcmo = $velocityCount - 1 )
-    /**
-     * Identify the $column.getName() field.
-     */
-    public static final int ID_$column.getConstName() = $vcmo;
-
-#end
     /**
      * Tablename.
      */
@@ -1763,7 +1755,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 switch(fieldList[i])
                 {
 #foreach( $column in $columns )
-                    case ID_$column.getConstName():
+                    case $column.getIDConstName():
                         ++pos;
                         bean.$column.getSetMethod()($column.getResultSetMethodObject("pos"));
                         break;

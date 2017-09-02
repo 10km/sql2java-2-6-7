@@ -5,6 +5,7 @@ $codewriter.setCurrentJavaFilename("$table.getPackage()", "${comparatorClass}.ja
 package $table.getPackage();
 
 import java.util.Comparator;
+import ${pkg}.Constant;
 
 ##import $pkg.*;
 
@@ -12,7 +13,7 @@ import java.util.Comparator;
  * Comparator class is used to sort the $beanClass objects.
  * @author sql2java
  */
-public class $comparatorClass implements Comparator<$beanClass>
+public class $comparatorClass implements Comparator<$beanClass>,Constant
 {
     /**
      * Holds the field on which the comparison is performed.
@@ -28,7 +29,7 @@ public class $comparatorClass implements Comparator<$beanClass>
      * <br>
      * Example:
      * <br>
-     * <code>Arrays.sort(pArray, new $comparatorClass(${managerClass}.ID_$table.getFirstColumn().getConstName(), bReverse));<code>
+     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));<code>
      *
      * @param iType the field from which you want to sort
      * <br>
@@ -36,7 +37,7 @@ public class $comparatorClass implements Comparator<$beanClass>
      * <ul>
 #foreach( $column in $columns )
 #if ( $column.hasCompareTo() )
-     *   <li>${managerClass}.ID_$column.getConstName()
+     *   <li>{@link Constant#$column.getIDConstName()}
 #end
 #end
      * </ul>
@@ -51,14 +52,14 @@ public class $comparatorClass implements Comparator<$beanClass>
      * <br>
      * Example:
      * <br>
-     * <code>Arrays.sort(pArray, new $comparatorClass(${managerClass}.ID_$table.getFirstColumn().getConstName(), bReverse));<code>
+     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));<code>
      *
      * @param iType the field from which you want to sort.
      * <br>
      * Possible values are:
      * <ul>
 #foreach( $column in $columns )
-     *   <li>${managerClass}.ID_$column.getConstName()
+     *   <li>{@link Constant#$column.getIDConstName()})
 #end
      * </ul>
      *
@@ -81,7 +82,7 @@ public class $comparatorClass implements Comparator<$beanClass>
 #foreach( $column in $columns )
 #set ( $getMethod = $column.getGetMethod() )
 #if ( $column.hasCompareTo() )
-            case ${managerClass}.ID_$column.getConstName():
+            case $column.getIDConstName():
                 if (b1.$getMethod() == null && b2.$getMethod() != null) {
                     iReturn = -1;
                 } else if (b1.$getMethod() == null && b2.$getMethod() == null) {

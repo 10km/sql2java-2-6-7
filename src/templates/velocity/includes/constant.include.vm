@@ -65,5 +65,14 @@ public interface $javaClassName {
 #foreach($t in $tables)
 #defineIndexConst($t)
 #end
-
+    //////////////////////////////////////
+    // COLUMN ID DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#foreach ( $column in $t.columns )
+#set ( $vcmo = $velocityCount - 1 )
+    /** Identify the $column.getFullName() field . */
+    public static final int $column.getIDConstName() = $vcmo;
+#end
+#end
 }
