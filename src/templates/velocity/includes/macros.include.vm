@@ -6,3 +6,37 @@
 ##
 ## call your macro with #myFunction("un","dos","three")
 #macro (join $elements $do $separator)#foreach($e in $elements)#if ( $velocityCount > 1 )$separator#end$do#end#end
+#####################
+#macro(foreachImportedTables $native $m_table $do $separator $newline)
+#set ( $m_count = 0 ) 
+#foreach ($m_importedTable in $m_table.importedTables)
+#if($native == 'native')
+#set ( $m_importedClass = "$m_importedTable.asBeanClassNSP()" )
+#set ( $m_importedNative = "$m_importedTable.asBeanClass()" )
+#else
+#set ( $m_importedClass = "$m_importedTable.asBeanClass()" )
+#end
+#set ( $m_importedClassManager = "$m_importedTable.asManagerClass()" )
+#foreach( $m_fkName in $m_importedTable.getFkMapNames($m_table.name) )
+#set($m_count = $m_count + 1)
+#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_fkName) )#if($m_count > 1 )$separator#end$do#if(!$newline.empty)
+
+#end#end#end
+#end
+#######################
+#macro (foreachForeignTables $native $m_table $do $separator $newline)
+#set ( $m_count = 0 )
+#foreach($m_foreignTable in $m_table.foreignTables)
+#if($native == 'native')
+#set ( $m_foreignClass = "$m_foreignTable.asBeanClassNSP()" )
+#set ( $m_foreignNative = "$m_foreignTable.asBeanClass()" )
+#else
+#set ( $m_foreignClass = "$m_foreignTable.asBeanClass()" )
+#end
+#set ( $m_foreignClassManager = "$m_foreignTable.asManagerClass()" )
+#foreach( $m_fkName in $table.getFkMapNames($m_foreignTable.name) )
+#set($m_count = $m_count + 1)
+#set ( $m_columnsOfFk = $table.getForeignKeysByFkName($m_fkName) )#if($m_count > 1)$separator#end$do#if(!$newline.empty)
+
+#end#end#end
+#end

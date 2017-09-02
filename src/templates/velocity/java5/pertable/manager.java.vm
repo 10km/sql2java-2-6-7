@@ -359,30 +359,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 ## ======================================================
 ## xImportedKeys template
 ## ======================================================
-#####################
-#macro(foreachImportedTables $do $separator $newline)
-#set ( $m_count = 0 ) 
-#foreach ($m_importedTable in $importedTables)
-#set ( $m_importedClass = "$m_importedTable.asBeanClass()" )
-#set ( $m_importedClassManager = "$m_importedTable.asManagerClass()" )
-#foreach( $m_fkName in $m_importedTable.getFkMapNames($table.name) )
-#set($m_count = $m_count + 1)
-#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_fkName) )#if($m_count > 1 )$separator#end$do#if(!$newline.empty)
-
-#end#end#end
-#end
-#######################
-#macro (foreachForeignTables $do $separator $newline)
-#set ( $m_count = 0 ) 
-#foreach($m_foreignTable in $foreignTables)
-#set ( $m_foreignClass = "$m_foreignTable.asBeanClass()" )
-#set ( $m_foreignClassManager = "$m_foreignTable.asManagerClass()" )
-#foreach( $m_fkName in $table.getFkMapNames($m_foreignTable.name) )
-#set($m_count = $m_count + 1)
-#set ( $m_columnsOfFk = $table.getForeignKeysByFkName($m_fkName) )#if($m_count > 1)$separator#end$do#if(!$newline.empty)
-
-#end#end#end
-#end
 
 #if ($table.hasImportedKeys())
     //////////////////////////////////////
@@ -404,10 +380,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Retrieves imported T objects by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
@@ -444,10 +420,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Retrieves imported T objects by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
@@ -485,11 +461,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * @param <T>
      * 
      * <ul>
-    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
-     * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
      * @return importedBeans always
      * @throws DAOException
@@ -532,11 +508,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Set the importedBeans associates to the bean by fkName<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables(" *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass} java.util.Collection</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> ${m_importedTable.asImpArg($m_fkName)} -> ${m_importedClass} java.util.Collection</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
-     * @param fkName valid values: #foreachImportedTables("${m_importedTable.asImpArg($m_fkName)}" ',' '')
+     * @param fkName valid values: #foreachImportedTables('' $table "${m_importedTable.asImpArg($m_fkName)}" ',' '')
 
      * @return importedBeans always
      * @throws DAOException
@@ -672,16 +648,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-    #foreachForeignTables(" * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
-    #foreachImportedTables(" * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+    #foreachForeignTables('' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DAOException
      */
     //3.5 SYNC SAVE 
     public $beanClass save($beanClass bean
-        #foreachForeignTables( ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+        #foreachForeignTables('' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         if(null == bean) return null;
 #foreach($foreignTable in $foreignTables)
@@ -719,18 +695,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     } 
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", $m_importedClass[] " '' ''))}
+     * @see {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", $m_importedClass[] " '' ''))}
      */
     //3.6 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
-        #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+        #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ",final $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ",final $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
             public $beanClass call() throws Exception {
-                return save(bean #foreachForeignTables( ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables( ", $m_importedTable.asImpArg($m_fkName) " '' ''));
+                return save(bean #foreachForeignTables('' $table  ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables('' $table  ", $m_importedTable.asImpArg($m_fkName) " '' ''));
             }});
     }
 #if( $table.hasImportedTables() )
@@ -738,16 +714,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-    #foreachForeignTables(" * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
-    #foreachImportedTables(" * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+    #foreachForeignTables('' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DAOException
      */
     //3.7 SYNC SAVE 
     public $beanClass save($beanClass bean
-        #foreachForeignTables( ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+        #foreachForeignTables('' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         if(null == bean) return null;
 #foreach($foreignTable in $foreignTables)
@@ -772,18 +748,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     }   
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables( ", $m_foreignClass " '' '')#foreachImportedTables( ", java.util.Collection " '' ''))}
+     * @see {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
      */
     //3.8 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
-        #foreachForeignTables( ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+        #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables( ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
             public $beanClass call() throws Exception {
-                return save(bean #foreachForeignTables( ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables( ", $m_importedTable.asImpArg($m_fkName) " '' ''));
+                return save(bean #foreachForeignTables('' $table  ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables('' $table  ", $m_importedTable.asImpArg($m_fkName) " '' ''));
             }});
     }
 #end ## $table.hasImportedTables()
@@ -800,11 +776,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Retrieves the bean object referenced by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables(" *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('' $table " *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkName valid values: <br>
-     *        #foreachForeignTables("{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws DAOException
@@ -831,12 +807,12 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * 
      * @param <T>
      * <ul>
-    #foreachForeignTables(" *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('' $table " *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
      * @param fkName valid values: <br>
-     *        #foreachForeignTables("{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
 
      * @return always beanToSet saved
      * @throws DAOException
