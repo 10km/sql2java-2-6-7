@@ -380,18 +380,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @SuppressWarnings("unchecked")
     @Override
     public <T> T[] getImportedBeans($beanClass bean,int ikIndex)throws DAOException{
-        switch(ikIndex){
-#foreach($importedTable in $importedTables)
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#set ( $importedClassManager = "$importedTable.asManagerClass()" )
-#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
-#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
-        case ${importedTable.asIKConst($fkName)}:
-            return (T[])this.${importedTable.getImportedBeansGetMethod($fkName)}(bean);
-#end
-#end
-        }
-        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
+        return getImportedBeansAsList(bean,ikIndex).toArray((T[])new Object[0]);
     }
     /**
      * Retrieves imported T objects by fkName.<br>
@@ -503,25 +492,20 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //3.1 GET IMPORTED
     public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean) throws DAOException
     {
-        if(null == bean)return null;
-        $importedClass other = ${importedClassManager}.getInstance().createBean();
-#foreach ( $fk in $columnsOfFk ) 
-        other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
-#end
-        return ${importedClassManager}.getInstance().loadUsingTemplate(other);
+        return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean).toArray(new $importedClass[0]);
     }
 
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
      * @param bean the {@link $beanClass}
-     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     * @return the associated {@link $importedClass} beans 
      * @throws DAOException
      */
     //3.2 GET IMPORTED
     public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean) throws DAOException
     {
-        if(null == bean)return null;
+        if(null == bean)return new java.util.ArrayList<$importedClass>();
         $importedClass other = ${importedClassManager}.getInstance().createBean();
 #foreach ( $fk in $columnsOfFk ) 
         other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
@@ -1244,7 +1228,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return a list of $beanClass
      * @throws DAOException
      */
-    public $beanClass loadBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public $beanClass loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
@@ -1254,7 +1238,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
         return loadUniqueUsingTemplate(bean);
     }
-#else ## $index.isUnique()
+#else## $index.isUnique()
     /**
      * Retrieves an array of $beanClass using the ${index.getName()} index.
      *
@@ -1264,9 +1248,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return an array of $beanClass
      * @throws DAOException
      */
-    public $beanClass[] loadBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public $beanClass[] loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
-        return ($beanClass[])this.loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end${column.getVarName()}#end).toArray(new $beanClass[0]);
+        return ($beanClass[])this.loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
     }
     
     /**
@@ -1278,7 +1262,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return a list of $beanClass
      * @throws DAOException
      */
-    public List<$beanClass> loadBy${index.getName()}AsList(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
@@ -1286,7 +1270,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
         return loadUsingTemplateAsList(bean);
     }
-#end ## $index.isUnique()    
+#end## $index.isUnique()    
     /**
      * Deletes rows using the ${index.getName()} index.
      *
@@ -1296,7 +1280,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return the number of deleted objects
      * @throws DAOException
      */
-    public int deleteBy${index.getName()}(#foreach ( $column in $index.getIndexColumnsList() )#if ( $velocityCount > 1 ), #end$column.getJavaType() ${column.getVarName()}#end) throws DAOException
+    public int deleteBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
@@ -1306,7 +1290,87 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     
 #end
+    /**
+     * Retrieves a array of $beanClass using the index specified by keyIndex.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return
+     * @throws DAOException
+     * @see #loadByIndexAsList(int ,Object ...)
+     */
+    public $beanClass[] loadByIndex(int keyIndex,Object ...keys)throws DAOException
+    {
+        return this.loadByIndexAsList(keyIndex,keys).toArray(new $beanClass[0]);
+    }
+    
+    /**
+     * Retrieves a list of $beanClass using the index specified by keyIndex.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return a list of $beanClass
+     * @throws DAOException
+     */
+    public List<$beanClass> loadByIndexAsList(int keyIndex,Object ...keys)throws DAOException
+    {
+        switch(keyIndex){
+#foreach($index in $table.getIndices())
+#set ( $idxIndex = $velocityCount - 1 )
+        case ${index.asConstName()}:{
+            if(keys.length != $index.getIndexColumns().size())
+                throw new IllegalArgumentException("argument number mismatch with index '${index.name}' column number");
+#foreach($column in $index.getIndexColumns())
+            if(null != keys[$idxIndex] && !(keys[$idxIndex] instanceof $column.getJavaType()))
+                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
 #end
+#if($index.isUnique())
+            $beanClass bean= this.loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));
+            List<$beanClass> result = new java.util.ArrayList<$beanClass>();
+            if(null != bean)
+                result.add(bean);
+            return result;
+#else
+            return this.loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));        
+#end
+        }
+#end
+        default:
+            throw new IllegalArgumentException(String.format("invalid keyIndex %d", keyIndex));
+        }
+    }
+    
+    /**
+     * Deletes rows using key.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return the number of deleted objects
+     * @throws DAOException
+     */
+    public int deleteByIndex(int keyIndex,Object ...keys)throws DAOException
+    {
+        switch(keyIndex){
+#foreach($index in $table.getIndices())
+#set ( $idxIndex = $velocityCount - 1 )
+        case ${index.asConstName()}:{
+            if(keys.length != $index.getIndexColumns().size())
+                throw new IllegalArgumentException("argument number mismatch with index '${index.name}' column number");
+#foreach($column in $index.getIndexColumns())
+            if(null != keys[$idxIndex] && !(keys[$idxIndex] instanceof $column.getJavaType()))
+                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
+#end                
+            return this.deleteBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));
+        }
+#end
+        default:
+            throw new IllegalArgumentException(String.format("invalid keyIndex %d", keyIndex));
+        }        
+    }
+#end##($table.countIndices() > 0)
 
 ## Many to Many needs to be templatized.
 #set ( $rTables = $codewriter.getRelationTables() )

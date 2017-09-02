@@ -782,10 +782,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end
      * @return an array of $beanClass
      */
-    public $beanClass loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public $beanClass loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
@@ -802,15 +802,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end
      * @return an array of $beanClass
      */
-    public $beanClass[] loadBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public $beanClass[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        return this.loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
     }
     
     /**
@@ -821,17 +815,17 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end
      * @return a list of $beanClass
      */
-    public java.util.List<$beanClass> loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.getName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
             throw new WrapDAOException(e);
         }
     }
-#end ## $index.isUnique()
+#end## $index.isUnique()
 
     /**
      * Deletes rows using the ${index.getName()} index.
@@ -841,10 +835,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
 #end
      * @return the number of deleted objects
      */
-    public int deleteBy${index.getName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public int deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.nativeManager.deleteBy${index.getName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ','));
+            return this.nativeManager.deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ','));
         }
         catch(DAOException e)
         {
@@ -853,7 +847,57 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }
     
 #end
-#end
+    /**
+     * Retrieves a array of $beanClass using the index specified by keyIndex.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return
+     * @see #loadByIndexAsList(int ,Object ...)
+     */
+    @Override
+    public $beanClass[] loadByIndex(int keyIndex,Object ...keys)
+    {
+        return this.loadByIndexAsList(keyIndex,keys).toArray(new $beanClass[0]);
+    }
+    
+    /**
+     * Retrieves a list of $beanClass using the index specified by keyIndex.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return a list of $beanClass
+     */
+    @Override
+    public java.util.List<$beanClass> loadByIndexAsList(int keyIndex,Object ...keys)
+    {
+        try{
+            return this.beanConverter.fromRight(this.nativeManager.loadByIndexAsList(keyIndex,keys));
+        }catch(DAOException e){
+            throw new WrapDAOException(e);
+        }
+    }
+    
+    /**
+     * Deletes rows using key.
+     * @param keyIndex valid values: <br>
+     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+
+     * @param keys key values of index
+     * @return the number of deleted objects
+     */
+    @Override
+    public int deleteByIndex(int keyIndex,Object ...keys)
+    {
+        try{
+            return this.nativeManager.deleteByIndex(keyIndex,keys);
+        }catch(DAOException e){
+            throw new WrapDAOException(e);
+        }
+    }
+#end##($table.countIndices() > 0)
 
 ## Many to Many needs to be templatized.
 #set ( $rTables = $codewriter.getRelationTables() )

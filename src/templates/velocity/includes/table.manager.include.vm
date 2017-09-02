@@ -10,7 +10,7 @@ $!importThrows
 #foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
 #set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
     /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
-    public static final int ${m_table.asFKConst($m_fkName)}=$m_fkIndex;
+    public static final int ${m_table.asFKConst($m_fkName)} = $m_fkIndex;
 #set ( $m_fkIndex = $m_fkIndex +1 )
 #end
 #end
@@ -22,9 +22,18 @@ $!importThrows
 #foreach( $m_ikName in $m_importedTable.getFkMapNames($m_table.name) )
 #set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_ikName) )
     /** imported key ${m_importedTable.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_table.name */
-    public static final int ${m_importedTable.asIKConst($m_ikName)}=$m_ikIndex;
+    public static final int ${m_importedTable.asIKConst($m_ikName)} = $m_ikIndex;
 #set ( $m_ikIndex = $m_ikIndex +1 )
 #end
+#end
+#end
+#####################
+#macro(defineIndexConst $m_table)
+#set ( $m_idxIndex = 0)
+#foreach($m_index in $m_table.getIndices())
+    /** $m_index.table.name index (#join($m_index.getIndexColumnsList() "$e.name" ',')) */
+    public static final int ${m_index.asConstName()} = $m_idxIndex;
+#set ( $m_idxIndex = $m_idxIndex +1 )
 #end
 #end
 #####################
@@ -54,6 +63,12 @@ public interface $javaClassName<B extends $B_parentClass> {
     //////////////////////////////////////    
 #foreach($t in $tables)
 #defineIkConst($t)
+#end
+    //////////////////////////////////////
+    // INDEX INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineIndexConst($t)
 #end
 
     public interface Action<B>{
@@ -263,7 +278,7 @@ public interface $javaClassName<B extends $B_parentClass> {
             loadUsingTemplate(bean,null,startRow,numRows,searchType, action);
             return action.getList();
         }
-
+        
         @Override
         public B save(B bean)$!throwsString{
             if(null == bean)return null;
@@ -397,7 +412,21 @@ public interface $javaClassName<B extends $B_parentClass> {
         public int deleteByPrimaryKey(Object ...keys)$!throwsString{
             throw new UnsupportedOperationException();
         }
-
+        
+        @Override
+        public B[] loadByIndex(int keyIndex,Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public List<B> loadByIndexAsList(int keyIndex,Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public int deleteByIndex(int keyIndex,Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
     }
 
     public abstract String[] getFieldNames();
@@ -966,7 +995,50 @@ public interface $javaClassName<B extends $B_parentClass> {
      */
     //20-3
     public abstract List<B> loadUsingTemplateAsList(B bean, int startRow, int numRows, int searchType)$!throwsString;
+
+    //_____________________________________________________________________
+    //
+    // USING INDICES
+    //_____________________________________________________________________    
+    /**
+     * Retrieves a array of B bean using the index specified by keyIndex.
+     * @param keyIndex valid values:see {@link #loadByIndexAsList(int,Object ...)}
+     * @param keys key values of index
+     * @return
+#if($throwsString)
+     * @$!throwsString
+#end
+     * @see #loadByIndexAsList(int ,Object ...)
+     */
+    public abstract B[] loadByIndex(int keyIndex,Object ...keys)$!throwsString;
     
+    /**
+     * Retrieves a list of B bean using the index specified by keyIndex.
+     * @param keyIndex valid values: <br>
+#foreach($t in $tables)
+#if($t.countIndices() > 0)
+     *        for $t.name table<br>
+     *        #join($t.getIndices() "{@link TableManager#${e.asConstName()}}" ',')<br>     
+#end
+#end
+     * @param keys key values of index
+     * @return a list of B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    public abstract java.util.List<B> loadByIndexAsList(int keyIndex,Object ...keys)$!throwsString;
+    
+    /**
+     * Deletes rows using key.
+     * @param keyIndex valid values: see {@link #loadByIndexAsList(int,Object ...)}
+     * @param keys key values of index
+     * @return the number of deleted objects
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    public abstract int deleteByIndex(int keyIndex,Object ...keys)$!throwsString;
     //_____________________________________________________________________
     //
     // LISTENER
@@ -1125,7 +1197,7 @@ public interface $javaClassName<B extends $B_parentClass> {
      * @param fkIndex foreign key name.<br>
 #foreach($t in $tables)
 #if($t.hasForeignTables())
-     *        for for $t.name:<br>
+     *        for for $t.name table:<br>
      *        #foreachForeignTables("$M_native" $t "{@link #${t.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
@@ -1164,7 +1236,7 @@ public interface $javaClassName<B extends $B_parentClass> {
      * @param ikIndex foreign key name.<br>
 #foreach($t in $tables)
 #if($t.hasImportedTables())
-     *        for for $t.name:<br>
+     *        for for $t.name table:<br>
      *        #foreachImportedTables("$M_native" $t "{@link #${m_importedTable.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
