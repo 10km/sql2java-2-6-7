@@ -255,33 +255,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends BaseBean> T[] getImportedBeans($beanClass bean,int ikIndex){
-        switch(ikIndex){
-#foreach($importedTable in $importedTables)
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#set ( $importedClassManager = "$importedTable.asManagerClass()" )
-#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
-#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
-        case ${importedTable.asIKConst($fkName)}:
-            return (T[])this.${importedTable.getImportedBeansGetMethod($fkName)}(bean);
-#end
-#end
-        }
-        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
-    }
-    /**
-     * Retrieves imported T objects by ikIndex.<br>
-     * @param <T>
-     * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
-     * </ul>
-     * @param bean the {@link $beanClass} object to use
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
-
-     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    @Override
     public <T extends BaseBean> java.util.List<T> getImportedBeansAsList($beanClass bean,int ikIndex){
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
@@ -376,13 +349,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     //3.1 GET IMPORTED
     public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean)
     {
-        try {
-            return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}( this.beanConverter.toRight(bean)));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        return this.${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean).toArray(new $importedClass[0]);
     }
 
     /**
@@ -847,20 +814,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     }
     
 #end
-    /**
-     * Retrieves a array of $beanClass using the index specified by keyIndex.
-     * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
-
-     * @param keys key values of index
-     * @return
-     * @see #loadByIndexAsList(int ,Object ...)
-     */
-    @Override
-    public $beanClass[] loadByIndex(int keyIndex,Object ...keys)
-    {
-        return this.loadByIndexAsList(keyIndex,keys).toArray(new $beanClass[0]);
-    }
     
     /**
      * Retrieves a list of $beanClass using the index specified by keyIndex.

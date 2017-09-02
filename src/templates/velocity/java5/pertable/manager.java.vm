@@ -379,23 +379,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T[] getImportedBeans($beanClass bean,int ikIndex)throws DAOException{
-        return getImportedBeansAsList(bean,ikIndex).toArray((T[])new Object[0]);
-    }
-    /**
-     * Retrieves imported T objects by fkName.<br>
-     * @param <T>
-     * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
-     * </ul>
-     * @param bean the {@link $beanClass} object to use
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
-
-     * @return the associated T beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    @Override
     public <T> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DAOException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
@@ -1290,20 +1273,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     
 #end
-    /**
-     * Retrieves a array of $beanClass using the index specified by keyIndex.
-     * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
-
-     * @param keys key values of index
-     * @return
-     * @throws DAOException
-     * @see #loadByIndexAsList(int ,Object ...)
-     */
-    public $beanClass[] loadByIndex(int keyIndex,Object ...keys)throws DAOException
-    {
-        return this.loadByIndexAsList(keyIndex,keys).toArray(new $beanClass[0]);
-    }
     
     /**
      * Retrieves a list of $beanClass using the index specified by keyIndex.
