@@ -796,20 +796,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     // FOREIGN KEY GENERIC METHOD
     //////////////////////////////////////
 
-    private static final  java.util.Vector<Object[]> REF_METHODS=new java.util.Vector<Object[]>(){
-        private static final long serialVersionUID = 1L;
-    {
-#set ($fkIndex = 0)
-#foreach($foreignTable in $foreignTables)
-#set ( $foreignClass = "$foreignTable.asBeanClass()" )
-#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
-#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
-#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        add(new Object[]{"${table.getReferencedVarGetMethod($fkName)}","${table.getReferencedVarSetMethod($fkName)}",${foreignClass}.class});
-#set ( $fkIndex = $fkIndex +1 )
-#end
-#end
-    }} ;
     /**
      * Retrieves the bean object referenced by fkName.<br>
      * @param <T>
@@ -826,31 +812,20 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getReferencedBean($beanClass bean,int fkName)throws DAOException{
-        if(fkName >= REF_METHODS.size() || fkName <0)
-            throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
-        Object[] params = REF_METHODS.get(fkName);
-        try {
-            return (T) this.getClass().getMethod((String)params[0],bean.getClass()).invoke(this,bean);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
+        switch(fkName){
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        case ${table.asFKNameConst($fkName)}:
+            return  (T)this.${table.getReferencedVarGetMethod($fkName)}(bean);
+#end
+#end
         }
+        throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
     }
+    
     /**
      * Associates the {@link $beanClass} object to the bean object by fkName field.<br>
      * 
@@ -869,34 +844,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @SuppressWarnings("unchecked")
     @Override
     public <T> T setReferencedBean($beanClass bean,T beanToSet,int fkName)throws DAOException{
-        if(fkName >= REF_METHODS.size() || fkName <0)
-            throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
-        Object[] params = REF_METHODS.get(fkName);
-        Class<?> resultClass = (Class<?>)params[2];
-        if(null != beanToSet && !resultClass.isAssignableFrom(beanToSet.getClass()) ){
-            throw new IllegalArgumentException("the argument 'beanToSet' be invalid type,expect type:" + resultClass.getName());
+        switch(fkName){
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        case ${table.asFKNameConst($fkName)}:
+            return  (T)this.${table.getReferencedVarSetMethod($fkName)}(bean, (${foreignClass})beanToSet);
+#end
+#end
         }
-        try {            
-            return (T) this.getClass().getMethod((String)params[1],bean.getClass(),resultClass).invoke(this,bean,beanToSet);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {    
-            throw new RuntimeException(e);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            try{
-                throw e.getCause();
-            }catch(DAOException e1){
-                throw e1;
-            }catch(RuntimeException e1){
-                throw e1;
-            }catch (Throwable e1) {
-                throw new RuntimeException(e1);
-            } 
-        }
+        throw new IllegalArgumentException(String.format("invalid fkName %d", fkName));
     }
 #end ## $table.hasForeignKeys()
     
