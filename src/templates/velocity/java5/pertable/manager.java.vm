@@ -42,25 +42,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Tablename.
      */
     public static final String TABLE_NAME="$tablename";
-    /**
-     * Contains all the full fields of the $tablename table.
-     */
-    public static final String[] FULL_FIELD_NAMES =
-    {
-#foreach ( $column in $columns )
-        #if ( $velocityCount > 1 ),#end"$column.getFullName()"
-#end
-    };
 
-    /**
-     * Contains all the fields of the $tablename table.
-     */
-    public static final String[] FIELD_NAMES =
-    {
-#foreach ( $column in $columns )
-        #if ( $velocityCount > 1 ),#end"$column.getName()"
-#end
-    };
    /**
      * Contains all the primarykey fields of the $tablename table.
      */
@@ -70,21 +52,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         #if ( $velocityCount > 1 ),#end"$column.getName()"
 #end
     };
-    /**
-     * Field that contains the comma separated fields of the $tablename table.
-     */
-    public static final String ALL_FULL_FIELDS = #foreach( $column in $columns )
-#if ( $velocityCount > 1 )
 
-                            + ",#else"#end$column.getFullName()"#end;
-
-    /**
-     * Field that contains the comma separated fields of the $tablename table.
-     */
-    public static final String ALL_FIELDS = #foreach( $column in $columns )
-#if ( $velocityCount > 1 )
-
-                            + ",#else"#end$column.getName()"#end;
     /**
     * @return tableName
     */
@@ -92,19 +60,12 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         return TABLE_NAME;
     }
 
-    /**
-    * @return fieldNames
-    */
-    public String[] getFieldNames() {
-        return FIELD_NAMES;
-    }
-
-    public String getFieldNamesAsString() {
-        return ALL_FIELDS;
+    public String getFieldNames() {
+        return ${tablename.toUpperCase()}_ALL_FIELDS;
     }
     
     public String[] getFullFieldNames() {
-        return FULL_FIELD_NAMES;
+        return ${tablename.toUpperCase()}_FULL_FIELD_NAMES;
     }
     
     /**
@@ -144,7 +105,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 
 #set ( $keys = "" )
 #set ( $sql = "" )
-##set ( $noWhereSelect = "SELECT \" + ALL_FIELDS + \" FROM \" + $tablename" )
+##set ( $noWhereSelect = "SELECT \" + ${tablename.toUpperCase()}_ALL_FIELDS + \" FROM \" + $tablename" )
 ##set ( $baseSelect = "$noWhereSelect WHERE " )
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
@@ -172,7 +133,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         try
         {
             c = this.getConnection();
-            StringBuilder sql = new StringBuilder("SELECT " + ALL_FIELDS + " FROM $tablename WHERE $sql");
+            StringBuilder sql = new StringBuilder("SELECT " + ${tablename.toUpperCase()}_ALL_FIELDS + " FROM $tablename WHERE $sql");
             // System.out.println("loadByPrimaryKey: " + sql);
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -1372,7 +1333,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     {
          Connection c = null;
          PreparedStatement ps = null;
-         String sql = " SELECT " + ${strLinkedManager}.ALL_FIELDS
+         String sql = " SELECT " + ${lTable.name.toUpperCase()}_ALL_FIELDS
                          + " FROM $lName ${lName}L, $rName ${rName}R"
                          + " WHERE "
                          + "     ${rName}R.$localKey.getForeignColumn().getName() = ?"

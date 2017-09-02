@@ -33,7 +33,7 @@
 #end
 #####################
 /**
- * const declare
+ * constant declare
  * @author guyadong
  */
 public interface $javaClassName {    
@@ -74,5 +74,25 @@ public interface $javaClassName {
     /** Identify the $column.getFullName() field . */
     public static final int $column.getIDConstName() = $vcmo;
 #end
+#end
+    //////////////////////////////////////
+    // COLUMN NAME DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+    /** Contains all the full fields of the $t.name table.*/
+    public static final String[] $t.name.toUpperCase()_FULL_FIELD_NAMES =
+    {
+#foreach ( $column in $t.columns )
+        #if ( $velocityCount > 1 ),#end"$column.getFullName()"
+#end
+    };
+#end
+
+#foreach($t in $tables)
+    /** Field that contains the comma separated fields of the $t.name table. */
+    public static final String $t.name.toUpperCase()_ALL_FIELDS = #foreach( $column in $t.columns )
+#if ( $velocityCount > 1 )
+
+                            + ",#else"#end$column.getName()"#end;
 #end
 }
