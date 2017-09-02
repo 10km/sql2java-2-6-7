@@ -3,18 +3,31 @@ import java.util.LinkedList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 $!importThrows
+#####################
 #macro(defineFkConst $m_table)
 #set ( $m_fkIndex = 0)
 #foreach($m_foreignTable in $m_table.foreignTables)
-#set ( $m_foreignClass = "$m_foreignTable.asBeanClass()" )
 #foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
 #set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
     /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
-    public static final int ${m_table.asFKNameConst($m_fkName)}=$m_fkIndex;
+    public static final int ${m_table.asFKConst($m_fkName)}=$m_fkIndex;
 #set ( $m_fkIndex = $m_fkIndex +1 )
 #end
 #end
 #end
+#####################
+#macro(defineIkConst $m_table)
+#set ( $m_ikIndex = 0)
+#foreach($m_importedTable in $m_table.importedTables)
+#foreach( $m_ikName in $m_importedTable.getFkMapNames($m_table.name) )
+#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_ikName) )
+    /** imported key ${m_importedTable.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_table.name */
+    public static final int ${m_importedTable.asIKConst($m_ikName)}=$m_ikIndex;
+#set ( $m_ikIndex = $m_ikIndex +1 )
+#end
+#end
+#end
+#####################
 /**
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong
@@ -35,6 +48,12 @@ public interface $javaClassName<B extends $B_parentClass> {
     //////////////////////////////////////    
 #foreach($t in $tables)
 #defineFkConst($t)
+#end
+    //////////////////////////////////////
+    // IMPORTED KEY INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineIkConst($t)
 #end
 
     public interface Action<B>{

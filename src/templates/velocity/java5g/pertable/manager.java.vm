@@ -593,11 +593,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Retrieves the bean object referenced by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkName valid values: <br>
-     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      */
@@ -616,12 +616,12 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * 
      * @param <T>
      * <ul>
-    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKNameConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
      * @param fkName valid values: <br>
-     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKNameConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return always beanToSet saved
      */
