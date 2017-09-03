@@ -1088,10 +1088,16 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     public <C extends Collection<B>> C save(C beans)$!throwsString;
 
     /**
-     * Save the B bean and referenced beans and imported beans into the database.
+     * Save the B bean and referenced beans and imported beans (array) into the database.
      *
      * @param bean the B bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param args referenced beans or imported beans,for each table,each argument's type is different:<br>
+#foreach($t in $tables)
+#if( $t.hasForeignTables() || $t.hasImportedTables() )
+            for $t.name table:<br>
+                {@code #foreachForeignTables("$M_native" $t "$m_foreignClass" ',' '')#foreachImportedTables("$M_native" $t ",$m_importedClass[]" '' '')}<br>
+#end
+#end
      * @return the inserted or updated B bean
  #if($throwsString)
      * @$!throwsString
@@ -1102,10 +1108,16 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
 
     /**
-     * Save the B bean and referenced beans and imported beans into the database.
+     * Save the B bean and referenced beans and imported beans (collection) into the database.
      *
      * @param bean the B bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param args referenced beans or imported beans,for each table,each argument's type is different:<br>
+#foreach($t in $tables)
+#if( $t.hasForeignTables() || $t.hasImportedTables() )
+            for $t.name table:<br>
+                {@code #foreachForeignTables("$M_native" $t "$m_foreignClass" ',' '')#foreachImportedTables("$M_native" $t ",Collection<$m_importedClass>" '' '')}<br>
+#end
+#end
      * @return the inserted or updated B bean
 #if($throwsString)
      * @$!throwsString
