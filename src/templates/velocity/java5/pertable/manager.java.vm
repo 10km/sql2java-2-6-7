@@ -484,8 +484,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 
 #end
 #end
-
-
 ## ======================================================
 ## only xImportedKeys template
 ## ======================================================
@@ -510,13 +508,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        if( null != $table.asRefArg($fkName)) {
-            $table.asRefArg($fkName) = ${foreignClassManager}.getInstance().save( $table.asRefArg($fkName) );
-#foreach ( $fk in $columnsOfFk ) 
-            bean.$fk.getSetMethod()($table.asRefArg($fkName).$fk.getForeignColumn().getGetMethod()()); 
-#end 
-            bean.$table.getReferencedVarSetMethod($fkName)($table.asRefArg($fkName));
-        }
+        this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
 #end
 #end
         bean = this.save( bean );
@@ -526,19 +518,13 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        if( null != $impVar) {
-            for ( $importedClass imp : $impVar ){
-#foreach ( $fk in $columnsOfFk ) 
-                imp.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()()); 
-#end 
-                imp.$importedTable.getReferencedVarSetMethod($fkName)(bean);
-                ${importedClassManager}.getInstance().save( imp );
-            }
-        }
+        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+        ${importedClassManager}.getInstance().save( $impVar );
 #end
 #end
         return bean;
     } 
+
     /**
      * Transaction version for sync save
      * @see {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", $m_importedClass[] " '' ''))}
@@ -591,7 +577,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
 #end
         return bean;
-    }   
+    }
+
     /**
      * Transaction version for sync save
      * @see {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
@@ -608,8 +595,104 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
                 return save(bean #foreachForeignTables('' $table  ", $table.asRefArg($m_fkName) " '' '')#foreachImportedTables('' $table  ", $m_importedTable.asImpArg($m_fkName) " '' ''));
             }});
     }
-#end ## $table.hasImportedTables()
-#end ## $table.hasForeignTables() || $table.hasImportedTables()
+#end## $table.hasImportedTables()
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+     * @param args referenced beans or imported beans<br>
+     *      see also {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", $m_importedClass[] " '' ''))}
+     * @return the inserted or updated {@link $beanClass} bean
+     * @throws DAOException
+     */
+    //3.9 SYNC SAVE 
+    @Override
+    public $beanClass save($beanClass bean,Object ...args) throws DAOException
+    {
+#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argIndex = 0 )
+#set ( $argCount = 1 )
+#set ( $callList= "" )
+        if(args.length > $argLength)
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
+        }
+#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $importedClass[])){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$importedClass[]");
+        }
+#set ( $callList = "$callList,($importedClass[])args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+        return save(bean$callList);
+    } 
+
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+     * @param args referenced beans or imported beans<br>
+     *      see also {@link #save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
+     * @return the inserted or updated {@link $beanClass} bean
+     * @throws DAOException
+     */
+    //3.10 SYNC SAVE 
+    @SuppressWarnings("unchecked")
+    @Override
+    public $beanClass saveCollection($beanClass bean,Object ...args) throws DAOException
+    {
+#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argIndex = 0 )
+#set ( $argCount = 1 )
+#set ( $callList= "" )
+        if(args.length > $argLength)
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
+        }
+#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClass()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof java.util.Collection)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:java.util.Collection<$importedClass>");
+        }
+#set ( $callList = "$callList,(java.util.Collection<$importedClass>)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+        return save(bean$callList);
+    } 
+#end## $table.hasForeignTables() || $table.hasImportedTables()
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================

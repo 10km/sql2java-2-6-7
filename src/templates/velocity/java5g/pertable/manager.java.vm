@@ -242,10 +242,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      */
@@ -270,11 +270,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * @param <T>
      * 
      * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      */
@@ -298,11 +298,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Set the importedBeans associates to the bean by ikIndex<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      */
@@ -514,6 +514,100 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
             }});
     }
 #end ## $table.hasImportedTables()
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+     * @param args referenced beans or imported beans<br>
+     *      see also {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", $m_importedClass[] " '' ''))}
+     * @return the inserted or updated {@link $beanClass} bean
+     */
+    //3.9 SYNC SAVE 
+    @Override
+    public $beanClass save($beanClass bean,Object ...args) 
+    {
+#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argIndex = 0 )
+#set ( $argCount = 1 )
+#set ( $callList= "" )
+        if(args.length > $argLength)
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
+        }
+#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClassNSP()" )
+#set ( $importedClassManager = "$importedTable.asManagerClass()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $importedClass[])){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$importedClass[]");
+        }
+#set ( $callList = "$callList,($importedClass[])args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+        return save(bean$callList);
+    } 
+
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+     * @param args referenced beans or imported beans<br>
+     *      see also {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
+     * @return the inserted or updated {@link $beanClass} bean
+     */
+    //3.10 SYNC SAVE 
+    @SuppressWarnings("unchecked")
+    @Override
+    public $beanClass saveCollection($beanClass bean,Object ...args)
+    {
+#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argIndex = 0 )
+#set ( $argCount = 1 )
+#set ( $callList= "" )
+        if(args.length > $argLength)
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
+        }
+#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClassNSP()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof java.util.Collection)){
+            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:java.util.Collection<$importedClass>");
+        }
+#set ( $callList = "$callList,(java.util.Collection<$importedClass>)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )            
+#set ( $argCount = $argCount + 1 )
+#end
+#end
+        return save(bean$callList);
+    } 
 #end ## $table.hasForeignTables() || $table.hasImportedTables()
 ## ======================================================
 ## xForeignKeys template

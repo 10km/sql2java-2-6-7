@@ -367,14 +367,42 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
         public int deleteByIndex(int keyIndex,Object ...keys)$!throwsString{
             throw new UnsupportedOperationException();
         }
-    }
-
-    public abstract String getFieldNames();
-
-    public abstract String[] getPrimarykeyNames();
-
-    public abstract String getTableName();
+        
+        @Override
+        public B save(B bean,Object ...args)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public B saveCollection(B bean,Object ...args)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public B saveAsTransaction(final B bean,final Object ...args)$!throwsString{
+            return this.runAsTransaction(new Callable<B>(){
+                @Override
+                public B call() throws Exception {
+                    return save(bean , args );
+                }});
+        }
+        
+        @Override
+        public B saveCollectionAsTransaction(final B bean,final Object ...args)$!throwsString{
+            return this.runAsTransaction(new Callable<B>(){
+                @Override
+                public B call() throws Exception {
+                    return saveCollection(bean , args );
+                }});
+        }
+    }    
     
+    public abstract String getFieldNames();
+    
+    public abstract String[] getPrimarykeyNames();
+    
+    public abstract String getTableName();
+        
     public abstract String[] getFullFieldNames();
     
     /**
@@ -1059,6 +1087,59 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //15-4
     public abstract <C extends Collection<B>> C save(C beans)$!throwsString;
 
+    /**
+     * Save the B bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the B bean to be saved
+     * @param args referenced beans or imported beans<br>
+     * @return the inserted or updated B bean
+ #if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //3.9 SYNC SAVE 
+    public abstract B save(B bean,Object ...args)$!throwsString;
+    
+
+    /**
+     * Save the B bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the B bean to be saved
+     * @param args referenced beans or imported beans<br>
+     * @return the inserted or updated B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //3.10 SYNC SAVE 
+    public abstract B saveCollection(B bean,Object ...args)$!throwsString;
+    
+    /**
+     *  Transaction version for sync save
+     * @see #save(B ,Object ...)
+     * @param bean the B bean to be saved
+     * @param args referenced beans or imported beans<br>
+     * @return the inserted or updated B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //3.11 SYNC SAVE 
+    public abstract B saveAsTransaction(B bean,Object ...args)$!throwsString;
+    
+    /**
+     *  Transaction version for sync save
+     * @see #saveCollection(B ,Object ...)
+     * @param bean the B bean to be saved
+     * @param args referenced beans or imported beans<br>
+     * @return the inserted or updated B bean
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //3.12 SYNC SAVE 
+    public abstract B saveCollectionAsTransaction(B bean,Object ...args)$!throwsString;
+        
     /**
      * Load all the elements using a SQL statement specifying a list of fields to be retrieved.
      * @param sql the SQL statement for retrieving
