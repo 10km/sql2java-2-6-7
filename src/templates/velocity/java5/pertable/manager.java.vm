@@ -614,13 +614,13 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $argCount = 1 )
 #set ( $callList= "" )
         if(args.length > $argLength)
-            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
-            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
+            throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$foreignClass");
         }
 #set ( $callList = "$callList,($foreignClass)args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
@@ -633,7 +633,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $importedClass[])){
-            throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$importedClass[]");
+            throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$importedClass[]");
         }
 #set ( $callList = "$callList,($importedClass[])args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
@@ -662,7 +662,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $argCount = 1 )
 #set ( $callList= "" )
         if(args.length > $argLength)
-            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number $argLength");
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
