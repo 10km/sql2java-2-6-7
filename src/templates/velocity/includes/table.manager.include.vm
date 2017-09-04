@@ -450,10 +450,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param searchType exact ?  like ? starting like ? ending link ? <br>
-     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
-     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
-     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
-     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     *                {@value Constant#SEARCH_EXACT}   {@link Constant#SEARCH_EXACT} <br>
+     *                {@value Constant#SEARCH_LIKE}   {@link Constant#SEARCH_LIKE} <br>
+     *                {@value Constant#SEARCH_STARTING_LIKE}   {@link Constant#SEARCH_STARTING_LIKE} <br>
+     *                {@value Constant#SEARCH_ENDING_LIKE}   {@link Constant#SEARCH_ENDING_LIKE} <br>  
      * @return the number of rows returned
 #if($throwsString)
      * @$!throwsString
@@ -900,10 +900,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param searchType exact ?  like ? starting like ? ending link ? <br>
-     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
-     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
-     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
-     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     *                {@value Constant#SEARCH_EXACT}   {@link Constant#SEARCH_EXACT} <br>
+     *                {@value Constant#SEARCH_LIKE}   {@link Constant#SEARCH_LIKE} <br>
+     *                {@value Constant#SEARCH_STARTING_LIKE}   {@link Constant#SEARCH_STARTING_LIKE} <br>
+     *                {@value Constant#SEARCH_ENDING_LIKE}   {@link Constant#SEARCH_ENDING_LIKE} <br>  
      * @param action Action object for do something(not null)
      * @return the count dealt by action
 #if($throwsString)
@@ -919,10 +919,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param searchType exact ?  like ? starting like ? ending link ? <br>
-     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
-     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
-     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
-     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     *                {@value ConstantConstant#SEARCH_EXACT}   {@link ConstantConstant#SEARCH_EXACT} <br>
+     *                {@value ConstantConstant#SEARCH_LIKE}   {@link ConstantConstant#SEARCH_LIKE} <br>
+     *                {@value ConstantConstant#SEARCH_STARTING_LIKE}   {@link ConstantConstant#SEARCH_STARTING_LIKE} <br>
+     *                {@value ConstantConstant#SEARCH_ENDING_LIKE}   {@link Constant#SEARCH_ENDING_LIKE} <br>  
      * @return all the B bean matching the template
 #if($throwsString)
      * @$!throwsString
@@ -964,10 +964,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param searchType exact ?  like ? starting like ? ending link? <br>
-     *                {@value #SEARCH_EXACT}   {@link #SEARCH_EXACT} <br>
-     *                {@value #SEARCH_LIKE}   {@link #SEARCH_LIKE} <br>
-     *                {@value #SEARCH_STARTING_LIKE}   {@link #SEARCH_STARTING_LIKE} <br>
-     *                {@value #SEARCH_ENDING_LIKE}   {@link #SEARCH_ENDING_LIKE} <br>  
+     *                {@value Constant#SEARCH_EXACT}   {@link Constant#SEARCH_EXACT} <br>
+     *                {@value Constant#SEARCH_LIKE}   {@link Constant#SEARCH_LIKE} <br>
+     *                {@value Constant#SEARCH_STARTING_LIKE}   {@link Constant#SEARCH_STARTING_LIKE} <br>
+     *                {@value Constant#SEARCH_ENDING_LIKE}   {@link Constant#SEARCH_ENDING_LIKE} <br>  
      * @return all the B beans matching the template
 #if($throwsString)
      * @$!throwsString
