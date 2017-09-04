@@ -94,7 +94,7 @@ public class Index {
 	}
 	
 	public String asCamelCaseName(){
-		return StringUtilities.convertName(this.asIndexName(),true);
+		return StringUtilities.convertName(this.asIndexName(),false);
 	}
 	public String asConstName(){
 		return (this.table.getName() + "_" +this.asIndexName()).toUpperCase();
