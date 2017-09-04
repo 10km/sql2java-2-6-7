@@ -7,6 +7,6 @@ package $pkg;
 #set ( $B_parentClass = "FullBean<?>")
 #set ( $throwsString = "throws DAOException" )
 #set ( $B_extends = " extends FullBean<?>" )
-#set ( $T_extends = "" )
+#set ( $T_extends = " extends FullBean<?>" )
 ###set ( $M_native = '' )
 #parse( "table.manager.include.vm" )

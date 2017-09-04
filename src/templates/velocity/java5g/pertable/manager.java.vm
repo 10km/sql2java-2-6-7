@@ -14,6 +14,7 @@ package ${gpkg}.${subpkg};
 
 import java.util.concurrent.Callable;
 
+import ${gpkg}.Constant;
 import ${gpkg}.${beanClass};
 import ${gpkg}.IBeanConverter;
 import ${gpkg}.IDbConverter;
