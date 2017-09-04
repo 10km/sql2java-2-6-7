@@ -322,10 +322,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Retrieves imported T objects by fkName.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> {@link Constantr#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('' $table "{@link Constantr#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
@@ -705,11 +705,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Retrieves the bean object referenced by fkIndex.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables('' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('' $table " *     <li> {@link Constantr#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkIndex valid values: <br>
-     *        #foreachForeignTables('' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('' $table "{@link Constantr#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws DAOException
@@ -1301,7 +1301,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * Retrieves a list of $beanClass using the index specified by keyIndex.
      * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+     *        #join($table.getIndices() "{@link Constantr#${e.asConstName()}}" ',')
 
      * @param keys key values of index
      * @return a list of $beanClass
@@ -1338,7 +1338,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * Deletes rows using key.
      * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+     *        #join($table.getIndices() "{@link Constantr#${e.asConstName()}}" ',')
 
      * @param keys key values of index
      * @return the number of deleted objects

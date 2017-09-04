@@ -242,10 +242,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
      */
@@ -270,11 +270,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * @param <T>
      * 
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      */
@@ -298,11 +298,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Set the importedBeans associates to the bean by ikIndex<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link TableManager#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
-     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link TableManager#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
+     * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
      */
@@ -601,11 +601,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      * Retrieves the bean object referenced by fkIndex.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables('native' $table " *     <li> {@link TableManager#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('native' $table " *     <li> {@link Constant#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkIndex valid values: <br>
-     *        #foreachForeignTables('native' $table "{@link TableManager#${table.asFKConst($m_fkName)}}" ',' '')
+     *        #foreachForeignTables('native' $table "{@link Constant#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      */
@@ -883,7 +883,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     /**
      * Retrieves a list of $beanClass using the index specified by keyIndex.
      * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+     *        #join($table.getIndices() "{@link Constant#${e.asConstName()}}" ',')
 
      * @param keys key values of index
      * @return a list of $beanClass
@@ -901,7 +901,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
     /**
      * Deletes rows using key.
      * @param keyIndex valid values: <br>
-     *        #join($table.getIndices() "{@link TableManager#${e.asConstName()}}" ',')
+     *        #join($table.getIndices() "{@link Constant#${e.asConstName()}}" ',')
 
      * @param keys key values of index
      * @return the number of deleted objects

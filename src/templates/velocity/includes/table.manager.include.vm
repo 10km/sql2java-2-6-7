@@ -984,7 +984,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if($t.countIndices() > 0)
      *        for $t.name table<br>
-     *        #join($t.getIndices() "{@link TableManager#${e.asConstName()}}" ',')<br>     
+     *        #join($t.getIndices() "{@link Constant#${e.asConstName()}}" ',')<br>     
 #end
 #end
      * @param keys key values of index
@@ -1095,7 +1095,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if( $t.hasForeignTables() || $t.hasImportedTables() )
             for $t.name table:<br>
-                {@code #foreachForeignTables("$M_native" $t "$m_foreignClass" ',' '')#foreachImportedTables("$M_native" $t ",$m_importedClass[]" '' '')}<br>
+                {@code #foreachForeignTables("$M_native" $t " $m_foreignClass" '' '')#foreachImportedTables("$M_native" $t " $m_importedClass[]" '' '')}<br>
 #end
 #end
      * @return the inserted or updated B bean
@@ -1106,7 +1106,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //3.9 SYNC SAVE 
     public B save(B bean,Object ...args)$!throwsString;
     
-
     /**
      * Save the B bean and referenced beans and imported beans (collection) into the database.
      *
@@ -1115,7 +1114,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if( $t.hasForeignTables() || $t.hasImportedTables() )
             for $t.name table:<br>
-                {@code #foreachForeignTables("$M_native" $t "$m_foreignClass" ',' '')#foreachImportedTables("$M_native" $t ",Collection<$m_importedClass>" '' '')}<br>
+                {@code #foreachForeignTables("$M_native" $t " $m_foreignClass" '' '')#foreachImportedTables("$M_native" $t " Collection<$m_importedClass>" '' '')}<br>
 #end
 #end
      * @return the inserted or updated B bean
@@ -1202,6 +1201,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
      */
     public<T> T runAsTransaction(Callable<T> fun)$!throwsString;
+
     /**
      * Run {@code Runnable} as a transaction.no return
      * @param fun
@@ -1220,7 +1220,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #if($t.hasForeignTables())
      * <ul>
      *     <li> for $t.name:
-    #foreachForeignTables("$M_native" $t " *     <li> {@link #${t.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables("$M_native" $t " *     <li> {@link Constant#${t.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
 #end
 #end
@@ -1229,7 +1229,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if($t.hasForeignTables())
      *        for for $t.name table:<br>
-     *        #foreachForeignTables("$M_native" $t "{@link #${t.asFKConst($m_fkName)}}" ',' '')<br>
+     *        #foreachForeignTables("$M_native" $t "{@link Constant#${t.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
      * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
@@ -1259,7 +1259,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #if($t.hasImportedTables())
      * <ul>
      *     <li> for $t.name table:
-    #foreachImportedTables("$M_native" $t " *     <li> {@link #${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachImportedTables("$M_native" $t " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
 #end
 #end
@@ -1268,7 +1268,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if($t.hasImportedTables())
      *        for $t.name table:<br>
-     *        #foreachImportedTables("$M_native" $t "{@link #${m_importedTable.asFKConst($m_fkName)}}" ',' '')<br>
+     *        #foreachImportedTables("$M_native" $t "{@link Constant#${m_importedTable.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
