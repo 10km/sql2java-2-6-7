@@ -489,7 +489,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      *
      * @param bean the {@link $beanClass} bean to be saved
     #foreachForeignTables('' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
-    #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+    #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} beans refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DAOException
      */
@@ -603,14 +603,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     //3.9 SYNC SAVE 
     @Override
-    public $beanClass save($beanClass bean,Object ...args) throws DAOException
+    public $beanClass save($beanClass bean,Object ...inputs) throws DAOException
     {
-#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength)
+        if(inputs.length > $argLength)
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
+        Object[] args = new Object[$argLength];
+        System.arraycopy(inputs,0,args,0,$argLength);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
@@ -618,7 +620,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
             throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$foreignClass");
         }
-#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $callList = "$callList,null == args[$argIndex]?null:($foreignClass)args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
@@ -631,7 +633,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $importedClass[])){
             throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$importedClass[]");
         }
-#set ( $callList = "$callList,($importedClass[])args[$argIndex]")
+#set ( $callList = "$callList,null == args[$argIndex]?null:($importedClass[])args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
@@ -651,14 +653,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //3.10 SYNC SAVE 
     @SuppressWarnings("unchecked")
     @Override
-    public $beanClass saveCollection($beanClass bean,Object ...args) throws DAOException
+    public $beanClass saveCollection($beanClass bean,Object ...inputs) throws DAOException
     {
-#set ( $argLength = $table.countForeignTables() + $table.countImportedTables() )
+#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength)
+        if(inputs.length > $argLength)
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
+        Object[] args = new Object[$argLength];
+        System.arraycopy(inputs,0,args,0,$argLength);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
@@ -667,7 +671,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
         }
-#set ( $callList = "$callList,($foreignClass)args[$argIndex]")
+#set ( $callList = "$callList,null == args[$argIndex]?null:($foreignClass)args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
@@ -681,8 +685,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof java.util.Collection)){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:java.util.Collection<$importedClass>");
         }
-#set ( $callList = "$callList,(java.util.Collection<$importedClass>)args[$argIndex]")
-#set ( $argIndex = $argIndex + 1 )            
+#set ( $callList = "$callList,null == args[$argIndex]?null:(java.util.Collection<$importedClass>)args[$argIndex]")
+#set ( $argIndex = $argIndex + 1 )
 #set ( $argCount = $argCount + 1 )
 #end
 #end
