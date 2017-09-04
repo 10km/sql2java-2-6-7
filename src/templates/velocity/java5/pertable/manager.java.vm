@@ -60,12 +60,12 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         return TABLE_NAME;
     }
 
-    public String getFieldNames() {
-        return ${tablename.toUpperCase()}_ALL_FIELDS;
+    public String getFields() {
+        return ${tablename.toUpperCase()}_FIELDS;
     }
     
-    public String[] getFullFieldNames() {
-        return ${tablename.toUpperCase()}_FULL_FIELD_NAMES;
+    public String getFullFields() {
+        return ${tablename.toUpperCase()}_FULL_FIELDS;
     }
     
     /**
@@ -105,7 +105,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 
 #set ( $keys = "" )
 #set ( $sql = "" )
-##set ( $noWhereSelect = "SELECT \" + ${tablename.toUpperCase()}_ALL_FIELDS + \" FROM \" + $tablename" )
+##set ( $noWhereSelect = "SELECT \" + ${tablename.toUpperCase()}_FIELDS + \" FROM \" + $tablename" )
 ##set ( $baseSelect = "$noWhereSelect WHERE " )
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
@@ -133,7 +133,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         try
         {
             c = this.getConnection();
-            StringBuilder sql = new StringBuilder("SELECT " + ${tablename.toUpperCase()}_ALL_FIELDS + " FROM $tablename WHERE $sql");
+            StringBuilder sql = new StringBuilder("SELECT " + ${tablename.toUpperCase()}_FIELDS + " FROM $tablename WHERE $sql");
             // System.out.println("loadByPrimaryKey: " + sql);
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,

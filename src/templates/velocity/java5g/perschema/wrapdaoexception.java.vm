@@ -6,7 +6,7 @@ $codewriter.setCurrentJavaFilename("$gpkg", "WrapDAOException.java")
 package $gpkg;
 
 /**
- * wrap all DAOException threw bye native code
+ * wrap all DAOException threw by native code
  *
  * @author guyadong
  */

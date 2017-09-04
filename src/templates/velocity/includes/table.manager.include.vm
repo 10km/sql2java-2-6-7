@@ -281,18 +281,20 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
         }
         
         @Override
-        public String createSelectSql(int[] fieldList,String where){
+        public String createSelectSql(int[] fieldList, String where){
             StringBuffer sql = new StringBuffer(128);
-            if(fieldList == null) {
-                sql.append("SELECT ").append(this.getFieldNames());
+            String fullFields = this.getFullFields();
+            if(null == fieldList || 0 == fieldList.length) {
+                sql.append("SELECT ").append(fullFields);
             } else{
                 sql.append("SELECT ");
+                String[] names=fullFields.split(",");
                 for(int i = 0; i < fieldList.length; ++i){
-                    if(i != 0) {
+                    if(i > 0) {
                         sql.append(",");
                     }
-                    sql.append(this.getFullFieldNames()[fieldList[i]]);
-                }            
+                    sql.append(names[fieldList[i]]);
+                }      
             }
             sql.append(" FROM " + this.getTableName() + " ");
             if(null!=where)
@@ -397,13 +399,13 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
         }
     }    
     
-    public String getFieldNames();
+    public String getFields();
     
     public String[] getPrimarykeyNames();
     
     public String getTableName();
         
-    public String[] getFullFieldNames();
+    public String getFullFields();
     
     /**
      * return true if @{code column}(case insensitive)is primary key,otherwise return false <br>
