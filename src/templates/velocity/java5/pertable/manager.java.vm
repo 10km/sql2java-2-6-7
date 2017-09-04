@@ -175,14 +175,12 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
-     * when you don't know which is primary key of table,you can use the method.
      * @param keys primary keys value:<br> 
-     *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
-     
      * @return a unique {@link $beanClass} or {@code null} if not found
      * @see {@link #loadByPrimaryKey($keys)}
      */
     //1.3
+    @Override
     public $beanClass loadByPrimaryKey(Object ...keys) throws DAOException{
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
@@ -288,8 +286,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Delete row according to its primary keys.
      *
      * @param keys primary keys value:<br> 
-     *             #join($primaryKeys "PK# $velocityCount:$e.getJavaType()" ',')
-     
      * @return the number of deleted rows
      * @see {@link #delete($beanClass)}
      */   

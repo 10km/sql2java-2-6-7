@@ -514,7 +514,13 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     /**
      * Delete row according to its primary keys.
      *
-     * @param keys primary keys value
+     * @param keys primary keys value<br>
+#foreach($table in $tables)
+#if($table.hasPrimaryKey())
+     *      for $table.name table<br>
+     *          #join($table.primaryKeys "PK# $velocityCount $e.fullName type $e.getJavaType()" ',')<br>
+#end
+#end
      * @return the number of deleted rows
      * @see #delete(B)
 #if($throwsString)
@@ -629,6 +635,12 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * Loads a B bean from the table using primary key fields.
      * when you don't know which is primary key of table,you can use the method.
      * @param keys primary keys value:<br> 
+#foreach($table in $tables)
+#if($table.hasPrimaryKey())
+     *      for $table.name table<br>
+     *          #join($table.primaryKeys "PK# $velocityCount $e.fullName type $e.getJavaType()" ',')<br>
+#end
+#end
      * @return a unique B or {@code null} if not found
 #if($throwsString)
      * @$!throwsString
