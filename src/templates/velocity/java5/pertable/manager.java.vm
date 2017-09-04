@@ -1318,10 +1318,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
 #if($index.isUnique())
             $beanClass bean= this.loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));
-            List<$beanClass> result = new java.util.ArrayList<$beanClass>();
-            if(null != bean)
-                result.add(bean);
-            return result;
+            return null == bean ? new java.util.ArrayList<$beanClass>() : java.util.Arrays.asList(bean);
 #else
             return this.loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));        
 #end
