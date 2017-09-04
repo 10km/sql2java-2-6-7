@@ -1118,7 +1118,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
      */
     //3.9 SYNC SAVE 
-    public B save(B bean,Object ...inputs)$!throwsString;
+    public B save(B bean,Object ...args)$!throwsString;
     
     /**
      * Save the B bean and referenced beans and imported beans (collection) into the database.
@@ -1137,7 +1137,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
      */
     //3.10 SYNC SAVE 
-    public B saveCollection(B bean,Object ...inputs)$!throwsString;
+    public B saveCollection(B bean,Object ...args)$!throwsString;
     
     /**
      *  Transaction version for sync save

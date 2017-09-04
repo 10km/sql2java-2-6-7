@@ -496,16 +496,14 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
      */
     //3.9 SYNC SAVE 
     @Override
-    public $beanClass save($beanClass bean,Object ...inputs) 
+    public $beanClass save($beanClass bean,Object ...args) 
     {
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(inputs.length > $argLength)
+        if(args.length > $argLength)
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
-        Object[] args = new Object[$argLength];
-        System.arraycopy(inputs,0,args,0,$argLength);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
@@ -514,7 +512,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
             throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$foreignClass");
         }
-#set ( $callList = "$callList,null == args[$argIndex]?null:($foreignClass)args[$argIndex]")
+#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:($foreignClass)args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
@@ -528,7 +526,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $importedClass[])){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$importedClass[]");
         }
-#set ( $callList = "$callList,null == args[$argIndex]?null:($importedClass[])args[$argIndex]")
+#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:($importedClass[])args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
