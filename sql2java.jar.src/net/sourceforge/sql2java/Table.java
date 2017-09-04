@@ -834,5 +834,16 @@ public class Table {
 	public void setAutoincrement(Column autoincrement) {
 		this.autoincrement = autoincrement;
 	}
-
+   
+	public int countForeignKeyNames(){
+		return this.getFkMapNames().size();
+	}
+	
+	public int countImportedKeyNames(){
+		int count = 0;
+		for(Table table:this.getImportedTables()){
+			count += table.getFkMapNames(this.getName()).size();
+		}
+		return count;
+	}
 }
