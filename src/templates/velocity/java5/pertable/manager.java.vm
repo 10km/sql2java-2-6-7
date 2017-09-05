@@ -316,7 +316,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //////////////////////////////////////
 
     /**
-     * Retrieves imported T objects by fkName.<br>
+     * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
      * <ul>
     #foreachImportedTables('' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
@@ -345,7 +345,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     }
 
     /**
-     * Set the T objects as imported beans of bean object by fkName.<br>
+     * Set the T objects as imported beans of bean object by ikIndex.<br>
      * @param <T> see also {@link #getImportedBeansAsList($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
@@ -370,7 +370,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
-     * Set the importedBeans associates to the bean by fkName<br>
+     * Set the importedBeans associates to the bean by ikIndex<br>
      * @param <T> see also {@link #getImportedBeansAsList($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the <T> object to associate to the {@link $beanClass}
