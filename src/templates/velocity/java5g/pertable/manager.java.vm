@@ -1092,16 +1092,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass>
         }
     }
     
-    @Override
-    public void runAsTransaction(final Runnable fun){
-        try{
-            this.nativeManager.runAsTransaction(fun);
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
-    }
     private ${pkg}.TableManager.Action<$nativeClass> toNative(final Action<$beanClass> action){
         if(null == action)
             throw new NullPointerException();
