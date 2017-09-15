@@ -27,16 +27,6 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
     public static final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass})=new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
 
         @Override
-        protected ${leftClass} _newInstanceL(){
-            return new ${leftClass}();
-        }
-
-        @Override
-        protected ${rightClass} _newInstanceR(){
-            return new ${rightClass}();
-        }
-
-        @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
             left.isNew(right.isNew());
 #foreach ( $column in $table.columns )

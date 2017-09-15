@@ -98,7 +98,12 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     {
         return new $beanClass();
     }
-
+    
+    @Override
+    protected Class<$beanClass> _beanType(){
+        return ${beanClass}.class;
+    }
+    
 #if ( $table.countPrimaryKeys() > 0 )
     //////////////////////////////////////
     // PRIMARY KEY METHODS
@@ -314,7 +319,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //////////////////////////////////////
     // IMPORT KEY GENERIC METHOD
     //////////////////////////////////////
+    
+    private static final Class<?>[] importedBeanTypes = new Class<?>[]{#foreachImportedTables('' $table "${m_importedClass}.class" ',' '')};
 
+    /**
+     * @see #getImportedBeansAsList($beanClass,int)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends ${pkg}.FullBean<?>> T[] getImportedBeans($beanClass bean, int ikIndex) throws DAOException {
+        return getImportedBeansAsList(bean, ikIndex).toArray((T[])java.lang.reflect.Array.newInstance(importedBeanTypes[ikIndex],0));
+    }
+    
     /**
      * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
@@ -343,7 +359,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         }
         throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
-
+    
     /**
      * Set the T objects as imported beans of bean object by ikIndex.<br>
      * @param <T> see also {@link #getImportedBeansAsList($beanClass,int)}
