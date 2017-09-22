@@ -1,6 +1,9 @@
 ##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
+#if($codewriter.getPropertyExplodedAsList('swift.annotation.bean').contains('general'))
+// swift supported
+#end
 #set ( $beanClass = $table.asBeanClassNSP() )
 #set($gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename("$gpkg", "${beanClass}.java")
