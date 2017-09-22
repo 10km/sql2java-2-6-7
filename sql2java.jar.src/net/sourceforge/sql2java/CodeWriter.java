@@ -4,16 +4,13 @@ package net.sourceforge.sql2java;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -307,18 +304,6 @@ public class CodeWriter {
 		return this.table;
 	}
 
-	public boolean listContainsString(List<String> list, String string) {
-		Object obj = null;
-		Iterator<String> iter = list.iterator();
-		while (iter.hasNext()) {
-			if (string.equals(obj)) {
-				return true;
-			}
-			obj = iter.next();
-		}
-		return false;
-	}
-
 	public static String getProperty(String key) {
 		String s = props.getProperty(key);
 		return s != null ? s.trim() : s;
@@ -333,26 +318,38 @@ public class CodeWriter {
 		return CodeWriter.getPropertyExploded(key, "");
 	}
 
-	public static String[] getPropertyExploded(String mkey, String defaultValue) {
+	public static List<String> getPropertyExplodedAsList(String key) {
+		return CodeWriter.getPropertyExplodedAsList(key, "");
+	}
+	
+	public static List<String> getPropertyExplodedAsList(String mkey, String defaultValue) {
 		String v = CodeWriter.getProperty(mkey);
 		if (v == null) {
 			v = defaultValue;
 		}
-		return CodeWriter.getExplodedString(v);
+		return CodeWriter.getExplodedStringAsList(v);
 	}
-
-	public static String[] getExplodedString(String value) {
+	
+	public static String[] getPropertyExploded(String mkey, String defaultValue) {
+		return getPropertyExplodedAsList(mkey,defaultValue).toArray(new String[0]);
+	}
+	
+	public static List<String> getExplodedStringAsList(String value) {
 		ArrayList<String> al = new ArrayList<String>();
 		if (value == null) {
-			return new String[0];
+			return al;
 		}
 		StringTokenizer st = new StringTokenizer(value, " ,;\t");
 		while (st.hasMoreTokens()) {
 			al.add(st.nextToken().trim());
 		}
-		return al.toArray(new String[al.size()]);
+		return al;
 	}
-
+	
+	public static String[] getExplodedString(String value) {
+		return getExplodedStringAsList(value).toArray(new String[0]);
+	}
+	
 	public String getLoadingPath() {
 		String ret = "";
 		String[] paths = CodeWriter.getPropertyExploded("velocity.templates.loadingpath", ".");
