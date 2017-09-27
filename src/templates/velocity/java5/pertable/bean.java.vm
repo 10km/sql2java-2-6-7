@@ -22,6 +22,8 @@ import ${pkg}.HashCodeBuilder;
 #end
  * @author sql2java
 */
+#swiftThriftStruct()
+#set( $fieldIndex = 1 )
 public class ${beanClass}
     implements Serializable,FullBean<${beanClass}>,Comparable<$beanClass>,Constant
 #if ($implementsClasses)
@@ -54,6 +56,7 @@ public class ${beanClass}
      *
      * @return true if the current object is new, false if the object is not new
      */
+#swiftThriftField( $fieldIndex )
     public boolean isNew()
     {
         return _isNew;
@@ -73,6 +76,7 @@ public class ${beanClass}
      *
      * @param isNew the boolean value to be assigned to the isNew field
      */
+#swiftThriftField( null )
     public void setNew(boolean isNew)
     {
         this._isNew = isNew;
@@ -85,6 +89,8 @@ public class ${beanClass}
     /**
      * @return the modified status of columns
      */
+#set( $fieldIndex = $fieldIndex + 1 )
+#swiftThriftField( $fieldIndex )
     public $bitFlagType getModified(){
         return modified;
     }
@@ -92,6 +98,7 @@ public class ${beanClass}
     /**
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
+#swiftThriftField( null )
     public void setModified($bitFlagType modified){
 #if( $table.countColumns() > 64 )	
 #set( $maskSize = ($table.countColumns() + 63 ) / 64 )
@@ -104,6 +111,8 @@ public class ${beanClass}
     /**
      * @return the initialized status of columns
      */
+#set( $fieldIndex = $fieldIndex + 1 )
+#swiftThriftField( $fieldIndex )
     public $bitFlagType getInitialized(){
         return initialized;
     }
@@ -111,6 +120,7 @@ public class ${beanClass}
     /**
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
+#swiftThriftField( null )
     public void setInitialized($bitFlagType initialized){
 #if( $table.countColumns() > 64 )	
 #set( $maskSize = ($table.countColumns() + 63 ) / 64 )
@@ -131,6 +141,7 @@ public class ${beanClass}
         copy(bean);
     }
 #foreach ( $column in $columns )
+#set( $fieldIndex = $fieldIndex + 1 )
     /**
      * Getter method for $column.getVarName().
      * <br>
@@ -158,6 +169,7 @@ public class ${beanClass}
      *
      * @return the value of $column.getVarName()
      */
+#swiftThriftField( $fieldIndex )
     public $column.getJavaType() ${column.getGetMethod()}(){
         return $column.getVarName();
     }
@@ -175,6 +187,7 @@ public class ${beanClass}
      *
      * @param newVal the new value to be assigned to $column.getVarName()
      */
+#swiftThriftField( null )
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
 #if ($column.hasCompareTo())
@@ -290,16 +303,19 @@ public class ${beanClass}
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
 #set ( $referencedBean = $table.getReferencedVarName($fkName) )
+#set( $fieldIndex = $fieldIndex + 1 )
     /** 
      * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
      * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
     private $foreignClass $referencedBean;
     /** Getter method for {@link #${referencedBean}}. */
+#swiftThriftField( $fieldIndex )
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
+#swiftThriftField( null )
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }
