@@ -3,13 +3,24 @@
 $codewriter.setCurrentJavaFilename($pkg, "FullBean.java")
 package $pkg;
 
+import java.util.Map;
+
 /**
  * @author guyadong
  */
-public interface FullBean <B> extends BaseBean<B>{
+public interface FullBean <B> {
+    public abstract void copy(B bean);
+    public abstract void copy(B bean, String[] fieldList);
+    public abstract void copyIfNotNull(B bean);
+    public abstract<T>T getObject(String column);
+    public abstract String getValue(String column);
+    public abstract boolean isNew();
+    public abstract void isNew(boolean isNew);
+    public abstract Map<String,String> readDictionnary();
+    public abstract Map<String,String> readPkDictionnary();
+    public abstract<T>void setObject(String column,T object);
     public abstract boolean isModified();
     public abstract void resetIsModified();
     public abstract boolean isInitialized(String column);
     public abstract boolean isModified(String column);
-
 }

@@ -3,9 +3,16 @@
 #parse( "header.include.vm" )
 $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
-
+import java.io.Serializable;
 import ${pkg}.FullBean;
-
+import java.util.HashMap;
+import java.util.Map;
+#foreach ($foreignTable in $foreignTables)
+import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
+#end
+import ${pkg}.CompareToBuilder;
+import ${pkg}.EqualsBuilder;
+import ${pkg}.HashCodeBuilder;
 /**
  * $beanClass is a mapping of $table.getName() Table.
 #if ( $table.getRemarks().length() > 0 )
@@ -17,34 +24,61 @@ import ${pkg}.FullBean;
  * @author sql2java
 */
 public class ${beanClass}
-    extends ${beanClass}Base
-    implements FullBean<${beanClass}Base>
+    implements Serializable,FullBean<${beanClass}>,Comparable<$beanClass>
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
 #end
 {
 	private static final long serialVersionUID = ${table.getSerialVersionUID("${table.getPackage()}.${beanClass}")}L;
-	
 #foreach ( $column in $columns )
-##    private $column.getJavaType() $column.getVarName();   // generation without default values
+#if ( $column.getRemarks().length() > 0 )
+    /** comments:$column.getRemarks() */
+#end
+    private $column.getJavaType() $column.getVarName()#if ( $column.getDefaultValue().length() > 0) =#if ($column.isString())"$column.getDefaultValue()"#else$column.getDefaultValue()#end#end;
+
+#end	
+#foreach ( $column in $columns )
     private boolean $column.getModifiedVarName() = false;
     private boolean $column.getInitializedVarName() = false;
 
 #end
-
+    private boolean _isNew = true;
+    /**
+     * Determines if the current object is new.
+     *
+     * @return true if the current object is new, false if the object is not new
+     */
+    public boolean isNew()
+    {
+        return _isNew;
+    }
 
     /**
-     * Prefered methods to create a $beanClass is via the create$beanClass method in $managerClass or
-     * via the factory class $factoryClass create method
-     * 为了能在webservice中传递对象，此处从protected改为public
+     * Specifies to the object if it has been set as new.
+     *
+     * @param isNew the boolean value to be assigned to the isNew field
      */
+    public void isNew(boolean isNew)
+    {
+        this._isNew = isNew;
+    }
+    /**
+     * Specifies to the object if it has been set as new.
+     *
+     * @param isNew the boolean value to be assigned to the isNew field
+     */
+    public void setNew(boolean isNew)
+    {
+        this._isNew = isNew;
+    }
+
     public ${beanClass}(){
         super();
     }
     /**
      * create a ${beanClass} from a instance
      */
-    ${beanClass}(${beanClass}Base bean){
+    ${beanClass}(${beanClass} bean){
         super();
         copy(bean);
     }
@@ -106,7 +140,38 @@ public class ${beanClass}
             return;
         }
 #end
-        super.$column.getSetMethod()(newVal);
+#if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
+#if($column.getJavaType()=='Integer')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Integer.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Long')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Long.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Byte')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Byte.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Double')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Double.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Float')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Float.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Character')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Character.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Short')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Short.MIN_VALUE?null:newVal;
+#elseif($column.getJavaType()=='Boolean')
+        //compatible for axis2
+        $column.getVarName() = null==newVal||newVal==Boolean.FALSE?null:newVal;       
+#else
+        $column.getVarName() = newVal;
+#end
+#else
+        $column.getVarName() = newVal;
+#end###if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
+
         $column.getModifiedVarName() = true;
         $column.getInitializedVarName() = true;
     }
@@ -148,16 +213,32 @@ public class ${beanClass}
     }
 
 #end
-#set ( $keysDones = [] )
-#foreach ($impKey in $importedKeys)
-#set ( $importedTable = $impKey.getTable() )
-#set ( $importedClass = "$importedTable.asBeanClass()" )
-#if ( !$keysDones.contains( $importedClass ) )
-#if ( $keysDones.add($importedClass) )#*squelch*##end
-## I don't know what I should be doing right here ???
+#foreach ($foreignTable in $foreignTables)
+#if ( $velocityCount == 1 )
+    //////////////////////////////////////
+    // referenced bean for FOREIGN KEYS
+    //////////////////////////////////////
 #end
+#set ( $foreignClass = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+#set ( $referencedBean = $table.getReferencedVarName($fkName) )
+    /** 
+     * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
+     * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
+     */
+    private $foreignClass $referencedBean;
+    /** Getter method for {@link #${referencedBean}}. */
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
+        return this.$referencedBean;
+    }
+    /** Setter method for {@link #${referencedBean}}. */
+    public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
+        this.$referencedBean = reference;
+    }
+#end        
 #end
-
 
     /**
      * Determines if the object has been modified since the last time this method was called.
@@ -218,15 +299,194 @@ public class ${beanClass}
 #end
     }
 
+    @Override
+    public boolean equals(Object object)
+    {
+        if (!(object instanceof ${beanClass})) {
+            return false;
+        }
+
+        $beanClass obj = ($beanClass) object;
+        return new EqualsBuilder()
+#foreach ( $column in $columns )
+            .append(${column.getGetMethod()}(), obj.${column.getGetMethod()}())
+#end
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return new HashCodeBuilder(-82280557, -700257973)
+#foreach ( $column in $columns )
+            .append(${column.getGetMethod()}())
+#end
+            .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[\n")
+#foreach ( $column in $columns )
+#if($column.getJavaType().equals('byte[]'))
+            .append("\t$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes\n")
+#else
+            .append("\t$column.getName()=").append(${column.getGetMethod()}()).append("\n")
+#end
+#end
+            .append("]\n")
+            .toString();
+    }
+
+    @Override
+    public int compareTo($beanClass object){
+#if($table.hasPrimaryKey())
+#set ($compareColumns = $primaryKeys)
+#else
+#set ($compareColumns = $columns)
+#end
+        return new CompareToBuilder()
+#foreach ( $column in $compareColumns )
+            .append(${column.getGetMethod()}(), object.${column.getGetMethod()}())
+#end
+            .toComparison();
+    }
     /**
-     * set all field to null and reset all modification status
-     * @see #resetIsModified() 
-     */
+    * Copies property of the passed bean into the current bean.<br>
+    * if bean.isNew() is true, call {@link #copyIfNotNull(GfCodeBeanBase)}
+    * @param bean the bean to copy into the current bean
+    * @author guyadong
+    */
+    public void copy(${beanClass} bean)
+    {
+        if(bean.isNew()){
+            copyIfNotNull(bean);
+        }else{        
+            isNew(bean.isNew());
+#foreach ( $column in $columns )
+            $column.getSetMethod()(bean.${column.getGetMethod()}());
+#end
+        }
+    }
+    /**
+    * Copies property of the passed bean into the current bean if property not null.
+    *
+    * @param bean the bean to copy into the current bean
+    * @author guyadong
+    */
+    public void copyIfNotNull(${beanClass} bean)
+    {
+        isNew(bean.isNew());
+#foreach ( $column in $columns )
+        if(bean.${column.getGetMethod()}()!=null)
+            $column.getSetMethod()(bean.${column.getGetMethod()}());
+#end
+    }
+
+    /**
+    * set all field to null
+    *
+    * @author guyadong
+    */
     public ${beanClass} clean()
     {
-        super.clean();
-        resetIsModified();
+        isNew(true);
+#foreach ( $column in $columns )
+        $column.getSetMethod()(null);
+#end
         return this;
+    }
+    
+    /**
+     * Copies the passed bean into the current bean.
+     *
+     * @param bean the bean to copy into the current bean
+     * @param fieldList the column name list to copy into the current bean
+     */
+    public void copy(${beanClass} bean, String[] fieldList)
+    {
+        if (null == fieldList)
+            copy(bean);
+        else
+            for (int i = 0; i < fieldList.length; i++) {
+                setObject(fieldList[i].trim(), bean.getObject(fieldList[i].trim()));
+            }
+    }
+
+    /**
+     * return a dictionnary of the object
+     */
+    public Map<String,String> readDictionnary()
+    {
+        Map<String,String> dictionnary = new HashMap<String,String>();
+#foreach ( $column in $columns )
+        dictionnary.put("$column.getName().toLowerCase()", ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString());
+#end
+        return dictionnary;
+    }
+
+    /**
+     * return a dictionnary of the pk columns
+#if ( $table.countPrimaryKeys() == 0)
+     * no primary key, the regular dictionnary is returned
+#end
+     */
+    public Map<String,String> readPkDictionnary()
+    {
+#if ( $table.countPrimaryKeys() == 0)
+        return readDictionnary();
+#else
+        Map<String,String> dictionnary = new HashMap<String,String>();
+#foreach ( $column in $primaryKeys )
+        dictionnary.put("$column.getName().toLowerCase()", ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString());
+#end
+        return dictionnary;
+#end
+    }
+
+    /**
+     * return a the value string representation of the given field
+     */
+    public String getValue(String column)
+    {
+        if (null == column || "".equals(column)) {
+            return "";
+#foreach ( $column in $columns )
+        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
+            return ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString();
+#end
+        }
+        return "";
+    }
+
+    /**
+     * return a object representation of the given field
+     */
+    @SuppressWarnings("unchecked")
+    public <T>T getObject(String column)
+    {
+        if (null == column || "".equals(column)) {
+            return null;
+#foreach ( $column in $columns )
+        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
+            return ${column.getGetMethod()}() == null ? null : (T)${column.getGetMethod()}();
+#end
+        }
+        return null;
+    }
+
+    /**
+     * set a value representation of the given field
+     */
+    public <T>void setObject(String column,T object)
+    {
+        if (null == column || "".equals(column)) {
+            return ;
+#foreach ( $column in $columns )
+        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
+            ${column.getSetMethod()}(($column.getJavaType())object);
+#end
+        }
     }
 
 }
