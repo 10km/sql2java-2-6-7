@@ -10,3 +10,4 @@
 #set ( $EXTENDS_BLOCK   = "extends")
 #set ( $CLASS_BLOCK     = "class")
 ## add your own stuffs here
+#set ( $swiftBeanSupport = $codewriter.getPropertyBoolean('swift.annotation.bean') )

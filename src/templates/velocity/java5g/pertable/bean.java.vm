@@ -1,16 +1,12 @@
 ##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
-#if($codewriter.getPropertyExplodedAsList('swift.annotation.bean').contains('general'))
-// swift supported
-#end
+#parse( "macros.include.vm" )
 #set ( $beanClass = $table.asBeanClassNSP() )
 #set($gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename("$gpkg", "${beanClass}.java")
 package $gpkg;
 import java.io.Serializable;
-
-
 /**
  * $beanClass is a mapping of $table.getName() Table.
 #if ( $table.getRemarks().length() > 0 )
@@ -21,6 +17,8 @@ import java.io.Serializable;
 #end
  * @author guyadong
 */
+#swiftThriftStruct()
+#set( $fieldIndex = 1 )
 public class ${beanClass}
     implements Serializable,BaseBean,Comparable<$beanClass>
 #if ($implementsClasses)
@@ -45,6 +43,7 @@ public class ${beanClass}
      *
      * @return true if the current object is new, false if the object is not new
      */
+#swiftThriftField( $fieldIndex )
     public boolean isNew()
     {
         return _isNew;
@@ -64,6 +63,7 @@ public class ${beanClass}
      *
      * @param isNew the boolean value to be assigned to the isNew field
      */
+#swiftThriftField(null)
     public void setNew(boolean isNew)
     {
         this._isNew = isNew;
@@ -82,6 +82,7 @@ public class ${beanClass}
         this.copy(bean);
     }
 #foreach ( $column in $columns )
+#set( $fieldIndex = $fieldIndex + 1 )
     /**
      * Getter method for {@link #$column.getVarName()}.<br>
 #if ( $column.isPrimaryKey() )
@@ -108,6 +109,7 @@ public class ${beanClass}
      *
      * @return the value of $column.getVarName()
      */
+#swiftThriftField($fieldIndex)
     public $column.getJavaType() ${column.getGetMethod()}(){
         return $column.getVarName();
     }
@@ -124,6 +126,7 @@ public class ${beanClass}
      *
      * @param newVal the new value to be assigned to $column.getVarName()
      */
+#swiftThriftField(null)
     public void $column.getSetMethod()($column.getJavaType() newVal){    
 #if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
 #if($column.getJavaType()=='Integer')
@@ -169,9 +172,8 @@ public class ${beanClass}
         $column.getSetMethod()(new $column.getJavaType()(newVal));
     }
 #end
-
 #end
-
+##########################################
 #foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
     //////////////////////////////////////
@@ -183,16 +185,19 @@ public class ${beanClass}
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
 #set ( $referencedBean = $table.getReferencedVarName($fkName) )
+#set( $fieldIndex = $fieldIndex + 1 )
     /** 
      * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
      * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
     private $foreignClass $referencedBean;
     /** Getter method for {@link #${referencedBean}}. */
+#swiftThriftField($fieldIndex)
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
+#swiftThriftField(null)
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }
