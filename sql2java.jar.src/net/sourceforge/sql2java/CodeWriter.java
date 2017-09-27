@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.sourceforge.sql2java.Column;
 import net.sourceforge.sql2java.Database;
 import net.sourceforge.sql2java.Main;
@@ -348,6 +351,16 @@ public class CodeWriter {
 	
 	public static String[] getExplodedString(String value) {
 		return getExplodedStringAsList(value).toArray(new String[0]);
+	}
+	
+	public static boolean getPropertyBoolean(String value){
+		try{
+			Pattern p = Pattern.compile("yes|true|on",Pattern.CASE_INSENSITIVE);
+			Matcher m = p.matcher(getProperty(value));
+			return m.matches();
+		}catch(Exception e){
+			return false;
+		}
 	}
 	
 	public String getLoadingPath() {
