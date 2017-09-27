@@ -1,6 +1,7 @@
 ##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
+#parse( "macros.include.vm" )
 $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
 import java.io.Serializable;
