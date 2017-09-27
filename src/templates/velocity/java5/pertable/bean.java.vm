@@ -4,9 +4,8 @@
 $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
 import java.io.Serializable;
+import ${pkg}.Constant;
 import ${pkg}.FullBean;
-import java.util.HashMap;
-import java.util.Map;
 #foreach ($foreignTable in $foreignTables)
 import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
 #end
@@ -24,7 +23,7 @@ import ${pkg}.HashCodeBuilder;
  * @author sql2java
 */
 public class ${beanClass}
-    implements Serializable,FullBean<${beanClass}>,Comparable<$beanClass>
+    implements Serializable,FullBean<${beanClass}>,Comparable<$beanClass>,Constant
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
 #end
@@ -36,11 +35,18 @@ public class ${beanClass}
 #end
     private $column.getJavaType() $column.getVarName()#if ( $column.getDefaultValue().length() > 0) =#if ($column.isString())"$column.getDefaultValue()"#else$column.getDefaultValue()#end#end;
 
-#end	
-#foreach ( $column in $columns )
-    private boolean $column.getModifiedVarName() = false;
-    private boolean $column.getInitializedVarName() = false;
-
+#end
+#if( $table.countColumns() > 64 )	
+#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
+    /** columns modified flag */
+    private final long[] modified = new long[${maskSize}] { #foreach($c in [0..$maskSize])#if( $velocityCount > 1 ) , #end 0L #end };
+    /** columns initialized flag */
+    private final long[] initialized = new long[${maskSize}] { #foreach($c in [0..$maskSize])#if( $velocityCount > 1 ) , #end 0L #end };
+#else
+    /** columns modified flag */
+    private long modified = 0L;
+    /** columns initialized flag */
+    private long initialized = 0L;
 #end
     private boolean _isNew = true;
     /**
@@ -71,7 +77,49 @@ public class ${beanClass}
     {
         this._isNew = isNew;
     }
+#if( $table.countColumns() > 64 )	
+#set ( $bitFlagType = "long[]")
+#else
+#set ( $bitFlagType = "long")
+#end
+    /**
+     * @return the modified status of columns
+     */
+    public $bitFlagType getModified(){
+        return modified;
+    }
 
+    /**
+     * @param modified the modified status bit to be assigned to {@link #modified}
+     */
+    public void setModified($bitFlagType modified){
+#if( $table.countColumns() > 64 )	
+#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
+        if( null == modified || $maskSize != modified.length )return;
+        for(int i =0 ; i < this.modified.length ; ++i)this.modified[i] = modified[i];
+#else
+        this.modified = modified;
+#end
+    }
+    /**
+     * @return the initialized status of columns
+     */
+    public $bitFlagType getInitialized(){
+        return initialized;
+    }
+
+    /**
+     * @param initialized the initialized status bit to be assigned to {@link #initialized}
+     */
+    public void setInitialized($bitFlagType initialized){
+#if( $table.countColumns() > 64 )	
+#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
+        if( null == initialized || $maskSize != initialized.length )return;
+        for(int i =0 ; i < this.initialized.length ; ++i)this.initialized[i] = initialized[i];
+#else
+        this.initialized = initialized;
+#end
+    }
     public ${beanClass}(){
         super();
     }
@@ -131,12 +179,12 @@ public class ${beanClass}
     {
 #if ($column.hasCompareTo())
         if ((newVal != null && $column.getVarName() != null && (newVal.compareTo($column.getVarName()) == 0)) ||
-            (newVal == null && $column.getVarName() == null && $column.getInitializedVarName())) {
+            (newVal == null && $column.getVarName() == null && ${column.getInitializedMethod()}())) {
             return;
         }
 #elseif ( $column.useEqualsInSetter() )
         if ((newVal != null && $column.getVarName() != null && newVal.equals($column.getVarName())) ||
-            (newVal == null && $column.getVarName() == null && $column.getInitializedVarName())) {
+            (newVal == null && $column.getVarName() == null && ${column.getInitializedMethod()}())) {
             return;
         }
 #end
@@ -172,8 +220,15 @@ public class ${beanClass}
         $column.getVarName() = newVal;
 #end###if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
 
-        $column.getModifiedVarName() = true;
-        $column.getInitializedVarName() = true;
+#if( $table.countColumns() > 64 )
+#set( $maskIndex = $velocityCount / 64 )	
+#set( $maskShift = $velocityCount % 64 )	
+        modified[$maskIndex] |= (1L << $maskShift);
+        initialized[$maskIndex] |= (1L << $maskShift);
+#else
+        modified |= $column.getIDMaskConstName();
+        initialized |= $column.getIDMaskConstName();
+#end
     }
 
 #if ( $column.hasPrimaryType() )
@@ -197,7 +252,13 @@ public class ${beanClass}
      */
     public boolean ${column.getModifiedMethod()}()
     {
-        return $column.getModifiedVarName();
+#if( $table.countColumns() > 64 )
+#set( $maskIndex = ($velocityCount - 1) / 64 )	
+#set( $maskShift = ($velocityCount - 1) % 64 )	
+        return 0L != (modified[$maskIndex] & (1L << $maskShift));
+#else
+        return 0L != (modified & $column.getIDMaskConstName());
+#end
     }
 
     /**
@@ -209,9 +270,14 @@ public class ${beanClass}
      */
     public boolean ${column.getInitializedMethod()}()
     {
-        return $column.getInitializedVarName();
+#if( $table.countColumns() > 64 )
+#set( $maskIndex = ($velocityCount - 1) / 64 )
+#set( $maskShift = ($velocityCount - 1) % 64 )	
+        return 0L != (initialized[$maskIndex] & (1L << $maskShift));
+#else
+        return 0L != (initialized & $column.getIDMaskConstName());
+#end
     }
-
 #end
 #foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
@@ -249,10 +315,46 @@ public class ${beanClass}
      */
     public boolean isModified()
     {
-        return #foreach ( $column in $columns )#if ( $velocityCount == 1 )$column.getModifiedVarName()#else
-		|| $column.getModifiedVarName() #end #end;
+#if( $table.countColumns() > 64 )
+        for( long m: modified )if( 0 != m )return true;
+        return false;
+#else
+        return 0 != modified;
+#end
     }
-    
+  
+    /**
+     * Determines if the {@code column} has been modified.
+     * @param columnID
+     * @return true if the field has been modified, false if the field has not been modified
+     * @author guyadong
+     */
+    public boolean isModified(int columnID){
+        switch ( columnID ){
+#foreach ( $column in $columns )
+        case $column.getIDConstName():
+            return ${column.getModifiedMethod()}();
+#end
+        }
+        return false;
+    }
+    /**
+     * Determines if the {@code column} has been initialized.
+     * <br>
+     * It is useful to determine if a field is null on purpose or just because it has not been initialized.
+     * @param columnID
+     * @return true if the field has been initialized, false otherwise
+     * @author guyadong
+     */
+    public boolean isInitialized(int columnID){
+        switch(columnID) {
+#foreach ( $column in $columns )
+        case $column.getIDConstName():
+            return ${column.getInitializedMethod()}();
+#end
+        }
+        return false;
+    }
     /**
      * Determines if the {@code column} has been modified.
      * @param column
@@ -260,14 +362,10 @@ public class ${beanClass}
      * @author guyadong
      */
     public boolean isModified(String column){
-        if (null == column || "".equals(column)) {
-            return false;
-#foreach ( $column in $columns )
-        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
-            return ${column.getModifiedMethod()}();
-#end
-        }
-        return false;		
+        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
+        if( 0 > index ) 
+            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
+        return isModified(index);
     }
 
     /**
@@ -279,14 +377,10 @@ public class ${beanClass}
      * @author guyadong
      */
     public boolean isInitialized(String column){
-        if (null == column || "".equals(column)) {
-            return false;
-#foreach ( $column in $columns )
-        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
-            return ${column.getInitializedMethod()}();
-#end
-        }
-        return false;		
+        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
+        if( 0 > index ) 
+            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
+        return isInitialized(index);
     }
     
     /**
@@ -294,8 +388,10 @@ public class ${beanClass}
      */
     public void resetIsModified()
     {
-#foreach ( $column in $columns )
-        $column.getModifiedVarName() = false;
+#if( $table.countColumns() > 64 )
+        for( int i=0;i<modified.length;++i)modified[i]= 0L;
+#else
+        modified = 0L;
 #end
     }
 
@@ -401,92 +497,81 @@ public class ${beanClass}
      * Copies the passed bean into the current bean.
      *
      * @param bean the bean to copy into the current bean
-     * @param fieldList the column name list to copy into the current bean
+     * @param fieldList the column id list to copy into the current bean
      */
-    public void copy(${beanClass} bean, String[] fieldList)
+    public void copy(${beanClass} bean, int... fieldList)
     {
-        if (null == fieldList)
+        if (null == fieldList || 0 == fieldList.length)
             copy(bean);
         else
             for (int i = 0; i < fieldList.length; i++) {
-                setObject(fieldList[i].trim(), bean.getObject(fieldList[i].trim()));
+                setValue(fieldList[i], bean.getValue(fieldList[i]));
+            }
+    }
+        
+    /**
+     * Copies the passed bean into the current bean.
+     *
+     * @param bean the bean to copy into the current bean
+     * @param fieldList the column name list to copy into the current bean
+     */
+    public void copy(${beanClass} bean, String... fieldList)
+    {
+        if (null == fieldList || 0 == fieldList.length)
+            copy(bean);
+        else
+            for (int i = 0; i < fieldList.length; i++) {
+                setValue(fieldList[i].trim(), bean.getValue(fieldList[i].trim()));
             }
     }
 
     /**
-     * return a dictionnary of the object
-     */
-    public Map<String,String> readDictionnary()
-    {
-        Map<String,String> dictionnary = new HashMap<String,String>();
-#foreach ( $column in $columns )
-        dictionnary.put("$column.getName().toLowerCase()", ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString());
-#end
-        return dictionnary;
-    }
-
-    /**
-     * return a dictionnary of the pk columns
-#if ( $table.countPrimaryKeys() == 0)
-     * no primary key, the regular dictionnary is returned
-#end
-     */
-    public Map<String,String> readPkDictionnary()
-    {
-#if ( $table.countPrimaryKeys() == 0)
-        return readDictionnary();
-#else
-        Map<String,String> dictionnary = new HashMap<String,String>();
-#foreach ( $column in $primaryKeys )
-        dictionnary.put("$column.getName().toLowerCase()", ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString());
-#end
-        return dictionnary;
-#end
-    }
-
-    /**
-     * return a the value string representation of the given field
-     */
-    public String getValue(String column)
-    {
-        if (null == column || "".equals(column)) {
-            return "";
-#foreach ( $column in $columns )
-        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
-            return ${column.getGetMethod()}() == null ? "" : ${column.getGetMethod()}().toString();
-#end
-        }
-        return "";
-    }
-
-    /**
-     * return a object representation of the given field
+     * return a object representation of the given column id
      */
     @SuppressWarnings("unchecked")
-    public <T>T getObject(String column)
+    public <T>T getValue(int columnID)
     {
-        if (null == column || "".equals(column)) {
-            return null;
+        switch( columnID ){
 #foreach ( $column in $columns )
-        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
-            return ${column.getGetMethod()}() == null ? null : (T)${column.getGetMethod()}();
+        case $column.getIDConstName(): 
+            return (T)${column.getGetMethod()}();        
 #end
         }
         return null;
     }
 
     /**
-     * set a value representation of the given field
+     * set a value representation of the given column id
      */
-    public <T>void setObject(String column,T object)
+    public <T> void setValue(int columnID,T value)
     {
-        if (null == column || "".equals(column)) {
-            return ;
+        switch( columnID ) {
 #foreach ( $column in $columns )
-        } else if ("$column.getName()".equalsIgnoreCase(column) || "$column.getJavaName()".equalsIgnoreCase(column)) {
-            ${column.getSetMethod()}(($column.getJavaType())object);
+        case $column.getIDConstName():        
+            ${column.getSetMethod()}(($column.getJavaType())value);
 #end
         }
     }
+    
+    /**
+     * return a object representation of the given field
+     */
+    public <T>T getValue(String column)
+    {
+        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
+        if( 0 > index ) 
+            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
+        return getValue(index);
+    }
 
+    /**
+     * set a value representation of the given field
+     */
+    public <T>void setValue(String column,T value)
+    {
+        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
+        if( 0 > index ) 
+            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
+        setValue(index,value);
+    }
 }
