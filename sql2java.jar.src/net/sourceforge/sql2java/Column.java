@@ -194,7 +194,9 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getIDConstName() {
 		return (this.tableName + "_ID_" + this.getName()).toUpperCase();
 	}
-	
+	public String getIDMaskConstName() {
+		return (this.tableName + "_ID_" + this.getName()).toUpperCase() + "_MASK";
+	}
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
