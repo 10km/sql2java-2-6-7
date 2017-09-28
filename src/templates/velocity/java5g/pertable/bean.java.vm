@@ -2,10 +2,10 @@
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
 #parse( "macros.include.vm" )
+#set($gpkg = $codewriter.getProperty('general.package') )
 #set ( $generateNative = true )
 #set ( $beanClass = $table.asBeanClass($generateNative) )
-#set ( $beanClassFullName = "$table.getPackage().${beanClass}" )
-#set($gpkg = $codewriter.getProperty('general.package') )
+#set ( $beanClassFullName = "${gpkg}.${beanClass}" )
 $codewriter.setCurrentJavaFilename("$gpkg", "${beanClass}.java")
 package $gpkg;
 import java.io.Serializable;
