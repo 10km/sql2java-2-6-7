@@ -31,7 +31,8 @@ public class ${beanClass}
     #foreach( $implements in $implementsClasses )$implements #end
 #end
 {
-	private static final long serialVersionUID = ${table.getSerialVersionUID("${table.getPackage()}.${beanClass}")}L;
+    private static final long serialVersionUID = ${table.getSerialVersionUID("${table.getPackage()}.${beanClass}")}L;
+    
 #foreach ( $column in $columns )
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
@@ -122,15 +123,14 @@ public class ${beanClass}
     /**
      * create a ${beanClass} from a instance
      */
-    ${beanClass}(${beanClass} bean){
+    public ${beanClass}(${beanClass} bean){
         super();
         copy(bean);
     }
 #foreach ( $column in $columns )
 #set( $fieldIndex = $fieldIndex + 1 )
     /**
-     * Getter method for $column.getVarName().
-     * <br>
+     * Getter method for {@link #$column.getVarName()}.<br>
 #if ( $column.isPrimaryKey() )
      * PRIMARY KEY.<br>
 #end
@@ -160,8 +160,7 @@ public class ${beanClass}
         return $column.getVarName();
     }
     /**
-     * Setter method for $column.getVarName().
-     * <br>
+     * Setter method for {@link #$column.getVarName()}.<br>
 #if ( $column.hasCompareTo() )
      * The new value is set only if compareTo() says it is different,
      * or if one of either the new value or the current value is null.
@@ -225,8 +224,7 @@ public class ${beanClass}
 
 #if ( $column.hasPrimaryType() )
     /**
-     * Setter method for $column.getVarName().
-     * <br>
+     * Setter method for {@link #$column.getVarName()}.<br>
      * Convenient for those who do not want to deal with Objects for primary types.
      *
      * @param newVal the new value to be assigned to $column.getVarName()
@@ -235,7 +233,6 @@ public class ${beanClass}
     {
         $column.getSetMethod()(new $column.getJavaType()(newVal));
     }
-
 #end
     /**
      * Determines if the $column.getVarName() has been modified.
@@ -259,6 +256,7 @@ public class ${beanClass}
         return 0L !=  ${column.bitAndExpression("initialized")};
     }
 #end
+##########################################
 #foreach ($foreignTable in $foreignTables)
 #if ( $velocityCount == 1 )
     //////////////////////////////////////
