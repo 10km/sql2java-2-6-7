@@ -564,20 +564,20 @@ public class Table {
 				: CodeWriter.getClassPrefix() + "_" + basename;
 	}
 	
-	public String convertName(String value) {
-		String basename = getBasename(false);
+	public String convertName(String value,boolean nsp) {
+		String basename = getBasename(nsp);
 		if ("".equals(value)) {
-			return StringUtilities.convertName((String) basename, (boolean) false);
+			return StringUtilities.convertName((String) basename, false);
 		}
-		return StringUtilities.convertName((String) (basename + "_" + value), (boolean) false);
+		return StringUtilities.convertName((String) (basename + "_" + value), false);
+	}
+	
+	public String convertName(String value) {
+		return convertName(value,false);
 	}
 	
 	public String convertNameNSP(String value) {
-		String basename = getBasename(true) ;
-		if ("".equals(value)) {
-			return StringUtilities.convertName((String) basename, (boolean) false);
-		}
-		return StringUtilities.convertName((String) (basename + "_" + value), (boolean) false);
+		return convertName(value,true);
 	}
 	
 	public String asClass(String suffix) {
@@ -598,6 +598,10 @@ public class Table {
 		
 	public String asBeanClassNSP() {
 		return this.convertNameNSP("Bean");	
+	}
+	
+	public String asBeanClass(boolean nsp) {
+		return convertName("Bean",nsp);
 	}
 	
 	public String asCacheClass() {
