@@ -327,7 +327,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>> T[] getImportedBeans($beanClass bean, int ikIndex) throws DAOException {
+    public <T extends ${pkg}.BaseBean<?>> T[] getImportedBeans($beanClass bean, int ikIndex) throws DAOException {
         return getImportedBeansAsList(bean, ikIndex).toArray((T[])java.lang.reflect.Array.newInstance(importedBeanTypes[ikIndex],0));
     }
     
@@ -345,7 +345,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<?>> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DAOException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -371,7 +371,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>> T[] setImportedBeans($beanClass bean,T[] importedBeans,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<?>> T[] setImportedBeans($beanClass bean,T[] importedBeans,int ikIndex)throws DAOException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -397,7 +397,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<?>,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,int ikIndex)throws DAOException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -729,7 +729,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>> T getReferencedBean($beanClass bean,int fkIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<?>> T getReferencedBean($beanClass bean,int fkIndex)throws DAOException{
         switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
@@ -756,7 +756,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.FullBean<?>> T setReferencedBean($beanClass bean,T beanToSet,int fkIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<?>> T setReferencedBean($beanClass bean,T beanToSet,int fkIndex)throws DAOException{
         switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )

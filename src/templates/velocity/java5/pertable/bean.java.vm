@@ -6,7 +6,7 @@ $codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
 package $table.getPackage();
 import java.io.Serializable;
 import ${pkg}.Constant;
-import ${pkg}.FullBean;
+import ${pkg}.BaseBean;
 #foreach ($foreignTable in $foreignTables)
 import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
 #end
@@ -26,7 +26,7 @@ import ${pkg}.HashCodeBuilder;
 #swiftThriftStruct()
 #set( $fieldIndex = 1 )
 public class ${beanClass}
-    implements Serializable,FullBean<${beanClass}>,Comparable<$beanClass>,Constant
+    implements Serializable,BaseBean<${beanClass}>,Comparable<$beanClass>,Constant
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
 #end
