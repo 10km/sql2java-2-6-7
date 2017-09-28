@@ -1,0 +1,19 @@
+/**
+ * @author guyadong
+ */
+public interface ${javaClassName} <B> {
+    public abstract boolean isNew();
+    public abstract void isNew(boolean isNew);
+    public abstract boolean isModified();
+    public abstract void resetIsModified();
+    public abstract boolean isInitialized(int columnID);
+    public abstract boolean isModified(int columnID);
+    public abstract boolean isInitialized(String column);
+    public abstract boolean isModified(String column);
+    public abstract void copy(B bean, String... fieldList);
+    public abstract void copy(B bean, int... fieldList);
+    public abstract <T> T getValue(int columnID);
+    public abstract <T> void setValue(int columnID,T value);
+    public abstract <T> T getValue(String column);
+    public abstract <T> void setValue(String column,T value);
+}

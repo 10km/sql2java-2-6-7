@@ -6,9 +6,9 @@
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package $gpkg;
 ###set ( $importThrows = "" )
-#set ( $B_parentClass = "BaseBean")
+#set ( $B_parentClass = "BaseBean<?>")
 ###set ( $throwsString = "" )
-#set ( $B_extends = " extends BaseBean" )
-#set ( $T_extends = " extends BaseBean" )
+#set ( $B_extends = " extends BaseBean<?>" )
+#set ( $T_extends = " extends BaseBean<?>" )
 #set ( $M_native = 'native' )
 #parse( "table.manager.include.vm" )

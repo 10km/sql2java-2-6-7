@@ -28,22 +28,24 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
 
         @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
-            left.isNew(right.isNew());
 #foreach ( $column in $table.columns )
-            if(right.${column.getGetMethod()}() != null)
+            if(right.${column.getInitializedMethod()}())
                 left.$column.getSetMethod()(right.${column.getGetMethod()}());
 #end
+            left.isNew(right.isNew());
+            left.setModified(right.getModified());
         }
 
         @Override
         protected void _toRight(${leftClass} left, ${rightClass} right) {
-            right.isNew(left.isNew());
 #foreach ( $column in $table.columns )
 #if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 #end
-#if( $ignorefields.contains($column.name) )// #end            if(left.${column.getGetMethod()}() != null)
+#if( $ignorefields.contains($column.name) )// #end            if(left.${column.getInitializedMethod()}() )
 #if( $ignorefields.contains($column.name) )// #end                right.$column.getSetMethod()(left.${column.getGetMethod()}());
 #end
+            right.isNew(left.isNew());
+            right.setModified(left.getModified());
         }};
         
 #end
