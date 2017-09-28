@@ -39,18 +39,10 @@ public class ${beanClass}
     private $column.getJavaType() $column.getVarName()#if ( $column.getDefaultValue().length() > 0) =#if ($column.isString())"$column.getDefaultValue()"#else$column.getDefaultValue()#end#end;
 
 #end
-#if( $table.countColumns() > 64 )	
-#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
     /** columns modified flag */
-    private final long[] modified = new long[${maskSize}] { #foreach($c in [0..$maskSize])#if( $velocityCount > 1 ) , #end 0L #end };
+    private $table.stateVarType() modified = $table.stateVarInitializedStatement();
     /** columns initialized flag */
-    private final long[] initialized = new long[${maskSize}] { #foreach($c in [0..$maskSize])#if( $velocityCount > 1 ) , #end 0L #end };
-#else
-    /** columns modified flag */
-    private long modified = 0L;
-    /** columns initialized flag */
-    private long initialized = 0L;
-#end
+    private $table.stateVarType() initialized = $table.stateVarInitializedStatement();    
     private boolean _isNew = true;
     /**
      * Determines if the current object is new.
@@ -82,17 +74,12 @@ public class ${beanClass}
     {
         this._isNew = isNew;
     }
-#if( $table.countColumns() > 64 )	
-#set ( $bitFlagType = "long[]")
-#else
-#set ( $bitFlagType = "long")
-#end
     /**
      * @return the modified status of columns
      */
 #set( $fieldIndex = $fieldIndex + 1 )
 #swiftThriftField( $fieldIndex )
-    public $bitFlagType getModified(){
+    public $table.stateVarType() getModified(){
         return modified;
     }
 
@@ -100,10 +87,9 @@ public class ${beanClass}
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
 #swiftThriftField( null )
-    public void setModified($bitFlagType modified){
+    public void setModified($table.stateVarType() modified){
 #if( $table.countColumns() > 64 )	
-#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
-        if( null == modified || $maskSize != modified.length )return;
+        if( null == modified || this.modified.length != modified.length )return;
         for(int i =0 ; i < this.modified.length ; ++i)this.modified[i] = modified[i];
 #else
         this.modified = modified;
@@ -114,7 +100,7 @@ public class ${beanClass}
      */
 #set( $fieldIndex = $fieldIndex + 1 )
 #swiftThriftField( $fieldIndex )
-    public $bitFlagType getInitialized(){
+    public $table.stateVarType() getInitialized(){
         return initialized;
     }
 
@@ -122,10 +108,9 @@ public class ${beanClass}
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
 #swiftThriftField( null )
-    public void setInitialized($bitFlagType initialized){
+    public void setInitialized($table.stateVarType() initialized){
 #if( $table.countColumns() > 64 )	
-#set( $maskSize = ($table.countColumns() + 63 ) / 64 )
-        if( null == initialized || $maskSize != initialized.length )return;
+        if( null == initialized || this.modified.length != initialized.length )return;
         for(int i =0 ; i < this.initialized.length ; ++i)this.initialized[i] = initialized[i];
 #else
         this.initialized = initialized;
@@ -234,15 +219,8 @@ public class ${beanClass}
         $column.getVarName() = newVal;
 #end###if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
 
-#if( $table.countColumns() > 64 )
-#set( $maskIndex = $velocityCount / 64 )	
-#set( $maskShift = $velocityCount % 64 )	
-        modified[$maskIndex] |= (1L << $maskShift);
-        initialized[$maskIndex] |= (1L << $maskShift);
-#else
-        modified |= $column.getIDMaskConstName();
-        initialized |= $column.getIDMaskConstName();
-#end
+        $column.bitORAssignExpression("modified");
+        $column.bitORAssignExpression("initialized");
     }
 
 #if ( $column.hasPrimaryType() )
@@ -266,31 +244,19 @@ public class ${beanClass}
      */
     public boolean ${column.getModifiedMethod()}()
     {
-#if( $table.countColumns() > 64 )
-#set( $maskIndex = ($velocityCount - 1) / 64 )	
-#set( $maskShift = ($velocityCount - 1) % 64 )	
-        return 0L != (modified[$maskIndex] & (1L << $maskShift));
-#else
-        return 0L != (modified & $column.getIDMaskConstName());
-#end
+        return 0L !=  ${column.bitAndExpression("modified")};
     }
 
     /**
-     * Determines if the $column.getVarName() has been initialized.
-     * <br>
+     * Determines if the $column.getVarName() has been initialized.<br>
+     *
      * It is useful to determine if a field is null on purpose or just because it has not been initialized.
      *
      * @return true if the field has been initialized, false otherwise
      */
     public boolean ${column.getInitializedMethod()}()
     {
-#if( $table.countColumns() > 64 )
-#set( $maskIndex = ($velocityCount - 1) / 64 )
-#set( $maskShift = ($velocityCount - 1) % 64 )	
-        return 0L != (initialized[$maskIndex] & (1L << $maskShift));
-#else
-        return 0L != (initialized & $column.getIDMaskConstName());
-#end
+        return 0L !=  ${column.bitAndExpression("initialized")};
     }
 #end
 #foreach ($foreignTable in $foreignTables)
