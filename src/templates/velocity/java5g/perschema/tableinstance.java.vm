@@ -1,0 +1,28 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#set ( $javaClassName = 'Constant' )
+#set ( $gpkg = $codewriter.getProperty('general.package') )
+#set ( $subpkg=$db.engineAsSubPackage() )
+$codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "TableInstance.java")
+package ${gpkg}.${subpkg};
+import ${gpkg}.TableManager;
+import ${gpkg}.BaseBean;
+#foreach($t in $tables)
+import ${gpkg}.${t.asBeanClassNSP()};
+#end
+import java.util.Map;
+import java.util.Hashtable;
+
+public class TableInstance{
+    private static final Map<Class<? extends BaseBean>,TableManager<?>> instanceMap = new Hashtable<Class<? extends BaseBean>,TableManager<?>>(){
+        private static final long serialVersionUID = 1L;
+        {
+#foreach($t in $tables)
+        put(${t.asBeanClassNSP()}.class,${t.asManagerClassNSP()}.getInstance());
+#end
+    }};
+    @SuppressWarnings("unchecked")
+    public static final <T extends BaseBean>TableManager<T> getInstance(Class<T> clazz){
+        return (TableManager<T>) instanceMap.get(clazz);
+    }
+}
