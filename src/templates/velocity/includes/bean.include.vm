@@ -29,7 +29,7 @@ public class ${beanClass}
     /** columns modified flag */
     private $table.stateVarType() modified = $table.stateVarInitializedStatement();
     /** columns initialized flag */
-    private $table.stateVarType() initialized = $table.stateVarInitializedStatement();    
+    private $table.stateVarType() initialized = $table.stateVarInitializedStatement();
     private boolean _isNew = true;
     /**
      * Determines if the current object is new.
