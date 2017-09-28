@@ -1239,13 +1239,31 @@ public class Column implements Cloneable, Comparable<Column> {
 	}
 
 	public String getModifiedMethod() {
-		return this.convertName("is_" + this.escape() + "_modified");
+		return this.convertName("check_" + this.escape() + "_modified");
 	}
 
 	public String getInitializedMethod() {
-		return this.convertName("is_" + this.escape() + "_initialized");
+		return this.convertName("check_" + this.escape() + "_initialized");
 	}
 
+	public String bitAndExpression(String varName){
+		if(this.getTable().countColumns()>64){
+			int pos = getOrdinalPosition()-1;
+			return String.format("(%s[%d] & (1L << %d))",varName,pos>>6,pos & 0x3f);
+		}else{
+			return String.format("(%s & %s)", varName,getIDMaskConstName());
+		}
+	}
+	
+	public String bitORAssignExpression(String varName){
+		if(this.getTable().countColumns()>64){
+			int pos = getOrdinalPosition()-1;
+			return String.format("%s[%d] |= (1L << %d)",varName,pos>>6,pos & 0x3f);
+		}else{
+			return String.format("%s |= %s", varName,getIDMaskConstName());
+		}
+	}
+	
 	public String getWidgetMethod() {
 		return this.convertName("get_" + this.escape() + "_widget");
 	}

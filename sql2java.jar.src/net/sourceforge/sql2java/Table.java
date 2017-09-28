@@ -818,7 +818,25 @@ public class Table {
 	public String getImportedBeansSetMethod(String fkName) {		
 		return "set" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
 	}
-
+	
+	public String stateVarType(){
+		return countColumns()>64 ? "long[]":"long";
+	}	
+	
+	public String stateVarInitializedStatement(){
+		if(countColumns()>64){
+			int len = (countColumns()+63)>>6;
+			StringBuffer sb = new StringBuffer();
+			for(int i=0;i<len;++i){
+				if(i>0)sb.append(",");
+				sb.append("0L");				
+			}
+			return String.format("new long[]{%s}",sb.toString());
+		}else{
+			return "0L";
+		}
+	}
+	
 	protected Database getDatabase() {
 		return database;
 	}
