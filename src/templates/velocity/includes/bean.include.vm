@@ -316,13 +316,6 @@ public class ${beanClass}
         return false;
     }
     
-    public int columnIDOf(String column){
-        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
-        if( 0 > index ) 
-            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
-        return index;    
-    }
-    
     /**
      * Determines if the {@code column} has been modified.
      * @param column
@@ -509,10 +502,7 @@ public class ${beanClass}
      */
     public <T>T getValue(String column)
     {
-        int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
-        if( 0 > index ) 
-            index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
-        return getValue(index);
+        return getValue(columnIDOf(column));
     }
 
     /**
@@ -520,9 +510,13 @@ public class ${beanClass}
      */
     public <T>void setValue(String column,T value)
     {
+        setValue(columnIDOf(column),value);
+    }
+
+    public static int columnIDOf(String column){
         int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
         if( 0 > index ) 
             index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
-        setValue(index,value);
+        return index;    
     }
 }
