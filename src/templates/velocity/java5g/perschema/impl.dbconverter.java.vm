@@ -13,7 +13,7 @@ import ${gpkg}.IDbConverter;
 #foreach ( $table in $tables )
 import ${gpkg}.${table.asBeanClassNSP()};
 #end
-#macro( convertVar $c)_converter$c#end
+#macro( convertVar $c)converter$c#end
 
 /**
  * {@link IDbConverter} implemention for $db.engine

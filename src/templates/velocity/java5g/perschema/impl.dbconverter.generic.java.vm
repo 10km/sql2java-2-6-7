@@ -1,0 +1,127 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#set ( $javaClassName = 'DbConverterGeneric' )
+#set( $gpkg = $codewriter.getProperty('general.package') )
+#set( $subpkg=$db.engineAsSubPackage() )
+#set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+$codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
+package ${gpkg};
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Hashtable;
+import ${gpkg}.IBeanConverter;
+import ${gpkg}.IDbConverter;
+
+#foreach ( $table in $tables )
+import ${gpkg}.${table.asBeanClassNSP()};
+#end
+#macro( convertVar $c)converter$c#end
+/**
+ * generic type converter of {@link IDbConverter} implemention<br>
+ * @author guyadong
+ *
+ */
+public abstract class ${javaClassName}<#join($tables "N_${e.asCoreClassNSP().toUpperCase()}" ',')> 
+    implements IDbConverter<#join($tables "N_${e.asCoreClassNSP().toUpperCase()}" ',')> {
+#foreach ( $table in $tables )
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
+    private final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass});
+#end
+    private static Class<?> getRawClass(Type type){
+        if(type instanceof Class<?>){
+            return (Class<?>) type;
+        } else if(type instanceof ParameterizedType){
+            return getRawClass(((ParameterizedType) type).getRawType());
+        } else{
+            throw new IllegalArgumentException("invalid type");
+        }
+    }
+    @SuppressWarnings("unchecked")
+    public ${javaClassName}(){
+        Type superClass = getClass().getGenericSuperclass();
+        Class<?> rawClass;
+#foreach ( $table in $tables )
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
+#set ( $idx = $velocityCount - 1 )
+        rawClass = getRawClass(((ParameterizedType) superClass).getActualTypeArguments()[$idx]);
+        this.#convertVar(${leftClass}) 
+            = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(${leftClass}.class,
+            (Class<N_${table.asCoreClassNSP().toUpperCase()}>)rawClass){
+            final Map<String,Method> getters = new Hashtable<String,Method>();
+            final Map<String,Method> setters = new Hashtable<String,Method>();
+            final Map<String,Method> checkers = new Hashtable<String,Method>();
+            {
+                try{
+#foreach ( $column in $table.columns )
+                    getters.put("${column.getGetMethod()}",rightType.getMethod("${column.getGetMethod()}"));
+                    setters.put("${column.getGetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
+                    checkers.put("${column.getInitializedMethod()}",rightType.getMethod("${column.getInitializedMethod()}"));
+#end
+                    getters.put("isNew",rightType.getMethod("isNew"));
+                    setters.put("isNew",rightType.getMethod("isNew",boolean.class));
+                    getters.put("getModified",rightType.getMethod("getModified"));
+                    setters.put("setModified",rightType.getMethod("setModified",${table.stateVarType()}.class));
+                }catch(RuntimeException e){
+                    throw e;
+                }catch(Exception e){
+                    throw new RuntimeException(e);
+                }
+            }
+            @Override
+            protected void _fromRight(${leftClass} left, ${rightClass} right) {
+                try{
+#foreach ( $column in $table.columns )
+                    if((boolean)checkers.get("${column.getInitializedMethod()}").invoke(right))
+                        left.$column.getSetMethod()((${column.getJavaType()})getters.get("${column.getGetMethod()}").invoke(right));
+#end
+                    left.isNew((boolean)getters.get("isNew").invoke(right));
+                    left.setModified((${table.stateVarType()})setters.get("getModified").invoke(right));
+                }catch(RuntimeException e){
+                    throw e;
+                }catch(Exception e){
+                    throw new RuntimeException(e);
+                }
+            }
+    
+            @Override
+            protected void _toRight(${leftClass} left, ${rightClass} right) {
+                try{
+ #foreach ( $column in $table.columns )
+#if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
+#end
+#if( $ignorefields.contains($column.name) )// #end                if(left.${column.getInitializedMethod()}() )
+#if( $ignorefields.contains($column.name) )// #end                    setters.get("$column.getSetMethod()").invoke(right,left.${column.getGetMethod()}());
+#end
+                    setters.get("isNew").invoke(right,left.isNew());
+                    setters.get("setModified").invoke(right,left.getModified());
+                }catch(RuntimeException e){
+                    throw e;
+                }catch(Exception e){
+                    throw new RuntimeException(e);
+                }
+            }};            
+#end
+    }
+    @Override
+    public <L,R>IBeanConverter<L,R>getBeanConverter(Class<L> lClass,Class<R> rClass){
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public <L,R>void setBeanConverter(Class<L> lClass,Class<R> rClass,IBeanConverter<L,R>converter){
+        throw new UnsupportedOperationException();
+    }
+
+#foreach ( $table in $tables )
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
+    @Override
+    public IBeanConverter<${leftClass}, ${rightClass}> get${leftClass}Converter() {
+        return #convertVar(${leftClass});
+    }
+#end    
+}
