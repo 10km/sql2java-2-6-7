@@ -48,3 +48,5 @@
 #macro(swiftThriftField $index)#if($swiftBeanSupport)$!SPACE@com.facebook.swift.codec.ThriftField#if($index)($index)#end
 
 #end#end
+########################
+#macro( converterClass $c)${c}Converter#end

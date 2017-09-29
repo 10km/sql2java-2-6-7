@@ -1,0 +1,104 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#parse( "macros.include.vm" )
+#set ( $javaClassName = 'BeanConverterUtils' )
+#set( $gpkg = $codewriter.getProperty('general.package') )
+#set( $subpkg=$db.engineAsSubPackage() )
+#set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+$codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
+package ${gpkg};
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Hashtable;
+import ${gpkg}.IBeanConverter;
+
+#foreach ( $table in $tables )
+import ${gpkg}.${table.asBeanClassNSP()};
+#end
+
+/**
+ * generic type converter classes of {@link IBeanConverter} implementation for #join($tables "$e.name" ',')<br>
+ * @author guyadong
+ *
+ */
+public class ${javaClassName} {
+    private ${javaClassName}(){}
+#foreach ( $table in $tables )
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
+    /**
+     * implementation of {@link IBeanConverter} by reflect<br>
+     * generic type converter for {@link $leftClass} to $rightClass <br>
+     * @author guyadong
+     *
+     */
+    public static class #converterClass(${leftClass})<$rightClass> extends IBeanConverter.AbstractHandle<${leftClass},${rightClass}>{
+        final Map<String,Method> methods = new Hashtable<String,Method>();
+        /** usage: <pre>new #converterClass(${leftClass})&lt;Model&gt;(){};</pre> */
+        public #converterClass(${leftClass})(){
+            super();
+            init();
+        }
+        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass){
+            super(leftClass,rightClass);
+            init();
+        }
+        private void init(){
+            try{
+                methods.put("isNew",rightType.getMethod("isNew"));
+                methods.put("setNew",rightType.getMethod("setNew",boolean.class));
+                methods.put("getModified",rightType.getMethod("getModified"));
+                methods.put("setModified",rightType.getMethod("setModified",${table.stateVarType()}.class));
+            }catch(RuntimeException e){
+                throw e;
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+#foreach ( $column in $table.columns )  
+            try{         
+                methods.put("${column.getGetMethod()}",rightType.getMethod("${column.getGetMethod()}"));
+                methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
+                methods.put("${column.getInitializedMethod()}",rightType.getMethod("${column.getInitializedMethod()}"));
+            }catch(Exception e){}
+#end
+        }
+        @Override
+        protected void _fromRight(${leftClass} left, ${rightClass} right) {
+            try{
+                Method initializedMethod,getterMethod;
+#foreach ( $column in $table.columns )
+                if( null != (initializedMethod = methods.get("${column.getInitializedMethod()}")) && null != (getterMethod = methods.get("${column.getGetMethod()}"))){
+                    if((boolean)initializedMethod.invoke(right))
+                        left.$column.getSetMethod()((${column.getJavaType()})getterMethod.invoke(right));
+                }
+#end
+                left.isNew((boolean)methods.get("isNew").invoke(right));
+                left.setModified((${table.stateVarType()})methods.get("getModified").invoke(right));
+            }catch(RuntimeException e){
+                throw e;
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void _toRight(${leftClass} left, ${rightClass} right) {
+            try{
+                Method setterMethod;
+#foreach ( $column in $table.columns )
+#if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
+#end
+#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}() )
+#if( $ignorefields.contains($column.name) )// #end                    setterMethod.invoke(right,left.${column.getGetMethod()}());
+#end
+                methods.get("setNew").invoke(right,left.isNew());
+                methods.get("setModified").invoke(right,left.getModified());
+            }catch(RuntimeException e){
+                throw e;
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        }}; 
+#end
+
+}
