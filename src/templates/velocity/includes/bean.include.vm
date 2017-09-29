@@ -12,7 +12,7 @@
 #swiftThriftStruct()
 #set( $fieldIndex = 1 )
 public class ${beanClass}
-    implements Serializable,BaseBean<$beanClass>,Comparable<$beanClass>,Constant
+    implements Serializable,BaseBean<$beanClass>,Comparable<$beanClass>,Constant,Cloneable
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
 #end
@@ -75,7 +75,7 @@ public class ${beanClass}
      */
 #swiftThriftField( null )
     public void setModified($table.stateVarType() modified){
-#if( $table.countColumns() > 64 )	
+#if( $table.countColumns() > 64 )    
         if( null == modified || this.modified.length != modified.length )return;
         for(int i =0 ; i < this.modified.length ; ++i)this.modified[i] = modified[i];
 #else
@@ -96,7 +96,7 @@ public class ${beanClass}
      */
 #swiftThriftField( null )
     public void setInitialized($table.stateVarType() initialized){
-#if( $table.countColumns() > 64 )	
+#if( $table.countColumns() > 64 )
         if( null == initialized || this.modified.length != initialized.length )return;
         for(int i =0 ; i < this.initialized.length ; ++i)this.initialized[i] = initialized[i];
 #else
@@ -412,7 +412,14 @@ public class ${beanClass}
 #end
             .toComparison();
     }
-
+    @Override
+    public $beanClass clone(){
+        try {
+            return ($beanClass) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
     /**
     * set all field to null
     *
