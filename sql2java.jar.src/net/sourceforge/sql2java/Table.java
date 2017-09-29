@@ -699,7 +699,9 @@ public class Table {
 	public String asManagerClassNSP() {
 		return this.convertNameNSP("Manager");
 	}
-	
+	public String asManagerInterfaceNSP() {
+		return "I"+asManagerClassNSP();
+	}
 	public String asManagerImplClass() {
 		return this.convertName("Manager_Impl");
 	}
