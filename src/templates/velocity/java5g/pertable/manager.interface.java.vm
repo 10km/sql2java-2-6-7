@@ -1,0 +1,258 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#parse( "table.include.vm" )
+#parse( "macros.include.vm" )
+######################
+#set ( $gpkg = $codewriter.getProperty('general.package') )
+#set ( $subpkg=$db.engineAsSubPackage() )
+#set ( $javaClassName = $table.asManagerInterfaceNSP() )
+#set ( $beanClass = $table.asBeanClassNSP() )
+$codewriter.setCurrentJavaFilename(${gpkg}, "${javaClassName}.java")
+package ${gpkg};
+
+/**
+ * Interface to handle database calls (save, load, count, etc...) for the $tablename table.<br>
+#if ( $table.hasRemarks() )
+ * Remarks: $table.getRemarks()
+#end
+ * @author guyadong
+ */
+public interface ${javaClassName} extends TableManager<$beanClass>
+{  
+#if ( $table.countPrimaryKeys() > 0 )
+    //////////////////////////////////////
+    // PRIMARY KEY METHODS
+    //////////////////////////////////////
+
+    /**
+     * Loads a {@link $beanClass} from the $tablename using primary key fields.
+     *
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return a unique $beanClass or {@code null} if not found
+     */
+    //1
+    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+
+    
+    /**
+     * Returns true if this $tablename contains row with primary key fields.
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end
+     * @see #loadByPrimaryKey($keys)
+     */
+    //1.4
+    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+    
+    /**
+     * Delete row according to its primary keys.<br>
+     * all keys must not be null
+     *
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the number of deleted rows
+     */
+    //2
+    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+
+#end ## $table.countPrimaryKeys() > 0
+## ======================================================
+## xImportedKeys template
+## ======================================================
+
+#foreach ($importedTable in $importedTables)
+#if ( $velocityCount == 1 )
+
+    //////////////////////////////////////
+    // GET/SET IMPORTED KEY BEAN METHOD
+    //////////////////////////////////////
+#end
+#set ( $importedClass = "$importedTable.asBeanClassNSP()" )
+#set ( $importedNative = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClassNSP()" )
+#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+    /**
+     * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME : $fkName 
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     */
+    //3.1 GET IMPORTED
+    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
+
+    /**
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     */
+    //3.2 GET IMPORTED
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean);
+
+    /**
+     * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME : $fkName 
+     * @param bean the referenced {@link $beanClass}
+     * @param importedBeans imported beans from $importedTable.name
+     * @return importedBeans always
+     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     */
+    //3.3 SET IMPORTED
+    public $importedClass[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , $importedClass[] importedBeans);
+
+    /**
+     * set  the {@link $importedClass} object java.util.Collection associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+     * @param bean the referenced {@link $beanClass} 
+     * @param importedBeans imported beans from $importedTable.name 
+     * @return importedBeans always
+     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     */
+    //3.4 SET IMPORTED
+    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans);
+
+#end
+#end
+## ======================================================
+## only xImportedKeys template
+## ======================================================
+#if( $table.hasForeignTables() || $table.hasImportedTables() )
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+    #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+     * @return the inserted or updated {@link $beanClass} bean
+     */
+    //3.5 SYNC SAVE 
+    public $beanClass save($beanClass bean
+        #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables('native' $table  ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+    /**
+     * Transaction version for sync save
+     * @see {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", $m_importedClass[] " '' ''))}
+     */
+    //3.6 SYNC SAVE AS TRANSACTION
+    public $beanClass saveAsTransaction(final $beanClass bean
+        #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables('native' $table  ",final $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+#if( $table.hasImportedTables() )
+    /**
+     * Save the $beanClass bean and referenced beans and imported beans into the database.
+     *
+     * @param bean the {@link $beanClass} bean to be saved
+    #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+     * @return the inserted or updated {@link $beanClass} bean
+     */
+    //3.7 SYNC SAVE 
+    public $beanClass save($beanClass bean
+        #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
+    /**
+     * Transaction version for sync save
+     * @see {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
+     */
+    //3.8 SYNC SAVE AS TRANSACTION
+    public $beanClass saveAsTransaction(final $beanClass bean
+        #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
+
+        #foreachImportedTables('native' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
+#end ## $table.hasImportedTables()
+#end ## $table.hasForeignTables() || $table.hasImportedTables()
+## ======================================================
+## xForeignKeys template
+## ======================================================
+#foreach ($foreignTable in $foreignTables)
+#if ( $velocityCount == 1 )
+    //////////////////////////////////////
+    // GET/SET FOREIGN KEY BEAN METHOD
+    //////////////////////////////////////
+#end
+#set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
+#set ( $foreignNative = "$foreignTable.asBeanClass()" )
+#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+    /**
+     * Retrieves the {@link $foreignClass} object referenced by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.<br>
+     * FK_NAME : $fkName
+     * @param bean the {@link $beanClass}
+     * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
+     */
+    //3.2 GET REFERENCED VALUE
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean);
+
+    /**
+     * Associates the {@link $beanClass} object to the {@link $foreignClass} object by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.
+     *
+     * @param bean the {@link $beanClass} object to use
+     * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass}
+     * @return always beanToSet saved
+     * @throws Exception
+     */
+    //5.2 SET REFERENCED 
+    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet);
+#end
+#end
+#if ($table.countIndices() > 0)
+    //_____________________________________________________________________
+    //
+    // USING INDICES
+    //_____________________________________________________________________
+
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+    /**
+     * Retrieves an unique $beanClass using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
+#end
+     * @return an array of $beanClass
+     */
+    public $beanClass loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+
+#else ## $index.isUnique()
+    /**
+     * Retrieves an array of $beanClass using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter.
+#end
+     * @return an array of $beanClass
+     */
+    public $beanClass[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    
+    /**
+     * Retrieves a list of $beanClass using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter.
+#end
+     * @return a list of $beanClass
+     */
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+#end## $index.isUnique()
+
+    /**
+     * Deletes rows using the ${index.getName()} index.
+     *
+#foreach ( $column in $index.getIndexColumnsList() )
+     * @param ${column.getVarName()} the ${column.getName()} column's value filter.
+#end
+     * @return the number of deleted objects
+     */
+    public int deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    
+#end    
+#end##($table.countIndices() > 0)
+}
