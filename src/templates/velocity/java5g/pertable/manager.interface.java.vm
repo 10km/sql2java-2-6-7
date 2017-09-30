@@ -83,7 +83,19 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      */
     //3.1 GET IMPORTED
     public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
-
+    
+    /**
+     * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME : $fkName 
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     * @throws DAOException
+     */
+    //3.1.2 GET IMPORTED
+    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
@@ -93,6 +105,18 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     //3.2 GET IMPORTED
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean);
 
+    /**
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the associated {@link $importedClass} beans 
+     * @throws DAOException
+     */
+    //3.2.2 GET IMPORTED
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
@@ -188,7 +212,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param bean the {@link $beanClass}
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
      */
-    //3.2 GET REFERENCED VALUE
+    //5.1 GET REFERENCED VALUE
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean);
 
     /**

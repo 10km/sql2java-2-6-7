@@ -436,7 +436,24 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     {
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean).toArray(new $importedClass[0]);
     }
-
+    /**
+     * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME : $fkName 
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     * @throws DAOException
+     */
+    //3.1.2 GET IMPORTED
+    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DAOException
+    {
+        ${beanClass} bean = createBean();
+#foreach ( $pk in $primaryKeys )
+        bean.${pk.getSetMethod()}(${pk.getFullVarName()});
+#end       
+        return ${importedTable.getImportedBeansGetMethod($fkName)}(bean);
+    }
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
@@ -454,7 +471,24 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
         return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other);
     }
-
+    /**
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the associated {@link $importedClass} beans 
+     * @throws DAOException
+     */
+    //3.2.2 GET IMPORTED
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DAOException
+    {
+         ${beanClass} bean = createBean();
+#foreach ( $pk in $primaryKeys )
+        bean.${pk.getSetMethod()}(${pk.getFullVarName()});
+#end       
+        return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean);
+    }
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
@@ -792,15 +826,11 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
-    //3.2 GET REFERENCED VALUE
+    //5.1 GET REFERENCED VALUE
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DAOException
     {
         if(null == bean)return null;
-        $foreignClass other = ${foreignClassManager}.getInstance().createBean();
-#foreach ( $fk in $columnsOfFk ) 
-        other.$fk.getForeignColumn().getSetMethod()(bean.$fk.getGetMethod()()); 
-#end 
-        bean.$table.getReferencedVarSetMethod($fkName)(${foreignClassManager}.getInstance().loadUniqueUsingTemplate(other)); 
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignClassManager}.getInstance().loadByPrimaryKey(#join($columnsOfFk "bean.$e.getGetMethod()()" ','))); 
         return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 
@@ -819,9 +849,14 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
             ${foreignClassManager}.getInstance().save(beanToSet);
             bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
             if( null == beanToSet){
+#set( $notNullColumns = $table.noNullableColumns($fkName))
+#if( $notNullColumns.empty )            
 #foreach ( $fk in $columnsOfFk ) 
                 bean.$fk.getSetMethod()(null);
 #end 
+#else
+               // foreign key ( #join($notNullColumns "${e.name}" ',') ) is not nullable , nothing to do
+#end
             }else{
 #foreach ( $fk in $columnsOfFk ) 
                 bean.$fk.getSetMethod()(beanToSet.${fk.getForeignColumn().getGetMethod()}());
