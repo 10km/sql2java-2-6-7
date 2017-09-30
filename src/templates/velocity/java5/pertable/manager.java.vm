@@ -521,7 +521,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+        if(null != $table.asRefArg($fkName))
+            this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
 #end
 #end
         bean = this.save( bean );
