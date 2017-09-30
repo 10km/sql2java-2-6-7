@@ -621,7 +621,11 @@ public class Table {
 	public String asBeanClass() {
 		return this.convertName("Bean");
 	}
-		
+	
+	public String asFullBeanClass() {
+		return this.getPackage() + "." + this.asBeanClass();
+	}
+	
 	public String asBeanClassNSP() {
 		return this.convertNameNSP("Bean");	
 	}
