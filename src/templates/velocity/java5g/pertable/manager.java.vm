@@ -374,24 +374,27 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 
         #foreachImportedTables('native' $table  ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
-        try{
-            $nativeClass nativeBean = this.beanConverter.toRight(bean);
-            #foreachForeignTables('native' $table  "$m_foreignTable.asFullBeanClass() native_$table.asRefArg($m_fkName) = this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName));" '' '    ')
-            #foreachImportedTables('native' $table  "$m_importedTable.asFullBeanClass()[] native_$m_importedTable.asImpArg($m_fkName) = this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName));" '' '    ')
-            nativeManager.save(nativeBean
-                #foreachForeignTables('native' $table  ", native_$table.asRefArg($m_fkName) " '' '')
-
-                #foreachImportedTables('native' $table  ", native_$m_importedTable.asImpArg($m_fkName)  " '' ''));
-            if(null != bean)
-                this.beanConverter.fromRight(bean,nativeBean);
-            #foreachForeignTables('native' $table  "if(null != $table.asRefArg($m_fkName)) this.dbConverter.get${m_foreignClass}Converter().fromRight($table.asRefArg($m_fkName),native_$table.asRefArg($m_fkName));" '' '    ')
-            #foreachImportedTables('native' $table  "if(null != $m_importedTable.asImpArg($m_fkName)) this.dbConverter.get${m_importedClass}Converter().fromRight($m_importedTable.asImpArg($m_fkName),native_$m_importedTable.asImpArg($m_fkName));" '' '    ')
-            return bean;
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        if(null == bean) return null;
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClassManager = "$foreignTable.asManagerClassNSP()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+        if(null != $table.asRefArg($fkName))
+            this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+#end
+#end
+        bean = this.save( bean );
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClassNSP()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+        ${importedClassManager}.getInstance().save( $impVar );
+#end
+#end
+        return bean;
     } 
 
     //3.6 SYNC SAVE AS TRANSACTION override $table.asManagerInterfaceNSP()
@@ -415,29 +418,26 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 
         #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
-        try{
-#*
-            $nativeClass nativeBean = this.beanConverter.toRight(bean);
-            #foreachForeignTables('native' $table  "$m_foreignTable.asFullBeanClass() native_$table.asRefArg($m_fkName) = this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName));" '' '    ')
-            #foreachImportedTables('native' $table  "java.util.List<$m_importedTable.asFullBeanClass()> native_$m_importedTable.asImpArg($m_fkName) = this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName));" '' '    ')
-            nativeManager.save(nativeBean
-                #foreachForeignTables('native' $table  ", native_$table.asRefArg($m_fkName) " '' '')
-
-                #foreachImportedTables('native' $table  ", native_$m_importedTable.asImpArg($m_fkName)  " '' ''));
-            if(null != bean)
-                this.beanConverter.fromRight(bean,nativeBean);
-            #foreachForeignTables('native' $table  "if(null != $table.asRefArg($m_fkName)) this.dbConverter.get${m_foreignClass}Converter().fromRight($table.asRefArg($m_fkName),native_$table.asRefArg($m_fkName));" '' '    ')
-            #foreachImportedTables('native' $table  "if(null != $m_importedTable.asImpArg($m_fkName)) this.dbConverter.get${m_importedClass}Converter().fromRight($m_importedTable.asImpArg($m_fkName),native_$m_importedTable.asImpArg($m_fkName));" '' '    ')
-            return bean;
-*#                    
-            return this.beanConverter.fromRight(bean,nativeManager.save(this.beanConverter.toRight(bean)
-                #foreachForeignTables('native' $table  ", this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName)) " '' '')
-                #foreachImportedTables('native' $table  ", this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName))  " '' '')));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        if(null == bean) return null;
+#foreach($foreignTable in $foreignTables)
+#set ( $foreignClassManager = "$foreignTable.asManagerClassNSP()" )
+#foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $columnsOfFk = $foreignTable.getForeignKeysByFkName($fkName) )
+        this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+#end
+#end
+        bean = this.save( bean );
+#foreach($importedTable in $importedTables)
+#set ( $importedClass = "$importedTable.asBeanClass()" )
+#set ( $importedClassManager = "$importedTable.asManagerClassNSP()" )
+#foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+#set ( $impVar= $importedTable.asImpArg($fkName) )
+        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+        ${importedClassManager}.getInstance().save( $impVar );
+#end
+#end
+        return bean;
     }   
 
     //3.8 SYNC SAVE AS TRANSACTION override $table.asManagerInterfaceNSP()
