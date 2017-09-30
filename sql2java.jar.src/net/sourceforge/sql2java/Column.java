@@ -39,6 +39,34 @@ public class Column implements Cloneable, Comparable<Column> {
 	public static final int M_URL = 16;
 	public static final int M_OBJECT = 17;
 	public static final int M_CALENDAR = 18;
+    /**
+     * Indicates that the column might not allow <code>NULL</code> values.
+     * <P>
+     * A possible value for the column
+     * <code>NULLABLE</code>
+     * in the <code>ResultSet</code> returned by the method
+     * <code>getColumns</code>.
+     */
+	public static final int columnNoNulls = 0;
+    /**
+     * Indicates that the column definitely allows <code>NULL</code> values.
+     * <P>
+     * A possible value for the column
+     * <code>NULLABLE</code>
+     * in the <code>ResultSet</code> returned by the method
+     * <code>getColumns</code>.
+     */
+	public static final int columnNullable = 1;
+
+    /**
+     * Indicates that the nullability of columns is unknown.
+     * <P>
+     * A possible value for the column
+     * <code>NULLABLE</code>
+     * in the <code>ResultSet</code> returned by the method
+     * <code>getColumns</code>.
+     */
+	public static final int columnNullableUnknown = 2;
 	private String catalog;
 	private String schema;
 	private String tableName;
@@ -1215,7 +1243,7 @@ public class Column implements Cloneable, Comparable<Column> {
 	}
 
 	public String convertName(String columnName) {
-		return StringUtilities.convertName((String) columnName, (boolean) true);
+		return StringUtilities.convertName((String) columnName, true);
 	}
 
 	public String convertName(Column col) {
@@ -1271,7 +1299,10 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getVarName() {
 		return this.convertName(this.escape());
 	}
-
+	
+	public String getFullVarName() {
+		return this.convertName(this.getTable().asCoreClassNSP() +"_" + this.name );
+	}
 	public String getModifiedVarName() {
 		return this.convertName(this.escape() + "_is_modified");
 	}

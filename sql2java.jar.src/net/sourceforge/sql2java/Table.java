@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -315,9 +316,34 @@ public class Table {
 	 */
 	public Vector<Column> getForeignKeysByFkName(String fkName) {		
 		Vector<Column> keys=this.fkNameMap.get(fkName);
-		return null==keys?new Vector<Column>():keys;
+		return null==keys?new Vector<Column>():new Vector<Column>(keys);
 	}
-
+	
+	/**
+	 * 判断 FK_NAME 包含的所有字段是否都允许为null
+	 * @param fkName
+	 * @return
+	 */
+	public boolean isNullable(String fkName){
+		for(Column column: getForeignKeysByFkName(fkName)){
+			if(Column.columnNullable !=column.getNullable())return false;
+		}
+		return true;
+	}
+	/**
+	 * 返回 FK_NAME 包含的所有字段中不允许为null的所有字段
+	 * @param fkName
+	 * @return
+	 */
+	public Vector<Column> noNullableColumns(String fkName){
+		Vector<Column> keys = getForeignKeysByFkName(fkName);
+		for(Iterator<Column> itor = keys.iterator();itor.hasNext();){
+			Column column = itor.next();
+			if(Column.columnNullable !=column.getNullable())continue;
+			itor.remove();
+		}
+		return keys;
+	}
 	private String toUniversalFkName(String fkName) {
 		Vector<Column> keys = this.fkNameMap.get(fkName);
 		if(null!=keys){
