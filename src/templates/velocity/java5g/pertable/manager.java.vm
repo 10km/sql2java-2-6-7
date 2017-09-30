@@ -648,12 +648,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     {
         try{
             $nativeClass nativeBean = this.beanConverter.toRight(bean);
-            $foreignTable.asFullBeanClass() foreignNativeBean = this.dbConverter.get${foreignClass}Converter().toRight(beanToSet);
+            IBeanConverter<$foreignClass,$foreignTable.asFullBeanClass()> foreignConverter = this.dbConverter.get${foreignClass}Converter();
+            $foreignTable.asFullBeanClass() foreignNativeBean = foreignConverter.toRight(beanToSet);
             this.nativeManager.$table.getReferencedVarSetMethod($fkName)(nativeBean,foreignNativeBean);
-            if(null != bean)
-                this.beanConverter.fromRight(bean, nativeBean);
-            if(null != beanToSet)
-                this.dbConverter.get${foreignClass}Converter().fromRight(beanToSet,foreignNativeBean);
+            this.beanConverter.fromRight(bean, nativeBean);
+            foreignConverter.fromRight(beanToSet,foreignNativeBean);
             return beanToSet;
         }
         catch(DAOException e)
