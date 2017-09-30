@@ -375,9 +375,18 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         #foreachImportedTables('native' $table  ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
         try{
-            return this.beanConverter.fromRight(bean,nativeManager.save(this.beanConverter.toRight(bean)
-                #foreachForeignTables('native' $table  ", this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName)) " '' '')
-                #foreachImportedTables('native' $table  ", this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName))  " '' '')));
+            $nativeClass nativeBean = this.beanConverter.toRight(bean);
+            #foreachForeignTables('native' $table  "$m_foreignTable.asFullBeanClass() native_$table.asRefArg($m_fkName) = this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName));" '' '    ')
+            #foreachImportedTables('native' $table  "$m_importedTable.asFullBeanClass()[] native_$m_importedTable.asImpArg($m_fkName) = this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName));" '' '    ')
+            nativeManager.save(nativeBean
+                #foreachForeignTables('native' $table  ", native_$table.asRefArg($m_fkName) " '' '')
+
+                #foreachImportedTables('native' $table  ", native_$m_importedTable.asImpArg($m_fkName)  " '' ''));
+            if(null != bean)
+                this.beanConverter.fromRight(bean,nativeBean);
+            #foreachForeignTables('native' $table  "if(null != $table.asRefArg($m_fkName)) this.dbConverter.get${m_foreignClass}Converter().fromRight($table.asRefArg($m_fkName),native_$table.asRefArg($m_fkName));" '' '    ')
+            #foreachImportedTables('native' $table  "if(null != $m_importedTable.asImpArg($m_fkName)) this.dbConverter.get${m_importedClass}Converter().fromRight($m_importedTable.asImpArg($m_fkName),native_$m_importedTable.asImpArg($m_fkName));" '' '    ')
+            return bean;
         }
         catch(DAOException e)
         {
@@ -407,6 +416,20 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
         try{
+#*
+            $nativeClass nativeBean = this.beanConverter.toRight(bean);
+            #foreachForeignTables('native' $table  "$m_foreignTable.asFullBeanClass() native_$table.asRefArg($m_fkName) = this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName));" '' '    ')
+            #foreachImportedTables('native' $table  "java.util.List<$m_importedTable.asFullBeanClass()> native_$m_importedTable.asImpArg($m_fkName) = this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName));" '' '    ')
+            nativeManager.save(nativeBean
+                #foreachForeignTables('native' $table  ", native_$table.asRefArg($m_fkName) " '' '')
+
+                #foreachImportedTables('native' $table  ", native_$m_importedTable.asImpArg($m_fkName)  " '' ''));
+            if(null != bean)
+                this.beanConverter.fromRight(bean,nativeBean);
+            #foreachForeignTables('native' $table  "if(null != $table.asRefArg($m_fkName)) this.dbConverter.get${m_foreignClass}Converter().fromRight($table.asRefArg($m_fkName),native_$table.asRefArg($m_fkName));" '' '    ')
+            #foreachImportedTables('native' $table  "if(null != $m_importedTable.asImpArg($m_fkName)) this.dbConverter.get${m_importedClass}Converter().fromRight($m_importedTable.asImpArg($m_fkName),native_$m_importedTable.asImpArg($m_fkName));" '' '    ')
+            return bean;
+*#                    
             return this.beanConverter.fromRight(bean,nativeManager.save(this.beanConverter.toRight(bean)
                 #foreachForeignTables('native' $table  ", this.dbConverter.get${m_foreignClass}Converter().toRight($table.asRefArg($m_fkName)) " '' '')
                 #foreachImportedTables('native' $table  ", this.dbConverter.get${m_importedClass}Converter().toRight($m_importedTable.asImpArg($m_fkName))  " '' '')));
@@ -624,7 +647,14 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet)
     {
         try{
-            return this.dbConverter.get${foreignClass}Converter().fromRight(beanToSet,this.nativeManager.$table.getReferencedVarSetMethod($fkName)(this.beanConverter.toRight(bean),this.dbConverter.get${foreignClass}Converter().toRight(beanToSet)));
+            $nativeClass nativeBean = this.beanConverter.toRight(bean);
+            $foreignTable.asFullBeanClass() foreignNativeBean = this.dbConverter.get${foreignClass}Converter().toRight(beanToSet);
+            this.nativeManager.$table.getReferencedVarSetMethod($fkName)(nativeBean,foreignNativeBean);
+            if(null != bean)
+                this.beanConverter.fromRight(bean, nativeBean);
+            if(null != beanToSet)
+                this.dbConverter.get${foreignClass}Converter().fromRight(beanToSet,foreignNativeBean);
+            return beanToSet;
         }
         catch(DAOException e)
         {
