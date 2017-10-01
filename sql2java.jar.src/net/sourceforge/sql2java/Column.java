@@ -1290,8 +1290,15 @@ public class Column implements Cloneable, Comparable<Column> {
 		}else{
 			return String.format("%s |= %s", varName,getIDMaskConstName());
 		}
+	}	
+	public String bitResetAssignExpression(String varName){
+		if(this.getTable().countColumns()>64){
+			int pos = getOrdinalPosition()-1;
+			return String.format("%s[%d] &= (~(1L << %d))",varName,pos>>6,pos & 0x3f);
+		}else{
+			return String.format("%s &= (~%s)", varName,getIDMaskConstName());
+		}
 	}
-	
 	public String getWidgetMethod() {
 		return this.convertName("get_" + this.escape() + "_widget");
 	}
@@ -1388,5 +1395,8 @@ public class Column implements Cloneable, Comparable<Column> {
 	}
 	public boolean isAutoincrement(){
 		return "YES".equals(this.autoincrement);
+	}
+	public boolean isNotNull(){
+		return columnNoNulls  == this.nullable ;
 	}
 }

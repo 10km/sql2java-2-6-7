@@ -326,7 +326,7 @@ public class Table {
 	 */
 	public boolean isNullable(String fkName){
 		for(Column column: getForeignKeysByFkName(fkName)){
-			if(Column.columnNullable !=column.getNullable())return false;
+			if(column.isNotNull())return false;
 		}
 		return true;
 	}
@@ -829,11 +829,11 @@ public class Table {
 	}
 	
 	public String asRefArg(String fkName){
-		return StringUtilities.convertName("ref_"+ this.getForeignTableByFkName(fkName).getName() +"by_" + toUniversalFkName(fkName),true);
+		return StringUtilities.convertName("ref_"+ this.getForeignTableByFkName(fkName).asCoreClassNSP() +"_by_" + toUniversalFkName(fkName),true);
 	}
 	
 	public String asImpArg(String fkName){
-		return StringUtilities.convertName("imp_"+ this.getName() +"by_" + toUniversalFkName(fkName),true);
+		return StringUtilities.convertName("imp_"+ this.asCoreClassNSP() +"_by_" + toUniversalFkName(fkName),true);
 	}
 
 	public String getReferencedVarName(String fkName){
@@ -849,10 +849,10 @@ public class Table {
 	}
 	
 	public String getImportedBeansGetMethod(String fkName) {		
-		return "get" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
+		return "get" + this.asBeanClassNSP() + "s" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
 	}
 	public String getImportedBeansSetMethod(String fkName) {		
-		return "set" + this.asBeanClass() + "s" + StringUtilities.convertName("by_" + toUniversalFkName(fkName),false);
+		return "set" + this.asBeanClassNSP() + "s" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
 	}
 	
 	public String stateVarType(){
