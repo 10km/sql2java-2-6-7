@@ -838,7 +838,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Associates the {@link $beanClass} object to the {@link $foreignClass} object by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.
      *
      * @param bean the {@link $beanClass} object to use
-     * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass}
+     * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass} #if(!$table.isNullable($fkName))(NOT NULL)#end.
      * @return always beanToSet saved
      * @throws Exception
      */
@@ -850,7 +850,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
             bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
             if( null == beanToSet){
 #set( $notNullColumns = $table.noNullableColumns($fkName))
-#if( $notNullColumns.empty )            
+#if( $notNullColumns.empty )
 #foreach ( $fk in $columnsOfFk ) 
                 bean.$fk.getSetMethod()(null);
 #end 

@@ -128,6 +128,12 @@ public class ${beanClass}
 #if ( $column.getDefaultValue().length() > 0 )
      * <li>default value: $column.getDefaultValue()</li>
 #end
+#if ($column.isAutoincrement())
+     * <li>AUTO_INCREMENT</li>
+#end
+#if ($column.isNotNull())
+     * <li>NOT NULL</li>
+#end
      * <li>column size: $column.getSize()</li>
      * <li>jdbc type returned by the driver: $column.getJavaTypeAsTypeName()</li>
      * </ul>
@@ -149,7 +155,7 @@ public class ${beanClass}
      * means calling this method will mark the field as 'modified' in all cases.
 #end
      *
-     * @param newVal the new value to be assigned to $column.getVarName()
+     * @param newVal the new value #if ($column.isNotNull())(NOT NULL)#end to be assigned to $column.getVarName()
      */
 #swiftThriftField( null )
     public void $column.getSetMethod()($column.getJavaType() newVal)
@@ -347,6 +353,15 @@ public class ${beanClass}
         for( int i=0;i<modified.length;++i)modified[i]= 0L;
 #else
         modified = 0L;
+#end
+    }
+    /**
+     * Resets the primary keys ( #join($primaryKeys "{@link #${e.getVarName()}}" ',') ) modification status to 'not modified'.
+     */
+    public void resetPrimaryKeysModified()
+    {
+#foreach($column in $primaryKeys)
+        $column.bitResetAssignExpression("modified");
 #end
     }
     /**
