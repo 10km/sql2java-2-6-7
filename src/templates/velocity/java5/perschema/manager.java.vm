@@ -523,12 +523,9 @@ public final class Manager
      */
     public static void  setBlob(PreparedStatement ps, int pos, $codewriter.binaryClassName blob) throws SQLException
     {
-        if (blob==null)
-        {
+        if (blob == null #if($codewriter.binaryIsByteBuffer())|| !blob.hasArray()#end){
             ps.setNull(pos, Types.BLOB);
-        }
-        else
-        {
+        }else{
 #if($codewriter.binaryIsByteBuffer())
             ps.setBlob(pos, new java.io.ByteArrayInputStream(blob.array()));
 #else
@@ -560,12 +557,9 @@ public final class Manager
      */
     public static void  setClob(PreparedStatement ps, int pos, String clob) throws SQLException
     {
-        if (clob==null)
-        {
+        if (clob==null){
             ps.setNull(pos, Types.CLOB);
-        }
-        else
-        {
+        }else{
             ps.setClob(pos, new java.io.StringReader(clob));
         }
     }
@@ -596,18 +590,15 @@ public final class Manager
     /**
      * Set a byte array to the passed prepared statement as a $codewriter.binaryClassName or as null.
      */
-    public static void  setBytes(int type,PreparedStatement ps, int pos, $codewriter.binaryClassName binary) throws SQLException
+    public static void  setBytes(int sqlType,PreparedStatement ps, int pos, $codewriter.binaryClassName bytes) throws SQLException
     {
-        if (binary==null)
-        {
-            ps.setNull(pos, type);
-        }
-        else
-        {
+        if (null == bytes #if($codewriter.binaryIsByteBuffer())|| !bytes.hasArray()#end){
+            ps.setNull(pos, sqlType);
+        }else{
 #if($codewriter.binaryIsByteBuffer())
-            ps.setBytes(pos, binary.array());
-#else        
-            ps.setBytes(pos, binary);
+            ps.setBytes(pos, bytes.array());
+#else
+            ps.setBytes(pos, bytes);
 #end
         }
     }
