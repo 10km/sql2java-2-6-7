@@ -495,25 +495,33 @@ public final class Manager
     /**
      * Retrieves a java.sql.Blob object from the passed result set as a byte array.
      */
-    public static byte[] getBlob(ResultSet rs, int pos) throws SQLException
+    public static $codewriter.binaryClassName getBlob(ResultSet rs, int pos) throws SQLException
     {
         java.sql.Blob blob = rs.getBlob(pos);
-        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
+#if($codewriter.binaryIsByteBuffer())
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(blob.getBytes(1L,(int)blob.length()));
+#else
+        return rs.wasNull()?($codewriter.binaryClassName)null:blob.getBytes(1L,(int)blob.length());
+#end
     }
 
     /**
      * Retrieves a java.sql.Blob object from the passed result set as a byte array.
      */
-    public static byte[] getBlob(ResultSet rs, String column) throws SQLException
+    public static $codewriter.binaryClassName getBlob(ResultSet rs, String column) throws SQLException
     {
         java.sql.Blob blob = rs.getBlob(column);
-        return rs.wasNull()?(byte[])null:blob.getBytes(1L,(int)blob.length());
+#if($codewriter.binaryIsByteBuffer())
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(blob.getBytes(1L,(int)blob.length()));
+#else
+        return rs.wasNull()?($codewriter.binaryClassName)null:blob.getBytes(1L,(int)blob.length());
+#end
     }
 
     /**
      * Set a byte array to the passed prepared statement as a java.sql.Blob or as null.
      */
-    public static void  setBlob(PreparedStatement ps, int pos, byte[] blob) throws SQLException
+    public static void  setBlob(PreparedStatement ps, int pos, $codewriter.binaryClassName blob) throws SQLException
     {
         if (blob==null)
         {
@@ -521,7 +529,11 @@ public final class Manager
         }
         else
         {
+#if($codewriter.binaryIsByteBuffer())
+            ps.setBlob(pos, new java.io.ByteArrayInputStream(blob.array()));
+#else
             ps.setBlob(pos, new java.io.ByteArrayInputStream(blob));
+#end        
         }
     }
 
@@ -558,6 +570,48 @@ public final class Manager
         }
     }
 
+    /**
+     * Retrieves a binary object from the passed result set as a byte array.
+     */
+    public static $codewriter.binaryClassName getBytes(ResultSet rs, int pos) throws SQLException
+    {
+#if($codewriter.binaryIsByteBuffer())
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(rs.getBytes(pos));
+#else
+        return rs.wasNull()?($codewriter.binaryClassName)null:rs.getBytes(pos);
+#end
+    }
+
+    /**
+     * Retrieves a byte array from the passed result set as $codewriter.binaryClassName.
+     */
+    public static $codewriter.binaryClassName getBytes(ResultSet rs, String column) throws SQLException
+    {
+#if($codewriter.binaryIsByteBuffer())
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(rs.getBytes(column));
+#else
+        return rs.wasNull()?($codewriter.binaryClassName)null:rs.getBytes(column);
+#end    }
+
+    /**
+     * Set a byte array to the passed prepared statement as a $codewriter.binaryClassName or as null.
+     */
+    public static void  setBytes(int type,PreparedStatement ps, int pos, $codewriter.binaryClassName binary) throws SQLException
+    {
+        if (binary==null)
+        {
+            ps.setNull(pos, type);
+        }
+        else
+        {
+#if($codewriter.binaryIsByteBuffer())
+            ps.setBytes(pos, binary.array());
+#else        
+            ps.setBytes(pos, binary);
+#end
+        }
+    }
+    
     /**
      * Retrieves a boolean value from the passed result set as a Boolean object.
      */
