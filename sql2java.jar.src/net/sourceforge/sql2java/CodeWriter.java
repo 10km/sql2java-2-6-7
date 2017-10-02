@@ -32,11 +32,14 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 public class CodeWriter {
+	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
 	protected static Properties props;
 	public static String MGR_CLASS;
 	protected static String dateClassName;
 	protected static String timeClassName;
 	protected static String timestampClassName;
+	/** type for byte array,default 'byte[]',defined in properties */
+	public static String binaryClassName;
 	protected static Database db;
 	protected static Hashtable<String, String> includeHash;
 	protected static Hashtable<String, String> excludeHash;
@@ -58,6 +61,7 @@ public class CodeWriter {
 			dateClassName = props.getProperty("jdbc2java.date", "java.sql.Date");
 			timeClassName = props.getProperty("jdbc2java.time", "java.sql.Time");
 			timestampClassName = props.getProperty("jdbc2java.timestamp", "java.sql.Timestamp");
+			binaryClassName = props.getProperty("binary.type", DEFAULT_BINARY_TYPE);
 			basePackage = props.getProperty("codewriter.package");
 			if (basePackage == null) {
 				throw new Exception("Missing property: codewriter.package");
@@ -478,6 +482,13 @@ public class CodeWriter {
 	static {
 		MGR_CLASS = "Manager";
 		classPrefix = "";
+	}
+
+	public static String getBinaryClassName() {
+		return binaryClassName;
+	}
+	public static boolean binaryIsByteBuffer() {
+		return !DEFAULT_BINARY_TYPE.equals(binaryClassName);
 	}
 
 }

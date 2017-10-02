@@ -477,7 +477,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return "Boolean";
 			}
 			case M_BYTES : {
-				return "byte[]";
+				return CodeWriter.binaryClassName;
 			}
 			case M_CLOB : {
 				// map Clob to java.lang.String
@@ -496,8 +496,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return "Float";
 			}
 			case M_BLOB : {
-				// map Blob to byte[]
-				return "byte[]";
+				return CodeWriter.binaryClassName;
 			}
 			case M_INTEGER : {
 				return "Integer";
@@ -726,7 +725,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return true;
 			}
 			case M_BYTES : {
-				return false;
+				return CodeWriter.binaryIsByteBuffer();
 			}
 			case M_CLOB : {
 				// Clob map to java.langString that has compareTo
@@ -802,7 +801,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return CodeWriter.MGR_CLASS + ".getLong(" + resultSet + ", " + pos + ")";
 			}
 			case M_BYTES : {
-				return resultSet + ".getBytes(" + pos + ")";
+				return CodeWriter.MGR_CLASS + ".getBytes(" + resultSet + ", " + pos + ")";
 			}
 			case M_BLOB : {
 				return CodeWriter.MGR_CLASS + ".getBlob(" + resultSet + ", " + pos + ")";
@@ -893,7 +892,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setLong(ps, ").append(end).toString();
 			}
 			case M_BYTES : {
-				return sb.append("ps.setBytes(").append(end).toString();
+				return sb.append(CodeWriter.MGR_CLASS).append(".setBytes("+this.getJavaTypeAsTypeName()+",ps, ").append(end).toString();
 			}
 			case M_BLOB : {
 				return sb.append(CodeWriter.MGR_CLASS).append(".setBlob(ps, ").append(end).toString();
