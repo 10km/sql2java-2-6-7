@@ -700,11 +700,11 @@ public class Column implements Cloneable, Comparable<Column> {
 
 	public boolean isDate() {
 		switch (this.getMappedType()) {
-			case M_UTILDATE :
-			case M_TIME :
-			case M_TIMESTAMP : {
-				return true;
-			}
+		case M_SQLDATE: 
+		case M_UTILDATE :
+		case M_TIME :
+		case M_TIMESTAMP : 
+			return true;
 		}
 		return false;
 	}
