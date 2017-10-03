@@ -178,6 +178,16 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      */
     //3.2.2 GET IMPORTED
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    /**
+     * delete the associated {@link $importedClass} objects from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return the number of deleted rows
+     */
+    //3.2.3 DELETE IMPORTED
+    public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
     
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
