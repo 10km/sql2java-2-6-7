@@ -151,7 +151,38 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     {
         return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
     }
-    
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    //1.5 override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys){
+        if(null == keys)return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.length);
+        $beanClass bean;
+        for(int i = 0 ;i< keys.length;++i){
+            if(null != (bean = loadByPrimaryKey(keys[i])))
+                list.add(bean);
+        }
+        return list;
+    }
+    //1.6 override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
+        if(null == keys )return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.size());
+        $beanClass bean;
+        for($pk.getJavaType() key: keys){
+            if(null != (bean = loadByPrimaryKey(key)))
+                list.add(bean);
+        }
+        return list;
+    }
+#end##1 == $table.countPrimaryKeys()    
     //2 override $table.asManagerInterfaceNSP()
     @Override 
     public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
@@ -165,7 +196,18 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             throw new WrapDAOException(e);
         }
     }
-
+    //2
+    @Override
+    public int delete($beanClass bean){
+        try
+        {
+            return nativeManager.delete(this.beanConverter.toRight(bean));
+        }
+        catch(DAOException e)
+        {
+            throw new WrapDAOException(e);
+        }   
+    }
     //2.1
     @Override
     public int deleteByPrimaryKey(Object ...keys){
@@ -178,7 +220,54 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #end        
         return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
-
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    //2.2 override $table.asManagerInterfaceNSP()
+    @Override 
+    public int deleteByPrimaryKey($pkType... keys){
+        if(null == keys)return 0;
+        int count = 0;
+        for($pkType key:keys){
+            count += deleteByPrimaryKey(key);
+        }
+        return count;
+    }
+    //2.3 override $table.asManagerInterfaceNSP()
+    @Override 
+    public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
+        if(null == keys)return 0;
+        int count = 0;
+        for($pk.getJavaType() key :keys){
+            count += deleteByPrimaryKey(key);
+        }
+        return count;
+    }
+#end##1 == $table.countPrimaryKeys()  
+    //2.4 override $table.asManagerInterfaceNSP()
+    @Override 
+    public int delete($beanClass... beans){
+        if(null == beans)return 0;
+        int count = 0;
+        for($beanClass bean :beans){
+            count += delete(bean);
+        }
+        return count;
+    }
+    //2.5 override $table.asManagerInterfaceNSP()
+    @Override 
+    public int delete(java.util.Collection<$beanClass> beans){
+        if(null == beans)return 0;
+        int count = 0;
+        for($beanClass bean :beans){
+            count += delete(bean);
+        }
+        return count;
+    }
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template

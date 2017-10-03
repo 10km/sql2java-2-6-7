@@ -305,7 +305,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 
         @Override
         public int delete(B bean)$!throwsString{
-            return deleteByPrimaryKey(bean);
+            throw new UnsupportedOperationException();
         }
         
         @Override

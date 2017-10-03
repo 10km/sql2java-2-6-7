@@ -45,7 +45,30 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      */
     //1.4
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
-    
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    /**
+     * Loads {@link $beanClass} from the $tablename using primary key fields.
+     *
+     * @param keys primary keys array
+     * @return list of $beanClass
+     */
+    //1.5
+    public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys);
+    /**
+     * Loads {@link $beanClass} from the $tablename using primary key fields.
+     *
+     * @param keys primary keys collection
+     * @return list of $beanClass
+     */
+    //1.6
+    public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
+#end##1 == $table.countPrimaryKeys()   
     /**
      * Delete row according to its primary keys.<br>
      * all keys must not be null
@@ -57,7 +80,46 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      */
     //2
     public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
-
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    /**
+     * Delete rows according to primary key.<br>
+     *
+     * @param keys primary keys array
+     * @return the number of deleted rows
+     */
+    //2.2
+    public int deleteByPrimaryKey($pkType... keys);
+    /**
+     * Delete rows according to primary key.<br>
+     *
+     * @param keys primary keys collection
+     * @return the number of deleted rows
+     */
+    //2.3
+    public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
+#end##1 == $table.countPrimaryKeys()  
+    /**
+     * Delete beans.<br>
+     *
+     * @param beans $beanClass collection wille be deleted
+     * @return the number of deleted rows
+     */
+    //2.4
+    public int delete($beanClass... beans);
+    /**
+     * Delete beans.<br>
+     *
+     * @param beans $beanClass collection wille be deleted
+     * @return the number of deleted rows
+     */
+    //2.5
+    public int delete(java.util.Collection<$beanClass> beans);
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template
