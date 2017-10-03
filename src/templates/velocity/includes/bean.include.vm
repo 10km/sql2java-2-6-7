@@ -221,7 +221,7 @@ public class ${beanClass}
 #if($swiftBeanSupport && $column.isDate())
     /** 
      * use Long to represent date type for thrift:swift support
-     * @see #${column.getWriteMethod()}($column.getJavaType())  
+     * @see #${column.getSetMethod()}($column.getJavaType())  
      */
     @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
     public void ${column.getWriteMethod()}(Long newVal){
