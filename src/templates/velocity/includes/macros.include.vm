@@ -41,12 +41,19 @@
 #end#end#end
 #end
 ########################
-#macro(swiftThriftStruct)#if($swiftBeanSupport)@com.facebook.swift.codec.ThriftStruct
+#macro(swiftThriftStruct)#if($swiftBeanSupport)@ThriftStruct
 #end#end
-#macro(swiftThriftConstructor)#if($swiftBeanSupport)$!SPACE@com.facebook.swift.codec.ThriftConstructor
+#macro(swiftThriftConstructor)#if($swiftBeanSupport)$!SPACE@ThriftConstructor
 #end#end
-#macro(swiftThriftField $index)#if($swiftBeanSupport)$!SPACE@com.facebook.swift.codec.ThriftField#if($index)($index)#end
+#macro(swiftThriftField $index)#if($swiftBeanSupport)$!SPACE@ThriftField#if($index)($index)#end
 
 #end#end
+########################
+#macro(swiftImport)
+#if($swiftBeanSupport)
+import com.facebook.swift.codec.ThriftStruct;
+import com.facebook.swift.codec.ThriftField;
+#end
+#end
 ########################
 #macro( converterClass $c)${c}Converter#end

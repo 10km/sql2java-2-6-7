@@ -1,4 +1,5 @@
 ##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
+#swiftImport()
 /**
  * $beanClass is a mapping of $table.getName() Table.
 #if ( $table.getRemarks().length() > 0 )
@@ -140,10 +141,20 @@ public class ${beanClass}
      *
      * @return the value of $column.getVarName()
      */
-#swiftThriftField( $fieldIndex )
+#if(!$column.isDate())#swiftThriftField( $fieldIndex )#end
     public $column.getJavaType() ${column.getGetMethod()}(){
         return $column.getVarName();
     }
+#if($swiftBeanSupport && $column.isDate())
+    /** 
+     * use Long to represent date type for thrift:swift support 
+     * @see #${column.getGetMethod()}()
+     */
+    @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
+    public Long ${column.getReadMethod()}(){
+        return null == $column.getVarName() ? null:${column.getVarName()}.getTime();
+    }
+#end
     /**
      * Setter method for {@link #$column.getVarName()}.<br>
 #if ( $column.hasCompareTo() )
@@ -157,7 +168,7 @@ public class ${beanClass}
      *
      * @param newVal the new value #if ($column.isNotNull())(NOT NULL)#end to be assigned to $column.getVarName()
      */
-#swiftThriftField( null )
+#if(!$column.isDate())#swiftThriftField( null )#end
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
 #if ($column.hasCompareTo())
@@ -207,6 +218,16 @@ public class ${beanClass}
         $column.bitORAssignExpression("initialized");
     }
 
+#if($swiftBeanSupport && $column.isDate())
+    /** 
+     * use Long to represent date type for thrift:swift support
+     * @see #${column.getWriteMethod()}($column.getJavaType())  
+     */
+    @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
+    public void ${column.getWriteMethod()}(Long newVal){
+        ${column.getSetMethod()}(null == newVal?null:new ${column.getJavaType()}(newVal));
+    }
+#end
 #if ( $column.hasPrimaryType() )
     /**
      * Setter method for {@link #$column.getVarName()}.<br>
