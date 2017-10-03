@@ -854,7 +854,9 @@ public class Table {
 	public String getImportedBeansSetMethod(String fkName) {		
 		return "set" + this.asBeanClassNSP() + "s" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
 	}
-	
+	public String getImportedBeansDelMethod(String fkName) {		
+		return "delete" + this.asBeanClassNSP() + "s" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
+	}
 	public String stateVarType(){
 		return countColumns()>64 ? "long[]":"long";
 	}	
