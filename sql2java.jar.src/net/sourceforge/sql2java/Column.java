@@ -728,7 +728,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return CodeWriter.binaryIsByteBuffer();
 			}
 			case M_CLOB : {
-				// Clob map to java.langString that has compareTo
+				// Clob map to java.lang.String that has compareTo
 				return true;
 			}
 			case M_SQLDATE : {
@@ -1264,7 +1264,12 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getSetMethod() {
 		return this.convertName("set_" + this.escape());
 	}
-
+	public String getReadMethod() {
+		return this.convertName("read_" + this.escape());
+	}
+	public String getWriteMethod() {
+		return this.convertName("write_" + this.escape());
+	}
 	public String getModifiedMethod() {
 		return this.convertName("check_" + this.escape() + "_modified");
 	}
