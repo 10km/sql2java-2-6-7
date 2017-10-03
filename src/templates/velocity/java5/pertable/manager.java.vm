@@ -254,9 +254,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public int delete($beanClass bean) throws DAOException
     {
-        if(null == bean) return 0;
-        if(#join($primaryKeys "null == bean.${e.getGetMethod()}()" ' || ')){
-            throw new IllegalArgumentException("primary keys must no be null ");
+        if(null == bean #join($primaryKeys " || null == bean.${e.getGetMethod()}()" '')){
+            return 0;
         }
         Connection c = null;
         PreparedStatement ps = null;
