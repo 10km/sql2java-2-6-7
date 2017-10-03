@@ -414,8 +414,13 @@ public class ${beanClass}
     @Override
     public int hashCode()
     {
+#if($table.hasPrimaryKey())
+#set ($hashColumns = $primaryKeys)
+#else
+#set ($hashColumns = $columns)
+#end
         return new HashCodeBuilder(-82280557, -700257973)
-#foreach ( $column in $columns )
+#foreach ( $column in $hashColumns )
             .append(${column.getGetMethod()}())
 #end
             .toHashCode();
