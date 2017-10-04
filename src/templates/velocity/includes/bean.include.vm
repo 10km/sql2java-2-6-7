@@ -442,13 +442,8 @@ public class ${beanClass}
 
     @Override
     public int compareTo($beanClass object){
-#if($table.hasPrimaryKey())
-#set ($compareColumns = $primaryKeys)
-#else
-#set ($compareColumns = $columns)
-#end
         return new CompareToBuilder()
-#foreach ( $column in $compareColumns )
+#foreach ( $column in $columns )
             .append(${column.getGetMethod()}(), object.${column.getGetMethod()}())
 #end
             .toComparison();
