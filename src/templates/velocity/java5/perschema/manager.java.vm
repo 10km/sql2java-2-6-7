@@ -112,7 +112,7 @@ public final class Manager
         try{
             if (ds == null){
                 //set C3P0 properties
-                ComboPooledDataSource cpds = new ComboPooledDataSource();				
+                ComboPooledDataSource cpds = new ComboPooledDataSource();                
                 cpds.setDriverClass(jdbcDriver);
                 cpds.setUser(jdbcUsername);
                 cpds.setPassword(jdbcPassword);
@@ -298,19 +298,19 @@ public final class Manager
      * Logs a message using the underlying logwriter, if not null.
      */
     public void log(Throwable cause)
-    {	
-    	if(pw != null && null != cause){
-    		cause.printStackTrace(pw);
-    	}
+    {    
+        if(pw != null && null != cause){
+            cause.printStackTrace(pw);
+        }
     }
     
     /**
      * Logs a message using the underlying logwriter, if not null.
      */
     public void log(String message,Throwable cause)
-    {	
-    	log(message);
-    	log(cause);
+    {    
+        log(message);
+        log(cause);
     }
     
     /**
@@ -517,17 +517,33 @@ public final class Manager
         return rs.wasNull()?($codewriter.binaryClassName)null:blob.getBytes(1L,(int)blob.length());
 #end
     }
-
+    /**
+     * return all bytes in buffer (0~limit)
+     * @param buffer
+     * @return
+     */
+    private static final byte[] getAllBytesInBuffer(java.nio.ByteBuffer buffer){
+        if(buffer.hasArray())return buffer.array();
+        int pos = buffer.position();
+        try{
+            buffer.position(0);
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            return bytes;
+        }finally{
+            buffer.position(pos);
+        }
+    }
     /**
      * Set a byte array to the passed prepared statement as a java.sql.Blob or as null.
      */
     public static void  setBlob(PreparedStatement ps, int pos, $codewriter.binaryClassName blob) throws SQLException
     {
-        if (blob == null #if($codewriter.binaryIsByteBuffer())|| !blob.hasArray()#end){
+        if (blob == null){
             ps.setNull(pos, Types.BLOB);
         }else{
 #if($codewriter.binaryIsByteBuffer())
-            ps.setBlob(pos, new java.io.ByteArrayInputStream(blob.array()));
+            ps.setBlob(pos, new java.io.ByteArrayInputStream(getAllBytesInBuffer(blob)));
 #else
             ps.setBlob(pos, new java.io.ByteArrayInputStream(blob));
 #end        
@@ -592,11 +608,11 @@ public final class Manager
      */
     public static void  setBytes(int sqlType,PreparedStatement ps, int pos, $codewriter.binaryClassName bytes) throws SQLException
     {
-        if (null == bytes #if($codewriter.binaryIsByteBuffer())|| !bytes.hasArray()#end){
+        if (null == bytes){
             ps.setNull(pos, sqlType);
         }else{
 #if($codewriter.binaryIsByteBuffer())
-            ps.setBytes(pos, bytes.array());
+            ps.setBytes(pos, getAllBytesInBuffer(bytes));
 #else
             ps.setBytes(pos, bytes);
 #end
@@ -643,12 +659,12 @@ public final class Manager
     {
         Calendar calendar = Calendar.getInstance();
         try {
-        	calendar.setTime(rs.getDate(pos));
-        	if (rs.wasNull()) {
-        		setValueRepresentingNull(calendar);
-        	}
+            calendar.setTime(rs.getDate(pos));
+            if (rs.wasNull()) {
+                setValueRepresentingNull(calendar);
+            }
         } catch (SQLException se) {
-        	setValueRepresentingNull(calendar);
+            setValueRepresentingNull(calendar);
         }
         return calendar;
     }
@@ -660,12 +676,12 @@ public final class Manager
     {
         Calendar calendar = Calendar.getInstance();
         try {
-        	calendar.setTime(rs.getDate(column));
-        	if (rs.wasNull()) {
-        		setValueRepresentingNull(calendar);
-        	}
+            calendar.setTime(rs.getDate(column));
+            if (rs.wasNull()) {
+                setValueRepresentingNull(calendar);
+            }
         } catch (SQLException se) {
-        	setValueRepresentingNull(calendar);
+            setValueRepresentingNull(calendar);
         }
         return calendar;
     }
@@ -685,27 +701,27 @@ public final class Manager
         }
     }
 
-	private static void setValueRepresentingNull(Calendar calendar) {
-		calendar.set(Calendar.YEAR, DATE_REPRESENTING_NULL_YEAR);
-		calendar.set(Calendar.MONTH, DATE_REPRESENTING_NULL_MONTH);
-		calendar.set(Calendar.DATE, DATE_REPRESENTING_NULL_DATE);
-		calendar.set(Calendar.HOUR, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.ZONE_OFFSET, 
-			(calendar.getTimeZone().getRawOffset() + calendar.getTimeZone().getDSTSavings()) / 60000);
-	} 
+    private static void setValueRepresentingNull(Calendar calendar) {
+        calendar.set(Calendar.YEAR, DATE_REPRESENTING_NULL_YEAR);
+        calendar.set(Calendar.MONTH, DATE_REPRESENTING_NULL_MONTH);
+        calendar.set(Calendar.DATE, DATE_REPRESENTING_NULL_DATE);
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.ZONE_OFFSET, 
+            (calendar.getTimeZone().getRawOffset() + calendar.getTimeZone().getDSTSavings()) / 60000);
+    } 
 
-	public static boolean isValueRepresentingNull(Calendar calendar) {
-		return (calendar.get(Calendar.YEAR) == DATE_REPRESENTING_NULL_YEAR) &&
-				(calendar.get(Calendar.MONTH) == DATE_REPRESENTING_NULL_MONTH) &&
-				(calendar.get(Calendar.DATE) == DATE_REPRESENTING_NULL_DATE);
-	} 
+    public static boolean isValueRepresentingNull(Calendar calendar) {
+        return (calendar.get(Calendar.YEAR) == DATE_REPRESENTING_NULL_YEAR) &&
+                (calendar.get(Calendar.MONTH) == DATE_REPRESENTING_NULL_MONTH) &&
+                (calendar.get(Calendar.DATE) == DATE_REPRESENTING_NULL_DATE);
+    } 
  
-	private static final int DATE_REPRESENTING_NULL_YEAR = 1899; 
-	private static final int DATE_REPRESENTING_NULL_MONTH = Calendar.JANUARY; 
-	private static final int DATE_REPRESENTING_NULL_DATE = 1; 
+    private static final int DATE_REPRESENTING_NULL_YEAR = 1899; 
+    private static final int DATE_REPRESENTING_NULL_MONTH = Calendar.JANUARY; 
+    private static final int DATE_REPRESENTING_NULL_DATE = 1; 
 
 ////////////////////////////////////////////////////
 // Date helper methods
@@ -882,7 +898,7 @@ public final class Manager
     {
         java.util.Date dReceivedDate = Calendar.getInstance().getTime();
         if (strDate == null) {
-        	return dReceivedDate;
+            return dReceivedDate;
         } else {
             strDate = strDate.trim();
         }
@@ -947,64 +963,64 @@ public final class Manager
         return false;
     }
     
-	public static String buildProcedureCall(String packageName, String procedureName, int paramCount) {
-		return buildProcedureCall(packageName + "." + procedureName, paramCount);
+    public static String buildProcedureCall(String packageName, String procedureName, int paramCount) {
+        return buildProcedureCall(packageName + "." + procedureName, paramCount);
     }
     
-	public static String buildProcedureCall(String procedureName, int paramCount) {
-		StringBuilder sb = new StringBuilder("{call ").append(procedureName).append("(");
-		for (int n = 1; n <= paramCount; n++) {
-			sb.append("?,");
-		}
-		if (paramCount > 0) {
-			sb.setLength(sb.length()-1);
-		}
-		return sb.append(")}").toString();
-	}
-	/**
-	 * 用指定的SQL语句查询数据库
-	 * 
-	 * @param sql
-	 *            sql语句字符串
-	 * @param argList
-	 *            sql语句中？代表的参数数组，顺序必须与sql语句中?出现的位置顺序保持一致
-	 * @return 包含查询结果的对象数组
-	 * @throws SQLException 
-	 */
-	public boolean runSql(String sql, Object[] argList) throws SQLException {
-		PreparedStatement ps = null;
-		Connection c = null;
-		if (sql == null)
-			return false;
-		// log("sql string:\n" + sql + "\n");
-		try {
-			c = getConnection();
-			ps = c.prepareStatement(sql);
-			fillPrepareStatement(ps, argList);
-			return ps.execute();
-		} finally {
-			if(null != ps)
-				close(ps);
-			if(null != c)
-				releaseConnection(c);
-		}
-	}
-	/**
-	 * 填充PreparedStatement中的参数对象
-	 * 
-	 * @param ps
-	 * @param argList
-	 * @return 出错则返回null;
-	 * @throws SQLException
-	 */
-	private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws SQLException {
-		if (!(argList == null || ps == null)) {
-			for (int i = 0; i < argList.length; i++) {
-				if (argList[i].getClass().equals(byte[].class)) {
-					ps.setBytes(i + 1, (byte[]) argList[i]);
-				} else
-					ps.setObject(i + 1, argList[i]);
-			}
-		}
-	}
+    public static String buildProcedureCall(String procedureName, int paramCount) {
+        StringBuilder sb = new StringBuilder("{call ").append(procedureName).append("(");
+        for (int n = 1; n <= paramCount; n++) {
+            sb.append("?,");
+        }
+        if (paramCount > 0) {
+            sb.setLength(sb.length()-1);
+        }
+        return sb.append(")}").toString();
+    }
+    /**
+     * 用指定的SQL语句查询数据库
+     * 
+     * @param sql
+     *            sql语句字符串
+     * @param argList
+     *            sql语句中？代表的参数数组，顺序必须与sql语句中?出现的位置顺序保持一致
+     * @return 包含查询结果的对象数组
+     * @throws SQLException 
+     */
+    public boolean runSql(String sql, Object[] argList) throws SQLException {
+        PreparedStatement ps = null;
+        Connection c = null;
+        if (sql == null)
+            return false;
+        // log("sql string:\n" + sql + "\n");
+        try {
+            c = getConnection();
+            ps = c.prepareStatement(sql);
+            fillPrepareStatement(ps, argList);
+            return ps.execute();
+        } finally {
+            if(null != ps)
+                close(ps);
+            if(null != c)
+                releaseConnection(c);
+        }
+    }
+    /**
+     * 填充PreparedStatement中的参数对象
+     * 
+     * @param ps
+     * @param argList
+     * @return 出错则返回null;
+     * @throws SQLException
+     */
+    private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws SQLException {
+        if (!(argList == null || ps == null)) {
+            for (int i = 0; i < argList.length; i++) {
+                if (argList[i].getClass().equals(byte[].class)) {
+                    ps.setBytes(i + 1, (byte[]) argList[i]);
+                } else
+                    ps.setObject(i + 1, argList[i]);
+            }
+        }
+    }
 }
