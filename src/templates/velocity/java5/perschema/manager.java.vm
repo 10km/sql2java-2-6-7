@@ -518,15 +518,13 @@ public final class Manager
 #end
     }
     /**
-     * return all bytes in buffer (0~limit)
+     * return all bytes in buffer (position~limit),no change status of buffer
      * @param buffer
      * @return
      */
-    private static final byte[] getAllBytesInBuffer(java.nio.ByteBuffer buffer){
-        if(buffer.hasArray())return buffer.array();
+    private static final byte[] getBytesInBuffer(java.nio.ByteBuffer buffer){
         int pos = buffer.position();
         try{
-            buffer.position(0);
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             return bytes;
@@ -543,7 +541,7 @@ public final class Manager
             ps.setNull(pos, Types.BLOB);
         }else{
 #if($codewriter.binaryIsByteBuffer())
-            ps.setBlob(pos, new java.io.ByteArrayInputStream(getAllBytesInBuffer(blob)));
+            ps.setBlob(pos, new java.io.ByteArrayInputStream(getBytesInBuffer(blob)));
 #else
             ps.setBlob(pos, new java.io.ByteArrayInputStream(blob));
 #end        
@@ -612,7 +610,7 @@ public final class Manager
             ps.setNull(pos, sqlType);
         }else{
 #if($codewriter.binaryIsByteBuffer())
-            ps.setBytes(pos, getAllBytesInBuffer(bytes));
+            ps.setBytes(pos, getBytesInBuffer(bytes));
 #else
             ps.setBytes(pos, bytes);
 #end
