@@ -109,27 +109,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     // PRIMARY KEY METHODS
     //////////////////////////////////////
 
-#set ( $keys = "" )
-#set ( $sql = "" )
-##set ( $noWhereSelect = "SELECT \" + ${tablename.toUpperCase()}_FIELDS + \" FROM \" + $tablename" )
-##set ( $baseSelect = "$noWhereSelect WHERE " )
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      *
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
-## part 1
-#if ( $velocityCount > 1 )#set( $keys = "$keys, " )#set ( $sql = "$sql and " )#end
-#set ( $keys = "$keys${pk.getJavaType()} $pk.getVarName()" )
-## part 2
-#set ( $sql = "$sql$pk.getName()=?" )
 #end     
      * @return a unique $beanClass or {@code null} if not found or have null argument
      * @throws DAOException
      */
     //1
     @SuppressWarnings("unused")
-    public $beanClass loadByPrimaryKey($keys) throws DAOException
+    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
         if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
             return null;
@@ -139,7 +130,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         try
         {
             c = this.getConnection();
-            StringBuilder sql = new StringBuilder("SELECT " + ${tablename.toUpperCase()}_FIELDS + " FROM $tablename WHERE $sql");
+            StringBuilder sql = new StringBuilder("SELECT " + ${tablename.toUpperCase()}_FIELDS + " FROM $tablename WHERE #join($primaryKeys "$e.getName()=?" " and " )");
             // System.out.println("loadByPrimaryKey: " + sql);
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -183,7 +174,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      * @param keys primary keys value:<br> 
      * @return a unique {@link $beanClass} or {@code null} if not found
-     * @see {@link #loadByPrimaryKey($keys)}
+     * @see {@link #loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))}
      */
     //1.3
     @Override
@@ -197,44 +188,96 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end        
         return loadByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
-    
-#set( $keys = "" )    
     /**
      * Returns true if this $tablename contains row with primary key fields.
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
-## part 1
-#if ( $velocityCount > 1 )#set( $keys = "$keys, " )#set ( $sql = "$sql and " )#end
-#set ( $keys = "$keys${pk.getJavaType()} $pk.getVarName()" )
-## part 2
-#set ( $sql = "$sql$pk.getName()=?" )
 #end     
      * @throws DAOException
-     * @see #loadByPrimaryKey($keys)
      */
-    //1.3
-    public boolean existsPrimaryKey($keys) throws DAOException
+    //1.4
+    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
-        return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
+        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+            return false;
+        }
+        Connection c = null;
+        PreparedStatement ps = null;
+        try{
+            c = this.getConnection();
+            StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS MCOUNT FROM $tablename WHERE #join($primaryKeys "$e.getName()=?" " and " )");
+            // System.out.println("loadByPrimaryKey: " + sql);
+            ps = c.prepareStatement(sql.toString(),
+                                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                    ResultSet.CONCUR_READ_ONLY);
+#foreach( $pk in $primaryKeys )
+            $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
+#end
+            return 1 == this.countByPreparedStatement(ps);
+        }catch(SQLException e){
+            throw new ObjectRetrievalException(e);
+        }finally{
+            this.getManager().close(ps);
+            this.freeConnection(c);
+        }
     }
-    
-#set ( $sql = "" )
+    /**
+     * Return true if this $tablename contains row with primary key fields.
+     * @param bean  
+     * @throws DAOException
+     * @return false if primary kes has null
+     * @see #countUsingTemplate($beanClass)
+     */
+    //1.6
+    @Override
+    public boolean existsByPrimaryKey($beanClass bean) throws DAOException
+    {
+        if(null == bean #join($primaryKeys " || null == bean.${e.getGetMethod()}()" ''))
+            return false;
+        $table.stateVarType() modified = bean.getModified();
+        try{
+            bean.resetModifiedExceptPrimaryKeys();
+            return 1 == countUsingTemplate(bean);
+        }finally{
+            bean.setModified(modified);
+        }
+    }
+    //1.7
+    @Override
+    public $beanClass checkDuplicate($beanClass bean) throws DAOException{
+        if(!existsByPrimaryKey(bean))
+            throw new ObjectRetrievalException("Duplicate entry ("+ #join( $primaryKeys "bean.$e.getGetMethod()()" ' + "" "" +') +") for key 'PRIMARY'");
+        return bean;
+    }
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+    /**
+     * Check duplicated row by primary keys,if row exists throw {@link ObjectRetrievalException}
+     * @param $pk.getVarName() $pk.getJavaType()
+     * @throws DAOException
+     * @see #existsPrimaryKey($pk.getJavaType() $pk.getVarName())
+     */
+    //1.4.1
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName()) throws DAOException
+    {
+        if(existsPrimaryKey($pk.getVarName()))
+            throw new ObjectRetrievalException("Duplicate entry '"+ $pk.getVarName() +"' for key 'PRIMARY'");
+        return $pk.getVarName();
+    }    
+#end##1 == $table.countPrimaryKeys()  
     /**
      * Delete row according to its primary keys.<br>
      * all keys must not be null
      * 
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
-## part 1     
-#if ( $velocityCount > 1 )#set ( $sql = "$sql and " )#end
-#set ( $sql = "$!sql$pk.getName()=?" )     
 #end     
      * @return the number of deleted rows
      * @throws DAOException
      * @see {@link #delete($beanClass)}
      */
     //2
-    public int deleteByPrimaryKey($keys) throws DAOException
+    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
         ${beanClass} bean=createBean();
 #foreach ( $pk in $primaryKeys )
@@ -263,7 +306,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         {
             this.listenerContainer.beforeDelete(bean); // listener callback
             c = this.getConnection();
-            StringBuilder sql = new StringBuilder("DELETE FROM $tablename WHERE $sql");
+            StringBuilder sql = new StringBuilder("DELETE FROM $tablename WHERE #join($primaryKeys "$e.getName()=?" " and " )");
             // System.out.println("deleteByPrimaryKey: " + sql);
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,

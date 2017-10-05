@@ -53,12 +53,18 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #set ($pkType = $pk.getJavaType())
 #end
     /**
+     * Check duplicated row by primary keys,if row exists throw exception
+     * @param $pk.getVarName() $pk.getJavaType()
+     */
+    //1.4.1
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName());
+    /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *
      * @param keys primary keys array
      * @return list of $beanClass
      */
-    //1.5
+    //1.8
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys);
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
@@ -66,7 +72,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param keys primary keys collection
      * @return list of $beanClass
      */
-    //1.6
+    //1.9
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
 #end##1 == $table.countPrimaryKeys()   
     /**

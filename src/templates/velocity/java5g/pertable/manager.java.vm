@@ -149,7 +149,34 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
-        return null!=loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
+        try{
+            return nativeManager.existsPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
+        }
+        catch(DAOException e)
+        {
+            throw new WrapDAOException(e);
+        }
+    }
+    //1.6
+    @Override
+    public boolean existsByPrimaryKey($beanClass bean)
+    {
+        return null == bean ? false : existsPrimaryKey(#join($primaryKeys "bean.$e.getGetMethod()()" ','));
+    }
+    //1.7
+    @Override
+    public $beanClass checkDuplicate($beanClass bean){
+#if ( 1 == $table.countPrimaryKeys() )
+        if(null != bean)
+            checkDuplicate(bean.$table.getPrimaryKey().getGetMethod()());            
+#else
+        try{
+            nativeManager.checkDuplicate(this.beanConverter.toRight(bean));            
+        }catch(DAOException e){
+            throw new WrapDAOException(e);
+        }
+#end     
+        return bean;   
     }
 #if ( 1 == $table.countPrimaryKeys() )
 #set ($pk = $table.getPrimaryKey())
@@ -158,7 +185,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #else
 #set ($pkType = $pk.getJavaType())
 #end
-    //1.5 override $table.asManagerInterfaceNSP()
+    //1.4.1 override $table.asManagerInterfaceNSP()
+    @Override 
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName()){
+        try{
+            return this.nativeManager.checkDuplicate($pk.getVarName());
+        }catch(DAOException e){
+            throw new WrapDAOException(e);
+        }
+    }
+    //1.8 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys){
         if(null == keys)return new java.util.ArrayList<$beanClass>();
@@ -170,7 +206,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         }
         return list;
     }
-    //1.6 override $table.asManagerInterfaceNSP()
+    //1.9 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
         if(null == keys )return new java.util.ArrayList<$beanClass>();

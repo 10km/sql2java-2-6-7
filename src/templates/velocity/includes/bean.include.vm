@@ -381,9 +381,14 @@ public class ${beanClass}
      */
     public void resetPrimaryKeysModified()
     {
-#foreach($column in $primaryKeys)
-        $column.bitResetAssignExpression("modified");
-#end
+        $table.bitResetAssignExpression($primaryKeys,"modified",'            ');
+    }
+    /**
+     * Resets columns modification status except primary keys to 'not modified'.
+     */
+    public void resetModifiedExceptPrimaryKeys()
+    {
+        $table.bitResetAssignExpression($table.getColumnsExceptPrimary(),"modified",'            ');
     }
     /**
      * Resets the object initialization status to 'not initialized'.

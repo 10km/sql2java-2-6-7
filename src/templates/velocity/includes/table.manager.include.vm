@@ -109,10 +109,13 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
         }
 
         @Override
-        public boolean existsPrimaryKey(B bean)$!throwsString{
+        public boolean existsByPrimaryKey(B bean)$!throwsString{
             return null!=loadByPrimaryKey(bean);
         }
-        
+        @Override
+        public B checkDuplicate(B bean)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
         @Override
         public boolean existsPrimaryKey(Object ...keys)$!throwsString{
             return null!=loadByPrimaryKey(keys);
@@ -682,7 +685,18 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
      */
     //1.6
-    public boolean existsPrimaryKey(B bean)$!throwsString;
+    public boolean existsByPrimaryKey(B bean)$!throwsString;
+    /**
+     * Check duplicated row by primary keys,if row exists throw exception
+     * @param bean the B bean with primary key fields
+     * @return always bean
+     * @see {@link #existsPrimaryKey(B bean)}
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.7
+    public B checkDuplicate(B bean)$!throwsString;
    
     //////////////////////////////////////
     // SQL 'WHERE' METHOD
