@@ -211,10 +211,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
         if(null == keys )return new java.util.ArrayList<$beanClass>();
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.size());
-        $beanClass bean;
-        for($pk.getJavaType() key: keys){
-            if(null != (bean = loadByPrimaryKey(key)))
-                list.add(bean);
+        if(keys instanceof java.util.List){
+            for($pk.getJavaType() key: keys){
+                list.add(loadByPrimaryKey(key));
+            }
+        }else{
+            $beanClass bean;
+            for($pk.getJavaType() key: keys){
+                if(null != (bean = loadByPrimaryKey(key)))
+                    list.add(bean);
+            }
         }
         return list;
     }

@@ -1331,7 +1331,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $index.getIndexColumnsList() )
         if( null == ${column.getVarName()})
-            throw new IllegalArgumentException("the key '${column.getVarName()}'  must not be null");
+            return null;
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
         return loadUniqueUsingTemplate(bean);
