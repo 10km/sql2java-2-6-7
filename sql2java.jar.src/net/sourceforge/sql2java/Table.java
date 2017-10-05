@@ -4,7 +4,6 @@ package net.sourceforge.sql2java;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -137,7 +136,17 @@ public class Table {
 		Collections.sort(this.cols);
 		return this.cols.toArray(new Column[this.cols.size()]);
 	}
-
+	public Column[] getColumnsExceptPrimary() {
+		if(!this.hasPrimaryKey())
+			return getColumns();
+		Vector<Column> columns = new Vector<Column>(this.cols);
+		for(Iterator<Column> itor = columns.iterator();itor.hasNext();){
+			Column column = itor.next();
+			if(column.isPrimaryKey())itor.remove();
+		}
+		Collections.sort(columns);
+		return columns.toArray(new Column[columns.size()]);
+	}
 	public Column getColumn(String columnName) {
 		return (Column) this.colHash.get(columnName.toLowerCase());
 	}
@@ -901,5 +910,26 @@ public class Table {
 			count += table.getFkMapNames(this.getName()).size();
 		}
 		return count;
+	}
+	public String bitResetAssignExpression(Column[]columns,String varName,String indent){
+		if(null == columns || 0 == columns.length)return "// columns is null or empty";
+		if(null == indent)indent = "";
+		if(countColumns()>64){
+			StringBuffer buffer = new StringBuffer();
+			for(Column column : columns){
+				int pos = column.getOrdinalPosition()-1;
+				buffer.append(indent).append(String.format("%s[%d] &= (~(1L << %d));\n",varName,pos>>6,pos & 0x3f));				
+			}
+			return buffer.toString();
+		}else{
+			StringBuffer buffer = new StringBuffer("(");
+			for(int i=0;i<columns.length;++i){
+				if(i > 0)
+					buffer.append(" |\n").append(indent);
+				buffer.append(columns[i].getIDMaskConstName());
+			}
+			buffer.append(")");
+			return String.format("%s &= (~%s)", varName,buffer.toString());
+		}
 	}
 }
