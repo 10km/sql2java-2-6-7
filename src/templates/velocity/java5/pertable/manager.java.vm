@@ -2258,4 +2258,38 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             return count.get();
         }
     }
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    /**
+     * return a primary key list from {@link $beanClass} array
+     * @param array
+     */
+    //45
+    public List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array){        
+        if(null == array)return new java.util.ArrayList<$pk.getJavaType()>();
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(array.length);
+        for($beanClass bean:array){
+            list.add(null == bean ? null : bean.$pk.getGetMethod()());
+        }
+        return list;
+    }
+    /**
+     * return a primary key list from {@link $beanClass} collection
+     * @param array
+     */
+    //46
+    public List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection){        
+        if(null == collection)return new java.util.ArrayList<$pk.getJavaType()>();
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(collection.size());
+        for($beanClass bean:collection){
+            list.add(null == bean ? null : bean.$pk.getGetMethod()());
+        }
+        return list;
+    }
+#end##1 == $table.countPrimaryKeys()   
 }

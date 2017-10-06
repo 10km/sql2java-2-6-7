@@ -1184,4 +1184,33 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
                 return  ${managerClassNSP}.this.beanConverter.toRight(action.getBean());
             }};
     }
+    
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    //45 override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array){        
+        if(null == array)return new java.util.ArrayList<$pk.getJavaType()>();
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(array.length);
+        for($beanClass bean:array){
+            list.add(null == bean ? null : bean.$pk.getGetMethod()());
+        }
+        return list;
+    }
+    //46 override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection){        
+        if(null == collection)return new java.util.ArrayList<$pk.getJavaType()>();
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(collection.size());
+        for($beanClass bean:collection){
+            list.add(null == bean ? null : bean.$pk.getGetMethod()());
+        }
+        return list;
+    }
+#end##1 == $table.countPrimaryKeys()  
 }

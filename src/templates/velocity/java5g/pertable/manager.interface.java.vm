@@ -357,4 +357,25 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     
 #end    
 #end##($table.countIndices() > 0)
+
+#if ( 1 == $table.countPrimaryKeys() )
+#set ($pk = $table.getPrimaryKey())
+#if ( $pk.hasPrimaryType() )
+#set ($pkType = $pk.getJavaPrimaryType())
+#else
+#set ($pkType = $pk.getJavaType())
+#end
+    /**
+     * return a primary key list from {@link $beanClass} array
+     * @param array
+     */
+    //45
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array);
+    /**
+     * return a primary key list from {@link $beanClass} collection
+     * @param array
+     */
+    //46
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection);
+#end##1 == $table.countPrimaryKeys()  
 }
