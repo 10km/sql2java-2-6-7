@@ -1316,54 +1316,136 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //_____________________________________________________________________
 
 #foreach ( $index in $table.getIndices() )
+#set( $indexColumns = $index.getIndexColumnsList())
+
 #if($index.isUnique())
     /**
      * Retrieves an unique $beanClass using the ${index.getName()} index.
      *
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
      * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
 #end
-     * @return a list of $beanClass
+     * @return 
      * @throws DAOException
      */
-    public $beanClass loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
         if( null == ${column.getVarName()})
             return null;
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
         return loadUniqueUsingTemplate(bean);
     }
+#if( 1 == $indexColumns.size())
+#set ($indexColumn = $indexColumns.get(0))
+#if ( $indexColumn.hasPrimaryType() )
+#set ($columnType = $indexColumn.getJavaPrimaryType())
+#else
+#set ($columnType = $indexColumn.getJavaType())
+#end
+    /**
+     * Retrieves an unique $beanClass for each ${index.getName()} index.
+     *
+     * @param indexs index array
+     * @return an list of $beanClass
+     * @throws DAOException
+     */
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)throws DAOException
+    {
+        if(null == indexs)return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.length);
+        for(int i = 0 ;i< indexs.length;++i){
+            list.add(loadBy${index.asCamelCaseName()}(indexs[i]));
+        }
+        return list;
+    }
+    /**
+     * Retrieves an unique $beanClass for each ${index.getName()} index.
+     *
+     * @param indexs index array
+     * @return an list of $beanClass
+     * @throws DAOException
+     */
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DAOException
+    {
+        if(null == indexs )return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.size());
+        if(indexs instanceof java.util.List){
+            for($indexColumn.getJavaType() key: indexs){
+                list.add(loadBy${index.asCamelCaseName()}(key));
+            }
+        }else{
+            $beanClass bean;
+            for($indexColumn.getJavaType() key: indexs){
+                if(null != (bean = loadBy${index.asCamelCaseName()}(key)))
+                    list.add(bean);
+            }
+        }
+        return list;
+    }
+    /**
+     * Deletes rows for each ${index.getName()} index.
+     *
+     * @param indexs index array
+     * @return the number of deleted rows
+     * @throws DAOException
+     */
+    public int deleteBy${index.asCamelCaseName()}($columnType... indexs)throws DAOException
+    {
+        if(null == indexs)return 0;
+        int count = 0;
+        for($columnType index : indexs){
+            count += deleteBy${index.asCamelCaseName()}(index);
+        }
+        return count;
+    }
+    /**
+     * Deletes rows for each ${index.getName()} index.
+     *
+     * @param indexs index collection
+     * @return the number of deleted rows
+     * @throws DAOException
+     */
+    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DAOException
+    {
+        if(null == indexs)return 0;
+        int count = 0;
+        for($columnType index : indexs){
+            count += deleteBy${index.asCamelCaseName()}(index);
+        }
+        return count;
+    }
+#end##1 == $indexColumns.size()
 #else## $index.isUnique()
     /**
      * Retrieves an array of $beanClass using the ${index.getName()} index.
      *
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return an array of $beanClass
      * @throws DAOException
      */
-    public $beanClass[] loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public $beanClass[] loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
-        return ($beanClass[])this.loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
+        return ($beanClass[])this.loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
     }
     
     /**
      * Retrieves a list of $beanClass using the ${index.getName()} index.
      *
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return a list of $beanClass
      * @throws DAOException
      */
-    public List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
         return loadUsingTemplateAsList(bean);
@@ -1372,16 +1454,16 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * Deletes rows using the ${index.getName()} index.
      *
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return the number of deleted objects
      * @throws DAOException
      */
-    public int deleteBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public int deleteBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
         ${beanClass} bean = this.createBean();
-#foreach ( $column in $index.getIndexColumnsList() )
+#foreach ( $column in $indexColumns )
         bean.${column.getSetMethod()}(${column.getVarName()});
 #end
         return deleteUsingTemplate(bean);
@@ -1402,6 +1484,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     {
         switch(keyIndex){
 #foreach($index in $table.getIndices())
+#set( $indexColumns = $index.getIndexColumnsList())
 #set ( $idxIndex = $velocityCount - 1 )
         case ${index.asConstName()}:{
             if(keys.length != $index.getIndexColumns().size())
@@ -1411,10 +1494,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
 #end
 #if($index.isUnique())
-            $beanClass bean= this.loadBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));
+            $beanClass bean= this.loadBy${index.asCamelCaseName()}(#join($indexColumns "($e.getJavaType())keys[$m_0count]" ','));
             return null == bean ? new java.util.ArrayList<$beanClass>() : java.util.Arrays.asList(bean);
 #else
-            return this.loadBy${index.asCamelCaseName()}AsList(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));        
+            return this.loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "($e.getJavaType())keys[$m_0count]" ','));        
 #end
         }
 #end
@@ -1436,6 +1519,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     {
         switch(keyIndex){
 #foreach($index in $table.getIndices())
+#set( $indexColumns = $index.getIndexColumnsList())
 #set ( $idxIndex = $velocityCount - 1 )
         case ${index.asConstName()}:{
             if(keys.length != $index.getIndexColumns().size())
@@ -1444,7 +1528,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             if(null != keys[$idxIndex] && !(keys[$idxIndex] instanceof $column.getJavaType()))
                 throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
 #end                
-            return this.deleteBy${index.asCamelCaseName()}(#join($index.getIndexColumnsList() "($e.getJavaType())keys[$m_0count]" ','));
+            return this.deleteBy${index.asCamelCaseName()}(#join($indexColumns "($e.getJavaType())keys[$m_0count]" ','));
         }
 #end
         default:

@@ -199,10 +199,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys){
         if(null == keys)return new java.util.ArrayList<$beanClass>();
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.length);
-        $beanClass bean;
         for(int i = 0 ;i< keys.length;++i){
-            if(null != (bean = loadByPrimaryKey(keys[i])))
-                list.add(bean);
+            list.add(loadByPrimaryKey(keys[i]));
         }
         return list;
     }
@@ -901,34 +899,94 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //_____________________________________________________________________
 
 #foreach ( $index in $table.getIndices() )
+#set( $indexColumns = $index.getIndexColumnsList())
 #if($index.isUnique())
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}(#join( $indexColumns "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
             throw new WrapDAOException(e);
         }
     }
-
+#if( 1 == $indexColumns.size())
+#set ($indexColumn = $indexColumns.get(0))
+#if ( $indexColumn.hasPrimaryType() )
+#set ($columnType = $indexColumn.getJavaPrimaryType())
+#else
+#set ($columnType = $indexColumn.getJavaType())
+#end
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)
+    {
+        if(null == indexs)return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.length);
+        for(int i = 0 ;i< indexs.length;++i){
+            list.add(loadBy${index.asCamelCaseName()}(indexs[i]));
+        }
+        return list;
+    }
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
+    {
+        if(null == indexs )return new java.util.ArrayList<$beanClass>();
+        java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.size());
+        if(indexs instanceof java.util.List){
+            for($indexColumn.getJavaType() key: indexs){
+                list.add(loadBy${index.asCamelCaseName()}(key));
+            }
+        }else{
+            $beanClass bean;
+            for($indexColumn.getJavaType() key: indexs){
+                if(null != (bean = loadBy${index.asCamelCaseName()}(key)))
+                    list.add(bean);
+            }
+        }
+        return list;
+    }
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public int deleteBy${index.asCamelCaseName()}($columnType... indexs)
+    {
+        if(null == indexs)return 0;
+        int count = 0;
+        for($columnType index : indexs){
+            count += deleteBy${index.asCamelCaseName()}(index);
+        }
+        return count;
+    }
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
+    {
+        if(null == indexs)return 0;
+        int count = 0;
+        for($columnType index : indexs){
+            count += deleteBy${index.asCamelCaseName()}(index);
+        }
+        return count;
+    }
+#end##1 == $indexColumns.size()
 #else ## $index.isUnique()
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public $beanClass[] loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        return this.loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
+        return this.loadBy${index.asCamelCaseName()}AsList(#join( $indexColumns "${e.getVarName()}" ',')).toArray(new $beanClass[0]);
     }
     
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "${e.getVarName()}" ',')));
+            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}AsList(#join( $indexColumns "${e.getVarName()}" ',')));
         }
         catch(DAOException e)
         {
@@ -939,10 +997,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public int deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))
+    public int deleteBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
         try{
-            return this.nativeManager.deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "${e.getVarName()}" ','));
+            return this.nativeManager.deleteBy${index.asCamelCaseName()}(#join( $indexColumns "${e.getVarName()}" ','));
         }
         catch(DAOException e)
         {

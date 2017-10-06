@@ -312,6 +312,8 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     //_____________________________________________________________________
 
 #foreach ( $index in $table.getIndices() )
+#set( $indexColumns = $index.getIndexColumnsList())
+
 #if($index.isUnique())
     /**
      * Retrieves an unique $beanClass using the ${index.getName()} index.
@@ -319,10 +321,45 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #foreach ( $column in $index.getIndexColumnsList() )
      * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
 #end
-     * @return an array of $beanClass
+     * @return 
      */
     public $beanClass loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
-
+#if( 1 == $indexColumns.size())
+#set ($indexColumn = $indexColumns.get(0))
+#if ( $indexColumn.hasPrimaryType() )
+#set ($columnType = $indexColumn.getJavaPrimaryType())
+#else
+#set ($columnType = $indexColumn.getJavaType())
+#end
+    /**
+     * Retrieves an unique $beanClass for each ${index.getName()} index.
+     *
+     * @param indexs index array
+     * @return an list of $beanClass
+     */
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs);
+    /**
+     * Retrieves an unique $beanClass for each ${index.getName()} index.
+     *
+     * @param indexs index collection
+     * @return an list of $beanClass
+     */
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs);
+    /**
+     * Deletes rows for each ${index.getName()} index.
+     *
+     * @param indexs index array
+     * @return the number of deleted rows
+     */
+    public int deleteBy${index.asCamelCaseName()}($columnType... indexs);
+    /**
+     * Deletes rows for each ${index.getName()} index.
+     *
+     * @param indexs index collection
+     * @return the number of deleted rows
+     */
+    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs);
+#end##1 == $indexColumns.size()
 #else ## $index.isUnique()
     /**
      * Retrieves an array of $beanClass using the ${index.getName()} index.
