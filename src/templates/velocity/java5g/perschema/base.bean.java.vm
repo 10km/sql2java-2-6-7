@@ -1,7 +1,6 @@
 ##$Id: basebean.java.vm,v 1.3 2007/11/12 14:06:30 kameleono Exp $
 #parse( "header.include.vm" )
 #set ( $javaClassName = 'BaseBean' )
-#set($gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package $gpkg;
 

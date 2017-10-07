@@ -1,0 +1,28 @@
+#parse( "header.include.vm" )
+#set ( $javaClassName = 'ITableCache' )
+$codewriter.setCurrentJavaFilename($schemaPkg, "${javaClassName}.java")
+package $schemaPkg;
+
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 数据库对象缓存接口
+ * @param <K> 主键类型(Primary or Unique)
+ * @param <B> 数据库记录对象类型(Java Bean)
+ * @author guyadong
+ */
+public interface $javaClassName<K, B extends BaseBean<B>> {
+    public static final long DEFAULT_CACHE_MAXIMUMSIZE = 10000;
+    public static final long DEFAULT_DURATION = 10;
+    public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MINUTES;
+    /**
+     * 加载主键(key)指定的记录,如果缓存中没有则从数据库中查询
+     * @param key
+     * @return
+     */
+    public B getBean(K key);
+    /** 注册侦听器 */
+    public void registerListener();
+    /** 注销侦听器 */
+    public void unregisterListener();
+}

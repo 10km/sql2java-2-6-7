@@ -1,6 +1,5 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-#set( $gpkg = $codewriter.getProperty('general.package') )
 #set( $subpkg=$db.engineAsSubPackage() )
 #set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "DbConverter.java")

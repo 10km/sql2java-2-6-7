@@ -1,0 +1,70 @@
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+#set ( $javaClassName = 'Cache' )
+$codewriter.setCurrentJavaFilename($codewriter.getImplPackageOfSchema(), "${javaClassName}.java")
+package $codewriter.getImplPackageOfSchema();
+
+#if($isGeneral)
+import ${schemaPkg}.BaseBean;
+import ${schemaPkg}.ITableCache;
+import ${schemaPkg}.TableLoadCaching;
+#end
+#if(!$isGeneral)
+import ${pkg}.exception.DAOException;
+#set ($throwsString = "throws DAOException")
+#end
+#foreach($table in $tables)
+#if ($table.countPrimaryKeys() == 1)
+import $table.getPackage(true).$table.asBeanClass($isGeneral);
+#if(!$isGeneral)
+import $table.getPackage(false).$table.asManagerClass($isGeneral);
+#end
+#end
+#end
+
+/**
+ * all cache implemention class for table 
+ * @author guyadong
+ *
+ */
+public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITableCache<K, B> {
+#foreach($table in $tables)
+#if ($table.countPrimaryKeys() == 1)
+#set($pk = $table.getPrimaryKey())
+#set($pkType = $pk.getJavaType())
+#set($beanClass = $table.asBeanClass($isGeneral))
+#set($managerClass = $table.asManagerClass($isGeneral))
+    /**
+     * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
+     * primary key ($pk.fullName) is key
+     * @author guyadong
+     *
+     */
+    public static class $table.asCacheClass($isGeneral) extends TableLoadCaching<$pkType, $beanClass> {
+        $managerClass manager = ${managerClass}.getInstance();
+        @Override
+        public void registerListener() {
+            manager.registerListener(tableListener);
+        }
+    
+        @Override
+        public void unregisterListener() {
+            manager.unregisterListener(tableListener);        
+        }
+    
+        @Override
+        protected $pkType returnKey($beanClass bean) {
+            return bean.$pk.getGetMethod()();
+        }
+    
+        @Override
+        protected $beanClass loadfromDatabase($pkType key)$!throwsString {
+            return manager.loadByPrimaryKey(key);
+        }
+    
+    }
+#else
+    // Table $table.name has a composite key, not a unique primary key
+#end##$table.countPrimaryKeys() == 1
+#end##foreach($t in $tables)
+}

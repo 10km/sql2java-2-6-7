@@ -1,5 +1,4 @@
 #parse( "header.include.vm" )
-#set($gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename($gpkg, "HashCodeBuilder.java")
 package $gpkg;
 

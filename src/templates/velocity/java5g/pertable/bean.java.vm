@@ -2,7 +2,6 @@
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
 #parse( "macros.include.vm" )
-#set($gpkg = $codewriter.getProperty('general.package') )
 #set ( $generateNative = true )
 #set ( $beanClass = $table.asBeanClass($generateNative) )
 #set ( $beanClassFullName = "${gpkg}.${beanClass}" )

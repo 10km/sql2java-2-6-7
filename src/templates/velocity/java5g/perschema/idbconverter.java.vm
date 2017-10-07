@@ -1,6 +1,5 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-#set($gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename($gpkg, "IDbConverter.java")
 package $gpkg;
 

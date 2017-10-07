@@ -1,7 +1,6 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
 #set ( $javaClassName = 'Constant' )
-#set ( $gpkg = $codewriter.getProperty('general.package') )
 
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package $gpkg;

@@ -3,7 +3,6 @@
 #parse( "table.include.vm" )
 #parse( "macros.include.vm" )
 ######################
-#set ( $gpkg = $codewriter.getProperty('general.package') )
 #set ( $subpkg=$db.engineAsSubPackage() )
 #set ( $javaClassName = $table.asManagerInterfaceNSP() )
 #set ( $beanClass = $table.asBeanClassNSP() )

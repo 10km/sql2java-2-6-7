@@ -2,7 +2,6 @@
 #parse( "schema.include.vm" )
 #parse( "macros.include.vm" )
 #set ( $javaClassName = 'DbConverterGeneric' )
-#set( $gpkg = $codewriter.getProperty('general.package') )
 #set( $subpkg=$db.engineAsSubPackage() )
 #set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")

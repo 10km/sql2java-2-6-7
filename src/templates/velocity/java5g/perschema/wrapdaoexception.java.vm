@@ -1,7 +1,6 @@
 ##$Id: dao.exception.java.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
 #parse( "schema.include.vm" )
 #parse( "header.include.vm" )
-#set ( $gpkg = $codewriter.getProperty('general.package') )
 $codewriter.setCurrentJavaFilename("$gpkg", "WrapDAOException.java")
 package $gpkg;
 

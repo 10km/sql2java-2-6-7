@@ -2,7 +2,6 @@
 #parse( "schema.include.vm" )
 #parse( "table.include.vm" )
 ######################
-#set ( $gpkg = $codewriter.getProperty('general.package') )
 #set ( $subpkg=$db.engineAsSubPackage() )
 #set ( $managerClassNSP = $table.asManagerClassNSP() )
 #set ( $nativeClass = $table.asBeanClass() )
