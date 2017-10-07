@@ -43,6 +43,7 @@ public class CodeWriter {
 	protected static Database db;
 	protected static Hashtable<String, String> includeHash;
 	protected static Hashtable<String, String> excludeHash;
+	protected static String generalPackage;
 	protected static String basePackage;
 	protected static String destDir;
 	protected static String optimisticLockType;
@@ -62,6 +63,7 @@ public class CodeWriter {
 			timeClassName = props.getProperty("jdbc2java.time", "java.sql.Time");
 			timestampClassName = props.getProperty("jdbc2java.timestamp", "java.sql.Timestamp");
 			binaryClassName = props.getProperty("binary.type", DEFAULT_BINARY_TYPE);
+			generalPackage = props.getProperty("general.package"); 
 			basePackage = props.getProperty("codewriter.package");
 			if (basePackage == null) {
 				throw new Exception("Missing property: codewriter.package");
@@ -182,6 +184,9 @@ public class CodeWriter {
 		this.vc.put("CodeWriter", (Object) new FieldMethodizer((Object) this));
 		this.vc.put("codewriter", (Object) this);
 		this.vc.put("pkg", (Object) basePackage);
+		this.vc.put("gpkg", (Object) generalPackage);
+		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
+		this.vc.put("isGeneral", isGeneral());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
 		this.vc.put("strUtil", (Object) StringUtilities.getInstance());
 		this.vc.put("fecha", (Object) new Date());
@@ -490,5 +495,16 @@ public class CodeWriter {
 	public static boolean binaryIsByteBuffer() {
 		return !DEFAULT_BINARY_TYPE.equals(binaryClassName);
 	}
-
+	public static boolean isGeneral(){
+		return null != generalPackage && !generalPackage.isEmpty();
+	}
+	public static String getSchemaPkg(){
+		return isGeneral()?generalPackage : basePackage;
+	}
+	public  String getImplPackageOfSchema(){
+		String pkg = getSchemaPkg();
+		if(isGeneral())
+			pkg += "." + "" + getDb().engineAsSubPackage();
+		return pkg;
+	}
 }

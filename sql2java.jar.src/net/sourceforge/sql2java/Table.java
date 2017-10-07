@@ -553,7 +553,14 @@ public class Table {
 		} while (true);
 		return basePackage;
 	}
-
+	public String getPackage(boolean isBean){
+		String generalPackage = CodeWriter.getProperty((String) "general.package");
+		if(null == generalPackage || generalPackage.isEmpty())
+			return getPackage();
+		return isBean
+				? generalPackage
+				: generalPackage + "." + this.getDatabase().engineAsSubPackage();
+	}
 	public String getPackagePath() {
 		return this.getPackage().replace('.', '/') + "/";
 	}
@@ -646,7 +653,9 @@ public class Table {
 	public String asCacheClass() {
 		return this.convertName("Cache");
 	}
-
+	public String asCacheClass(boolean nsp) {
+		return this.convertName("Cache",nsp);
+	}
 	public String asRelationnalBeanClass() {
 		return this.convertName("Relationnal_Bean");
 	}
@@ -734,7 +743,9 @@ public class Table {
 	public String asManagerClass() {
 		return this.convertName("Manager");
 	}
-
+	public String asManagerClass(boolean nsp) {
+		return this.convertName("Manager",nsp);
+	}
 	public String asManagerClassNSP() {
 		return this.convertNameNSP("Manager");
 	}
