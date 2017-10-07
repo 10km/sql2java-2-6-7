@@ -6,8 +6,6 @@ package $codewriter.getImplPackageOfSchema();
 
 import java.util.concurrent.TimeUnit;
 #if($isGeneral)
-import ${schemaPkg}.BaseBean;
-import ${schemaPkg}.ITableCache;
 import ${schemaPkg}.TableLoadCaching;
 #end
 #if(!$isGeneral)
@@ -28,7 +26,8 @@ import $table.getPackage(false).$table.asManagerClass($isGeneral);
  * @author guyadong
  *
  */
-public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITableCache<K, B> {
+public class $javaClassName{
+    private $javaClassName(){}
 #foreach($table in $tables)
 #if ($table.countPrimaryKeys() == 1)
 #set($pk = $table.getPrimaryKey())
@@ -43,43 +42,120 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
      *
      */
     public static class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
-        $managerClass manager = ${managerClass}.getInstance();
-        public $cacheClass() {
-            super();
-        }
-
+        private final $managerClass manager = ${managerClass}.getInstance();
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        private final TableLoadCaching<$columnType, $beanClass> ${indexColumn.getCacheVarName()};
+#end
+#end
         public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
             super(maximumSize, duration, unit);
+############ FOR INDICES ############
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+
+            ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(){
+                @Override
+                public void registerListener() {
+                    manager.registerListener(tableListener);
+                }
+                @Override
+                public void unregisterListener() {
+                    manager.unregisterListener(tableListener);        
+                }
+                @Override
+                protected $columnType returnKey($beanClass bean) {
+                    return bean.$indexColumn.getGetMethod()();
+                }
+                @Override
+                protected $beanClass loadfromDatabase($columnType key)$!throwsString {
+                    return manager.loadBy${index.asCamelCaseName()}(key);
+                }};
+#end###if($index.isUnique())
+#end##foreach
         }
 
         public $cacheClass(long maximumSize, long durationMinutes) {
-            super(maximumSize, durationMinutes);
+            this(maximumSize, durationMinutes, DEFAULT_TIME_UNIT);
         }
 
         public $cacheClass(long maximumSize) {
-            super(maximumSize);
+            this(maximumSize,DEFAULT_DURATION,DEFAULT_TIME_UNIT);
         }
-
+        public $cacheClass() {
+            this(DEFAULT_CACHE_MAXIMUMSIZE,DEFAULT_DURATION,DEFAULT_TIME_UNIT);
+        }
+        
         @Override
         public void registerListener() {
             manager.registerListener(tableListener);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.registerListener();
+#end
+#end
         }
-    
         @Override
         public void unregisterListener() {
-            manager.unregisterListener(tableListener);        
+            manager.unregisterListener(tableListener);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.unregisterListener();
+#end
+#end   
         }
-    
         @Override
         protected $pkType returnKey($beanClass bean) {
             return bean.$pk.getGetMethod()();
         }
-    
         @Override
         protected $beanClass loadfromDatabase($pkType key)$!throwsString {
             return manager.loadByPrimaryKey(key);
         }
-    
+        
+        public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()){
+            return getBean($pk.getVarName());
+        }
+
+        public void $pk.getPutCacheMethod()($beanClass bean){
+            put(bean);
+        }
+
+        public void $pk.getPutIfAbsentCacheMethod()($beanClass bean){
+            putIfAbsent(bean);
+        }
+
+        public void $pk.getReplaceCacheMethod()($beanClass bean){
+            replace(bean);
+        }       
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        public $beanClass $indexColumn.getGetCacheMethod()($columnType $indexColumn.getVarName()){
+            return ${indexColumn.getCacheVarName()}.getBean($indexColumn.getVarName());
+        }
+        public void $indexColumn.getPutCacheMethod()($beanClass bean){
+            ${indexColumn.getCacheVarName()}.put(bean);
+        }
+
+        public void $indexColumn.getPutIfAbsentCacheMethod()($beanClass bean){
+            ${indexColumn.getCacheVarName()}.putIfAbsent(bean);
+        }
+
+        public void $indexColumn.getReplaceCacheMethod()($beanClass bean){
+            ${indexColumn.getCacheVarName()}.replace(bean);
+        }   
+#end
+#end
     }
 #elseif(!$table.hasPrimaryKey())
     // Table $table.name haven't primary key
