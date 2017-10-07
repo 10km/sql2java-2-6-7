@@ -4,6 +4,7 @@
 $codewriter.setCurrentJavaFilename($codewriter.getImplPackageOfSchema(), "${javaClassName}.java")
 package $codewriter.getImplPackageOfSchema();
 
+import java.util.concurrent.TimeUnit;
 #if($isGeneral)
 import ${schemaPkg}.BaseBean;
 import ${schemaPkg}.ITableCache;
@@ -34,14 +35,31 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
 #set($pkType = $pk.getJavaType())
 #set($beanClass = $table.asBeanClass($isGeneral))
 #set($managerClass = $table.asManagerClass($isGeneral))
+#set($cacheClass = $table.asCacheClass($isGeneral) )
     /**
      * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
      * primary key ($pk.fullName) is key
      * @author guyadong
      *
      */
-    public static class $table.asCacheClass($isGeneral) extends TableLoadCaching<$pkType, $beanClass> {
+    public static class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         $managerClass manager = ${managerClass}.getInstance();
+        public $cacheClass() {
+            super();
+        }
+
+        public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
+            super(maximumSize, duration, unit);
+        }
+
+        public $cacheClass(long maximumSize, long durationMinutes) {
+            super(maximumSize, durationMinutes);
+        }
+
+        public $cacheClass(long maximumSize) {
+            super(maximumSize);
+        }
+
         @Override
         public void registerListener() {
             manager.registerListener(tableListener);
