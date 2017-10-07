@@ -1,6 +1,5 @@
-#parse( "header.include.vm" )
-#parse( "schema.include.vm" )
 #parse( "table.include.vm" )
+#parse( "header.include.vm" )
 #parse( "macros.include.vm" )
 ######################
 #set ( $subpkg=$db.engineAsSubPackage() )

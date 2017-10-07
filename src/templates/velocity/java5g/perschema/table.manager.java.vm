@@ -1,5 +1,5 @@
-#parse( "header.include.vm" )
 #parse( "schema.include.vm" )
+#parse( "header.include.vm" )
 #set ( $javaClassName = 'TableManager' )
 
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")

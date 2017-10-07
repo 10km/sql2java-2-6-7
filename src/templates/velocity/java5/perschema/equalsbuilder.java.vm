@@ -1,3 +1,4 @@
+#parse( "schema.include.vm" )
 #parse( "header.include.vm" )
 $codewriter.setCurrentJavaFilename($pkg, "EqualsBuilder.java")
 package $pkg;

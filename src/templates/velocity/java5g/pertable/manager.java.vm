@@ -1,6 +1,5 @@
-#parse( "header.include.vm" )
-#parse( "schema.include.vm" )
 #parse( "table.include.vm" )
+#parse( "header.include.vm" )
 ######################
 #set ( $subpkg=$db.engineAsSubPackage() )
 #set ( $managerClassNSP = $table.asManagerClassNSP() )
