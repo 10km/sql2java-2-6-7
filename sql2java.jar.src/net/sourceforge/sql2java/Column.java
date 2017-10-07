@@ -1277,6 +1277,18 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getInitializedMethod() {
 		return this.convertName("check_" + this.escape() + "_initialized");
 	}
+	public String getGetCacheMethod() {
+		return this.convertName("get_bean_by_" + this.escape());
+	}
+	public String getPutCacheMethod() {
+		return this.convertName("put_by_" + this.escape());
+	}
+	public String getPutIfAbsentCacheMethod() {
+		return this.convertName("put_If_absent_by_" + this.escape());
+	}
+	public String getReplaceCacheMethod() {
+		return this.convertName("replace_by_" + this.escape());
+	}
 
 	public String bitAndExpression(String varName){
 		if(this.getTable().countColumns()>64){
@@ -1310,7 +1322,9 @@ public class Column implements Cloneable, Comparable<Column> {
 	public String getVarName() {
 		return this.convertName(this.escape());
 	}
-	
+	public String getCacheVarName() {
+		return this.convertName(this.escape() + "_cacher");
+	}
 	public String getFullVarName() {
 		return this.convertName(this.getTable().asCoreClassNSP() +"_" + this.name );
 	}

@@ -71,7 +71,12 @@ public class Index {
 		Collections.sort(list);
 		return list;
 	}
-
+	public Column getIndexColumn() {
+		if (this.columns.size() != 1) {
+			throw new RuntimeException("the index "+this.getName() + "of Table " + this.getTable().getName() + " is a composite key");
+		}
+		return getIndexColumnsList().get(0);	
+	}
 	public void setName(String name) {
 		this.name = name;
 	}
