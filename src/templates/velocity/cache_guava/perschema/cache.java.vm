@@ -63,6 +63,8 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
         }
     
     }
+#elseif(!$table.hasPrimaryKey())
+    // Table $table.name haven't primary key
 #else
     // Table $table.name has a composite key, not a unique primary key
 #end##$table.countPrimaryKeys() == 1
