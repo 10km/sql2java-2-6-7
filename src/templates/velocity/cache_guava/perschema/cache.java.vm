@@ -4,6 +4,7 @@
 $codewriter.setCurrentJavaFilename($codewriter.getImplPackageOfSchema(), "${javaClassName}.java")
 package $codewriter.getImplPackageOfSchema();
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 #if($isGeneral)
 import ${schemaPkg}.TableLoadCaching;
@@ -132,6 +133,18 @@ public class $javaClassName{
 #end
         }
         @Override
+        public Collection<$beanClass> put(Collection<$beanClass> beans){
+            super.put(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.put(beans);
+#end
+#end
+            return beans;
+        }
+        @Override
         public void putIfAbsent($beanClass bean){
             super.putIfAbsent(bean);
 #foreach ( $index in $table.getIndices() )
@@ -143,6 +156,18 @@ public class $javaClassName{
 #end
         }
         @Override
+        public Collection<$beanClass> putIfAbsent(Collection<$beanClass> beans){
+            super.putIfAbsent(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.putIfAbsent(beans);
+#end
+#end
+            return beans;
+        }
+        @Override
         public void replace($beanClass bean){
             super.replace(bean);
 #foreach ( $index in $table.getIndices() )
@@ -152,6 +177,18 @@ public class $javaClassName{
             ${indexColumn.getCacheVarName()}.replace(bean);
 #end
 #end
+        }
+        @Override
+        public Collection<$beanClass> replace(Collection<$beanClass> beans){
+            super.replace(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.replace(beans);
+#end
+#end
+            return beans;
         }
         
         public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()){

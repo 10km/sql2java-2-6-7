@@ -4,7 +4,7 @@ $codewriter.setCurrentJavaFilename($schemaPkg, "${javaClassName}.java")
 package $schemaPkg;
 
 import java.util.concurrent.TimeUnit;
-
+import java.util.Collection;
 /**
  * 数据库对象缓存接口
  * @param <K> 主键类型(Primary or Unique)
@@ -28,17 +28,35 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      */
     public void put(B bean);
     /**
+     * @param beans
+     * @return always beans 
+     * @see #put(B) 
+     */
+    public Collection<B> put(Collection<B> beans);
+    /**
      * 向cache中增加数据
      * @param bean
      * @return
      */
     public void putIfAbsent(B bean);
     /**
+     * @param beans
+     * @return always beans 
+     * @see #putIfAbsent(B) 
+     */
+    public Collection<B> putIfAbsent(Collection<B> beans);
+    /**
      * 更新cache已有数据
      * @param bean
      * @return
      */
     public void replace(B bean);
+    /**
+     * @param beans
+     * @return always beans 
+     * @see #replace(B) 
+     */
+    public Collection<B> replace(Collection<B> beans);
     /** 注册侦听器 */
     public void registerListener();
     /** 注销侦听器 */
