@@ -77,7 +77,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     }
 
     private static $managerClass singleton = new $managerClass();
-
+    protected $managerClass(){}
     /**
      * Get the $managerClass singleton.
      *

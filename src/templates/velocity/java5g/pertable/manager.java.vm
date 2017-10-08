@@ -42,7 +42,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     private IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> dbConverter = DbConverter.INSTANCE;
     private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
-
+    protected $managerClassNSP(){}
     /**
     * @return table name
     */
