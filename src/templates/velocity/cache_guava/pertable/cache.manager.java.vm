@@ -89,7 +89,7 @@ public class $cacheManagerClass extends $managerClass
     //1.2
     @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean){        
-        return null == bean ? null : cache.getBean(bean.$primaryKey.getGetMethod()());
+        return null == bean ? null : loadByPrimaryKey(bean.$primaryKey.getGetMethod()());
     }
 ## ======================================================
 ## xForeignKeys template
