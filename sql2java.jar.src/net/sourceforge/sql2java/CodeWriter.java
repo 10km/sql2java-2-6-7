@@ -30,6 +30,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.tools.generic.EscapeTool;
 
 public class CodeWriter {
 	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
@@ -184,6 +185,7 @@ public class CodeWriter {
 		this.vc = new VelocityContext();
 		this.vc.put("CodeWriter", (Object) new FieldMethodizer((Object) this));
 		this.vc.put("codewriter", (Object) this);
+		this.vc.put("esc", new EscapeTool());
 		this.vc.put("pkg", (Object) basePackage);
 		this.vc.put("gpkg", (Object) generalPackage);
 		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
