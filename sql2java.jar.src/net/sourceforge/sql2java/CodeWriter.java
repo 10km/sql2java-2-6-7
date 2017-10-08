@@ -54,7 +54,8 @@ public class CodeWriter {
 	protected VelocityContext current_vc;
 	String current_fullfilename = "";
 	String current_filename = "";
-
+	/** 是否保存当前文件标志,模板可以通过改写此标志,跳过模板生成 */
+	boolean save_current_file = true;
 	public CodeWriter(Database db, Properties props) {
 		try {
 			CodeWriter.db = db;
@@ -246,15 +247,20 @@ public class CodeWriter {
 			return;
 		}
 		StringWriter sw = new StringWriter();
+		// reset
+		save_current_file = true;
 		Velocity.mergeTemplate((String) templateName, (String) "UTF-8", (Context) this.current_vc, (Writer) sw);
-		System.out.println(" .... writing to " + this.current_fullfilename);
-		File file = new File(this.current_fullfilename);
-		new File(file.getParent()).mkdirs();
-		PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.current_fullfilename),"UTF-8"));
-		writer.write(sw.toString());
-		writer.flush();
-		writer.close();
-		System.out.println("    " + this.current_filename + " done.");
+		if(save_current_file){
+			System.out.println(" .... writing to " + this.current_fullfilename);
+			File file = new File(this.current_fullfilename);
+			new File(file.getParent()).mkdirs();
+			PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.current_fullfilename),"UTF-8"));
+			writer.write(sw.toString());
+			writer.flush();
+			writer.close();
+			System.out.println("    " + this.current_filename + " done.");
+		}else
+			System.out.println("    " + this.current_filename + " skip.");
 	}
 
 	public void setCurrentFilename(String relpath_or_package, String fn) throws Exception {
@@ -506,5 +512,9 @@ public class CodeWriter {
 		if(isGeneral())
 			pkg += "." + "" + getDb().engineAsSubPackage();
 		return pkg;
+	}
+
+	public void setSaveCurrentFile(boolean save_current_fullfile) {
+		this.save_current_file = save_current_fullfile;
 	}
 }
