@@ -759,7 +759,21 @@ public class Table {
 	public String asManagerTestClass() {
 		return this.convertName("Manager_Test");
 	}
-
+	public String asCacheManagerClass() {
+		return this.convertName("CacheManager");
+	}
+	public String asCacheManagerClassNSP() {
+		return this.convertNameNSP("CacheManager");
+	}
+	public String asCacheManagerClass(boolean nsp) {
+		return this.convertName("CacheManager",nsp);
+	}
+	public String asCacheVarName(){
+		return StringUtilities.convertName( getBasename(true) +  "_cache",true);
+	}
+	public String asCacheVarSetMethod(){
+		return StringUtilities.convertName("set_" +  getBasename(true) +  "_cache",true);
+	}
 	public String asModelClass() {
 		return this.convertName("Model");
 	}

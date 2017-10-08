@@ -191,7 +191,7 @@ public class CodeWriter {
 		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
 		this.vc.put("isGeneral", isGeneral());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
-		this.vc.put("strUtil", (Object) StringUtilities.getInstance());
+		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
 		this.vc.put("fecha", (Object) new Date());
 		this.current_vc = new VelocityContext((Context) this.vc);
 		String[] schema_templates = this.getSchemaTemplates("velocity.templates");
