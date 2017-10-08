@@ -198,7 +198,7 @@ public class $rendererClass extends Renderer
     /**
      * retrieve the beans to be displayed
      */
-    public $beanClass[] getRenderList($beanClass templateBean)
+    public ${beanClass}[] getRenderList($beanClass templateBean)
     {
         $beanClass beans[] = null;
         try
