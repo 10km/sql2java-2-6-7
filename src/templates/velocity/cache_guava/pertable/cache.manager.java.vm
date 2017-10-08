@@ -12,31 +12,23 @@ $codewriter.setSaveCurrentFile(false)
 #set ( $beanClass = $table.asBeanClass($isGeneral) )
 ##set ( $listenerClass = $table.asListenerClassNSP() )
 ##set ( $nativeListener = $table.asListenerClass() )
-$codewriter.setCurrentJavaFilename($codewriter.getImplPackageOfSchema(), "${cacheManagerClass}.java")
-package $codewriter.getImplPackageOfSchema();
+$codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheManagerClass}.java")
+package $table.getPackage(false);
 
-
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import ${gpkg}.Constant;
-import ${gpkg}.${beanClass};
-import ${gpkg}.IBeanConverter;
-import ${gpkg}.IDbConverter;
 import ${schemaPkg}.ITableCache;
-import ${gpkg}.TableManager;
-import ${gpkg}.$table.asManagerInterfaceNSP();
-#foreach ($linkedTable in $linkedTables)
-import ${linkedTable.getPackage(true)}.${linkedTable.asBeanClass($isGeneral)};
-import ${linkedTable.getPackage(false)}.Cache.${linkedTable.asCacheClass($isGeneral)};
+#foreach ($foreignTable in $foreignTables)
+import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass($isGeneral)};
+import ${foreignTable.getPackage(false)}.${foreignTable.asCacheManagerClass($isGeneral)};
 #end
-import ${gpkg}.TableListener;
-import ${gpkg}.WrapDAOException;
-
+#if(!$isGeneral)
 import ${pkg}.exception.DAOException;
+#set ($throwsString = "throws DAOException")
+#end
 import ${table.getPackage(false)}.${managerClass};
 import ${table.getPackage(true)}.${beanClass};
-import ${table.getPackage(false)}.Cache.${table.asCacheClass($isGeneral)};
+import ${table.getPackage(false)}.${table.asCacheClass($isGeneral)};
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -47,26 +39,41 @@ import ${table.getPackage(false)}.Cache.${table.asCacheClass($isGeneral)};
  */
 public class $cacheManagerClass extends $managerClass
 {
-    private $managerClass nativeManager = ${managerClass}.getInstance();
-    private final ${table.asCacheClass($isGeneral)} $table.asCacheVarName();
-#foreach ($foreignTable in $linkedTables)
-    private ${foreignTable.asCacheClass($isGeneral)} $foreignTable.asCacheVarName();
-    public void $foreignTable.asCacheVarSetMethod()(${foreignTable.asCacheClass($isGeneral)} $foreignTable.asCacheVarName()){
-        this.$foreignTable.asCacheVarName() = $foreignTable.asCacheVarName();
+    /** singleton of $cacheManagerClass */
+    private static $cacheManagerClass instance;
+    /** 
+     * @return a instance of $cacheManagerClass
+     * @throws IllegalStateException while {@link #instance} is null
+     */
+    public static final $cacheManagerClass getInstance(){
+        if(null == instance){
+            throw new IllegalStateException("uninitialized instance of $cacheManagerClass");
+        }
+        return instance;
     }
-#end
-    public $cacheManagerClass(long maximumSize, long duration, TimeUnit unit) {
-        this.$table.asCacheVarName() = new ${table.asCacheClass($isGeneral)}(maximumSize,duration,unit);
+    /**
+     * create a instance of $cacheManagerClass and assign to {@link #instance},if <code>instance</code> is not initialized.<br>
+     * otherwise return <code>instance</code>
+     */
+    public static synchronized final $cacheManagerClass makeInstance(long maximumSize, long duration, TimeUnit unit){
+        if(null == instance){
+            instance = new $cacheManagerClass(maximumSize,duration,unit);
+        }
+        return instance;
     }
-    public $cacheManagerClass(long maximumSize, long durationMinutes) {
-        this(maximumSize, durationMinutes, ITableCache.DEFAULT_TIME_UNIT);
+    /** @see ${esc.hash}makeInstance(long, long, TimeUnit) */
+    public static final $cacheManagerClass makeInstance(long maximumSize, long durationMinutes){
+        return makeInstance(maximumSize, durationMinutes, ITableCache.DEFAULT_TIME_UNIT);
     }
-
-    public $cacheManagerClass(long maximumSize) {
-        this(maximumSize,ITableCache.DEFAULT_DURATION,ITableCache.DEFAULT_TIME_UNIT);
+    /** @see ${esc.hash}makeInstance(long, long, TimeUnit) */
+    public static final $cacheManagerClass makeInstance(long maximumSize){
+        return makeInstance(maximumSize,ITableCache.DEFAULT_DURATION,ITableCache.DEFAULT_TIME_UNIT);
     }
-    public $cacheManagerClass() {
-        this(ITableCache.DEFAULT_CACHE_MAXIMUMSIZE,ITableCache.DEFAULT_DURATION,ITableCache.DEFAULT_TIME_UNIT);
+    /** instance of {@link ${table.asCacheClass($isGeneral)}} */
+    private final ${table.asCacheClass($isGeneral)} cache;
+    protected $cacheManagerClass(long maximumSize, long duration, TimeUnit unit) {
+        cache = new ${table.asCacheClass($isGeneral)}(maximumSize,duration,unit);
+        cache.registerListener();
     }
 
     //////////////////////////////////////
@@ -75,41 +82,15 @@ public class $cacheManagerClass extends $managerClass
 
     //1 override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadByPrimaryKey($primaryKey.getJavaType() $primaryKey.getVarName())
-    {
-        return ${table.asCacheVarName()}.getBean($primaryKey.getVarName());
+    public $beanClass loadByPrimaryKey($primaryKey.getJavaType() $primaryKey.getVarName()){
+        return cache.getBean($primaryKey.getVarName());
     }
 
     //1.2
     @Override
-    public $beanClass loadByPrimaryKey(${beanClass} bean)
-    {        
-        return null == bean ? null : ${table.asCacheVarName()}.getBean(bean.$primaryKey.getGetMethod()());
+    public $beanClass loadByPrimaryKey(${beanClass} bean){        
+        return null == bean ? null : cache.getBean(bean.$primaryKey.getGetMethod()());
     }
-## ======================================================
-## xImportedKeys template
-## ======================================================
-
-#foreach ($importedTable in $importedTables)
-#if ( $velocityCount == 1 )
-
-    //////////////////////////////////////
-    // GET/SET IMPORTED KEY BEAN METHOD
-    //////////////////////////////////////
-#end
-#foreach( $fkName in $importedTable.getFkMapNames($table.name) )
-#set ( $importedClass = "$importedTable.asBeanClass($isGeneral)" )
-
-    //3.2 GET IMPORTED override $table.asManagerInterfaceNSP()
-    @Override 
-    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
-    {
-        return (java.util.List<$importedClass>)${importedTable.asCacheVarName()}.put(super.${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean));
-    }
-#end
-#end
-
-
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================
@@ -121,19 +102,17 @@ public class $cacheManagerClass extends $managerClass
     //////////////////////////////////////
 
 #end
-#set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
-#set ( $foreignNative = "$foreignTable.asBeanClass()" )
-#set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
+#set ( $foreignClass = "$foreignTable.asBeanClass($isGeneral)" )
+#set ( $foreignCache = "$foreignTable.asCacheManagerClass($isGeneral)" )
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name))
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
 #if( 1 == $columnsOfFk.size() )
     //5.1 GET REFERENCED VALUE override $table.asManagerInterfaceNSP()
     @Override 
-    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
-    {
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean){
         if(null == bean)return null;
-        bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asCacheVarName()}.getBean(bean.${columnsOfFk.get(0).getGetMethod()}())); 
-        return bean.$table.getReferencedVarGetMethod($fkName)();        
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignCache}.getInstance().loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
+        return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 #end    
 #end
@@ -141,14 +120,14 @@ public class $cacheManagerClass extends $managerClass
     private class CacheAction implements Action<$beanClass>{
         final Action<$beanClass> action;
         CacheAction(Action<$beanClass>action){
-            this.action = action;            
+            this.action = action;
         }
         @Override
-        public void call($beanClass bean) {
+        public void call($beanClass bean)$!throwsString {
             if(null != action){
                 action.call(bean);
             }
-            ${table.asCacheVarName()}.put(bean);
+            cache.put(bean);
         }
         @Override
         public $beanClass getBean() {
@@ -156,8 +135,7 @@ public class $cacheManagerClass extends $managerClass
         }}
     //20-5
     @Override
-    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)
-    {
+    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)$!throwsString{
         if(null == fieldList )
             action = new CacheAction(action);
         return super.loadUsingTemplate(bean,fieldList,startRow,numRows,searchType,action);
@@ -168,20 +146,16 @@ public class $cacheManagerClass extends $managerClass
     //
     // USING INDICES
     //_____________________________________________________________________
-
 #foreach ( $index in $table.getIndices() )
-#if($index.isUnique() && 1 == $indexColumns.size())
-#set ($indexColumn = $indexColumns.getIndexColumn())
+#if($index.isUnique() && 1 == $index.getIndexColumnsList().size())
+#set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
-
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadBy${indexColumn.asCamelCaseName()}($indexColumn.getJavaType() $indexColumn.getVarName())
-    {
-        ${index.getTable().asCacheVarName()}.put(super.loadBy${indexColumn.asCamelCaseName()}($indexColumn.getVarName()));
+    public $beanClass loadBy${index.asCamelCaseName()}($indexColumn.getJavaType() $indexColumn.getVarName()){
+        return cache.${indexColumn.getGetCacheMethod()}($indexColumn.getVarName());
     }
 #end## $index.isUnique() && 1 == $indexColumns.size()    
 #end
 #end##($table.countIndices() > 0)
-
 }

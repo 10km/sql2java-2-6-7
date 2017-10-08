@@ -1,0 +1,194 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+#if ($table.countPrimaryKeys() != 1)
+$codewriter.setSaveCurrentFile(false)
+#stop
+#end
+#set($beanClass = $table.asBeanClass($isGeneral))
+#set($managerClass = $table.asManagerClass($isGeneral))
+#set($cacheClass = $table.asCacheClass($isGeneral) )
+$codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheClass}.java")
+package $table.getPackage(false);
+
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import ${schemaPkg}.TableLoadCaching;
+#if(!$isGeneral)
+import ${pkg}.exception.DAOException;
+#set ($throwsString = "throws DAOException")
+#end
+import $table.getPackage(true).$beanClass;
+#if(!$isGeneral)
+import $table.getPackage(false).$managerClass;
+#end
+
+#set($pk = $table.getPrimaryKey())
+#set($pkType = $pk.getJavaType())
+/**
+ * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
+ * primary key ($pk.fullName) is key
+ * @author guyadong
+ *
+ */
+public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
+    private final $managerClass manager = ${managerClass}.getInstance();
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+    private final TableLoadCaching<$columnType, $beanClass> ${indexColumn.getCacheVarName()};
+#end
+#end
+    public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
+        super(maximumSize, duration, unit);
+############ FOR INDICES ############
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+
+        ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(){
+            @Override
+            public void registerListener() {
+                manager.registerListener(tableListener);
+            }
+            @Override
+            public void unregisterListener() {
+                manager.unregisterListener(tableListener);        
+            }
+            @Override
+            protected $columnType returnKey($beanClass bean) {
+                return bean.$indexColumn.getGetMethod()();
+            }
+            @Override
+            protected $beanClass loadfromDatabase($columnType key)$!throwsString {
+                return manager.loadBy${index.asCamelCaseName()}(key);
+            }};
+#end###if($index.isUnique())
+#end##foreach
+    }
+
+    public $cacheClass(long maximumSize, long durationMinutes) {
+        this(maximumSize, durationMinutes, DEFAULT_TIME_UNIT);
+    }
+
+    public $cacheClass(long maximumSize) {
+        this(maximumSize,DEFAULT_DURATION,DEFAULT_TIME_UNIT);
+    }
+    public $cacheClass() {
+        this(DEFAULT_CACHE_MAXIMUMSIZE,DEFAULT_DURATION,DEFAULT_TIME_UNIT);
+    }
+    
+    @Override
+    public void registerListener() {
+        manager.registerListener(tableListener);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.registerListener();
+#end
+#end
+    }
+    @Override
+    public void unregisterListener() {
+        manager.unregisterListener(tableListener);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.unregisterListener();
+#end
+#end   
+    }
+    @Override
+    protected $pkType returnKey($beanClass bean) {
+        return bean.$pk.getGetMethod()();
+    }
+    @Override
+    protected $beanClass loadfromDatabase($pkType key)$!throwsString {
+        return manager.loadByPrimaryKey(key);
+    }
+    @Override
+    public void put($beanClass bean){
+        super.put(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.put(bean);
+#end
+#end
+    }
+    @Override
+    public Collection<$beanClass> put(Collection<$beanClass> beans){
+        super.put(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.put(beans);
+#end
+#end
+        return beans;
+    }
+    @Override
+    public void putIfAbsent($beanClass bean){
+        super.putIfAbsent(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.putIfAbsent(bean);
+#end
+#end
+    }
+    @Override
+    public Collection<$beanClass> putIfAbsent(Collection<$beanClass> beans){
+        super.putIfAbsent(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.putIfAbsent(beans);
+#end
+#end
+        return beans;
+    }
+    @Override
+    public void replace($beanClass bean){
+        super.replace(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.replace(bean);
+#end
+#end
+    }
+    @Override
+    public Collection<$beanClass> replace(Collection<$beanClass> beans){
+        super.replace(beans);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        ${indexColumn.getCacheVarName()}.replace(beans);
+#end
+#end
+        return beans;
+    }
+    
+    public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()){
+        return super.getBean($pk.getVarName());
+    }
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+    public $beanClass $indexColumn.getGetCacheMethod()($columnType $indexColumn.getVarName()){
+        return ${indexColumn.getCacheVarName()}.getBean($indexColumn.getVarName());
+    }
+#end
+#end
+}
