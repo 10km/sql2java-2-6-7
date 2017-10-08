@@ -666,7 +666,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     /**
      * Returns true if this table contains row with primary key fields.
      * @param keys primary keys value:<br>
-     * @see #loadByPrimaryKey(Object...)
+     * @see ${esc.hash}loadByPrimaryKey(Object...)
 #if($throwsString)
      * @$!throwsString
 #end
@@ -679,7 +679,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * when you don't know which is primary key of table,you can use the method.
      * @param bean the B bean with primary key fields
      * @return 
-     * @see {@link #loadByPrimaryKey(B bean)}
+     * @see {@link ${esc.hash}loadByPrimaryKey(B bean)}
 #if($throwsString)
      * @$!throwsString
 #end
@@ -1007,13 +1007,13 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //_____________________________________________________________________    
     /**
      * Retrieves a array of B bean using the index specified by keyIndex.
-     * @param keyIndex valid values:see also {@link #loadByIndexAsList(int,Object ...)}
+     * @param keyIndex valid values:see also {@link ${esc.hash}loadByIndexAsList(int,Object ...)}
      * @param keys key values of index
      * @return
 #if($throwsString)
      * @$!throwsString
 #end
-     * @see #loadByIndexAsList(int ,Object ...)
+     * @see ${esc.hash}loadByIndexAsList(int ,Object ...)
      */
     public B[] loadByIndex(int keyIndex,Object ...keys)$!throwsString;
     
@@ -1036,7 +1036,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     /**
      * Deletes rows using key.
-     * @param keyIndex valid values: see also {@link #loadByIndexAsList(int,Object ...)}
+     * @param keyIndex valid values: see also {@link ${esc.hash}loadByIndexAsList(int,Object ...)}
      * @param keys key values of index
      * @return the number of deleted objects
 #if($throwsString)
@@ -1134,7 +1134,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #foreach($t in $tables)
 #if( $t.hasForeignTables() || $t.hasImportedTables() )
             for $t.name table:<br>
-                {@code #foreachForeignTables("$M_native" $t " $m_foreignClass" '' '')#foreachImportedTables("$M_native" $t " $m_importedClass[]" '' '')}<br>
+                {@code #foreachForeignTables("$M_native" $t " $m_foreignClass" '' '')#foreachImportedTables("$M_native" $t " ${m_importedClass}[]" '' '')}<br>
 #end
 #end
      * @return the inserted or updated B bean
@@ -1166,7 +1166,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     /**
      *  Transaction version for sync save
-     * @see #save(B ,Object ...)
+     * @see ${esc.hash}save(B ,Object ...)
      * @param bean the B bean to be saved
      * @param args referenced beans or imported beans<br>
      * @return the inserted or updated B bean
@@ -1179,7 +1179,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     /**
      *  Transaction version for sync save
-     * @see #saveCollection(B ,Object ...)
+     * @see ${esc.hash}saveCollection(B ,Object ...)
      * @param bean the B bean to be saved
      * @param args referenced beans or imported beans<br>
      * @return the inserted or updated B bean

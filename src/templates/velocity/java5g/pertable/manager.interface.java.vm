@@ -148,7 +148,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      */
     //3.1 GET IMPORTED
-    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
     
     /**
      * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -160,7 +160,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws DAOException
      */
     //3.1.2 GET IMPORTED
-    public $importedClass[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
     
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -202,7 +202,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     //3.3 SET IMPORTED
-    public $importedClass[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , $importedClass[] importedBeans);
+    public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans);
 
     /**
      * set  the {@link $importedClass} object java.util.Collection associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -233,16 +233,16 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ", $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", $m_importedClass[] " '' ''))}
+     * @see {@link ${esc.hash}save(${beanClass} #foreachForeignTables('native' ${table}  ", ${m_foreignClass} " '' '')#foreachImportedTables('native' ${table}  ", ${m_importedClass}[] " '' ''))}
      */
     //3.6 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ",final $m_importedClass[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
 #if( $table.hasImportedTables() )
     /**
      * Save the $beanClass bean and referenced beans and imported beans into the database.
@@ -259,7 +259,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
         #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
     /**
      * Transaction version for sync save
-     * @see {@link #save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
+     * @see {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
      */
     //3.8 SYNC SAVE AS TRANSACTION
     public $beanClass saveAsTransaction(final $beanClass bean
@@ -367,7 +367,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end
      * @return an array of $beanClass
      */
-    public $beanClass[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
     
     /**
      * Retrieves a list of $beanClass using the ${index.getName()} index.

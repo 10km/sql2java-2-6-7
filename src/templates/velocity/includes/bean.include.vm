@@ -57,7 +57,7 @@ public class ${beanClass}
      *
      * @param isNew the boolean value to be assigned to the isNew field
      */
-#swiftThriftField( null )
+#swiftThriftField( $null )
     public void setNew(boolean isNew)
     {
         this._isNew = isNew;
@@ -74,7 +74,7 @@ public class ${beanClass}
     /**
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
-#swiftThriftField( null )
+#swiftThriftField( $null )
     public void setModified($table.stateVarType() modified){
 #if( $table.countColumns() > 64 )    
         if( null == modified || this.modified.length != modified.length )return;
@@ -95,7 +95,7 @@ public class ${beanClass}
     /**
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
-#swiftThriftField( null )
+#swiftThriftField( $null )
     public void setInitialized($table.stateVarType() initialized){
 #if( $table.countColumns() > 64 )
         if( null == initialized || this.modified.length != initialized.length )return;
@@ -168,7 +168,7 @@ public class ${beanClass}
      *
      * @param newVal the new value #if ($column.isNotNull())(NOT NULL)#end to be assigned to $column.getVarName()
      */
-#if(!$column.isDate())#swiftThriftField( null )#end
+#if(!$column.isDate())#swiftThriftField( $null )#end
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
 #if ($column.hasCompareTo())
@@ -286,7 +286,7 @@ public class ${beanClass}
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
-#swiftThriftField( null )
+#swiftThriftField( $null )
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }
