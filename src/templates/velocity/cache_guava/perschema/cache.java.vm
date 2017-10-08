@@ -120,22 +120,43 @@ public class $javaClassName{
         protected $beanClass loadfromDatabase($pkType key)$!throwsString {
             return manager.loadByPrimaryKey(key);
         }
+        @Override
+        public void put($beanClass bean){
+            super.put(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.put(bean);
+#end
+#end
+        }
+        @Override
+        public void putIfAbsent($beanClass bean){
+            super.putIfAbsent(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.putIfAbsent(bean);
+#end
+#end
+        }
+        @Override
+        public void replace($beanClass bean){
+            super.replace(bean);
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+            ${indexColumn.getCacheVarName()}.replace(bean);
+#end
+#end
+        }
         
         public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()){
-            return getBean($pk.getVarName());
+            return super.getBean($pk.getVarName());
         }
-
-        public void $pk.getPutCacheMethod()($beanClass bean){
-            put(bean);
-        }
-
-        public void $pk.getPutIfAbsentCacheMethod()($beanClass bean){
-            putIfAbsent(bean);
-        }
-
-        public void $pk.getReplaceCacheMethod()($beanClass bean){
-            replace(bean);
-        }       
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())
 #set ($indexColumn = $index.getIndexColumn())
@@ -143,17 +164,6 @@ public class $javaClassName{
         public $beanClass $indexColumn.getGetCacheMethod()($columnType $indexColumn.getVarName()){
             return ${indexColumn.getCacheVarName()}.getBean($indexColumn.getVarName());
         }
-        public void $indexColumn.getPutCacheMethod()($beanClass bean){
-            ${indexColumn.getCacheVarName()}.put(bean);
-        }
-
-        public void $indexColumn.getPutIfAbsentCacheMethod()($beanClass bean){
-            ${indexColumn.getCacheVarName()}.putIfAbsent(bean);
-        }
-
-        public void $indexColumn.getReplaceCacheMethod()($beanClass bean){
-            ${indexColumn.getCacheVarName()}.replace(bean);
-        }   
 #end
 #end
     }
