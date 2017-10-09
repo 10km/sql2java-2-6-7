@@ -593,6 +593,9 @@ public class Table {
 		return this.remarks == null ? "" : this.remarks;
 	}
 
+	public boolean hasRemarks(){
+		return !getRemarks().isEmpty();
+	}
 	public String getJavaName() {
 		return this.convertName("");
 	}
