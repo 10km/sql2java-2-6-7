@@ -24,7 +24,7 @@ public class ${beanClass}
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
 #end
-    private $column.getJavaType() $column.getVarName()#if ( $column.getDefaultValue().length() > 0) =#if ($column.isString())"$column.getDefaultValue()"#else$column.getDefaultValue()#end#end;
+    private $column.getJavaType() $column.getVarName()$!{column.getDefaultValue()};
 
 #end
     /** columns modified flag */
