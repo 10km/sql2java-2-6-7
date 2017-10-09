@@ -1145,8 +1145,7 @@ public class Column implements Cloneable, Comparable<Column> {
 	}
 
 	public String getDefaultValue() {
-		if (Boolean.valueOf(CodeWriter.getProperty((String) "codewriter.generate.defaultvalue", (String) "false"))
-				.booleanValue()) {
+		if(!CodeWriter.getPropertyBoolean("codewriter.generate.defaultvalue")){
 			return "";
 		}
 		String xmlDefaultValue = ConfigHelper.getColumnProperty((String) this.getTableName(), (String) this.getName(),
@@ -1159,14 +1158,14 @@ public class Column implements Cloneable, Comparable<Column> {
 				try {
 					double value = Double.parseDouble(this.defaultValue);
 					switch (this.getMappedType()) {
-						case 1 :
-						case 10 :
-						case 11 : {
+						case M_BIGDECIMAL :
+						case M_INTEGER :
+						case M_LONG : {
 							return this.generateNewAssignation(this.getJavaType(), this.defaultValue,
-									String.valueOf(value));
+									this.defaultValue);
 						}
-						case 7 :
-						case 8 : {
+						case M_DOUBLE :
+						case M_FLOAT : {
 							return this.generateNewAssignation(this.getJavaType(), String.valueOf(value),
 									this.defaultValue);
 						}
@@ -1178,28 +1177,81 @@ public class Column implements Cloneable, Comparable<Column> {
 			}
 			if (this.isDate()) {
 				try {
-					Date date = SimpleDateFormat.getInstance().parse(this.defaultValue);
-					return "= SimpleDateFormat.getInstance().parse(" + this.defaultValue + "); // '"
-							+ SimpleDateFormat.getInstance().format(date) + "'";
-				} catch (ParseException pe) {
-					return "= null; // '" + this.defaultValue + "'";
+					return generateDateDefaultAssignation(this.getJavaType(),this.defaultValue);
+				} catch (IllegalArgumentException pe) {
+					return "; // DEFAULT '" + this.defaultValue + "'";
 				}
 			}
 			if (this.isString()) {
 				return "".equals(this.defaultValue) ? "" : "= \"" + this.defaultValue + '\"';
 			}
-			if (2 == this.getMappedType()) {
+			if (M_BOOLEAN == this.getMappedType()) {
 				return "= Boolean.valueOf(\"" + ("1".equals(this.defaultValue) ? "true" : this.defaultValue)
 						+ "\").booleanValue(); // '" + this.defaultValue + "'";
 			}
 		}
 		return this.defaultValue == null ? "" : "= " + this.defaultValue;
 	}
-
+	
+	/** sql类型日期字符串转为java 日期对象 */
+	private static Date parseSqlDate(String source){
+		if(null == source)
+			throw new IllegalArgumentException();
+		try{
+			return java.sql.Date.valueOf(source);
+		}catch(IllegalArgumentException e){
+			try{
+				return java.sql.Time.valueOf(source);
+			}catch(IllegalArgumentException e2){
+				return java.sql.Timestamp.valueOf(source);
+			}
+		}
+	}
+	/** 生成日期类型缺省值语句 */
+	private String generateDateDefaultAssignation(String type, String parameter) {
+		StringBuffer sb = new StringBuffer(100);
+		Date parsedDate = parseSqlDate(parameter);
+		String dateStr;
+		switch(this.getMappedType()){
+		case M_UTILDATE:{
+			String instanceMethod="";
+			if(parsedDate instanceof java.sql.Date){
+				instanceMethod = "getDateInstance";
+			}else if(parsedDate instanceof java.sql.Time){
+				instanceMethod = "getTimeInstance";
+			}else if(parsedDate instanceof java.sql.Timestamp){
+				instanceMethod = "getDateTimeInstance";
+			}else
+				throw new IllegalStateException("invalid type");
+			sb.append("= java.text.DateFormat.").append(instanceMethod).append("().parse(\"").append(parsedDate.toString()).append("\",new java.text.ParsePosition(0))");
+			break;
+		}
+		case M_SQLDATE:{
+			dateStr = new java.sql.Date(parsedDate.getTime()).toString();
+			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			break;
+		}
+		case M_TIME:{
+			dateStr = new java.sql.Time(parsedDate.getTime()).toString();
+			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			break;
+		}
+		case M_TIMESTAMP:{
+			dateStr = new java.sql.Timestamp(parsedDate.getTime()).toString();
+			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			break;
+		}
+		default:
+			return "";
+		}
+		sb.append("; // DEFAULT '").append(parameter).append("'");
+		return sb.toString();
+	}	
+	
 	private String generateNewAssignation(String type, String parameter, String comment) {
 		StringBuffer sb = new StringBuffer(70);
 		sb.append("= new ").append(type);
-		sb.append('(').append(parameter).append("); // '").append(comment).append("'");
+		sb.append('(').append(parameter).append("); // DEFAULT '").append(comment).append("'");
 		return sb.toString();
 	}
 
