@@ -123,10 +123,10 @@ public class ${beanClass}
 #foreach ( $iKey in $column.getImportedKeys() )
      * <li> imported key: ${iKey.getTableName()}.${iKey.getName()}</li>
 #end
-#if ( $column.getRemarks().length() > 0 )
+#if ( !$column.getRemarks().empty )
      * <li>comments: $column.getRemarks()</li>
 #end
-#if ( $column.getDefaultValue().length() > 0 )
+#if ( !$column.getDefaultValue().empty )
      * <li>default value: $column.getDefaultValue()</li>
 #end
 #if ($column.isAutoincrement())

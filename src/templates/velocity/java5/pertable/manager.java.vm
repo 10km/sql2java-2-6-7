@@ -31,9 +31,9 @@ import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
 #end
 
 /**
- * Handles database calls (save, load, count, etc...) for the $tablename table.
+ * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
 #if ( $table.hasRemarks() )
- * Remarks: $table.getRemarks()
+ * Remarks: $table.getRemarks()<br>
 #end
  * @author sql2java
  */

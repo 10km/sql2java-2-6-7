@@ -12,6 +12,13 @@ import java.util.Collection;
  * @author guyadong
  */
 public interface $javaClassName<K, B extends BaseBean<B>> {
+    /** 
+     * {@code always} update no matter whether key exists<br>
+     * {@code ifAbsent} update if key not exists<br>
+     * {@code replace} update only key exists 
+     */
+    public static enum UpdateStrategy{always,ifAbsent,replace;}
+    public static final UpdateStrategy DEFAULT_STRATEGY = UpdateStrategy.always;
     public static final long DEFAULT_CACHE_MAXIMUMSIZE = 10000;
     public static final long DEFAULT_DURATION = 10;
     public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MINUTES;
@@ -25,38 +32,15 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      * 向cache中更新数据
      * @param bean
      * @return
+     * @see {@link UpdateStrategy}
      */
-    public void put(B bean);
+    public void update(B bean);
     /**
      * @param beans
      * @return always beans 
-     * @see #put(B) 
+     * @see #update(B) 
      */
-    public Collection<B> put(Collection<B> beans);
-    /**
-     * 向cache中增加数据
-     * @param bean
-     * @return
-     */
-    public void putIfAbsent(B bean);
-    /**
-     * @param beans
-     * @return always beans 
-     * @see #putIfAbsent(B) 
-     */
-    public Collection<B> putIfAbsent(Collection<B> beans);
-    /**
-     * 更新cache已有数据
-     * @param bean
-     * @return
-     */
-    public void replace(B bean);
-    /**
-     * @param beans
-     * @return always beans 
-     * @see #replace(B) 
-     */
-    public Collection<B> replace(Collection<B> beans);
+    public Collection<B> update(Collection<B> beans);
     /** 注册侦听器 */
     public void registerListener();
     /** 注销侦听器 */

@@ -30,9 +30,9 @@ import ${table.getPackage()}.${nativeClass};
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
- * all {@link DAOException} be wrapped as {@link WrapDAOException} to throw.
+ * all {@link DAOException} be wrapped as {@link WrapDAOException} to throw.<br>
 #if ( $table.hasRemarks() )
- * Remarks: $table.getRemarks()
+ * Remarks: $table.getRemarks()<br>
 #end
  * @author guyadong
  */

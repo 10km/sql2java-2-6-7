@@ -39,15 +39,18 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     private final TableLoadCaching<$columnType, $beanClass> ${indexColumn.getCacheVarName()};
 #end
 #end
-    public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
-        super(maximumSize, duration, unit);
+    /** constructor<br>
+     * @see {@link TableLoadCaching#TableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
+     */
+    public $cacheClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
+        super(updateStragey,maximumSize, duration, unit);
 ############ FOR INDICES ############
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
 
-        ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(){
+        ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(updateStragey, maximumSize, duration, unit){
             @Override
             public void registerListener() {
                 manager.registerListener(tableListener);
@@ -67,7 +70,9 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
 #end###if($index.isUnique())
 #end##foreach
     }
-
+    public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
+        this(DEFAULT_STRATEGY,maximumSize,duration,unit);
+    }
     public $cacheClass(long maximumSize, long durationMinutes) {
         this(maximumSize, durationMinutes, DEFAULT_TIME_UNIT);
     }
@@ -110,70 +115,24 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         return manager.loadByPrimaryKey(key);
     }
     @Override
-    public void put($beanClass bean){
-        super.put(bean);
+    public void update($beanClass bean){
+        super.update(bean);
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.put(bean);
+        ${indexColumn.getCacheVarName()}.update(bean);
 #end
 #end
     }
     @Override
-    public Collection<$beanClass> put(Collection<$beanClass> beans){
-        super.put(beans);
+    public Collection<$beanClass> update(Collection<$beanClass> beans){
+        super.update(beans);
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.put(beans);
-#end
-#end
-        return beans;
-    }
-    @Override
-    public void putIfAbsent($beanClass bean){
-        super.putIfAbsent(bean);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.putIfAbsent(bean);
-#end
-#end
-    }
-    @Override
-    public Collection<$beanClass> putIfAbsent(Collection<$beanClass> beans){
-        super.putIfAbsent(beans);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.putIfAbsent(beans);
-#end
-#end
-        return beans;
-    }
-    @Override
-    public void replace($beanClass bean){
-        super.replace(bean);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.replace(bean);
-#end
-#end
-    }
-    @Override
-    public Collection<$beanClass> replace(Collection<$beanClass> beans){
-        super.replace(beans);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.replace(beans);
+        ${indexColumn.getCacheVarName()}.update(beans);
 #end
 #end
         return beans;

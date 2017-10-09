@@ -18,6 +18,7 @@ package $table.getPackage(false);
 import java.util.concurrent.TimeUnit;
 
 import ${schemaPkg}.ITableCache;
+import ${schemaPkg}.ITableCache.UpdateStrategy;
 #foreach ($foreignTable in $foreignTables)
 import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass($isGeneral)};
 import ${foreignTable.getPackage(false)}.${foreignTable.asCacheManagerClass($isGeneral)};
@@ -31,10 +32,7 @@ import ${table.getPackage(true)}.${beanClass};
 import ${table.getPackage(false)}.${table.asCacheClass($isGeneral)};
 
 /**
- * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
-#if ( $table.hasRemarks() )
- * Remarks: $table.getRemarks()
-#end
+ * cache implementation for $managerClass<br>
  * @author guyadong
  */
 public class $cacheManagerClass extends $managerClass
@@ -52,14 +50,19 @@ public class $cacheManagerClass extends $managerClass
         return instance;
     }
     /**
-     * create a instance of $cacheManagerClass and assign to {@link #instance},if <code>instance</code> is not initialized.<br>
-     * otherwise return <code>instance</code>
+     * create a instance of $cacheManagerClass and assign to {@link #instance} if {@code instance} is not initialized.<br>
+     * otherwise return {@code instance}.
+     * @see {@link $cacheManagerClass#$cacheManagerClass(UpdateStrategy ,long , long , TimeUnit )}
      */
-    public static synchronized final $cacheManagerClass makeInstance(long maximumSize, long duration, TimeUnit unit){
+    public static synchronized final $cacheManagerClass makeInstance(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit){
         if(null == instance){
-            instance = new $cacheManagerClass(maximumSize,duration,unit);
+            instance = new $cacheManagerClass(updateStragey,maximumSize,duration,unit);
         }
         return instance;
+    }
+    /** @see ${esc.hash}makeInstance(UpdateStrategy,long, long, TimeUnit) */
+    public static final $cacheManagerClass makeInstance(long maximumSize, long duration, TimeUnit unit){
+        return makeInstance(ITableCache.DEFAULT_STRATEGY,maximumSize, duration, unit);
     }
     /** @see ${esc.hash}makeInstance(long, long, TimeUnit) */
     public static final $cacheManagerClass makeInstance(long maximumSize, long durationMinutes){
@@ -71,8 +74,11 @@ public class $cacheManagerClass extends $managerClass
     }
     /** instance of {@link ${table.asCacheClass($isGeneral)}} */
     private final ${table.asCacheClass($isGeneral)} cache;
-    protected $cacheManagerClass(long maximumSize, long duration, TimeUnit unit) {
-        cache = new ${table.asCacheClass($isGeneral)}(maximumSize,duration,unit);
+    /** constructor<br>
+     * @see {@link ${table.asCacheClass($isGeneral)}#${table.asCacheClass($isGeneral)}(UpdateStrategy ,long , long , TimeUnit )}
+     */
+    protected $cacheManagerClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
+        cache = new ${table.asCacheClass($isGeneral)}(updateStragey,maximumSize,duration,unit);
         cache.registerListener();
     }
 
@@ -127,7 +133,7 @@ public class $cacheManagerClass extends $managerClass
             if(null != action){
                 action.call(bean);
             }
-            cache.put(bean);
+            cache.update(bean);
         }
         @Override
         public $beanClass getBean() {
