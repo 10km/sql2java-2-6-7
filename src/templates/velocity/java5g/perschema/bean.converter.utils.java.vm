@@ -7,6 +7,7 @@
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package ${gpkg};
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Hashtable;
 import ${gpkg}.IBeanConverter;
@@ -20,7 +21,7 @@ import ${gpkg}.${table.asBeanClassNSP()};
  * @author guyadong
  *
  */
-public class ${javaClassName} {
+public class ${javaClassName} implements Constant {
     private ${javaClassName}(){}
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
@@ -37,6 +38,54 @@ public class ${javaClassName} {
         public #converterClass(${leftClass})(){
             super();
             init();
+        }
+        /**
+         * 返回buffer中所有字节(position~limit),不改变buffer状态
+         * @param buffer
+         * @return
+         */
+        private static final byte[] getBytesInBuffer(ByteBuffer buffer){
+            int pos = buffer.position();
+            try{
+                byte[] bytes = new byte[buffer.remaining()];
+                buffer.get(bytes);
+                return bytes;
+            }finally{
+                buffer.position(pos);
+            }
+        }
+        /**
+         * {@code obj}转为{@code type}指定的类型
+         * @param type
+         * @param obj
+         * @return
+         */
+        @SuppressWarnings({ "unchecked" })
+        private static final <T> T convert(Class<T> type,Object obj){
+            try{
+                if(null ==obj && type.isPrimitive())
+                    throw new IllegalArgumentException(String.format("can't convert null to primitive type %s",type.getSimpleName()));
+                return (T) obj;
+            }catch(ClassCastException ce){
+                // long -> Date
+                if(java.util.Date.class.isAssignableFrom(type) && obj instanceof Long){
+                    try {
+                        // call constructor,such as  java.util.Date#Date(long), java.sql.Time.Time(long)
+                        return type.getConstructor(long.class).newInstance(obj);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                // byte[] -> ByteBuffer
+                if(ByteBuffer.class == type && obj instanceof byte[]){
+                    return (T) ByteBuffer.wrap((byte[]) obj);
+                }
+                // ByteBuffer -> byte[]
+                if(byte[].class == type && obj instanceof ByteBuffer){
+                    return (T) getBytesInBuffer((ByteBuffer) obj);
+                }
+                throw new IllegalArgumentException(String.format("can't convert %s to %s",obj.getClass().getSimpleName(),type.getSimpleName()));
+            }
         }
         public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass){
             super(leftClass,rightClass);
@@ -56,23 +105,37 @@ public class ${javaClassName} {
 #foreach ( $column in $table.columns )  
             try{         
                 methods.put("${column.getGetMethod()}",rightType.getMethod("${column.getGetMethod()}"));
+#if ( $column.hasPrimaryType())
+                try{
+                    methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
+                }catch(NoSuchMethodException nm){
+#if($column.isDate())
+                    try{
+                        methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaPrimaryType()}.class));
+                    }catch(NoSuchMethodException nm2){
+                        methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",Long.class));
+                    }
+#else
+                    methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaPrimaryType()}.class));
+#end
+                }
+#else
                 methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
-                methods.put("${column.getInitializedMethod()}",rightType.getMethod("${column.getInitializedMethod()}"));
+#end
             }catch(Exception e){}
 #end
         }
         @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
             try{
-                Method initializedMethod,getterMethod;
+                Method getterMethod;
+                $table.stateVarType() modified = (${table.stateVarType()})methods.get("getModified").invoke(right);
 #foreach ( $column in $table.columns )
-                if( null != (initializedMethod = methods.get("${column.getInitializedMethod()}")) && null != (getterMethod = methods.get("${column.getGetMethod()}"))){
-                    if((boolean)initializedMethod.invoke(right))
-                        left.$column.getSetMethod()((${column.getJavaType()})getterMethod.invoke(right));
-                }
+                if( (0L !=  ${column.bitAndExpression("modified")}) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
+                    left.$column.getSetMethod()(convert(${column.getJavaType()}.class,getterMethod.invoke(right)));
 #end
                 left.isNew((boolean)methods.get("isNew").invoke(right));
-                left.setModified((${table.stateVarType()})methods.get("getModified").invoke(right));
+                left.setModified(modified);
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
@@ -87,8 +150,8 @@ public class ${javaClassName} {
 #foreach ( $column in $table.columns )
 #if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 #end
-#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}() )
-#if( $ignorefields.contains($column.name) )// #end                    setterMethod.invoke(right,left.${column.getGetMethod()}());
+#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}())
+#if( $ignorefields.contains($column.name) )// #end                    setterMethod.invoke(right,convert(setterMethod.getParameterTypes()[0],left.${column.getGetMethod()}()));
 #end
                 methods.get("setNew").invoke(right,left.isNew());
                 methods.get("setModified").invoke(right,left.getModified());
