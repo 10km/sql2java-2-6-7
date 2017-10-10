@@ -32,6 +32,25 @@ public $!final class ${beanClass}
     /** columns initialized flag */
     private $table.stateVarType() initialized = $table.stateVarInitializedStatement();
     private boolean _isNew = true;
+#if( $swiftBeanSupport && $table.countColumns() > 64  )
+    private static final java.util.List<Long> toList(long[] array) {
+        java.util.ArrayList<Long> result = new java.util.ArrayList<Long>(array.length);
+        for (int i = 0; i < array.length; i++) {
+            result.add(new Long(array[i]));
+        }
+        return result;
+    }
+    private static final void toPrimitive(java.util.List<Long> list,long[]dst) {
+        if ( null == list  || list.size() != dst.length) {
+            return;
+        }
+        Long element;
+        for (int i = 0; i < dst.length; i++) {
+            if(null != (element = list.get(i)))
+                dst[i] = element.longValue();
+        }
+    }
+#end
     /**
      * Determines if the current object is new.
      *
@@ -67,22 +86,29 @@ public $!final class ${beanClass}
      */
 #set( $fieldIndex = $fieldIndex + 1 )
 #swiftThriftField( $fieldIndex 'Requiredness.REQUIRED')
+#if( $swiftBeanSupport && $table.countColumns() > 64  )
+    public java.util.List<Long> getModified(){
+        return toList(modified);
+    }
+#else
     public $table.stateVarType() getModified(){
         return modified;
     }
+#end
 
     /**
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
 #swiftThriftField( $null $null)
-    public void setModified($table.stateVarType() modified){
-#if( $table.countColumns() > 64 )    
-        if( null == modified || this.modified.length != modified.length )return;
-        for(int i =0 ; i < this.modified.length ; ++i)this.modified[i] = modified[i];
-#else
-        this.modified = modified;
-#end
+#if( $swiftBeanSupport && $table.countColumns() > 64  )
+    public void setModified(List<Long> modified){
+        toPrimitive(modified,this.modified);
     }
+#else
+    public void setModified($table.stateVarType() modified){
+        $table.stateVarAssignStatement("modified","this.modified");
+    }
+#end
     /**
      * @return the initialized status of columns
      */
@@ -96,14 +122,15 @@ public $!final class ${beanClass}
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
 #swiftThriftField( $null $null)
+#if( $swiftBeanSupport && $table.countColumns() > 64  )
     public void setInitialized($table.stateVarType() initialized){
-#if( $table.countColumns() > 64 )
-        if( null == initialized || this.modified.length != initialized.length )return;
-        for(int i =0 ; i < this.initialized.length ; ++i)this.initialized[i] = initialized[i];
-#else
-        this.initialized = initialized;
-#end
+        toPrimitive(initialized,this.initialized);
     }
+#else
+    public void setInitialized($table.stateVarType() initialized){
+        $table.stateVarAssignStatement("initialized","this.initialized");
+    }
+#end
     public ${beanClass}(){
         super();
     }
