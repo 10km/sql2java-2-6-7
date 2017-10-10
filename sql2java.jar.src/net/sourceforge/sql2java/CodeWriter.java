@@ -251,6 +251,7 @@ public class CodeWriter {
 		StringWriter sw = new StringWriter();
 		// reset
 		save_current_file = true;
+		this.current_vc.put("template", new File(templateName).getName());
 		Velocity.mergeTemplate((String) templateName, (String) "UTF-8", (Context) this.current_vc, (Writer) sw);
 		if(save_current_file){
 			System.out.println(" .... writing to " + this.current_fullfilename);
