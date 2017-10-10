@@ -12,7 +12,7 @@
 */
 #swiftThriftStruct()
 #set( $fieldIndex = 1 )
-public class ${beanClass}
+public $!final class ${beanClass}
     implements Serializable,BaseBean<$beanClass>,Comparable<$beanClass>,Constant,Cloneable
 #if ($implementsClasses)
     #foreach( $implements in $implementsClasses )$implements #end
@@ -37,7 +37,7 @@ public class ${beanClass}
      *
      * @return true if the current object is new, false if the object is not new
      */
-#swiftThriftField( $fieldIndex )
+#swiftThriftField( $fieldIndex 'Requiredness.REQUIRED')
     public boolean isNew()
     {
         return _isNew;
@@ -57,7 +57,7 @@ public class ${beanClass}
      *
      * @param isNew the boolean value to be assigned to the isNew field
      */
-#swiftThriftField( $null )
+#swiftThriftField( $null $null)
     public void setNew(boolean isNew)
     {
         this._isNew = isNew;
@@ -66,7 +66,7 @@ public class ${beanClass}
      * @return the modified status of columns
      */
 #set( $fieldIndex = $fieldIndex + 1 )
-#swiftThriftField( $fieldIndex )
+#swiftThriftField( $fieldIndex 'Requiredness.REQUIRED')
     public $table.stateVarType() getModified(){
         return modified;
     }
@@ -74,7 +74,7 @@ public class ${beanClass}
     /**
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
-#swiftThriftField( $null )
+#swiftThriftField( $null $null)
     public void setModified($table.stateVarType() modified){
 #if( $table.countColumns() > 64 )    
         if( null == modified || this.modified.length != modified.length )return;
@@ -87,7 +87,7 @@ public class ${beanClass}
      * @return the initialized status of columns
      */
 #set( $fieldIndex = $fieldIndex + 1 )
-#swiftThriftField( $fieldIndex )
+#swiftThriftField( $fieldIndex 'Requiredness.REQUIRED')
     public $table.stateVarType() getInitialized(){
         return initialized;
     }
@@ -95,7 +95,7 @@ public class ${beanClass}
     /**
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
-#swiftThriftField( $null )
+#swiftThriftField( $null $null)
     public void setInitialized($table.stateVarType() initialized){
 #if( $table.countColumns() > 64 )
         if( null == initialized || this.modified.length != initialized.length )return;
@@ -141,7 +141,7 @@ public class ${beanClass}
      *
      * @return the value of $column.getVarName()
      */
-#if(!$column.isDate())#swiftThriftField( $fieldIndex )#end
+#if(!$column.isDate())#swiftThriftField( $fieldIndex $null)#end
     public $column.getJavaType() ${column.getGetMethod()}(){
         return $column.getVarName();
     }
@@ -168,7 +168,7 @@ public class ${beanClass}
      *
      * @param newVal the new value #if ($column.isNotNull())(NOT NULL)#end to be assigned to $column.getVarName()
      */
-#if(!$column.isDate())#swiftThriftField( $null )#end
+#if(!$column.isDate())#swiftThriftField( $null $null)#end
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
 #if ($column.hasCompareTo())
@@ -281,12 +281,12 @@ public class ${beanClass}
      */
     private $foreignClass $referencedBean;
     /** Getter method for {@link #${referencedBean}}. */
-#swiftThriftField( $fieldIndex )
+#swiftThriftField( $fieldIndex $null)
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
-#swiftThriftField( $null )
+#swiftThriftField( $null $null )
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }

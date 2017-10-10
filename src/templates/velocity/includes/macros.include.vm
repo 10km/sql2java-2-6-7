@@ -42,10 +42,11 @@
 #end
 ########################
 #macro(swiftThriftStruct)#if($swiftBeanSupport)@ThriftStruct
+#set($final = 'final' )
 #end#end
 #macro(swiftThriftConstructor)#if($swiftBeanSupport)$!SPACE@ThriftConstructor
 #end#end
-#macro(swiftThriftField $index)#if($swiftBeanSupport)$!SPACE@ThriftField#if($index)($index)#end
+#macro(swiftThriftField $index $requiredness)#if($swiftBeanSupport)$!SPACE@ThriftField#if($index)(value=$index#if($requiredness),requiredness=$requiredness#end)#end
 
 #end#end
 ########################
@@ -53,6 +54,7 @@
 #if($swiftBeanSupport)
 import com.facebook.swift.codec.ThriftStruct;
 import com.facebook.swift.codec.ThriftField;
+import com.facebook.swift.codec.ThriftField.Requiredness;
 #end
 #end
 ########################
