@@ -76,6 +76,13 @@ public class ${javaClassName} implements Constant {
             throw new IllegalArgumentException(String.format("can't convert %s to %s",obj.getClass().getSimpleName(),type.getSimpleName()));
         }
     }
+    private static final boolean bitCheck(int index,long...bits){
+    	return 0 != (bits[index>>6]&(1L<<(index&0x3f)));
+    }
+    private static final long[] bitOR(int index,long... bits){
+    	 bits[index>>6] |= (1L<<(index&0x3f));
+    	 return bits;
+    }
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
@@ -86,17 +93,38 @@ public class ${javaClassName} implements Constant {
      *
      */
     public static class #converterClass(${leftClass})<$rightClass> extends IBeanConverter.AbstractHandle<${leftClass},${rightClass}>{
-        final Map<String,Method> methods = new Hashtable<String,Method>();
+        private final Map<String,Method> methods = new Hashtable<String,Method>();
+        private final Map<String,Integer> rightIndexs = new Hashtable<String,Integer>();
+        private String[] rightFields;
+        private boolean bitCheck(String name,long...bits){
+        	Integer id = rightIndexs.get(name);
+        	return (null == id)?false:BeanConverterUtils.bitCheck(id.intValue(),bits);
+        }
+        private long[] bitOR(String name,long... bits){
+            return BeanConverterUtils.bitOR(rightIndexs.get(name),bits);
+        }
         /** usage: <pre>new #converterClass(${leftClass})&lt;Model&gt;(){};</pre> */
-        public #converterClass(${leftClass})(){
+        public #converterClass(${leftClass})(String javaFields){
             super();
-            init();
+            init(javaFields);
+        }
+        public #converterClass(${leftClass})(){
+            this(null);
+        }
+        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass,String javaFields){
+            super(leftClass,rightClass);
+            init(javaFields);
         }
         public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass){
-            super(leftClass,rightClass);
-            init();
+            this(leftClass,rightClass,null);
         }
-        private void init(){
+        private void init(String javaFields){
+            if(null == javaFields){
+                javaFields = $table.name.toUpperCase()_JAVA_FIELDS;
+            }
+            rightFields = javaFields.split(",");
+            for(int i = 0 ; i < rightFields.length; ++i)
+                rightIndexs.put(rightFields[i],i);
             try{
                 methods.put("isNew",rightType.getMethod("isNew"));
                 methods.put("setNew",rightType.getMethod("setNew",boolean.class));
@@ -134,13 +162,17 @@ public class ${javaClassName} implements Constant {
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method getterMethod;
-                $table.stateVarType() modified = (${table.stateVarType()})methods.get("getModified").invoke(right);
+                left.resetIsModified();
+                long[] modified;
+                if(rightFields.length > 64)
+                    modified = (long[])methods.get("getModified").invoke(right);
+                else
+                    modified = new long[]{(long)methods.get("getModified").invoke(right)};
 #foreach ( $column in $table.columns )
-                if( (0L !=  ${column.bitAndExpression("modified")}) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
+                if( bitCheck("$column.getJavaName()",modified) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
                     left.$column.getSetMethod()(convert(${column.getJavaType()}.class,getterMethod.invoke(right)));
 #end
                 left.isNew((boolean)methods.get("isNew").invoke(right));
-                left.setModified(modified);
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
@@ -152,14 +184,21 @@ public class ${javaClassName} implements Constant {
         protected void _toRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method setterMethod;
+                long[] modified = new long[(rightFields.length + 63)>>6];
+                for(int i = 0 ;i < modified.length; ++i)modified[i] = 0L;
 #foreach ( $column in $table.columns )
 #if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 #end
-#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}())
+#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}()){
 #if( $ignorefields.contains($column.name) )// #end                    setterMethod.invoke(right,convert(setterMethod.getParameterTypes()[0],left.${column.getGetMethod()}()));
+#if( $ignorefields.contains($column.name) )// #end                    bitOR("$column.getJavaName()",modified);
+#if( $ignorefields.contains($column.name) )// #end                }
 #end
                 methods.get("setNew").invoke(right,left.isNew());
-                methods.get("setModified").invoke(right,left.getModified());
+                if( modified.length > 1)
+                    methods.get("setModified").invoke(right,modified);
+                else
+                    methods.get("setModified").invoke(right,modified[0]);
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
