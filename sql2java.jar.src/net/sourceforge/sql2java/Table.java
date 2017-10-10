@@ -914,7 +914,14 @@ public class Table {
 			return "0L";
 		}
 	}
-	
+	public String stateVarAssignStatement(String src,String dst){
+		if(countColumns()>64){
+	        return "if( null != ${src} && ${dst}.length != ${src}.length )System.arraycopy(${src},0,${dst},0,${dst}.length)"
+	        		.replace("${src}", src).replace("${dst}", dst);
+		}else{
+			return dst + " = " + src;
+		}
+	}
 	protected Database getDatabase() {
 		return database;
 	}
