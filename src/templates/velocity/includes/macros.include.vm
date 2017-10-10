@@ -46,8 +46,7 @@
 #end#end
 #macro(swiftThriftConstructor)#if($swiftBeanSupport)$!SPACE@ThriftConstructor
 #end#end
-#macro(swiftThriftField $index $requiredness)#if($swiftBeanSupport)$!SPACE@ThriftField#if($index)(value=$index#if($requiredness),requiredness=$requiredness#end)#end
-
+#macro(swiftThriftField $index $requiredness $name)#if($swiftBeanSupport)$!SPACE@ThriftField(#if($index)value=$index#end#if($name),name="$name"#end#if($requiredness),requiredness=$requiredness#end)
 #end#end
 ########################
 #macro(swiftImport)
