@@ -82,24 +82,17 @@ public interface $javaClassName {
     // COLUMN NAME DECLARE
     //////////////////////////////////////    
 #foreach($t in $tables)
+    /////////////////// $t.name ////////////
     /** Contains all the full fields of the $t.name table.*/
-    public static final String $t.name.toUpperCase()_FULL_FIELDS =#foreach ( $column in $t.columns )
-#if ( $velocityCount > 1 )
-
-                            + ",#else"#end$column.getFullName()"#end;
-#end
-#foreach($t in $tables)
+    public static final String $t.name.toUpperCase()_FULL_FIELDS ="#join($t.columns '$e.fullName' '"
+                            + ",')";
     /** Field that contains the comma separated fields of the $t.name table. */
-    public static final String $t.name.toUpperCase()_FIELDS = #foreach( $column in $t.columns )
-#if ( $velocityCount > 1 )
-
-                            + ",#else"#end$column.getName()"#end;
+    public static final String $t.name.toUpperCase()_FIELDS = "#join($t.columns '$e.name' '"
+                            + ",')";
     public static final java.util.List<String> $t.name.toUpperCase()_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_FIELDS.split(","));
     /** Field that contains the comma separated java fields of the $t.name table. */
-    public static final String $t.name.toUpperCase()_JAVA_FIELDS = #foreach( $column in $t.columns )
-#if ( $velocityCount > 1 )
-
-                            + ",#else"#end$column.getJavaName()"#end;
+    public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.getJavaName()' '"
+                            + ",')";
     public static final java.util.List<String> $t.name.toUpperCase()_JAVA_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_JAVA_FIELDS.split(","));
 #end
 }
