@@ -771,6 +771,15 @@ public class Table {
 	public String asCacheManagerClass(boolean nsp) {
 		return this.convertName("cache_manager",nsp);
 	}
+	public String asVar(String prefix,String suffix){
+		return StringUtilities.convertName( prefix + getBasename(true) +  suffix,true);
+	}
+	public String asVar(String prefix){
+		return asVar(prefix,"");
+	}
+	public String asVar(){
+		return asVar("","");
+	}
 	public String asCacheVarName(){
 		return StringUtilities.convertName( getBasename(true) +  "_cache",true);
 	}
