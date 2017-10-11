@@ -10,6 +10,8 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Hashtable;
+import java.util.List;
+
 import ${gpkg}.IBeanConverter;
 
 #foreach ( $table in $tables )
@@ -22,6 +24,14 @@ import ${gpkg}.${table.asBeanClassNSP()};
  *
  */
 public class ${javaClassName} implements Constant {
+    public static class NullCastPrimitiveException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        public NullCastPrimitiveException() {
+        }
+        public NullCastPrimitiveException(String message) {
+            super(message);
+        }
+    }
     private ${javaClassName}(){}
     /**
      * 返回buffer中所有字节(position~limit),不改变buffer状态
@@ -38,124 +48,182 @@ public class ${javaClassName} implements Constant {
             buffer.position(pos);
         }
     }
+    private static final List<Long> toList(long[] array) {
+        java.util.ArrayList<Long> result = new java.util.ArrayList<Long>(array.length);
+        for (int i = 0; i < array.length; i++) {
+            result.add(new Long(array[i]));
+        }
+        return result;
+    }
+    private static final long[] toPrimitive(List<Long> list) {        
+        long[]dst = new long[list.size()];
+        Long element;
+        for (int i = 0; i < dst.length; i++) {
+            if(null != (element = list.get(i)))
+                dst[i] = element.longValue();
+        }
+        return dst;
+    }
     /**
-     * {@code obj}转为{@code type}指定的类型
-     * @param type
-     * @param obj
+     * {@code source}转为{@code type}指定的类型
+     * @param type destination type
+     * @param source  source object
      * @return
      */
     @SuppressWarnings({ "unchecked" })
-    private static final <T> T convert(Class<T> type,Object obj){
+    private static final <T> T cast(Class<T> type,Object source){
         try{
-            if(null ==obj && type.isPrimitive())
-                throw new IllegalArgumentException(String.format("can't convert null to primitive type %s",type.getSimpleName()));
-            return (T) obj;
-        }catch(ClassCastException ce){
+            if(null ==source && type.isPrimitive())
+                throw new NullCastPrimitiveException(String.format("can't convert null to primitive type %s",type.getSimpleName()));
+            return (T) source;
+        }catch(ClassCastException cce){
+            // long[] -> List  
+            if(List.class.isAssignableFrom(type) && (source instanceof long[])){
+                return (T) toList((long[]) source);
+            }
+            // List -> long[]   
+            if(long[].class == type && (source instanceof List)){
+                return (T) toPrimitive( (List<Long>) source);
+            }
             // Long -> Date
-            if(java.util.Date.class.isAssignableFrom(type) && (obj instanceof Long)){
+            if(java.util.Date.class.isAssignableFrom(type) && (source instanceof Long)){
                 try {
                     // call constructor,such as  java.util.Date#Date(long), java.sql.Time.Time(long)
-                    return type.getConstructor(long.class).newInstance(obj);
+                    return type.getConstructor(long.class).newInstance(source);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             // Date -> Long,long
-            if( (long.class == type || Long.class == type) && obj instanceof java.util.Date){
-                	Long time = ((java.util.Date)obj).getTime();
+            if( (long.class == type || Long.class == type) && source instanceof java.util.Date){
+                    Long time = ((java.util.Date)source).getTime();
                     return (T)time;
             }
             // byte[] -> ByteBuffer
-            if(ByteBuffer.class == type && obj instanceof byte[]){
-                return (T) ByteBuffer.wrap((byte[]) obj);
+            if(ByteBuffer.class == type && source instanceof byte[]){
+                return (T) ByteBuffer.wrap((byte[]) source);
             }
             // ByteBuffer -> byte[]
-            if(byte[].class == type && obj instanceof ByteBuffer){
-                return (T) getBytesInBuffer((ByteBuffer) obj);
+            if(byte[].class == type && source instanceof ByteBuffer){
+                return (T) getBytesInBuffer((ByteBuffer) source);
             }
-            throw new IllegalArgumentException(String.format("can't convert %s to %s",obj.getClass().getSimpleName(),type.getSimpleName()));
+            throw cce;
         }
     }
     private static final boolean bitCheck(int index,long...bits){
-    	return 0 != (bits[index>>6]&(1L<<(index&0x3f)));
+        return 0 != (bits[index>>6]&(1L<<(index&0x3f)));
     }
     private static final long[] bitOR(int index,long... bits){
-    	 bits[index>>6] |= (1L<<(index&0x3f));
-    	 return bits;
+         bits[index>>6] |= (1L<<(index&0x3f));
+         return bits;
     }
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
-#set ( $rightClass = "N_${table.asCoreClassNSP().toUpperCase()}" )
+#set ( $rightClass = "R_${table.asCoreClassNSP().toUpperCase()}" )
     /**
      * implementation of {@link IBeanConverter} by reflect<br>
-     * generic type converter for {@link $leftClass} to $rightClass <br>
+     * generic type converter between {@link $leftClass} and $rightClass <br>
      * @author guyadong
+     * @param <$rightClass> right type
      *
      */
     public static class #converterClass(${leftClass})<$rightClass> extends IBeanConverter.AbstractHandle<${leftClass},${rightClass}>{
         private final Map<String,Method> methods = new Hashtable<String,Method>();
         private final Map<String,Integer> rightIndexs = new Hashtable<String,Integer>();
-        private String[] rightFields;
+        private final Map<String, Class<?>> setterParams = new Hashtable<String,Class<?>>();
+
         private boolean bitCheck(String name,long...bits){
-        	Integer id = rightIndexs.get(name);
-        	return (null == id)?false:BeanConverterUtils.bitCheck(id.intValue(),bits);
+            Integer id = rightIndexs.get(name);
+            return (null == id)?false:BeanConverterUtils.bitCheck(id.intValue(),bits);
         }
         private long[] bitOR(String name,long... bits){
             return BeanConverterUtils.bitOR(rightIndexs.get(name),bits);
         }
-        /** usage: <pre>new #converterClass(${leftClass})&lt;Model&gt;(){};</pre> */
+        private void getGetter(String name){
+            try{
+                methods.put(name,rightType.getMethod(name));
+            }catch(NoSuchMethodException e){}
+        }
+        private void getSetter(String name, Class<?>...types) throws NoSuchMethodException{
+            for(Class<?>paramType:types){
+                try{
+                    methods.put(name,rightType.getMethod(name,paramType));
+                    setterParams.put(name, paramType);
+                    return;
+                }catch(NoSuchMethodException e){
+                    continue;
+                }
+            }
+            throw new NoSuchMethodException();
+        }
+        private void getSetterNoThrow(String name, Class<?>...types){
+        	try{
+        		getSetter(name,types);
+        	}catch(NoSuchMethodException e){}
+        }
+        /** 
+         * usage: <pre>new #converterClass(${leftClass})&lt;Model&gt;(javaFields){};</pre>
+         * @param javaFields a comma splice string,including all field name of $rightClass,<br>
+         *                   if null, use default string:{@link Constant#$table.name.toUpperCase()_JAVA_FIELDS}
+         */
         public #converterClass(${leftClass})(String javaFields){
             super();
             init(javaFields);
         }
+        /** @see #converterClass(${leftClass})(String) */
         public #converterClass(${leftClass})(){
             this(null);
         }
-        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass,String javaFields){
+        /**
+         * @param leftClass
+         * @param rightClass
+         * @param javaFields see also {@link #converterClass(${leftClass})(String)}
+         */
+        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<$rightClass> rightClass,String javaFields){
             super(leftClass,rightClass);
             init(javaFields);
         }
-        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<N_${table.asCoreClassNSP().toUpperCase()}> rightClass){
+        public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<$rightClass> rightClass){
             this(leftClass,rightClass,null);
         }
         private void init(String javaFields){
-            if(null == javaFields){
+            if(null == javaFields || javaFields.isEmpty()){
                 javaFields = $table.name.toUpperCase()_JAVA_FIELDS;
             }
-            rightFields = javaFields.split(",");
-            for(int i = 0 ; i < rightFields.length; ++i)
-                rightIndexs.put(rightFields[i],i);
+            String []rightFields = javaFields.split(",");
+            for(int i = 0 ; i < rightFields.length; ++i){
+                String field = rightFields[i].trim();
+                if(!field.matches("\\w+"))
+                    throw new IllegalArgumentException("invalid 'javaFields':" + javaFields);
+                rightIndexs.put(field,i);
+            }
             try{
                 methods.put("isNew",rightType.getMethod("isNew"));
-                methods.put("setNew",rightType.getMethod("setNew",boolean.class));
                 methods.put("getModified",rightType.getMethod("getModified"));
-                methods.put("setModified",rightType.getMethod("setModified",${table.stateVarType()}.class));
-            }catch(RuntimeException e){
-                throw e;
-            }catch(Exception e){
+                getSetter("setNew",boolean.class);
+                if(rightIndexs.size() > 64)
+                    getSetter("setModified",long[].class,List.class);
+                else
+                    getSetter("setModified",long.class);
+            }catch(NoSuchMethodException e){
                 throw new RuntimeException(e);
             }
-#foreach ( $column in $table.columns )  
-            try{         
-                methods.put("${column.getGetMethod()}",rightType.getMethod("${column.getGetMethod()}"));
+#foreach ( $column in $table.columns ) 
+#set ( $methodName = ${column.getSetMethod()}) 
+#set ( $javaType = ${column.getJavaType()})
+#set ( $javaPrimaryType = ${column.getJavaPrimaryType()})
+            getGetter("$methodName");
 #if ( $column.hasPrimaryType())
-                try{
-                    methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
-                }catch(NoSuchMethodException nm){
 #if($column.isDate())
-                    try{
-                        methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaPrimaryType()}.class));
-                    }catch(NoSuchMethodException nm2){
-                        methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",Long.class));
-                    }
+            getSetterNoThrow("$methodName",${javaType}.class,Long.class,long.class);  
 #else
-                    methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaPrimaryType()}.class));
+            getSetterNoThrow("$methodName",${javaType}.class,${javaPrimaryType}.class);                    
 #end
-                }
+#elseif($column.isBinary())
+            getSetterNoThrow("$methodName",java.nio.ByteBuffer.class,byte[].class);                    
 #else
-                methods.put("${column.getSetMethod()}",rightType.getMethod("${column.getSetMethod()}",${column.getJavaType()}.class));
+            getSetterNoThrow("$methodName",${javaType}.class); 
 #end
-            }catch(Exception e){}
 #end
         }
         @Override
@@ -164,13 +232,13 @@ public class ${javaClassName} implements Constant {
                 Method getterMethod;
                 left.resetIsModified();
                 long[] modified;
-                if(rightFields.length > 64)
+                if(rightIndexs.size() > 64)
                     modified = (long[])methods.get("getModified").invoke(right);
                 else
                     modified = new long[]{(long)methods.get("getModified").invoke(right)};
 #foreach ( $column in $table.columns )
                 if( bitCheck("$column.getJavaName()",modified) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
-                    left.$column.getSetMethod()(convert(${column.getJavaType()}.class,getterMethod.invoke(right)));
+                    left.$column.getSetMethod()(cast(${column.getJavaType()}.class,getterMethod.invoke(right)));
 #end
                 left.isNew((boolean)methods.get("isNew").invoke(right));
             }catch(RuntimeException e){
@@ -184,19 +252,26 @@ public class ${javaClassName} implements Constant {
         protected void _toRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method setterMethod;
-                long[] modified = new long[(rightFields.length + 63)>>6];
+                long[] modified = new long[(rightIndexs.size() + 63)>>6];
                 for(int i = 0 ;i < modified.length; ++i)modified[i] = 0L;
 #foreach ( $column in $table.columns )
-#if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
+#set ( $setterName = ${column.getSetMethod()}) 
+#set($isIgnore = $ignorefields.contains($column.name))
+#if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
+/*
 #end
-#if( $ignorefields.contains($column.name) )// #end                if(null != (setterMethod = methods.get("$column.getSetMethod()")) && left.${column.getInitializedMethod()}()){
-#if( $ignorefields.contains($column.name) )// #end                    setterMethod.invoke(right,convert(setterMethod.getParameterTypes()[0],left.${column.getGetMethod()}()));
-#if( $ignorefields.contains($column.name) )// #end                    bitOR("$column.getJavaName()",modified);
-#if( $ignorefields.contains($column.name) )// #end                }
+               if(null != (setterMethod = methods.get("$setterName")) && left.${column.getInitializedMethod()}()){
+                    try{
+                        setterMethod.invoke(right,cast(setterParams.get("$setterName"),left.${column.getGetMethod()}()));
+                        bitOR("$column.getJavaName()",modified);
+                    }catch(NullCastPrimitiveException e){}
+                }
+#if( $isIgnore )*/
+#end
 #end
                 methods.get("setNew").invoke(right,left.isNew());
                 if( modified.length > 1)
-                    methods.get("setModified").invoke(right,modified);
+                    methods.get("setModified").invoke(right,cast(setterParams.get("setModified"),modified));
                 else
                     methods.get("setModified").invoke(right,modified[0]);
             }catch(RuntimeException e){
@@ -204,7 +279,8 @@ public class ${javaClassName} implements Constant {
             }catch(Exception e){
                 throw new RuntimeException(e);
             }
-        }}; 
+        }
+    }; 
 #end
 
 }
