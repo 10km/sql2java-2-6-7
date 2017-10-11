@@ -708,7 +708,14 @@ public class Column implements Cloneable, Comparable<Column> {
 		}
 		return false;
 	}
-
+	public boolean isBinary() {
+		switch (this.getMappedType()) {
+		case M_BYTES: 
+		case M_BLOB:
+			return true;
+		}
+		return false;
+	}
 	public boolean isCalendar() {
 		return this.getMappedType() == M_CALENDAR;
 	}
