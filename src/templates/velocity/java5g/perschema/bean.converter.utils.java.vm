@@ -6,9 +6,12 @@
 #set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package ${gpkg};
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -24,11 +27,9 @@ import ${gpkg}.${table.asBeanClassNSP()};
  *
  */
 public class ${javaClassName} implements Constant {
-    public static class NullCastPrimitiveException extends RuntimeException {
+    private static class NullCastPrimitiveException extends ClassCastException {
         private static final long serialVersionUID = 1L;
-        public NullCastPrimitiveException() {
-        }
-        public NullCastPrimitiveException(String message) {
+        NullCastPrimitiveException(String message) {
             super(message);
         }
     }
@@ -49,18 +50,19 @@ public class ${javaClassName} implements Constant {
         }
     }
     private static final List<Long> toList(long[] array) {
-        java.util.ArrayList<Long> result = new java.util.ArrayList<Long>(array.length);
+        ArrayList<Long> result = new ArrayList<Long>(array.length);
         for (int i = 0; i < array.length; i++) {
             result.add(new Long(array[i]));
         }
         return result;
     }
     private static final long[] toPrimitive(List<Long> list) {        
-        long[]dst = new long[list.size()];
+        long[] dst = new long[list.size()];
         Long element;
         for (int i = 0; i < dst.length; i++) {
-            if(null != (element = list.get(i)))
-                dst[i] = element.longValue();
+            if(null == (element = list.get(i)))
+                throw new IllegalArgumentException("can't cast List<Long> to long[] because of null element");
+            dst[i] = element.longValue();
         }
         return dst;
     }
@@ -91,7 +93,9 @@ public class ${javaClassName} implements Constant {
                     // call constructor,such as  java.util.Date#Date(long), java.sql.Time.Time(long)
                     return type.getConstructor(long.class).newInstance(source);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    StringWriter writer = new StringWriter();
+                    e.printStackTrace(new PrintWriter(writer));
+                    throw new ClassCastException(writer.toString());
                 }
             }
             // Date -> Long,long
@@ -157,14 +161,14 @@ public class ${javaClassName} implements Constant {
             throw new NoSuchMethodException();
         }
         private void getSetterNoThrow(String name, Class<?>...types){
-        	try{
-        		getSetter(name,types);
-        	}catch(NoSuchMethodException e){}
+            try{
+                getSetter(name,types);
+            }catch(NoSuchMethodException e){}
         }
         /** 
          * usage: <pre>new #converterClass(${leftClass})&lt;Model&gt;(javaFields){};</pre>
          * @param javaFields a comma splice string,including all field name of $rightClass,<br>
-         *                   if null, use default string:{@link Constant#$table.name.toUpperCase()_JAVA_FIELDS}
+         *                   if null or empty, use default string:{@link Constant#$table.name.toUpperCase()_JAVA_FIELDS}
          */
         public #converterClass(${leftClass})(String javaFields){
             super();
@@ -175,6 +179,7 @@ public class ${javaClassName} implements Constant {
             this(null);
         }
         /**
+         * constructor
          * @param leftClass
          * @param rightClass
          * @param javaFields see also {@link #converterClass(${leftClass})(String)}
@@ -183,6 +188,7 @@ public class ${javaClassName} implements Constant {
             super(leftClass,rightClass);
             init(javaFields);
         }
+        /** @see #converterClass(${leftClass})(Class,Class,String) */
         public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<$rightClass> rightClass){
             this(leftClass,rightClass,null);
         }
@@ -208,6 +214,12 @@ public class ${javaClassName} implements Constant {
             }catch(NoSuchMethodException e){
                 throw new RuntimeException(e);
             }
+            getGetter("getInitialized");
+            if(rightIndexs.size() > 64)
+                getSetterNoThrow("setInitialized",long[].class,List.class);
+            else
+                getSetterNoThrow("setInitialized",long.class);
+
 #foreach ( $column in $table.columns ) 
 #set ( $methodName = ${column.getSetMethod()}) 
 #set ( $javaType = ${column.getJavaType()})
@@ -269,6 +281,12 @@ public class ${javaClassName} implements Constant {
 #if( $isIgnore )*/
 #end
 #end
+                if(null != (setterMethod = methods.get("setInitialized"))){
+                    if( modified.length > 1)
+                        setterMethod.invoke(right,cast(setterParams.get("setInitialized"),modified));
+                    else
+                        setterMethod.invoke(right,modified[0]);
+                }
                 methods.get("setNew").invoke(right,left.isNew());
                 if( modified.length > 1)
                     methods.get("setModified").invoke(right,cast(setterParams.get("setModified"),modified));
