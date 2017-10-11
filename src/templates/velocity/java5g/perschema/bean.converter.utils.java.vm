@@ -174,7 +174,7 @@ public class ${javaClassName} implements Constant {
             super();
             init(javaFields);
         }
-        /** @see #converterClass(${leftClass})(String) */
+        /** @see ${esc.hash}#converterClass(${leftClass})(String) */
         public #converterClass(${leftClass})(){
             this(null);
         }
@@ -182,13 +182,13 @@ public class ${javaClassName} implements Constant {
          * constructor
          * @param leftClass
          * @param rightClass
-         * @param javaFields see also {@link #converterClass(${leftClass})(String)}
+         * @param javaFields see also {@link ${esc.hash}#converterClass(${leftClass})(String)}
          */
         public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<$rightClass> rightClass,String javaFields){
             super(leftClass,rightClass);
             init(javaFields);
         }
-        /** @see #converterClass(${leftClass})(Class,Class,String) */
+        /** @see ${esc.hash}#converterClass(${leftClass})(Class,Class,String) */
         public #converterClass(${leftClass}) (Class<${leftClass}> leftClass, Class<$rightClass> rightClass){
             this(leftClass,rightClass,null);
         }
