@@ -1,8 +1,13 @@
 ##$Id: tablelistener.java.vm,v 1.3 2007/11/12 14:06:30 kameleono Exp $
 #parse( "schema.include.vm" )
 #parse( "header.include.vm" )
-$codewriter.setCurrentJavaFilename($gpkg, "TableListener.java")
-package $gpkg;
+$codewriter.setCurrentJavaFilename($schemaPkg, "TableListener.java")
+package $schemaPkg;
+#if(!$isGeneral)
+import ${schemaPkg}.exception.DAOException;
+#set ( $throwsString = " throws DAOException" )
+#end
+
 /**
  * Listener that is notified of table changes.
  * @author guyadong
@@ -17,29 +22,29 @@ public interface TableListener<B>{
     public static class Adapter<B> implements TableListener<B>{
 
         @Override
-        public void beforeInsert(B bean) {}
+        public void beforeInsert(B bean)$!throwsString {}
 
         @Override
-        public void afterInsert(B bean) {}
+        public void afterInsert(B bean)$!throwsString {}
 
         @Override
-        public void beforeUpdate(B bean) {}
+        public void beforeUpdate(B bean)$!throwsString {}
 
         @Override
-        public void afterUpdate(B bean) {}
+        public void afterUpdate(B bean)$!throwsString {}
 
         @Override
-        public void beforeDelete(B bean) {}
+        public void beforeDelete(B bean)$!throwsString {}
 
         @Override
-        public void afterDelete(B bean) {}
+        public void afterDelete(B bean)$!throwsString {}
     }
     /**
      * Invoked just before inserting a B record into the database.
      *
      * @param bean the B that is about to be inserted
      */
-    public void beforeInsert(B bean);
+    public void beforeInsert(B bean)$!throwsString;
 
 
     /**
@@ -47,7 +52,7 @@ public interface TableListener<B>{
      *
      * @param bean the B that was just inserted
      */
-    public void afterInsert(B bean);
+    public void afterInsert(B bean)$!throwsString;
 
 
     /**
@@ -55,7 +60,7 @@ public interface TableListener<B>{
      *
      * @param bean the B that is about to be updated
      */
-    public void beforeUpdate(B bean);
+    public void beforeUpdate(B bean)$!throwsString;
 
 
     /**
@@ -63,7 +68,7 @@ public interface TableListener<B>{
      *
      * @param bean the B that was just updated
      */
-    public void afterUpdate(B bean);
+    public void afterUpdate(B bean)$!throwsString;
 
 
     /**
@@ -71,7 +76,7 @@ public interface TableListener<B>{
      *
      * @param bean the B that is about to be deleted
      */
-    public void beforeDelete(B bean);
+    public void beforeDelete(B bean)$!throwsString;
 
 
     /**
@@ -79,5 +84,6 @@ public interface TableListener<B>{
      *
      * @param bean the B that was just deleted
      */
-    public void afterDelete(B bean);
+    public void afterDelete(B bean)$!throwsString;
 }
+
