@@ -1,0 +1,7 @@
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+#set ( $javaClassName = 'Constant' )
+
+$codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
+package $gpkg;
+#parse( "constant.include.vm" )
