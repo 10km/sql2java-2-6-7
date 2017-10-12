@@ -31,7 +31,7 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
             if(right.${column.getInitializedMethod()}())
                 left.$column.getSetMethod()(right.${column.getGetMethod()}());
 #end
-            left.isNew(right.isNew());
+            left.setNew(right.isNew());
             left.setModified(right.getModified());
         }
 
@@ -43,7 +43,7 @@ public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()
 #if( $ignorefields.contains($column.name) )// #end            if(left.${column.getInitializedMethod()}() )
 #if( $ignorefields.contains($column.name) )// #end                right.$column.getSetMethod()(left.${column.getGetMethod()}());
 #end
-            right.isNew(left.isNew());
+            right.setNew(left.isNew());
             right.setModified(left.getModified());
         }};
         
