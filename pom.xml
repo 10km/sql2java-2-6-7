@@ -36,7 +36,6 @@
 						<property name="sql2java-config" value="${sql2java-config}"/>
 						<property name="generated-src" value="${generated-src}"/>
 						<property name="driver-jar" value="${driver-jar}"/>
-						<property name="ext-src" value="${native-src}"/>
 					</ant>
 				</target>
 				</configuration>

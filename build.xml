@@ -29,8 +29,7 @@
 
     <!-- 指定代码生成位置 WHERE WILL BE GENERATED THE CODE -->
     <property name="generated-src"      value="${basedir}/src/java/"/>
-    <!-- 指定其他编译需要的代码位置 -->
-    <property name="ext-src"            value=""/>
+
     <property name="project-name"       value="sql2java"/>
     <!-- 指定 sql2java配置文件位置 -->
     <property name="sql2java-config"    value="${config}/${project-name}.properties"/>
@@ -236,7 +235,7 @@
                 memoryMaximumSize="512M">
             <classpath refid="lib" />
             <src path="${generated-src}"/>
-            <src path="${ext-src}"/>
+            <src path="${dependency.src}"/>
         </javac>
     </target>
 
