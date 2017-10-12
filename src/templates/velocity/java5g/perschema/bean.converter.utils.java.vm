@@ -2,7 +2,6 @@
 #parse( "header.include.vm" )
 #parse( "macros.include.vm" )
 #set ( $javaClassName = 'BeanConverterUtils' )
-#set( $subpkg=$db.engineAsSubPackage() )
 #set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
 package ${gpkg};
