@@ -57,7 +57,6 @@ public class CodeWriter {
 	String current_filename = "";
 	/** 是否保存当前文件标志,模板可以通过改写此标志,跳过模板生成 */
 	boolean save_current_file = true;
-
 	public CodeWriter(Database db, Properties props) {
 		try {
 			CodeWriter.db = db;
@@ -71,7 +70,6 @@ public class CodeWriter {
 			if (basePackage == null) {
 				throw new Exception("Missing property: codewriter.package");
 			}
-
 			classPrefix = props.getProperty("codewriter.classprefix");
 			this.setDestinationFolder(props.getProperty("codewriter.destdir"));
 			excludeHash = this.setHash(props.getProperty("tables.exclude"));
