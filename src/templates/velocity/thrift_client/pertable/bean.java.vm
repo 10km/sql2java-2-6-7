@@ -1,1 +1,2 @@
+#set ( $ext_template = "ext.thrift.vm")
 #parse( "bean.include.vm" )

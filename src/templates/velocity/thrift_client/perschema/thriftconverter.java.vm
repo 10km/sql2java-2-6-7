@@ -1,0 +1,58 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#if(!$codewriter.existsDependencyPackage() || !$codewriter.existsDependencySrc())
+$codewriter.setSaveCurrentFile(false);
+#stop
+#end
+#set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
+#set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
+#set ( $javaClassName = 'ThriftConverter' )
+#set ( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+$codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
+package ${gpkg};
+#macro( convertVar $c)converter$c#end
+
+public class $javaClassName implements Constant{
+#foreach ( $table in $tables )
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#if($codewriter.existsInDependencyPackage($leftClass))
+#set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )
+    /** {@link IBeanConverter} implemention for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
+    public static final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass})
+
+            = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
+        @Override
+        protected void _fromRight(${leftClass} left, ${rightClass} right) {
+            left.resetIsModified();
+            $table.stateVarType() modified = right.getModified();
+#foreach ( $column in $table.columns )
+            if(0L !=  $column.bitAndExpression("modified"))
+                left.$column.getSetMethod()(right.${column.getGetMethod()}());
+#end
+            left.setNew(right.isNew());
+        }
+
+        @Override
+        protected void _toRight(${leftClass} left, ${rightClass} right) {
+#foreach ( $column in $table.columns )
+#set($isIgnore = $ignorefields.contains($column.name))
+#if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
+/*
+#end
+            if(left.${column.getInitializedMethod()}() ){
+#if($column.isDate())
+                right.$column.getSetMethod()(left.${column.getGetMethod()}().getTime());
+#else
+                right.$column.getSetMethod()(left.${column.getGetMethod()}());
+#end
+            }
+#if( $isIgnore )*/
+#end
+#end
+            right.setNew(left.isNew());
+            right.setModified(left.getModified());
+            right.setInitialized(left.getInitialized());
+        }};
+#end###if($codewriter.existsInDependencyPackage())
+#end
+}

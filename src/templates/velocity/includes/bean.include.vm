@@ -612,4 +612,8 @@ public $!{final} class ${beanClass}
             index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
         return index;    
     }
+####### FOR EXTENSION ##############
+#if($ext_template)
+#parse( "$ext_template" )
+#end
 }

@@ -1,0 +1,33 @@
+#set ( $ext_template = "")
+#if($codewriter.existsInDependencyPackage($beanClass))
+#set ( $thriftClass = "${codewriter.getDependencyPackage()}.${beanClass}" )
+    /////// FOR THRIFT //////
+    /** 
+     * cast {@code this} to {@link $thriftClass}
+     * @see {@link ThriftConverter#converter${beanClass}}
+     */
+    public $thriftClass toThrift(){
+        return ThriftConverter.converter${beanClass}.toRight(this);
+    }
+    /** 
+     * copy all fields from {@link $thriftClass},do nothing if {@code thriftBean} is null
+     * @return current object {@code this}
+     * @see {@link ThriftConverter#converter${beanClass}}
+     */
+    public $beanClass fromThrift($thriftClass thriftBean){
+        if(null != thriftBean){
+            return ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
+        }
+        return this;
+    }
+    /** 
+     * construct new instance from {@link $thriftClass}
+     * @param thriftBean must not be null
+     * @see {@link ThriftConverter#converter${beanClass}}
+     */
+    public $beanClass($thriftClass thriftBean){
+        if(null != thriftBean)
+            throw new NullPointerException();
+        ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
+    }
+#end
