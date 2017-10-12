@@ -57,6 +57,7 @@ public class CodeWriter {
 	String current_filename = "";
 	/** 是否保存当前文件标志,模板可以通过改写此标志,跳过模板生成 */
 	boolean save_current_file = true;
+
 	public CodeWriter(Database db, Properties props) {
 		try {
 			CodeWriter.db = db;
@@ -70,6 +71,7 @@ public class CodeWriter {
 			if (basePackage == null) {
 				throw new Exception("Missing property: codewriter.package");
 			}
+
 			classPrefix = props.getProperty("codewriter.classprefix");
 			this.setDestinationFolder(props.getProperty("codewriter.destdir"));
 			excludeHash = this.setHash(props.getProperty("tables.exclude"));
@@ -519,5 +521,45 @@ public class CodeWriter {
 
 	public void setSaveCurrentFile(boolean save_current_fullfile) {
 		this.save_current_file = save_current_fullfile;
+	}
+
+	public boolean existsDependencySource(String pkg, String className) {
+		String dependencySrc = getDependencySrc();
+		String dependencyPackage = getDependencyPackage();
+		if (null == className || className.isEmpty())
+			return false;
+		if (null == pkg)
+			pkg = dependencyPackage;
+		className = className.indexOf('.')<0?className:className.substring(0, className.indexOf('.'));
+		return new File(dependencySrc + File.separatorChar + pkg.replace('.', File.separatorChar) + File.separatorChar
+				+ className + ".java").exists();
+	}
+	public boolean existsDependencySource(String classFullName) {
+		String dependencySrc = getDependencySrc();
+		if (null == classFullName || classFullName.isEmpty())
+			return false;
+		return new File(dependencySrc + File.separatorChar + classFullName.replace('.', File.separatorChar) ).exists();
+	}
+
+	public boolean existsInDependencyPackage(String className) {
+		return existsDependencySource(null, className);
+	}
+	public String getDependencyPackage(){
+		String dependencyPackage = props.getProperty("dependency.package", "");
+		if ( dependencyPackage.isEmpty())
+			throw new IllegalStateException("'dependency.package' undefined");
+		return dependencyPackage;
+	}
+	public boolean existsDependencyPackage(){
+		return !props.getProperty("dependency.package", "").isEmpty();
+	}
+	public boolean existsDependencySrc(){
+		return !props.getProperty("dependency.src", "").isEmpty();
+	}
+	public String getDependencySrc(){
+		String dependencySrc = props.getProperty("dependency.src", "");
+		if ( dependencySrc.isEmpty())
+			throw new IllegalStateException("'dependency.src' undefined");
+		return dependencySrc;
 	}
 }
