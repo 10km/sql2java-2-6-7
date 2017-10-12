@@ -1,4 +1,22 @@
-##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
+##included template: bean.include.vm
+#parse( "header.include.vm" )
+#parse( "table.include.vm" )
+#parse( "macros.include.vm" )
+#set ( $beanClass = $table.asBeanClass($isGeneral) )
+#set ( $beanClassFullName = "$table.getPackage(true).${beanClass}" )
+$codewriter.setCurrentJavaFilename($table.getPackage(true), "${beanClass}.java")
+package $table.getPackage(true);
+import java.io.Serializable;
+#if(!$isGeneral)
+import ${schemaPkg}.Constant;
+import ${schemaPkg}.BaseBean;
+#foreach ($foreignTable in $foreignTables)
+import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass()};
+#end
+import ${schemaPkg}.CompareToBuilder;
+import ${schemaPkg}.EqualsBuilder;
+import ${schemaPkg}.HashCodeBuilder;
+#end
 #swiftImport()
 /**
  * $beanClass is a mapping of $table.getName() Table.
@@ -296,7 +314,7 @@ public $!{final} class ${beanClass}
     // referenced bean for FOREIGN KEYS
     //////////////////////////////////////
 #end
-#set ( $foreignClass = "$foreignTable.asBeanClass($generateNative)" )
+#set ( $foreignClass = "$foreignTable.asBeanClass($isGeneral)" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )

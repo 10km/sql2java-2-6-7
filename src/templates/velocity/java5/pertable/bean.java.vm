@@ -1,18 +1,1 @@
-##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
-#parse( "table.include.vm" )
-#parse( "header.include.vm" )
-#parse( "macros.include.vm" )
-#set ( $generateNative = false )
-#set ( $beanClassFullName = "$table.getPackage().${beanClass}" )
-$codewriter.setCurrentJavaFilename("$table.getPackage()", "${beanClass}.java")
-package $table.getPackage();
-import java.io.Serializable;
-import ${pkg}.Constant;
-import ${pkg}.BaseBean;
-#foreach ($foreignTable in $foreignTables)
-import ${foreignTable.getPackage()}.${foreignTable.asBeanClass()};
-#end
-import ${pkg}.CompareToBuilder;
-import ${pkg}.EqualsBuilder;
-import ${pkg}.HashCodeBuilder;
 #parse( "bean.include.vm" )

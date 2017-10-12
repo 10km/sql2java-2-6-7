@@ -1,11 +1,1 @@
-##$Id: bean.java.vm,v 1.8 2008/05/05 11:54:35 kameleono Exp $
-#parse( "table.include.vm" )
-#parse( "header.include.vm" )
-#parse( "macros.include.vm" )
-#set ( $generateNative = true )
-#set ( $beanClass = $table.asBeanClass($generateNative) )
-#set ( $beanClassFullName = "${gpkg}.${beanClass}" )
-$codewriter.setCurrentJavaFilename("$gpkg", "${beanClass}.java")
-package $gpkg;
-import java.io.Serializable;
 #parse( "bean.include.vm" )
