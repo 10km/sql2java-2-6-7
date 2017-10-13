@@ -4,15 +4,16 @@
 $codewriter.setSaveCurrentFile(false);
 #stop
 #end
-#set ($parser = $codewriter.loadExtensionToolInstance("gu.rpc.thrift.SwiftServiceParser"))
+#set ($parser = $codewriter.loadExtensionTool("gu.rpc.thrift.SwiftServiceParser"))
 // $parser.class.name 
 #set ($classpath = ['D:/j/facelog/facelog-main/target/classes','D:/j/facelog/db/target/classes'])
-// $classpath.getClass().getName()
+// classloader $parser.class.classLoader.class.name
+// classloader.parent $parser.class.classLoader.parent.class.name
 #set ($metadata = $parser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 
 /*
 $metadata
-##$SwiftServiceParser.output($metadata)
+$parser.output($metadata)
 */
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
