@@ -1,13 +1,14 @@
 package gu.rpc.thrift;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.PrintStream;
 import java.net.URLClassLoader;
 
 import com.facebook.swift.codec.metadata.ThriftCatalog;
+import com.facebook.swift.codec.metadata.ThriftFieldMetadata;
+import com.facebook.swift.service.metadata.ThriftMethodMetadata;
 import com.facebook.swift.service.metadata.ThriftServiceMetadata;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 /**
  * 解析swift service类型,返回 {@link ThriftServiceMetadata}实例
@@ -23,35 +24,41 @@ public class SwiftServiceUtils {
 		return getServiceMetadata(thriftServiceClassName,(URLClassLoader)null);
 	}
 	public static ThriftServiceMetadata getServiceMetadata(String thriftServiceClassName,ClassLoader classLoader) throws ClassNotFoundException{
-		Preconditions.checkNotNull(thriftServiceClassName,"thriftServiceClass is null");
+		if(Strings.isNullOrEmpty(thriftServiceClassName))
+			throw new IllegalArgumentException("thriftServiceClass is null");
 		Class<?> swiftServiceType;
 		if(null == classLoader)
 			classLoader =Thread.currentThread().getContextClassLoader();
-		swiftServiceType = Class.forName(thriftServiceClassName,true,classLoader);
+		swiftServiceType = Class.forName(thriftServiceClassName,false,classLoader);
 		return getServiceMetadata(swiftServiceType);
 	}
 	
-	public static ThriftServiceMetadata getServiceMetadata(String thriftServiceClassName,String... classPath) throws ClassNotFoundException{
-		if(null == classPath || 0 == classPath.length)
-			throw new IllegalArgumentException("classPath must not be null or empty");
-		return getServiceMetadata(thriftServiceClassName,makeURLClassLoader(classPath));
+	public static ThriftServiceMetadata getServiceMetadata(String thriftServiceClassName,String... classpath) throws ClassNotFoundException{
+		return getServiceMetadata(thriftServiceClassName,ClassLoaderUtils.makeURLClassLoader(classpath));
 	}
-	
-	private static URLClassLoader makeURLClassLoader(String[] classPath){
-		URL[] urls = new URL[classPath.length];
-		for(int i=0;i<urls.length;++i){
-			String path = classPath[i];
-			Preconditions.checkNotNull(path,"classPath have null or empty element");
-			File file = new File(path);
-			if(file.exists())
-				throw new IllegalArgumentException("no exists : "+ file.toString());
-			try {
-				urls[i]= file.getAbsoluteFile().toURI().toURL();					
-			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException(e);
+	/**
+	 * @param thriftServiceClassName
+	 * @param recursive
+	 * @param path
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
+	public static ThriftServiceMetadata getServiceMetadata(String thriftServiceClassName,boolean recursive,String path) throws ClassNotFoundException{
+		return getServiceMetadata(thriftServiceClassName,ClassLoaderUtils.makeURLClassLoader(recursive,path));
+	}
+	public static final void output(ThriftServiceMetadata metadata, PrintStream stream){
+		int mcount=0;
+		stream.println(metadata.getName());
+		for( ThriftMethodMetadata method: metadata.getDeclaredMethods().values()){
+			stream.printf("%d name: %s ", mcount++, method.getName());
+			if(!method.getMethod().getName().equals(method.getName()))
+				stream.printf("original name: %s ", method.getMethod().getName());
+			stream.println();
+			int pcount = 0;
+			for(ThriftFieldMetadata parameter:method.getParameters()){
+				stream.printf("\tparam %d: %s %s\n",pcount++, parameter.getName(),parameter.getThriftType().getJavaType());
 			}
 		}
-		return URLClassLoader.newInstance(urls);
 	}
 	private SwiftServiceUtils() {}
 
