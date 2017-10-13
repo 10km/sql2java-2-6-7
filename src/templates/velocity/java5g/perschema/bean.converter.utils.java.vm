@@ -246,12 +246,12 @@ public class ${javaClassName} implements Constant {
                 if(rightIndexs.size() > 64)
                     modified = (long[])methods.get("getModified").invoke(right);
                 else
-                    modified = new long[]{(long)methods.get("getModified").invoke(right)};
+                    modified = new long[]{(Long)methods.get("getModified").invoke(right)};
 #foreach ( $column in $table.columns )
                 if( bitCheck("$column.getJavaName()",modified) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
                     left.$column.getSetMethod()(cast(${column.getJavaType()}.class,getterMethod.invoke(right)));
 #end
-                left.isNew((boolean)methods.get("isNew").invoke(right));
+                left.isNew((Boolean)methods.get("isNew").invoke(right));
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
