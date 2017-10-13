@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -559,5 +560,28 @@ public class CodeWriter {
 		if ( dependencySrc.isEmpty())
 			throw new IllegalStateException("'dependency.src' undefined");
 		return dependencySrc;
+	}
+	public static Class<?> loadExtensionClass(String classname,ClassLoader classLoader) throws ClassNotFoundException{
+		if(null == classLoader)
+			throw new NullPointerException();
+		return Class.forName(classname,true,classLoader);
+	}
+	public static Class<?> loadExtensionClass(String classname,boolean recursive,String[] libdirs,String[] classpath) throws ClassNotFoundException{
+		URLClassLoader classLoader = ClassLoaderUtils.makeURLClassLoader(recursive, libdirs, classpath);
+		return loadExtensionClass(classname,classLoader);
+	}
+	public static Class<?> loadExtensionClass(String classname) throws ClassNotFoundException{
+		String[] libdirs = getPropertyExploded("extension.tools.libdirs");
+		String[] classpath = getPropertyExploded("extension.tools.classpath");
+		if( 0 == libdirs.length && 0 == classpath.length)
+			throw new IllegalStateException("property 'extension.tools.libdirs' and 'extension.tools.classpath' is all undefined");
+
+		return loadExtensionClass(classname,true,libdirs,classpath);
+	}
+	
+	public Object loadExtensionToolInstance(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+		Class<?> clazz = loadExtensionClass(classname);
+		this.current_vc.put(clazz.getSimpleName(), clazz.newInstance());
+		return clazz.newInstance();	
 	}
 }
