@@ -191,6 +191,7 @@ public class CodeWriter {
 		this.vc.put("gpkg", (Object) generalPackage);
 		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
 		this.vc.put("isGeneral", isGeneral());
+		this.vc.put("swiftParser", loadSwiftServiceParser());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
 		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
 		this.vc.put("fecha", (Object) new Date());
@@ -575,13 +576,18 @@ public class CodeWriter {
 		String[] classpath = getPropertyExploded("extension.tools.classpath");
 		if( 0 == libdirs.length && 0 == classpath.length)
 			throw new IllegalStateException("property 'extension.tools.libdirs' and 'extension.tools.classpath' is all undefined");
-
 		return loadExtensionClass(classname,true,libdirs,classpath);
 	}
 	
-	public Object loadExtensionToolInstance(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+	public Object loadExtensionTool(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
 		Class<?> clazz = loadExtensionClass(classname);
-		this.current_vc.put(clazz.getSimpleName(), clazz.newInstance());
 		return clazz.newInstance();	
+	}
+	public Object loadSwiftServiceParser(){
+		try {
+			return Class.forName("gu.rpc.thrift.SwiftServiceParser").newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
