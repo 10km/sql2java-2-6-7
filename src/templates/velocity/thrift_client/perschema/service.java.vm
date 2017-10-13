@@ -1,0 +1,27 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#if(!$codewriter.existsDependencyPackage() || !$codewriter.existsDependencySrc())
+$codewriter.setSaveCurrentFile(false);
+#stop
+#end
+#set ($parser = $codewriter.loadExtensionToolInstance("gu.rpc.thrift.SwiftServiceParser"))
+// $parser.class.name 
+#set ($classpath = ['D:/j/facelog/facelog-main/target/classes','D:/j/facelog/db/target/classes'])
+// $classpath.getClass().getName()
+#set ($metadata = $parser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
+
+/*
+$metadata
+##$SwiftServiceParser.output($metadata)
+*/
+#set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
+#set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
+#set ( $javaClassName = 'Service' )
+#set ( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+$codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
+package ${gpkg};
+#macro( convertVar $c)converter$c#end
+
+public class $javaClassName implements Constant{
+
+}
