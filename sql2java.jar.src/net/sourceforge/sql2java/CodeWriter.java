@@ -191,7 +191,6 @@ public class CodeWriter {
 		this.vc.put("gpkg", (Object) generalPackage);
 		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
 		this.vc.put("isGeneral", isGeneral());
-		this.vc.put("swiftParser", loadSwiftServiceParser());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
 		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
 		this.vc.put("fecha", (Object) new Date());
@@ -562,15 +561,33 @@ public class CodeWriter {
 			throw new IllegalStateException("'dependency.src' undefined");
 		return dependencySrc;
 	}
-	public static Class<?> loadExtensionClass(String classname,ClassLoader classLoader) throws ClassNotFoundException{
-		if(null == classLoader)
-			throw new NullPointerException();
-		return Class.forName(classname,true,classLoader);
+	
+	private static Class<?> loadClass(String classname,ClassLoader classLoader) throws ClassNotFoundException{
+		return null == classLoader?
+				Class.forName(classname) :	Class.forName(classname,true,classLoader);
 	}
-	public static Class<?> loadExtensionClass(String classname,boolean recursive,String[] libdirs,String[] classpath) throws ClassNotFoundException{
-		URLClassLoader classLoader = ClassLoaderUtils.makeURLClassLoader(recursive, libdirs, classpath);
-		return loadExtensionClass(classname,classLoader);
+	/**
+	 * 加载扩展类
+	 * @param classname
+	 * @param recursive
+	 * @param libdirs
+	 * @param classpath
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @see {@link ClassLoaderUtils#makeURLClassLoader(ClassLoader, boolean, String[], String[])}
+	 */
+	private static Class<?> loadExtensionClass(String classname,boolean recursive,String[] libdirs,String[] classpath) throws ClassNotFoundException{
+		URLClassLoader classLoader = ClassLoaderUtils.makeURLClassLoader(CodeWriter.class.getClassLoader(),recursive, libdirs, classpath);
+		return loadClass(classname,classLoader);
 	}
+	/**
+	 * 读取 'extension.tools.libdirs','extension.tools.classpath'分别对应{@code libdirs,classpath}参数<br>
+	 * 如果上述property都没有定义则抛出异常
+	 * @param classname
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @see {@link #loadExtensionClass(String, boolean, String[], String[])}
+	 */
 	public static Class<?> loadExtensionClass(String classname) throws ClassNotFoundException{
 		String[] libdirs = getPropertyExploded("extension.tools.libdirs");
 		String[] classpath = getPropertyExploded("extension.tools.classpath");
@@ -579,15 +596,29 @@ public class CodeWriter {
 		return loadExtensionClass(classname,true,libdirs,classpath);
 	}
 	
+	/**
+	 * 加载扩展工具对象
+	 * @param classname
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @see {@link #loadExtensionClass(String)}
+	 */
 	public Object loadExtensionTool(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
 		Class<?> clazz = loadExtensionClass(classname);
 		return clazz.newInstance();	
 	}
-	public Object loadSwiftServiceParser(){
-		try {
-			return Class.forName("gu.rpc.thrift.SwiftServiceParser").newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	/**
+	 * 使用当前类的class loader加载工具对象
+	 * @param classname
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public Object loadTool(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+		Class<?> clazz = loadClass(classname,null);
+		return clazz.newInstance();	
 	}
 }
