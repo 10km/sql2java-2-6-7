@@ -12,7 +12,7 @@ $codewriter.setSaveCurrentFile(false);
 #set ($metadata = $parser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 
 /*
-$metadata
+$metadata.class.name
 $parser.output($metadata)
 */
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
