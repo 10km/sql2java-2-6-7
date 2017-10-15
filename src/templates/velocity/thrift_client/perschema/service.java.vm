@@ -4,25 +4,40 @@
 $codewriter.setSaveCurrentFile(false);
 #stop
 #end
-#set ($parser = $codewriter.loadExtensionTool("gu.rpc.thrift.SwiftServiceParser"))
-// $parser.class.name 
+#set ($swiftParser = $codewriter.loadExtensionTool("gu.rpc.thrift.SwiftServiceParser"))
+// $swiftParser.class.name 
 #set ($classpath = ['D:/j/facelog/facelog-main/target/classes','D:/j/facelog/db/target/classes'])
-// classloader $parser.class.classLoader.class.name
-// classloader.parent $parser.class.classLoader.parent.class.name
-#set ($metadata = $parser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
+// classloader $swiftParser.class.classLoader.class.name
+// classloader.parent $swiftParser.class.classLoader.parent.class.name
+#set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 
 /*
 $metadata.class.name
-$parser.output($metadata)
+$swiftParser.output($metadata)
 */
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
-#set ( $javaClassName = 'Service' )
-#set ( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
+#set ( $serviceName = ${metadata.name} )
+#set ( $javaClassName = "${serviceName}Client" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
+import com.facebook.nifty.client.FramedClientConnector;
+import com.facebook.swift.service.ThriftClientManager;
+import static com.google.common.net.HostAndPort.fromParts;
 
 public class $javaClassName implements Constant{
-
+    private final ThriftClientManager clientManager = new ThriftClientManager();
+    private final ${thriftPackage}.$serviceName service;
+    public $javaClassName(String host,int port){
+        try{
+            service = clientManager.createClient(
+                    new FramedClientConnector(fromParts(host, port)),
+                    ${thriftPackage}.${serviceName}.class).get();
+		    } catch (Exception e) {
+		    	throw new RuntimeException(e);
+		    }
+    }
+#foreach($method in $metadata.methods)
+#end
 }
