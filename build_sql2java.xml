@@ -53,6 +53,9 @@
 				<jar destfile="${jar}" update="true" >
 						<fileset dir="${build}/classes" includes="**/Column*.class **/CodeWriter*.class **/Table*.class **/Database*.class **/Index*.class"/>
 						<fileset dir="${src}" includes="**/Column.java **/CodeWriter.java **/Table.java **/Database.java **/Index.java"/>
+						<!-- add class -->
+						<fileset dir="${build}/classes" includes="**/ClassLoaderUtils*.class"/>
+						<fileset dir="${src}" includes="**/ClassLoaderUtils.java"/>
 				</jar>
 		    <copy file="${basedir}/release.sh" todir="${build}" overwrite="true"/>
     </target>
