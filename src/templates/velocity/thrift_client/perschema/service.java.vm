@@ -8,10 +8,7 @@ $codewriter.setSaveCurrentFile(false);
 #set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
 $typeUtils.setPackagePrefix("net.gdface.facelog.db")
 $typeUtils.setConvertVarPrefix("ThriftConverter.converter")
-// $swiftParser.class.name 
-#set ($classpath = ['D:/j/facelog/facelog-main/target/classes','D:/j/facelog/db/target/classes'])
-// classloader $swiftParser.class.classLoader.class.name
-// classloader.parent $swiftParser.class.classLoader.parent.class.name
+#set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 
 /*
