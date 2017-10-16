@@ -6,7 +6,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -223,6 +226,60 @@ public interface IBeanConverter<L,R> {
         public List<L> fromRight(List<R> beans) {
             return this.fromRight(makeLefts(beans),beans);
         }
+        @Override
+        public<V> Map<R,V> toRightKey(Map<L,V> lmap) {
+            if(null == lmap)return null;
+            HashMap<R,V> rmap = new HashMap<R,V>();
+            for(Entry<L, V> entry:lmap.entrySet()){
+                rmap.put(this.toRight(entry.getKey()),entry.getValue());
+            }
+            return rmap;
+        }
+        @Override
+        public<K> Map<K,R> toRightValue(Map<K,L> lmap) {
+            if(null == lmap)return null;
+            HashMap<K, R> rmap = new HashMap<K, R>();
+            for(Entry<K, L> entry:lmap.entrySet()){
+                rmap.put(entry.getKey(), this.toRight(entry.getValue()));
+            }
+            return rmap;
+        }
+        @Override
+        public<V> Map<L,V> fromRightKey(Map<R,V> rmap) {
+            if(null == rmap)return null;
+            HashMap<L,V> lmap = new HashMap<L,V>();
+            for(Entry<R, V> entry:rmap.entrySet()){
+                lmap.put(this.fromRight(entry.getKey()),entry.getValue());
+            }
+            return lmap;
+        }
+        @Override
+        public<K> Map<K,L> fromRightValue(Map<K,R> rmap) {
+            if(null == rmap)return null;
+            HashMap<K, L> lmap = new HashMap<K, L>();
+            for(Entry<K, R> entry:rmap.entrySet()){
+                lmap.put(entry.getKey(), this.fromRight(entry.getValue()));
+            }
+            return lmap;
+        }
+        @Override
+        public Map<R,R> toRight(Map<L,L> lmap) {
+            if(null == lmap)return null;
+            HashMap<R,R> rmap = new HashMap<R,R>();
+            for(Entry<L, L> entry:lmap.entrySet()){
+                rmap.put(this.toRight(entry.getKey()),this.toRight(entry.getValue()));
+            }
+            return rmap;
+        }
+        @Override
+        public Map<L,L> fromRight(Map<R,R> rmap) {
+            if(null == rmap)return null;
+            HashMap<L,L> lmap = new HashMap<L,L>();
+            for(Entry<R, R> entry:rmap.entrySet()){
+                lmap.put(this.fromRight(entry.getKey()),this.fromRight(entry.getValue()));
+            }
+            return lmap;
+        }
     }
 
     /**
@@ -308,5 +365,35 @@ public interface IBeanConverter<L,R> {
      * @return an new list converted from L beans
      */
     public List<R> toRight(Collection<L> beans);
-
+    
+    /**
+     * @param lmap
+     * @return an new map with R key converted from map with L key
+     */
+    public <V> Map<R,V> toRightKey(Map<L,V> lmap);
+    /**
+     * @param lmap
+     * @return an new map with R value converted from map with L value
+     */
+    public <K> Map<K,R> toRightValue(Map<K,L> lmap);
+    /**
+     * @param rmap
+     * @return an new map with L key converted from map with R key
+     */
+    public <V> Map<L,V> fromRightKey(Map<R,V> rmap);
+    /**
+     * @param rmap
+     * @return an new map with L value converted from map with R value
+     */
+    public <K> Map<K,L> fromRightValue(Map<K,R> rmap);
+    /**
+     * @param lmap
+     * @return an new map with R key and  R value converted from map with L key and L value
+     */
+    public Map<R,R> toRight(Map<L,L> lmap);
+    /**
+     * @param rmap
+     * @return an new map with L key and  L value converted from map with R key and R value
+     */
+    public Map<L,L> fromRight(Map<R,R> rmap);
 }
