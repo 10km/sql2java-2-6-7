@@ -32,6 +32,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.EscapeTool;
+import org.apache.velocity.tools.generic.SortTool;
 
 public class CodeWriter {
 	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
@@ -58,6 +59,9 @@ public class CodeWriter {
 	String current_filename = "";
 	/** 是否保存当前文件标志,模板可以通过改写此标志,跳过模板生成 */
 	boolean save_current_file = true;
+	private static String[] extLibdirs;
+	private static String[] extClasspath;
+	private static URLClassLoader extensionClassLoader;
 	public CodeWriter(Database db, Properties props) {
 		try {
 			CodeWriter.db = db;
@@ -71,6 +75,8 @@ public class CodeWriter {
 			if (basePackage == null) {
 				throw new Exception("Missing property: codewriter.package");
 			}
+			extLibdirs = getPropertyExploded("extension.tools.libdirs");
+			extClasspath = getPropertyExploded("extension.tools.classpath");
 			classPrefix = props.getProperty("codewriter.classprefix");
 			this.setDestinationFolder(props.getProperty("codewriter.destdir"));
 			excludeHash = this.setHash(props.getProperty("tables.exclude"));
@@ -182,11 +188,13 @@ public class CodeWriter {
 		Properties vprops = new Properties();
 		vprops.put("file.resource.loader.path", this.getLoadingPath());
 		vprops.put("velocimacro.library", "macros.include.vm");
+		vprops.put("directive.set.null.allowed", "true");
 		Velocity.init((Properties) vprops);
 		this.vc = new VelocityContext();
 		this.vc.put("CodeWriter", (Object) new FieldMethodizer((Object) this));
 		this.vc.put("codewriter", (Object) this);
 		this.vc.put("esc", new EscapeTool());
+		this.vc.put("sorter", new SortTool());
 		this.vc.put("pkg", (Object) basePackage);
 		this.vc.put("gpkg", (Object) generalPackage);
 		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
@@ -561,24 +569,9 @@ public class CodeWriter {
 			throw new IllegalStateException("'dependency.src' undefined");
 		return dependencySrc;
 	}
-	
 	private static Class<?> loadClass(String classname,ClassLoader classLoader) throws ClassNotFoundException{
 		return null == classLoader?
 				Class.forName(classname) :	Class.forName(classname,true,classLoader);
-	}
-	/**
-	 * 加载扩展类
-	 * @param classname
-	 * @param recursive
-	 * @param libdirs
-	 * @param classpath
-	 * @return
-	 * @throws ClassNotFoundException
-	 * @see {@link ClassLoaderUtils#makeURLClassLoader(ClassLoader, boolean, String[], String[])}
-	 */
-	private static Class<?> loadExtensionClass(String classname,boolean recursive,String[] libdirs,String[] classpath) throws ClassNotFoundException{
-		URLClassLoader classLoader = ClassLoaderUtils.makeURLClassLoader(CodeWriter.class.getClassLoader(),recursive, libdirs, classpath);
-		return loadClass(classname,classLoader);
 	}
 	/**
 	 * 读取 'extension.tools.libdirs','extension.tools.classpath'分别对应{@code libdirs,classpath}参数<br>
@@ -589,25 +582,15 @@ public class CodeWriter {
 	 * @see {@link #loadExtensionClass(String, boolean, String[], String[])}
 	 */
 	public static Class<?> loadExtensionClass(String classname) throws ClassNotFoundException{
-		String[] libdirs = getPropertyExploded("extension.tools.libdirs");
-		String[] classpath = getPropertyExploded("extension.tools.classpath");
-		if( 0 == libdirs.length && 0 == classpath.length)
-			throw new IllegalStateException("property 'extension.tools.libdirs' and 'extension.tools.classpath' is all undefined");
-		return loadExtensionClass(classname,true,libdirs,classpath);
+		return loadClass(classname,getExtensionClassLoader());
 	}
-	
-	/**
-	 * 加载扩展工具对象
-	 * @param classname
-	 * @return
-	 * @throws ClassNotFoundException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @see {@link #loadExtensionClass(String)}
-	 */
-	public Object loadExtensionTool(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
-		Class<?> clazz = loadExtensionClass(classname);
-		return clazz.newInstance();	
+	private static synchronized URLClassLoader getExtensionClassLoader(){
+		if(null ==extensionClassLoader){
+			if( 0 == extLibdirs.length && 0 == extClasspath.length)
+				throw new IllegalStateException("property 'extension.tools.libdirs' and 'extension.tools.classpath' is all undefined");
+			extensionClassLoader = ClassLoaderUtils.makeURLClassLoader(CodeWriter.class.getClassLoader(),true, extLibdirs, extClasspath);
+		}
+		return extensionClassLoader;
 	}
 	/**
 	 * 使用当前类的class loader加载工具对象
@@ -621,4 +604,5 @@ public class CodeWriter {
 		Class<?> clazz = loadClass(classname,null);
 		return clazz.newInstance();	
 	}
+
 }
