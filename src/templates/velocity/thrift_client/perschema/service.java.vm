@@ -8,6 +8,7 @@ $codewriter.setSaveCurrentFile(false);
 #set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
 $typeUtils.setPackagePrefix("net.gdface.facelog.db")
 $typeUtils.setConvertVarPrefix("ThriftConverter.converter")
+$typeUtils.setToBytesMethodPrefix("toBytes")
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 
@@ -26,6 +27,10 @@ import com.facebook.nifty.client.FramedClientConnector;
 import com.facebook.swift.service.ThriftClientManager;
 import static com.google.common.net.HostAndPort.fromParts;
 
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.Map.Entry;
+
 public class $javaClassName implements Constant{
     private final ThriftClientManager clientManager = new ThriftClientManager();
     private final ${thriftPackage}.$serviceName service;
@@ -34,9 +39,36 @@ public class $javaClassName implements Constant{
             service = clientManager.createClient(
                     new FramedClientConnector(fromParts(host, port)),
                     ${thriftPackage}.${serviceName}.class).get();
-		    } catch (Exception e) {
-		    	throw new RuntimeException(e);
-		    }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+    }
+    public static final byte[] toBytes(ByteBuffer buffer){
+        if(null == buffer)return null;
+        int pos = buffer.position();
+        try{
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            return bytes;
+        }finally{
+            buffer.position(pos);
+        }
+    }
+    protected static final<V>Map<byte[],V> toBytesKey(java.util.Map<ByteBuffer,V> source){
+        if(null == source)return null;
+        HashMap<byte[], V> dest = new java.util.HashMap<byte[],V>();
+        for(Entry<ByteBuffer, V> entry:source.entrySet()){
+            dest.put(toBytes(entry.getKey()), entry.getValue());
+        }
+        return dest;
+    }
+    protected static final<K> java.util.Map<K,byte[]> toBytesValue(java.util.Map<K,ByteBuffer> source){
+        if(null == source)return null;
+        HashMap<K,byte[]> dest = new java.util.HashMap<K,byte[]>();
+        for(Entry<K, ByteBuffer> entry:source.entrySet()){
+            dest.put(entry.getKey(),toBytes(entry.getValue()));
+        }
+        return dest;        
     }
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #set ($returnType = $method.returnType.javaType)
