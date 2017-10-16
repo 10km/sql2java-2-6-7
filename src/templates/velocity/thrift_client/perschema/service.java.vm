@@ -4,7 +4,10 @@
 $codewriter.setSaveCurrentFile(false);
 #stop
 #end
-#set ($swiftParser = $codewriter.loadExtensionTool("gu.rpc.thrift.SwiftServiceParser"))
+#set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
+#set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
+$typeUtils.setPackagePrefix("net.gdface.facelog.db")
+$typeUtils.setConvertVarPrefix("ThriftConverter.converter")
 // $swiftParser.class.name 
 #set ($classpath = ['D:/j/facelog/facelog-main/target/classes','D:/j/facelog/db/target/classes'])
 // classloader $swiftParser.class.classLoader.class.name
@@ -38,6 +41,22 @@ public class $javaClassName implements Constant{
 		    	throw new RuntimeException(e);
 		    }
     }
-#foreach($method in $metadata.methods)
+#foreach($method in $sorter.sort($metadata.methods.values(),"name"))
+#set ($returnType = $method.returnType.javaType)
+#if(!$typeUtils.isVoid($returnType))
+#set ( $thriftReturn = "return ")
+#else
+#set ( $thriftReturn = $null)
+#end
+
+    public $typeUtils.swiftType($returnType) ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
+#define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name)' ',
+                '))#end
+#if($typeUtils.isTypeOfDao($returnType))
+        $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+#else
+        $!{thriftReturn}$callThrift;
+#end
+    }
 #end
 }
