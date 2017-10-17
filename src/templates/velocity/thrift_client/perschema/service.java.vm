@@ -15,6 +15,8 @@ $typeUtils.setToBytesMethodPrefix("toBytes")
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
+## disable to show @throws tag
+$serviceComment.addExcludeTag("@throws")
 #*
 /*
 $metadata.class.name
