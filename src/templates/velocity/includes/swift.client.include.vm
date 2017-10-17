@@ -1,5 +1,10 @@
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
+#if($isAsync)
+#set ($asyncSuffix = 'Async')
+#else
+#set ($asyncSuffix = $null)
+#end
 #if(!$codewriter.existsDependencyPackage() || !$codewriter.existsDependencySrc())
 $codewriter.setSaveCurrentFile(false);
 #stop
@@ -20,14 +25,18 @@ $codewriter.setSaveCurrentFile(false);
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
 #set ( $serviceName = ${metadata.name} )
-#set ( $javaClassName = "${serviceName}Client" )
+#set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
 import com.facebook.nifty.client.FramedClientConnector;
 import com.facebook.swift.service.ThriftClientManager;
+#if($isAsync)
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+#end
 import static com.google.common.net.HostAndPort.fromParts;
-
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.Map.Entry;
@@ -35,12 +44,12 @@ import java.util.Map.Entry;
 $!{serviceComment.getClassComment()}
 public class $javaClassName implements Constant{
     private final ThriftClientManager clientManager = new ThriftClientManager();
-    private final ${thriftPackage}.$serviceName service;
+    private final ${thriftPackage}.$serviceName#if($isAsync).$asyncSuffix#end service;
     public $javaClassName(String host,int port){
         try{
             service = clientManager.createClient(
                     new FramedClientConnector(fromParts(host, port)),
-                    ${thriftPackage}.${serviceName}.class).get();
+                    ${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end.class).get();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -74,17 +83,31 @@ public class $javaClassName implements Constant{
     }
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #set ($returnType = $method.returnType.javaType)
-#if(!$typeUtils.isVoid($returnType))
+#if(!$typeUtils.isVoid($returnType) || $isAsync)
 #set ( $thriftReturn = "return ")
 #else
 #set ( $thriftReturn = $null)
 #end
+#define($returnTypeStr)
+#set ($tmp = $typeUtils.wrapType($returnType,$isAsync))
+#if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 $!{serviceComment.getMethodComment($method.method)}
-    public $typeUtils.swiftType($returnType) ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
+    public $returnTypeStr ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
 #define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name)' ',
                 '))#end
 #if($typeUtils.isTypeOfDao($returnType))
+#if($isAsync)
+        return Futures.transform(
+                $callThrift, 
+                new Function<$typeUtils.asJavaType($returnType,$thriftPackage),$typeUtils.asJavaType($returnType)>(){
+                    @Override
+                    public $typeUtils.asJavaType($returnType) apply($typeUtils.asJavaType($returnType,$thriftPackage) input) {
+                        return $typeUtils.fromRight($returnType,"input");
+                    }
+                });
+#else
         $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+#end
 #else
         $!{thriftReturn}$callThrift;
 #end

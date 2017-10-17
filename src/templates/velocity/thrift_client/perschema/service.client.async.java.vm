@@ -1,2 +1,2 @@
-#set ($isAsync = false)
+#set ($isAsync = true)
 #parse( "swift.client.include.vm" )
