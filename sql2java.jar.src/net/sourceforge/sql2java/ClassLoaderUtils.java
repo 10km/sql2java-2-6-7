@@ -9,7 +9,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 根据指定的libdirs,classpath创建{@link URLClassLoader}的工具类<br>
+ * classpath中{@value #TOOLS_JAR}代表 {@code $java_home/lib/tools.jar}<br>
+ * 参见 {@link #toJarURLs(String...)}
+ * @author guyadong
+ *
+ */
 public class ClassLoaderUtils {
+	public static final String TOOLS_JAR="${jdk_tools_jar}";
 	/**
 	 * {@code parent}为{@code null}时策略<br>
 	 * {@code defaultParentLoader} 使用default parent class loader,参见{@link URLClassLoader#newInstance(URL[])}<br>
@@ -105,6 +113,9 @@ public class ClassLoaderUtils {
 		for (String path : classpath) {
 			if (null == path || 0 == path.length())
 				throw new IllegalArgumentException("classPaths have null or empty element");
+			if(path.equals(TOOLS_JAR)){
+				path = getJdkToolsJar();
+			}
 			File file = new File(path);
 			if (!file.exists())
 				throw new IllegalArgumentException("no exists : " + file);
@@ -190,5 +201,16 @@ public class ClassLoaderUtils {
 	/** @see #setParentLoaderStrategy(ParentStrategy) */
 	public final static void setParentLoaderStrategy(String parentLoaderStrategy){
 		setParentLoaderStrategy(ParentStrategy.valueOf(parentLoaderStrategy));
+	}
+	
+	/** 返回 jdk/lib/tools.jar路径 */
+	public static String getJdkToolsJar(){
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(System.getProperty("java.home")).append(File.separatorChar);
+		if(System.getProperty("os.name").indexOf("Mac OS")<0){
+			buffer.append("..").append(File.separatorChar).append("lib").append(File.separatorChar).append("tools.jar");
+		}else
+			buffer.append("../Classes/classes.jar");
+		return buffer.toString();		
 	}
 }

@@ -604,5 +604,15 @@ public class CodeWriter {
 		Class<?> clazz = loadClass(classname,null);
 		return clazz.newInstance();	
 	}
-
+	
+	/**
+	 * 返回类的源文件位置
+	 * @param baseDir 源文件夹
+	 * @param clazz
+	 * @return
+	 */
+	public static String getSourceFile(String baseDir,Class<?> clazz){
+		if(null == baseDir || null == clazz )return null;
+		return baseDir + File.separatorChar + clazz.getName().replace('.', File.separatorChar) + ".java";
+	}
 }
