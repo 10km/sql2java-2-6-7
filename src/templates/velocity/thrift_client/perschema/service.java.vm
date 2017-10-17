@@ -8,21 +8,15 @@ $codewriter.setSaveCurrentFile(false);
 #set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
 #set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
 #set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
-$typeUtils.setPackagePrefix("net.gdface.facelog.db")
-$typeUtils.setConvertVarPrefix("ThriftConverter.converter")
-$typeUtils.setToBytesMethodPrefix("toBytes")
+#set ($nothing = $typeUtils.setPackagePrefix("net.gdface.facelog.db"))
+#set ($nothing = $typeUtils.setConvertVarPrefix("ThriftConverter.converter"))
+#set ($nothing = $typeUtils.setToBytesMethodPrefix("toBytes"))
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
 ## disable to show @throws tag
-$serviceComment.addExcludeTag("@throws")
-#*
-/*
-$metadata.class.name
-$swiftParser.output($metadata)
-*/
-*#
+#set ($nothing = $serviceComment.addExcludeTag("@throws"))
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
 #set ( $serviceName = ${metadata.name} )
@@ -51,7 +45,7 @@ public class $javaClassName implements Constant{
                 throw new RuntimeException(e);
             }
     }
-    public static final byte[] toBytes(ByteBuffer buffer){
+    protected static final byte[] toBytes(ByteBuffer buffer){
         if(null == buffer)return null;
         int pos = buffer.position();
         try{
