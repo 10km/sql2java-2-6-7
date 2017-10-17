@@ -6,16 +6,21 @@ $codewriter.setSaveCurrentFile(false);
 #end
 #set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
 #set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
+#set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
+#set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
 $typeUtils.setPackagePrefix("net.gdface.facelog.db")
 $typeUtils.setConvertVarPrefix("ThriftConverter.converter")
 $typeUtils.setToBytesMethodPrefix("toBytes")
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
-
+#set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
+#set ($serviceComment    = $javadocReader.read($serviceSourceFile))
+#*
 /*
 $metadata.class.name
 $swiftParser.output($metadata)
 */
+*#
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
 #set ( $serviceName = ${metadata.name} )
@@ -31,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.Map.Entry;
 
+$!{serviceComment.getClassComment()}
 public class $javaClassName implements Constant{
     private final ThriftClientManager clientManager = new ThriftClientManager();
     private final ${thriftPackage}.$serviceName service;
@@ -77,7 +83,7 @@ public class $javaClassName implements Constant{
 #else
 #set ( $thriftReturn = $null)
 #end
-
+$!{serviceComment.getMethodComment($method.method)}
     public $typeUtils.swiftType($returnType) ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
 #define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name)' ',
                 '))#end
