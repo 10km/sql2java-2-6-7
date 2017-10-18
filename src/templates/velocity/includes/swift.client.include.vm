@@ -2,8 +2,10 @@
 #parse( "schema.include.vm" )
 #if($isAsync)
 #set ($asyncSuffix = 'Async')
+#set ($asyncComment = '(asynchronous implementation)')
 #else
 #set ($asyncSuffix = $null)
+#set ($asyncComment = $null)
 #end
 #if(!$codewriter.existsDependencyPackage() || !$codewriter.existsDependencySrc())
 $codewriter.setSaveCurrentFile(false);
@@ -21,18 +23,23 @@ $codewriter.setSaveCurrentFile(false);
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
 ## disable to show @throws tag
-#set ($nothing = $serviceComment.addExcludeTag("@throws"))
 #set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
 #set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
 #set ( $serviceName = ${metadata.name} )
+## 删除原注释中的 @throws 标记
+#set ($nothing = $serviceComment.addExcludeTag("@throws"))
+## 修改注释
+#set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
+all comment copied from {@code ${swiftParser.serviceClass.name}.java}<br>","OVERWRITE","CLASS"))
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
 import com.facebook.nifty.client.FramedClientConnector;
 import com.facebook.swift.service.ThriftClientManager;
-#if($isAsync)
 import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+#if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 #end
@@ -65,21 +72,21 @@ public class $javaClassName implements Constant{
             buffer.position(pos);
         }
     }
-    protected static final<V>Map<byte[],V> toBytesKey(java.util.Map<ByteBuffer,V> source){
+    protected static final<V>Map<byte[],V> toBytesKey(Map<ByteBuffer,V> source){
         if(null == source)return null;
-        HashMap<byte[], V> dest = new java.util.HashMap<byte[],V>();
+        HashMap<byte[], V> dest = new HashMap<byte[],V>();
         for(Entry<ByteBuffer, V> entry:source.entrySet()){
             dest.put(toBytes(entry.getKey()), entry.getValue());
         }
         return dest;
     }
-    protected static final<K> java.util.Map<K,byte[]> toBytesValue(java.util.Map<K,ByteBuffer> source){
+    protected static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
         if(null == source)return null;
-        HashMap<K,byte[]> dest = new java.util.HashMap<K,byte[]>();
-        for(Entry<K, ByteBuffer> entry:source.entrySet()){
-            dest.put(entry.getKey(),toBytes(entry.getValue()));
-        }
-        return dest;        
+        return Maps.transformValues(source, new Function<ByteBuffer,byte[]>(){
+            @Override
+            public byte[] apply(ByteBuffer input) {
+                return toBytes(input);
+            }});
     }
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #set ($returnType = $method.returnType.javaType)
