@@ -16,7 +16,8 @@ $codewriter.setSaveCurrentFile(false);
 #set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
 #set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
 #set ($nothing = $typeUtils.setPackagePrefix("net.gdface.facelog.db"))
-#set ($nothing = $typeUtils.setConvertVarPrefix("ThriftConverter.converter"))
+## $bean$ÓÃÓÚÌæ»»beanClass
+#set ($nothing = $typeUtils.setConvertVar('converter$bean$'))
 #set ($nothing = $typeUtils.setToBytesMethodPrefix("toBytes"))
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
@@ -48,10 +49,40 @@ import static com.google.common.net.HostAndPort.fromParts;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.Map.Entry;
-
+#macro( convertVar $c)converter$c#end
+#macro( eachDepencyTable $do $separator)
+#set ( $m_count = 0 )
+#foreach($table in $tables)
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#if($codewriter.existsInDependencyPackage($leftClass))
+#set ( $m_count = $m_count + 1 )
+#set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
+#end
+#end
 $!{serviceComment.getClassComment()}
 public class $javaClassName implements Constant{
+    #eachDepencyTable('
+    private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) = ThriftConverter.#convertVar(${leftClass});' $null)
+
+#eachDepencyTable('
+    /** 
+     * @return converter of $leftClass 
+     */
+    public IBeanConverter<$leftClass,$rightClass> get${leftClass}Converter(){
+        return #convertVar(${leftClass});
+    }
+    /** 
+     * setup converter of $leftClass 
+     * @param #convertVar(${leftClass}) must not be null. 
+     */
+    public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass})){
+        if(null == #convertVar(${leftClass}))
+            throw new NullPointerException();
+        this.#convertVar(${leftClass}) = #convertVar(${leftClass});
+    }' $null)
+
     private final ThriftClientManager clientManager = new ThriftClientManager();
+
     private final ${thriftPackage}.$serviceName#if($isAsync).$asyncSuffix#end service;
     public $javaClassName(String host,int port){
         try{
