@@ -39,6 +39,7 @@ import com.facebook.nifty.client.FramedClientConnector;
 import com.facebook.swift.service.ThriftClientManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -80,13 +81,14 @@ public class $javaClassName implements Constant{
         }
         return dest;
     }
+    private static final EntryTransformer<Object,ByteBuffer,byte[]> transformer = new EntryTransformer<Object,ByteBuffer,byte[]>(){
+        @Override
+        public byte[] transformEntry(Object key, ByteBuffer value) {
+             return toBytes(value);
+        }};
     protected static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
         if(null == source)return null;
-        return Maps.transformValues(source, new Function<ByteBuffer,byte[]>(){
-            @Override
-            public byte[] apply(ByteBuffer input) {
-                return toBytes(input);
-            }});
+        return Maps.transformEntries(source, transformer);
     }
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #set ($returnType = $method.returnType.javaType)
