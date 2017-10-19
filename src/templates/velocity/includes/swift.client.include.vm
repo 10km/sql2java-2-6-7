@@ -60,8 +60,9 @@ import java.util.Map.Entry;
 #define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
 $!{serviceComment.getClassComment()}
 class $javaClassName implements Constant{
-    #eachDepencyTable('
-    private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) = ThriftConverter.#convertVar(${leftClass});' $null)
+#set ( $converterInit = $codewriter.getProperty('swift.service.converter.init'))
+    #eachDepencyTable("
+    private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) $!converterInit;" $null)
 
 #eachDepencyTable('
     /** 
