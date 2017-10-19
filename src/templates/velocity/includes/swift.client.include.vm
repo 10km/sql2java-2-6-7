@@ -36,7 +36,6 @@ all comment copied from {@code ${swiftParser.serviceClass.name}.java}<br>","OVER
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 #if($isAsync)
@@ -139,7 +138,7 @@ $!{serviceComment.getMethodComment($method.method)}
 #if($isAsync)
         return Futures.transform(
                 $callThrift, 
-                new Function<$typeUtils.asJavaType($returnType,$thriftPackage),$typeUtils.asJavaType($returnType)>(){
+                new com.google.common.base.Function<$typeUtils.asJavaType($returnType,$thriftPackage),$typeUtils.asJavaType($returnType)>(){
                     @Override
                     public $typeUtils.asJavaType($returnType) apply($typeUtils.asJavaType($returnType,$thriftPackage) input) {
                         return $typeUtils.fromRight($returnType,"input");
