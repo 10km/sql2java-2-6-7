@@ -36,8 +36,6 @@ all comment copied from {@code ${swiftParser.serviceClass.name}.java}<br>","OVER
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
-import com.facebook.nifty.client.FramedClientConnector;
-import com.facebook.swift.service.ThriftClientManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
@@ -45,7 +43,6 @@ import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 #end
-import static com.google.common.net.HostAndPort.fromParts;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -62,7 +59,7 @@ import java.util.Map.Entry;
 #end
 #define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
 $!{serviceComment.getClassComment()}
-public class $javaClassName implements Constant{
+class $javaClassName implements Constant{
     #eachDepencyTable('
     private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) = ThriftConverter.#convertVar(${leftClass});' $null)
 
@@ -83,19 +80,12 @@ public class $javaClassName implements Constant{
         this.#convertVar(${leftClass}) = #convertVar(${leftClass});
     }' $null)
 
-    private final ThriftClientManager clientManager = new ThriftClientManager();
-
     private final $interfaceClass service;
-    public $javaClassName(String host,int port){
-        try{
-            service = clientManager.createClient(
-                    new FramedClientConnector(fromParts(host, port)),
-                    ${interfaceClass}.class).get();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-    }
-    public $javaClassName(${interfaceClass} service){
+    /**
+     * constructor 
+     * @param service a instance of ${interfaceClass} created by Swift, must not be null
+     */
+    $javaClassName(${interfaceClass} service){
     	checkNotNull(service,"service is null");
     	this.service = service;
     }

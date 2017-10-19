@@ -30,13 +30,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import io.airlift.units.Duration;
 /**
- * 
  * Factory class for creating client instance of IFaceLog<br>
  * Example:<br>
  * <pre>
  * // get a asynchronous instance
  * #clientClass(true) client = ClientFactory.builder()
- * .setHostAndPort("127.0.0.1",9090).buildAsync();
+ * .setHostAndPort("127.0.0.1",9090)
+ * .setTimeout(10,TimeUnit.SECONDS)
+ * .buildAsync();
  * </pre>
  * @author guyadong
  *
