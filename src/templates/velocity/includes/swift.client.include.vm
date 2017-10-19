@@ -46,6 +46,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 #end
 import static com.google.common.net.HostAndPort.fromParts;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.Map.Entry;
@@ -59,6 +60,7 @@ import java.util.Map.Entry;
 #set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
 #end
 #end
+#define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
 $!{serviceComment.getClassComment()}
 public class $javaClassName implements Constant{
     #eachDepencyTable('
@@ -83,15 +85,19 @@ public class $javaClassName implements Constant{
 
     private final ThriftClientManager clientManager = new ThriftClientManager();
 
-    private final ${thriftPackage}.$serviceName#if($isAsync).$asyncSuffix#end service;
+    private final $interfaceClass service;
     public $javaClassName(String host,int port){
         try{
             service = clientManager.createClient(
                     new FramedClientConnector(fromParts(host, port)),
-                    ${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end.class).get();
+                    ${interfaceClass}.class).get();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+    }
+    public $javaClassName(${interfaceClass} service){
+    	checkNotNull(service,"service is null");
+    	this.service = service;
     }
     protected static final byte[] toBytes(ByteBuffer buffer){
         if(null == buffer)return null;
