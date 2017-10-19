@@ -60,10 +60,13 @@ import java.util.Map.Entry;
 #define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
 $!{serviceComment.getClassComment()}
 class $javaClassName implements Constant{
+## 从properties 文件中读取converter的初始化代码
 #set ( $converterInit = $codewriter.getProperty('swift.service.converter.init'))
     #eachDepencyTable("
+    /** bean converter between {@link $leftClass} and corresponding thrift bean */
     private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) $!converterInit;" $null)
-
+## 如果properties 文件中没有指定初始化代码,就生成getter/setter方法
+#if(!$converterInit)
 #eachDepencyTable('
     /** 
      * @return converter of $leftClass 
@@ -80,7 +83,7 @@ class $javaClassName implements Constant{
             throw new NullPointerException();
         this.#convertVar(${leftClass}) = #convertVar(${leftClass});
     }' $null)
-
+#end##(!$converterInit)
     private final $interfaceClass service;
     /**
      * constructor 
