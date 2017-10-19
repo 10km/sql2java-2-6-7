@@ -613,7 +613,5 @@ public $!{final} class ${beanClass}
         return index;    
     }
 ####### FOR EXTENSION ##############
-#if($ext_template)
-#parse( "$ext_template" )
-#end
+#parse( $codewriter.getProperty("template.extension.bean"))
 }
