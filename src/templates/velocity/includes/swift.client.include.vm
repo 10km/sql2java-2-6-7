@@ -89,7 +89,7 @@ class $javaClassName implements Constant{
         checkNotNull(service,"service is null");
         this.service = service;
     }
-#foreach($method in $sorter.sort($metadata.methods.values(),"name"))
+#macro(defineMethod $isGeneric)
 #set ($returnType = $method.returnType.javaType)
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
 #set ( $thriftReturn = "return ")
@@ -100,9 +100,9 @@ class $javaClassName implements Constant{
 #set ($tmp = $typeUtils.wrapType($returnType,$isAsync))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 $!{serviceComment.getMethodComment($method.method)}
-    // $velocityCount
-    public $returnTypeStr ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
-#define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name)' ',
+    // $velocityCount 
+    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType, $isGeneric) $e.name' ',')){
+#define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name, $isGeneric)' ',
                 '))#end
 #if($typeUtils.isTypeOfDao($returnType))
 #if($isAsync)
@@ -121,5 +121,12 @@ $!{serviceComment.getMethodComment($method.method)}
         $!{thriftReturn}$callThrift;
 #end
     }
+#end###macro
+## 遍历所有方法输出
+#foreach($method in $sorter.sort($metadata.methods.values(),"name"))
+#defineMethod($null)
+#if($typeUtils.existsBinaryParam($method.method))
+#defineMethod(true)
+#end
 #end
 }
