@@ -93,7 +93,7 @@ public class GenericUtils {
 	 * 
 	 * @param src
 	 *            获取InputStream的源对象
-	 * @return 返回获取的InputStream对象,src为null失败返回null或抛出异常
+	 * @return 返回获取的InputStream对象
 	 * @throws IOException 
 	 */
 	private static <T> InputStream getInputStream(T src) throws IOException {
@@ -127,7 +127,7 @@ public class GenericUtils {
 	 * 
 	 * @param src
 	 *            获取byte[]的源对象
-	 * @return 返回字节数组,参数为{@code null}或类型不对则抛出异常
+	 * @return 返回字节数组,参数类型不对则抛出异常
 	 * @see #toBytes(InputStream)
 	 * @see #toBytes(FileInputStream)
 	 * @see #getInputStream(Object)

@@ -31,7 +31,9 @@ $codewriter.setSaveCurrentFile(false);
 #set ($nothing = $serviceComment.addExcludeTag("@throws"))
 ## 修改注释
 #set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
-all comment copied from {@code ${swiftParser.serviceClass.name}.java}<br>","OVERWRITE","CLASS"))
+all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}<br>
+<b>NOTE:</b>methods with 'Generic' suffix support generic type argument for {@code byte[]}.<br>
+","OVERWRITE","CLASS"))
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
@@ -89,6 +91,10 @@ class $javaClassName implements Constant{
         checkNotNull(service,"service is null");
         this.service = service;
     }
+## 生成方法参数列表
+#macro(param $isGeneric $withType $withName)
+#join($method.parameters '#if($withType)$typeUtils.swiftType($e.thriftType.javaType, $isGeneric)#end#if($withName) $e.name#end' ',')
+#end
 #macro(defineMethod $isGeneric)
 #set ($returnType = $method.returnType.javaType)
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
@@ -99,9 +105,19 @@ class $javaClassName implements Constant{
 #define($returnTypeStr)
 #set ($tmp = $typeUtils.wrapType($returnType,$isAsync))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
+#if($isGeneric)
+    /** 
+     * Generic version of {@link ${esc.hash}${method.method.name}(#param(false true false))}<br>
+     * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
+     * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
+     * @see {@link GenericUtils#toBytes(Object)}
+     */
+    // $velocityCount GENERIC
+#else
 $!{serviceComment.getMethodComment($method.method)}
-    // $velocityCount 
-    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType, $isGeneric) $e.name' ',')){
+    // $velocityCount SERIVCE PORT : $method.name
+#end    
+    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#param($isGeneric true true)){
 #define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name, $isGeneric)' ',
                 '))#end
 #if($typeUtils.isTypeOfDao($returnType))
