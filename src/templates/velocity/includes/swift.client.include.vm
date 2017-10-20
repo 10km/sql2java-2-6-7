@@ -82,6 +82,8 @@ class $javaClassName implements Constant{
         this.#convertVar(${leftClass}) = #convertVar(${leftClass});
     }' $null)
 #end##(!$converterInit)
+
+
     private final $interfaceClass service;
     /**
      * constructor 
