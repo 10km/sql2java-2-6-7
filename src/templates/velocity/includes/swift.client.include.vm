@@ -111,7 +111,7 @@ class $javaClassName implements Constant{
         public ByteBuffer fromRight(byte[] input) {
             return null == input ? null : ByteBuffer.wrap(input);
         }};
-    /** get a view of Map<ByteBuffer,V> with {@code byte[]} key type */
+    /** get a view of {@code Map<ByteBuffer,V>} with {@code byte[]} key type */
     protected static final<V>Map<byte[],V> toBytesKey(Map<ByteBuffer,V> source){
         if(null == source)return null;
         return CollectionUtils.tranformKeys(source, dualTransformer);
@@ -121,7 +121,7 @@ class $javaClassName implements Constant{
         public byte[] transformEntry(Object key, ByteBuffer value) {
              return dualTransformer.toRight(value);
         }};
-    /** get a view of Map<K,ByteBuffer> with {@code byte[]} value type */
+    /** get a view of {@code Map<K,ByteBuffer>} with {@code byte[]} value type */
     protected static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
         if(null == source)return null;
         return Maps.transformEntries(source, transformer);
