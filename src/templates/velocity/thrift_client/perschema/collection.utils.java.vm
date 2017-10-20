@@ -1,0 +1,334 @@
+#parse( "header.include.vm" )
+#set ( $javaClassName = "CollectionUtils" )
+$codewriter.setCurrentJavaFilename("${schemaPkg}", "${javaClassName}.java")
+package ${schemaPkg};
+
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+public class $javaClassName {
+    private $javaClassName() {}
+    public static interface Function<F, T> {
+        T apply( F input);
+    }
+    /**
+     * dual transform type between L and R<br>
+     * {@link #toRight(Object)} L -> R<br>
+     * {@link #fromRight(Object)} R -> L
+     * @author guyadong
+     *
+     * @param <L> left type
+     * @param <R> right type
+     */
+    public static interface DualTransformer<L,R>{
+        R toRight(L input);
+        L fromRight(R input);
+    }
+    public static final <L,R> DualTransformer<L,R> asDualTransformer(final Function<L,R> t1,final Function<R,L>t2){
+        checkNotNull(t1);
+        checkNotNull(t2);
+        return new DualTransformer<L,R>(){
+            @Override
+            public R toRight(L input) {
+                return t1.apply(input);
+            }
+            @Override
+            public L fromRight(R input) {
+                return t2.apply(input);
+            }
+        };
+    }
+    public static final <L,R> Function<L,R> asToRightTransformer(final DualTransformer<L,R> dual){
+        checkNotNull(dual);
+        return new Function<L,R>(){
+            @Override
+            public R apply(L input) {
+                return dual.toRight(input);
+            }
+        };
+    }
+    public static final <L,R> Function<R,L> asFromRightTransformer(final DualTransformer<L,R> dual){
+        checkNotNull(dual);
+        return new Function<R,L>(){
+            @Override
+            public L apply(R input) {
+                return dual.fromRight(input);
+            }
+        };
+    }
+    private static boolean equal( Object a, Object b) {
+        return a == b || (a != null && a.equals(b));
+    }
+    static <T> T checkNotNull(T reference) {
+        if (reference == null) {
+            throw new NullPointerException();
+        }
+        return reference;
+    }
+    static <V> V safeGet(Map<?, V> map, Object key) {
+        checkNotNull(map);
+        try {
+            return map.get(key);
+        } catch (ClassCastException e) {
+            return null;
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+    /** @see #tranformKeys(Map, DualTransformer)*/
+    public static final<K1,K2,V>Map<K2,V> tranformKeys(Map<K1,V>fromMap, 
+            Function<K1, K2> transformer2, 
+            Function<K2, K1> transformer1){
+        return tranformKeys(fromMap,asDualTransformer(transformer2,transformer1));
+    }
+    /**
+     * Returns a view of a map where each value is transformed by a function. All
+     * other properties of the map, such as iteration order, are left intact. <br>
+     * see also {@link com.google.common.collect.Maps${esc.hash}transformEntries(Map, com.google.common.collect.Maps.EntryTransformer)}
+     * @param fromMap
+     * @param transformer
+     * @return
+     */
+    public static final<K1,K2,V>Map<K2,V> tranformKeys(Map<K1,V>fromMap, 
+            DualTransformer<K1, K2> transformer){
+        return new TransformedMap<K1, K2, V>(fromMap,transformer);
+    }
+    /** @see #transform(Set, DualTransformer)*/
+    public static final <E1,E2>Set<E2>transform(Set<E1> fromSet, 
+            Function<E1, E2> transformer2, 
+            Function<E2, E1> transformer1){
+        return transform(fromSet,asDualTransformer(transformer2,transformer1));
+    }
+    /**
+     * Returns a view of a set where each key is transformed by a function. All
+     * other properties of the map, such as iteration order, are left intact. <br>
+     * see also {@link com.google.common.collect.Maps${esc.hash}transformEntries(Map, com.google.common.collect.Maps.EntryTransformer)}
+     * @param fromSet
+     * @param transformer
+     * @return
+     */
+    public static final <E1,E2>Set<E2>transform(Set<E1> fromSet, 
+            DualTransformer<E1,E2> transformer){
+        return new TransformedSet<E1,E2>(fromSet,transformer);
+    }
+    
+    /**
+     * Returns an iterator that applies {@code function} to each element of {@code fromIterator}.<br>
+     * see also {@link com.google.common.collect.Iterators${esc.hash}transform(Iterator, com.google.common.base.Function)}
+     * @param fromIterator
+     * @param transformer
+     * @return
+     */
+    public static <F, T> Iterator<T> transform(final Iterator<F> fromIterator,
+            final Function<? super F, ? extends T> transformer) {
+        return new TransformedIterator<F, T>(fromIterator,transformer);
+    }
+    static class TransformedIterator<F, T> implements Iterator<T> {
+        final Iterator<? extends F> backingIterator;
+        private Function<? super F, ? extends T> transformer;
+
+        TransformedIterator(Iterator<? extends F> backingIterator,Function<? super F, ? extends T> transformer) {
+            this.backingIterator = checkNotNull(backingIterator);
+            this.transformer = checkNotNull(transformer);
+        }
+
+        @Override
+        public final boolean hasNext() {
+            return backingIterator.hasNext();
+        }
+
+        @Override
+        public final T next() {
+            return transformer.apply(backingIterator.next());
+        }
+
+        @Override
+        public final void remove() {
+            backingIterator.remove();
+        }
+    }
+    static class TransformedSet<E1, E2> extends AbstractSet<E2> {
+        final Set<E1> fromSet;
+        private final DualTransformer<E1, E2> transformer;
+
+        TransformedSet(Set<E1> fromSet, DualTransformer<E1, E2> transformer) {
+            checkNotNull(fromSet);
+            checkNotNull(transformer);
+            this.fromSet = fromSet;
+            this.transformer = transformer;
+        }
+        @Override
+        public int size() {
+            return fromSet.size();
+        }
+
+        @Override
+        public Iterator<E2> iterator() {
+            return transform(fromSet.iterator(), asToRightTransformer(transformer));
+        }
+
+        @Override
+        public boolean add(E2 e) {
+            return fromSet.add(transformer.fromRight(e));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean contains(Object o) {
+            try {
+                return fromSet.contains(transformer.fromRight((E2) o));
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean remove(Object o) {
+            try {
+                return fromSet.remove(transformer.fromRight((E2) o));
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+    }
+
+    static class TransformedMap<K1, K2, V> extends AbstractMap<K2, V> {
+        final Map<K1, V> fromMap;
+        private DualTransformer<K1,K2> transformer;
+        TransformedMap(Map<K1, V> fromMap, DualTransformer<K1,K2> transformer) {
+            checkNotNull(fromMap);
+            checkNotNull(transformer);
+            this.fromMap = fromMap;
+            this.transformer = transformer;
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public V get(Object key) {
+            try {
+                return fromMap.get(transformer.fromRight((K2) key));
+            } catch (ClassCastException e) {
+                return null;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean containsKey(Object key) {
+            try {
+                return fromMap.containsKey(transformer.fromRight((K2) key));
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+
+        @Override
+        public V put(K2 key, V value) {            
+            return fromMap.put(transformer.fromRight(key), value);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public V remove(Object key) {
+            try {
+                return fromMap.remove(transformer.fromRight((K2) key));
+            } catch (ClassCastException e) {
+                return null;
+            }
+        }
+
+        @Override
+        public Set<Entry<K2, V>> entrySet() {
+            return new EntrySet<K2,V>(){
+
+                @Override
+                Map<K2, V> map() {
+                    return TransformedMap.this;
+                }
+
+                @Override
+                public Iterator<java.util.Map.Entry<K2, V>> iterator() {
+                    return transform(fromMap.entrySet().iterator(),
+                            new Function<Entry<K1,V>,Entry<K2,V>>(){
+                        @Override
+                        public java.util.Map.Entry<K2, V> apply(java.util.Map.Entry<K1, V> input) {
+                            return new TransformedEntry<K1,K2,V>(input,asToRightTransformer(TransformedMap.this.transformer));
+                        }});
+                }};
+        }
+        abstract static class EntrySet<K, V> extends AbstractSet<Entry<K, V>> {
+            abstract Map<K, V> map();
+
+            @Override 
+            public int size() {
+                return map().size();
+            }
+
+            @Override 
+            public boolean contains(Object o) {
+                if (o instanceof Entry) {
+                    Entry<?, ?> entry = (Entry<?, ?>) o;
+                    Object key = entry.getKey();
+                    V value = safeGet(map(), key);
+                    return equal(value, entry.getValue())
+                            && (value != null || map().containsKey(entry.getKey()));
+                }
+                return false;
+            }
+
+            @Override 
+            public boolean remove(Object o) {
+                if (contains(o)) {
+                    Entry<?, ?> entry = (Entry<?, ?>) o;
+                    return map().keySet().remove(entry.getKey());
+                }
+                return false;
+            }
+        }
+        static class  TransformedEntry<K1,K2,V> implements Entry<K2, V> {
+            final Entry<K1,V>fromEntry;
+            final Function<K1, K2> transformer2;
+            TransformedEntry(Entry<K1,V>fromEntry,Function<K1, K2> transformer2){
+                checkNotNull(fromEntry);
+                this.fromEntry = fromEntry;
+                checkNotNull(transformer2);
+                this.transformer2 = transformer2;
+            }
+            @Override
+            public K2 getKey() {
+                return transformer2.apply(fromEntry.getKey());
+            }
+
+            @Override
+            public V getValue() {
+                return fromEntry.getValue();
+            }
+
+            @Override
+            public V setValue(V value) {
+                return fromEntry.setValue(value);
+            }
+
+            @Override 
+            public boolean equals(Object object) {
+                if(object instanceof TransformedEntry){
+                    return fromEntry.equals((TransformedEntry<?, ?, ?>)object);
+                }
+                return super.equals(object);
+            }
+
+            @Override 
+            public int hashCode() {
+                return fromEntry.hashCode();
+            }
+
+            @Override 
+            public String toString() {
+                return fromEntry.toString();
+            }
+        }
+    }
+}
