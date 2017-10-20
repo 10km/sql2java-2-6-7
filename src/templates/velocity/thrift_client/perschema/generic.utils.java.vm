@@ -1,0 +1,180 @@
+#parse( "header.include.vm" )
+#set ( $javaClassName = "GenericUtils" )
+$codewriter.setCurrentJavaFilename("${schemaPkg}", "${javaClassName}.java")
+package ${schemaPkg};
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
+
+/**
+ * @author guyadong
+ *
+ */
+public class GenericUtils {
+	/**
+	 * 返回buffer中所有字节(position~limit),不改变buffer状态
+	 * @param buffer
+	 * @return buffer 为 null 时返回 null 
+	 */
+	public static final byte[] toBytes(ByteBuffer buffer){
+		if(null == buffer)return null;
+		int pos = buffer.position();
+		try{
+			byte[] bytes = new byte[buffer.remaining()];
+			buffer.get(bytes);
+			return bytes;
+		}finally{
+			buffer.position(pos);
+		}
+	}
+	/**
+	 * 从{@link InputStream}读取字节数组<br>
+	 * 当{@code in}为{@link FileInputStream}时，调用{@link #toBytes(FileInputStream)}(NIO方式)读取<br>
+	 *  结束时会关闭{@link InputStream}
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 * @throws IllegalArgumentException {@code in}为{@code null}
+	 */
+	private static byte[] toBytes(InputStream in) throws IOException, IllegalArgumentException {
+		if(null == in)return null;
+		if(in instanceof FileInputStream)
+			return toBytes((FileInputStream)in);
+		try {
+			int buffSize = Math.max(in.available(), 1024*8);
+			byte[] temp = new byte[buffSize];
+			ByteArrayOutputStream out = new ByteArrayOutputStream(buffSize);
+			int size = 0;
+			while ((size = in.read(temp)) != -1) {
+				out.write(temp, 0, size);
+			}
+			return  out.toByteArray();
+		} finally {
+			in.close();
+		}
+	}
+	
+	/**
+	 * NIO方式从{@link FileInputStream}读取字节数组<br>
+	 *  结束时会关闭{@link InputStream}
+	 * @param fin {@link FileInputStream}
+	 * @return 返回读取的字节数 当{@code fin}为null时返回null;
+	 * @throws IOException
+	 */
+	private static byte[] toBytes(FileInputStream fin) throws IOException {
+		if(null == fin)return null;
+		FileChannel fc = fin.getChannel();
+		try {
+			ByteBuffer bb = ByteBuffer.allocate((int) fc.size());
+			fc.read(bb);
+			bb.flip();
+			return bb.array();
+		} finally {
+			if (null != fc)
+				fc.close();
+			fin.close();
+		}
+	}
+	/**
+	 * 将对象转换为InputStream<br>
+	 * 类型可以是byte[],{@link ByteBuffer},{@link InputStream},{@link String}(base64编码),{@link File},{@link URL},{@link URI},否则抛出RuntimeException<br>
+	 * 
+	 * @param src
+	 *            获取InputStream的源对象
+	 * @return 返回获取的InputStream对象,src为null失败返回null或抛出异常
+	 * @throws IOException 
+	 */
+	private static <T> InputStream getInputStream(T src) throws IOException {
+		if(null == src)return null;
+		if (src instanceof InputStream)
+			return (InputStream) src;
+		else if (src instanceof String) {
+			return new ByteArrayInputStream(Base64Utils.decode(((String) src)));
+		} else if (src instanceof byte[]) {
+			return new ByteArrayInputStream((byte[]) src);
+		} else if (src instanceof ByteBuffer) {
+			return new ByteArrayInputStream(toBytes((ByteBuffer) src));
+		} else if (src instanceof File) {
+			return new FileInputStream((File) src);
+		} else if (src instanceof URL) {
+			return ((URL) src).openStream();
+		} else if (src instanceof URI) {
+			return ((URI) src).toURL().openStream();
+		} else
+			throw new IllegalArgumentException(String.format("Can't get inputstream from [%s]", src.getClass()
+					.getCanonicalName()));
+	}
+
+	/**
+	 * 将数据对象{@code src}转换为字节数组(byte[])<br>
+	 * {@code src}的数据类型可以是byte[],{@link InputStream},{@link ByteBuffer},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
+	 * 否则抛出{@link IllegalArgumentException}<br>
+	 * 对象转换为InputStream或byte[]时,可能会抛出{@link IOException}
+	 * 
+	 * 当{@code src}为{@link File}或{@link FileInputStream}时，使用NIO方式({@link #toBytes(FileInputStream)})读取
+	 * 
+	 * @param src
+	 *            获取byte[]的源对象
+	 * @return 返回字节数组,参数为{@code null}或类型不对则抛出异常
+	 * @see #toBytes(InputStream)
+	 * @see #toBytes(FileInputStream)
+	 * @see #getInputStream(Object)
+	 * @see Base64Utils#decode(String)
+	 */
+	static public final <T> byte[] toBytes(T src) {
+		if(null == src)return null;	
+		try{
+			if (src instanceof byte[]) {
+				return (byte[]) src;
+			} else if (src instanceof String) {
+				return Base64Utils.decode(((String) src));
+			} else if (src instanceof ByteBuffer) {
+				return toBytes((ByteBuffer)src);
+			} else if (src instanceof FileInputStream){
+				return toBytes((FileInputStream)src);
+			}else if (src instanceof File){
+				return toBytes(new FileInputStream((File)src));
+			}else {
+				return toBytes(getInputStream(src));
+			}
+		}catch(IOException e){
+			throw new IllegalArgumentException(e);
+		}
+	}
+    private static final CollectionUtils.DualTransformer<ByteBuffer,byte[]> dualTransformer = new CollectionUtils.DualTransformer<ByteBuffer,byte[]>(){
+        @Override
+        public byte[] toRight(ByteBuffer input) {
+            return toBytes(input);
+        }
+        @Override
+        public ByteBuffer fromRight(byte[] input) {
+            return null == input ? null : ByteBuffer.wrap(input);
+        }};
+    /** get a view of {@code Map<ByteBuffer,V>} with {@code byte[]} key type */
+    public static final<V>Map<byte[],V> toBytesKey(Map<ByteBuffer,V> source){
+        if(null == source)return null;
+        return CollectionUtils.tranformKeys(source, dualTransformer);
+    }
+    private static final EntryTransformer<Object,ByteBuffer,byte[]> transformer = new EntryTransformer<Object,ByteBuffer,byte[]>(){
+        @Override
+        public byte[] transformEntry(Object key, ByteBuffer value) {
+             return dualTransformer.toRight(value);
+        }};
+    /** get a view of {@code Map<K,ByteBuffer>} with {@code byte[]} value type */
+    public static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
+        if(null == source)return null;
+        return Maps.transformEntries(source, transformer);
+    }
+}

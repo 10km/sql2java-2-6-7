@@ -18,7 +18,7 @@ $codewriter.setSaveCurrentFile(false);
 #set ($nothing = $typeUtils.setPackagePrefix("net.gdface.facelog.db"))
 ## $bean$”√”⁄ÃÊªªbeanClass
 #set ($nothing = $typeUtils.setConvertVar('converter$bean$'))
-#set ($nothing = $typeUtils.setToBytesMethodPrefix("toBytes"))
+#set ($nothing = $typeUtils.setToBytesMethodPrefix("GenericUtils.toBytes"))
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
@@ -36,8 +36,6 @@ all comment copied from {@code ${swiftParser.serviceClass.name}.java}<br>","OVER
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 #macro( convertVar $c)converter$c#end
-import com.google.common.collect.Maps;
-import com.google.common.collect.Maps.EntryTransformer;
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -91,41 +89,6 @@ class $javaClassName implements Constant{
         checkNotNull(service,"service is null");
         this.service = service;
     }
-    protected static final byte[] toBytes(ByteBuffer buffer){
-        if(null == buffer)return null;
-        int pos = buffer.position();
-        try{
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            return bytes;
-        }finally{
-            buffer.position(pos);
-        }
-    }
-    private static final CollectionUtils.DualTransformer<ByteBuffer,byte[]> dualTransformer = new CollectionUtils.DualTransformer<ByteBuffer,byte[]>(){
-        @Override
-        public byte[] toRight(ByteBuffer input) {
-            return toBytes(input);
-        }
-        @Override
-        public ByteBuffer fromRight(byte[] input) {
-            return null == input ? null : ByteBuffer.wrap(input);
-        }};
-    /** get a view of {@code Map<ByteBuffer,V>} with {@code byte[]} key type */
-    protected static final<V>Map<byte[],V> toBytesKey(Map<ByteBuffer,V> source){
-        if(null == source)return null;
-        return CollectionUtils.tranformKeys(source, dualTransformer);
-    }
-    private static final EntryTransformer<Object,ByteBuffer,byte[]> transformer = new EntryTransformer<Object,ByteBuffer,byte[]>(){
-        @Override
-        public byte[] transformEntry(Object key, ByteBuffer value) {
-             return dualTransformer.toRight(value);
-        }};
-    /** get a view of {@code Map<K,ByteBuffer>} with {@code byte[]} value type */
-    protected static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
-        if(null == source)return null;
-        return Maps.transformEntries(source, transformer);
-    }
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #set ($returnType = $method.returnType.javaType)
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
@@ -137,6 +100,7 @@ class $javaClassName implements Constant{
 #set ($tmp = $typeUtils.wrapType($returnType,$isAsync))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 $!{serviceComment.getMethodComment($method.method)}
+    // $velocityCount
     public $returnTypeStr ${method.method.name}(#join($method.parameters '$typeUtils.swiftType($e.thriftType.javaType) $e.name' ',')){
 #define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name)' ',
                 '))#end
