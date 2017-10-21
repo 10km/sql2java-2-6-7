@@ -93,10 +93,11 @@ class $javaClassName implements Constant{
         checkNotNull(service,"service is null");
         this.service = service;
     }
+## 
 ## 生成方法参数列表
-#macro(param $isGeneric $withType $withName)
-#join($method.parameters '#if($withType)$typeUtils.swiftType($e.thriftType.javaType, $isGeneric)#end#if($withName) $e.name#end' ',')
-#end
+#macro(signture $method $isGeneric $withType $withName)
+#set ($thriftSignture = $swiftParser.signtureOfMethod($method))
+$typeUtils.signture($method.method,$thriftSignture,$isGeneric,$withType,$withName,',')#end
 #macro(defineMethod $isGeneric)
 #set ($returnType = $method.returnType.javaType)
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
@@ -109,7 +110,7 @@ class $javaClassName implements Constant{
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 #if($isGeneric)
     /** 
-     * Generic version of {@link ${esc.hash}${method.method.name}(#param(false true false))}<br>
+     * Generic version of {@link ${esc.hash}${method.method.name}(#signture($method false true false))}<br>
      * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
      * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
      * @see {@link GenericUtils#toBytes(Object)}
@@ -119,8 +120,9 @@ class $javaClassName implements Constant{
 $!{serviceComment.getMethodComment($method.method)}
     // $velocityCount SERIVCE PORT : $method.name
 #end    
-    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#param($isGeneric true true)){
-#define( $callThrift )service.${method.name}(#join($method.parameters '$typeUtils.toRight(${e.thriftType.javaType}, $e.name, $isGeneric)' ',
+    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#signture($method $isGeneric true true)){
+#set ($parameters = $typeUtils.signtureOfMethod($method.method,$swiftParser.signtureOfMethod($method)))
+#define( $callThrift )service.${method.name}(#join($parameters.entrySet() '$typeUtils.toRight(${e.value}, $e.key, $isGeneric)' ',
                 '))#end
 #if($typeUtils.isTypeOfDao($returnType))
 #if($isAsync)
@@ -139,7 +141,7 @@ $!{serviceComment.getMethodComment($method.method)}
         $!{thriftReturn}$callThrift;
 #end
     }
-#end###macro
+#end###macro(defineMethod)
 ## 遍历所有方法输出
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
 #defineMethod($null)
