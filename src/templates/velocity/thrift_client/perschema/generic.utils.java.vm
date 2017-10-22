@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -194,10 +197,14 @@ public class GenericUtils {
         public byte[] apply(ByteBuffer input) {
             return byteBufferdualTransformer.toRight(input);
         }};
+    /** get a view of {@code List<ByteBuffer>} with {@code byte[]} type */
     public static final List<byte[]> toBytes(List<ByteBuffer>source){
+        if(null == source)return null;
         return Lists.transform(source, toRightByteBuffer);
     }
+    /** get a view of {@code Collection<ByteBuffer>} with {@code byte[]} type */
     public static final Collection<byte[]> toBytes(Collection<ByteBuffer>source){
+        if(null == source)return null;
         return Collections2.transform(source, toRightByteBuffer);
     }
     static  class DateDualTransformer<D extends Date>
@@ -227,16 +234,27 @@ public class GenericUtils {
             }
         }
     }
-    public static final Long toLong(Date date,Class<?>clazz){
-        return null == date ? null : date.getTime();
+    @SuppressWarnings("rawtypes")
+    private static final LoadingCache<Class<? extends Date>, DateDualTransformer> dateTransformerCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Class<? extends Date>, DateDualTransformer>(){
+                @SuppressWarnings("unchecked")
+                @Override
+                public DateDualTransformer load(Class<? extends Date> key) throws Exception {
+                    return new DateDualTransformer(key);
+                }});
+    /** transform Date to Long,return null if {@code source} is null */
+    public static final Long toLong(Date source,Class<?>clazz){
+        return null == source ? null : source.getTime();
     }
-    /** get a view of {@code Map<Date,V>} with {@code Long} key & value type */
+    /** get a view of {@code Map<Date,V>} with {@code Long} key type */
+    @SuppressWarnings("unchecked")
     public static final<D extends Date,V>Map<Long,V> toLongKey(Map<D,V> source,Class<D>clazz){
         if(null == source)return null;
-        return CollectionUtils.tranformKeys(source, new DateDualTransformer<D>(clazz));
+        checkNotNull(clazz);
+        return CollectionUtils.tranformKeys(source, dateTransformerCache.getUnchecked(clazz));
     }
 
-    private static final EntryTransformer<Object,Date,Long> dateLongTransformer = new EntryTransformer<Object,Date,Long>(){
+    private static final EntryTransformer<Object,Date,Long> dateEntryTransformer = new EntryTransformer<Object,Date,Long>(){
         @Override
         public Long transformEntry(Object key, Date value) {
             return null == value? null:value.getTime();
@@ -244,12 +262,14 @@ public class GenericUtils {
     /** get a view of {@code Map<K,Date>} with {@code Long} value type */
     public static final<K,D extends Date> Map<K,Long> toLongValue(Map<K,D> source,Class<?>clazz){
         if(null == source)return null;
-        return Maps.transformEntries(source, dateLongTransformer);
+        return Maps.transformEntries(source, dateEntryTransformer);
     }
-    /** get a view of {@code Map<Date,Date>} with {@code Long} key type */
+    /** get a view of {@code Map<Date,Date>} with {@code Long} key & value type */
     public static final<D extends Date>Map<Long,Long> toLong(Map<D,D> source,Class<D>clazz){
         if(null == source)return null;
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
+        checkNotNull(clazz);
+        @SuppressWarnings("unchecked")
+        final DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz);
         Map<Long, D> m = CollectionUtils.tranformKeys(source, trans);
        return  Maps.transformEntries(m, new EntryTransformer<Long,D,Long>(){           
             @Override
@@ -258,29 +278,42 @@ public class GenericUtils {
             }});
     }
     
-    private static final Function<Date,Long> tolongTransformer = new Function<Date,Long>(){
+    private static final Function<Date,Long> toLongFun = new Function<Date,Long>(){
         @Override
         public Long apply(Date input) {
-            return input.getTime();
+            return null == input ? null :input.getTime();
         }};
+    /** get a view of {@code List<Date>} with {@code Long} type */
     public static final List<Long> toLong(List<Date>source,Class<?>clazz){
-        return Lists.transform(source, tolongTransformer);
+        if(null == source)return null;
+        return Lists.transform(source, toLongFun);
     }
+    /** get a view of {@code Set<Date>} with {@code Long} type */
+    @SuppressWarnings("unchecked")
     public static final<D extends Date> Set<Long> toLong(Set<D>source,Class<D>clazz){
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
-        return CollectionUtils.transform(source, trans);
+        if(null == source)return null;
+        checkNotNull(clazz);
+        return CollectionUtils.transform(source, dateTransformerCache.getUnchecked(clazz));
     }
+    /** get a view of {@code Collection<Date>} with {@code Long} type */
     public static final Collection<Long> toLong(Collection<Date>source,Class<?>clazz){
-        return Collections2.transform(source, tolongTransformer);
+        if(null == source)return null;
+        return Collections2.transform(source, toLongFun);
     }
-    public static final<D extends Date> D toDate(Long date,Class<D> clazz){
-        return null == date ? null : new DateDualTransformer<D>(clazz).fromRight(date);
+    /** transform Long to Date,return null if {@code source} is null */
+    @SuppressWarnings("unchecked")
+    public static final<D extends Date> D toDate(Long source,Class<D> clazz){
+        if(null == source)return null;
+        checkNotNull(clazz);
+        return (D) dateTransformerCache.getUnchecked(clazz).fromRight(source);
     }
     /** get a view of {@code Map<Long,V>} with {@code Date} key type */
-    public static final<D extends Date,V>Map<D,V> toDateKey(Map<Long,V> source,Class<D>clazz){
+    public static final<D extends Date,V>Map<D,V> toDateKey(Map<Long,V> source,final Class<D>clazz){
         if(null == source)return null;
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
+        checkNotNull(clazz);
         return CollectionUtils.tranformKeys(source, new CollectionUtils.DualTransformer<Long,D>(){            
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz);
             @Override
             public D toRight(Long input) {
                 return trans.fromRight(input);
@@ -291,20 +324,24 @@ public class GenericUtils {
             }});
     }
     /** get a view of {@code Map<K,Long>} with {@code Date} value type */
-    public static final<K,D extends Date> Map<K,D> toDateValue(Map<K,Long> source,Class<D>clazz){
+    public static final<K,D extends Date> Map<K,D> toDateValue(Map<K,Long> source,final Class<D>clazz){
         if(null == source)return null;
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz); 
+        checkNotNull(clazz);
         return Maps.transformEntries(source, new EntryTransformer<K,Long,D>(){
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz); 
             @Override
             public D transformEntry(K key, Long value) {
                 return trans.fromRight(value);
             }});
     }
     /** get a view of {@code Map<Long,Long>} with {@code Date} key & value type */
-    public static final<D extends Date>Map<D,D> toDate(Map<Long,Long> source,Class<D>clazz){
+    public static final<D extends Date>Map<D,D> toDate(Map<Long,Long> source,final Class<D>clazz){
         if(null == source)return null;
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
+        checkNotNull(clazz);
         final DualTransformer<Long, D> trans2 = new CollectionUtils.DualTransformer<Long,D>(){            
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans =dateTransformerCache.getUnchecked(clazz);
             @Override
             public D toRight(Long input) {
                 return trans.fromRight(input);
@@ -320,18 +357,25 @@ public class GenericUtils {
                 return trans2.toRight(value);
             }});
     }
-
-    public static final<D extends Date> List<D> toDate(List<Long>source,Class<D>clazz){
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
+    /** get a view of {@code List<Long>} with {@code Data} type */
+    public static final<D extends Date> List<D> toDate(List<Long>source,final Class<D>clazz){
+        if(null == source)return null;
+        checkNotNull(clazz);
         return Lists.transform(source, new Function<Long,D>(){
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz);
             @Override
             public D apply(Long input) {
                 return trans.fromRight(input);
             }});
     }
-    public static final<D extends Date> Set<D> toDate(Set<Long>source,Class<D>clazz){
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
-        final DualTransformer<Long, D> trans2 = new CollectionUtils.DualTransformer<Long,D>(){            
+    /** get a view of {@code Set<Date>} with {@code Date} type */
+    public static final<D extends Date> Set<D> toDate(Set<Long>source,final Class<D>clazz){
+        if(null == source)return null;
+        checkNotNull(clazz);
+        final DualTransformer<Long, D> trans2 = new CollectionUtils.DualTransformer<Long,D>(){ 
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz);
             @Override
             public D toRight(Long input) {
                 return trans.fromRight(input);
@@ -342,9 +386,13 @@ public class GenericUtils {
             }};
         return CollectionUtils.transform(source, trans2);
     }
-    public static final<D extends Date> Collection<D> toDate(Collection<Long>source,Class<D>clazz){
-        final DateDualTransformer<D> trans = new DateDualTransformer<D>(clazz);
+    /** get a view of {@code Collection<Date>} with {@code Date} type */
+    public static final<D extends Date> Collection<D> toDate(Collection<Long>source,final Class<D>clazz){
+        if(null == source)return null;
+        checkNotNull(clazz);
         return Collections2.transform(source, new Function<Long,D>(){
+            @SuppressWarnings("unchecked")
+            DateDualTransformer<D> trans = dateTransformerCache.getUnchecked(clazz);
             @Override
             public D apply(Long input) {
                 return trans.fromRight(input);
