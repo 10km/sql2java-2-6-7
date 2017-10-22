@@ -19,6 +19,8 @@ $codewriter.setSaveCurrentFile(false);
 ## $bean$”√”⁄ÃÊªªbeanClass
 #set ($nothing = $typeUtils.setConvertVar('converter$bean$'))
 #set ($nothing = $typeUtils.setToBytesMethodPrefix("GenericUtils.toBytes"))
+#set ($nothing = $typeUtils.setToLongMethodPrefix("GenericUtils.toLong"))
+#set ($nothing = $typeUtils.setToDateMethodPrefix("GenericUtils.toDate"))
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
