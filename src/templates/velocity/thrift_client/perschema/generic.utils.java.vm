@@ -133,16 +133,14 @@ public class GenericUtils {
     }
 
     /**
-     * 将数据对象{@code src}转换为字节数组(byte[])<br>
-     * {@code src}的数据类型可以是byte[],{@link InputStream},{@link ByteBuffer},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
+     * 从数据对象{@code src}读取二进制数据(byte[])<br>
+     * {@code src}的数据类型可以是{@code byte[]},{@link InputStream},{@link ByteBuffer},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
      * 否则抛出{@link IllegalArgumentException}<br>
-     * 对象转换为InputStream或byte[]时,可能会抛出{@link IOException}
-     * 
-     * 当{@code src}为{@link File}或{@link FileInputStream}时，使用NIO方式({@link #toBytes(FileInputStream)})读取
+     * 对象转换为{@code InputStream}或{@code byte[]}时,可能会抛出{@link IOException}(封装成{@link RuntimeException}抛出)<br>
      * 
      * @param src
      *            获取byte[]的源对象
-     * @return 返回字节数组,参数类型不对则抛出异常
+     * @return 返回字节数组,参数类型不对则抛出异常,{@code src}为{@code null}时返回{@code null}
      * @see #toBytes(InputStream)
      * @see #toBytes(FileInputStream)
      * @see #getInputStream(Object)
@@ -165,7 +163,7 @@ public class GenericUtils {
                 return toBytes(getInputStream(src));
             }
         }catch(IOException e){
-            throw new IllegalArgumentException(e);
+            throw new RuntimeException(e);
         }
     }
     private static final CollectionUtils.DualTransformer<ByteBuffer,byte[]> byteBufferdualTransformer = new CollectionUtils.DualTransformer<ByteBuffer,byte[]>(){
