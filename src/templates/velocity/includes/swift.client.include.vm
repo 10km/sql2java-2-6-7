@@ -97,9 +97,10 @@ class $javaClassName implements Constant{
     }
 ## 
 ## 生成方法参数列表
-#macro(signture $method $isGeneric $withType $withName)
+#macro(eachparam $method $params)
 #set ($thriftSignture = $swiftParser.signtureOfMethod($method))
-$typeUtils.signture($method.method,$thriftSignture,$isGeneric,$withType,$withName,',')#end
+$typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signture)
+#########################
 #macro(defineMethod $isGeneric)
 #set ($thriftReturnType = $method.returnType.javaType)
 #set ($returnType = $typeUtils.returnTypeOfMethod($method.method,$thriftReturnType))
@@ -113,7 +114,7 @@ $typeUtils.signture($method.method,$thriftSignture,$isGeneric,$withType,$withNam
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 #if($isGeneric)
     /** 
-     * Generic version of {@link ${esc.hash}${method.method.name}(#signture($method false true false))}<br>
+     * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withName':true,'rawTypeOnly':true}))}<br>
      * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
      * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
      * @see {@link GenericUtils#toBytes(Object)}
@@ -123,10 +124,10 @@ $typeUtils.signture($method.method,$thriftSignture,$isGeneric,$withType,$withNam
 $!{serviceComment.getMethodComment($method.method)}
     // $velocityCount SERIVCE PORT : $method.name
 #end    
-    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#signture($method $isGeneric true true)){
-#set ($parameters = $typeUtils.signtureOfMethod($method.method,$swiftParser.signtureOfMethod($method)))
-#define( $callThrift )service.${method.name}(#join($parameters.entrySet() '$typeUtils.toRight(${e.value}, $e.key, $isGeneric)' ',
-                '))#end
+    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
+            '})){
+#define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
+                    '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
 #set ( $fromType = $typeUtils.asJavaType($thriftReturnType,true,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
