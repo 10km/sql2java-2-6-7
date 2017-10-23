@@ -21,6 +21,7 @@ import ${pkg}.TableListener;
 import ${pkg}.TableManager;
 import ${pkg}.exception.DAOException;
 import ${pkg}.exception.DataAccessException;
+import net.gdface.facelog.dborm.exception.DataRetrievalException;
 import ${pkg}.exception.ObjectRetrievalException;
 #if ( $table.hasVersionColumn() )
 import ${pkg}.exception.OptimisticLockingException;
@@ -119,11 +120,35 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * @throws DAOException
      */
     //1
-    @SuppressWarnings("unused")
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
         if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
             return null;
+        }
+        try{
+            return loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ','));
+        }catch(ObjectRetrievalException e){
+            // not found
+            return null;
+        }
+    }
+    
+    /**
+     * Loads a {@link $beanClass} from the $tablename using primary key fields.
+     *
+#foreach ( $pk in $primaryKeys )
+     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+#end     
+     * @return a unique $beanClass
+     * @throws ObjectRetrievalException if not found
+     * @throws DAOException
+     */
+    //1.1
+    @SuppressWarnings("unused")
+    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
+    {
+        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+            throw new NullPointerException();
         }
         Connection c = null;
         PreparedStatement ps = null;
@@ -140,14 +165,18 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #end
             List<$beanClass> pReturn = this.loadByPreparedStatementAsList(ps);
             if (0 == pReturn.size()) {
-                return null;
+                throw new ObjectRetrievalException();
             } else {
                 return pReturn.get(0);
             }
         }
+        catch(ObjectRetrievalException e)
+        {
+            throw e;
+        }
         catch(SQLException e)
         {
-            throw new ObjectRetrievalException(e);
+            throw new DataRetrievalException(e);
         }
         finally
         {
@@ -160,14 +189,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean) throws DAOException
     {
-#set ( $methods = "" ) 
-#foreach ( $pk in $primaryKeys )
-## part 1
-#if ( $velocityCount > 1 )#set( $methods = "$methods, " )#end
-## part 2
-#set ( $methods = "$methods bean.${pk.getGetMethod()}()" )
-#end     
-        return bean==null?null:loadByPrimaryKey($methods);
+        return bean==null?null:loadByPrimaryKeyChecked(bean);
+    }
+    
+    //1.2.2
+    @Override
+    public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws DAOException
+    {
+        if(null == bean)
+            throw new NullPointerException();
+        return loadByPrimaryKeyChecked(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
     }
     
     /**
@@ -179,6 +210,15 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //1.3
     @Override
     public $beanClass loadByPrimaryKey(Object ...keys) throws DAOException{
+        try{
+            return loadByPrimaryKey(keys);
+        }catch(ObjectRetrievalException e){
+            return null;
+        }
+    }
+    //1.3.2
+    @Override
+    public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws DAOException{
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
 #foreach ( $pk in $primaryKeys )
@@ -186,7 +226,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         if(! (keys[$kidx] instanceof $pk.getJavaType()))
             throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
 #end        
-        return loadByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+        return loadByPrimaryKeyChecked(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
     /**
      * Returns true if this $tablename contains row with primary key fields.
@@ -196,6 +236,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
      * @throws DAOException
      */
     //1.4
+    @SuppressWarnings("unused")
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
         if(#join($primaryKeys "null == $e.getVarName()" ' || ')){

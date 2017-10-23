@@ -346,12 +346,18 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
         public B loadByPrimaryKey(B bean)$!throwsString{
             throw new UnsupportedOperationException();
         }
-
+        @Override
+        public B loadByPrimaryKeyChecked(B bean)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
         @Override
         public B loadByPrimaryKey(Object ...keys)$!throwsString{
             throw new UnsupportedOperationException();
         }
-
+        @Override
+        public B loadByPrimaryKeyChecked(Object ...keys)$!throwsString{
+            throw new UnsupportedOperationException();
+        }
         @Override
         public int deleteByPrimaryKey(Object ...keys)$!throwsString{
             throw new UnsupportedOperationException();
@@ -635,7 +641,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 
     /**
      * Loads a B bean from the table using primary key fields of {@code bean}.
-     * when you don't know which is primary key of table,you can use the method.
      * @param bean the B bean with primary key fields
      * @return a unique B or {@code null} if not found or bean is null
 #if($throwsString)
@@ -645,6 +650,18 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //1.2
     public B loadByPrimaryKey(B bean)$!throwsString;
     
+    /**
+     * see also {@link loadByPrimaryKey(B)}
+     * @return a unique B ,otherwise throw exception
+#if($throwsString)
+     * @throws ObjectRetrievalException not found
+#end
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.2.2
+    public B loadByPrimaryKeyChecked(B bean)$!throwsString;    
     /**
      * Loads a B bean from the table using primary key fields.
      * when you don't know which is primary key of table,you can use the method.
@@ -662,6 +679,19 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      */
     //1.3
     public B loadByPrimaryKey(Object ...keys)$!throwsString;
+
+    /**
+     * see also {@link ${esc.hash}loadByPrimaryKey(Object...)}
+     * @return a unique B,otherwise throw exception
+#if($throwsString)
+     * @throws ObjectRetrievalException not found
+#end
+#if($throwsString)
+     * @$!throwsString
+#end
+     */
+    //1.3.2
+    public B loadByPrimaryKeyChecked(Object ...keys)$!throwsString;
     
     /**
      * Returns true if this table contains row with primary key fields.

@@ -3,7 +3,8 @@
 #set ( $javaClassName = 'TableManager' )
 $codewriter.setCurrentJavaFilename($pkg, "${javaClassName}.java")
 package $pkg;
-#set ( $importThrows = "import ${pkg}.exception.DAOException;" )
+#set ( $importThrows = "import ${pkg}.exception.DAOException;
+import ${pkg}.exception.ObjectRetrievalException;" )
 #set ( $B_parentClass = "BaseBean<?>")
 #set ( $throwsString = "throws DAOException" )
 #set ( $B_extends = " extends BaseBean<?>" )
