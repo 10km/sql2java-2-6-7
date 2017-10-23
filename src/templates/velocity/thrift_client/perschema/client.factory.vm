@@ -11,7 +11,7 @@ $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 #macro(interfaceClass $isAsync)${thriftPackage}.${serviceName}#if($isAsync).Async#end#end
 package ${gpkg};
 
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -205,16 +205,14 @@ public class ClientFactory {
                 this.clientName).open(getConnector()).get();
     }
     @SuppressWarnings("unchecked")
-    protected<I,O> O  _build(Class<I> interfaceClass,Class<O> destClass){
+    protected<I,O> O  _build(Class<I> interfaceClass,final Class<O> destClass){
         try {
-            HostPortClass key = new HostPortClass(getHostAndPort(),interfaceClass);
-            ConcurrentMap<HostPortClass, Object> map = clientCache.asMap();
-            if(!map.containsKey(key)){
-                map.putIfAbsent(
-                        key, 
-                        destClass.getConstructor(interfaceClass).newInstance(getThriftClient(interfaceClass)));
-            }
-            return (O) map.get(key);
+            final HostPortClass key = new HostPortClass(getHostAndPort(),interfaceClass);
+            return (O) clientCache.get(key, new Callable<Object>(){
+                @Override
+                public Object call() throws Exception {
+                    return destClass.getDeclaredConstructor(key.clazz).newInstance(getThriftClient(key.clazz));
+                }});
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

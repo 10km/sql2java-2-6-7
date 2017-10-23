@@ -35,7 +35,7 @@ $codewriter.setSaveCurrentFile(false);
 #set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
 all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}<br>
 <b>NOTE:</b>methods with 'Generic' suffix support generic type argument for {@code byte[]}.<br>
-","OVERWRITE","CLASS"))
+","APPEND","CLASS"))
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
