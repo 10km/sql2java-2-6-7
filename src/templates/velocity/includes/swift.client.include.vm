@@ -101,14 +101,15 @@ class $javaClassName implements Constant{
 #set ($thriftSignture = $swiftParser.signtureOfMethod($method))
 $typeUtils.signture($method.method,$thriftSignture,$isGeneric,$withType,$withName,',')#end
 #macro(defineMethod $isGeneric)
-#set ($returnType = $method.returnType.javaType)
+#set ($thriftReturnType = $method.returnType.javaType)
+#set ($returnType = $typeUtils.returnTypeOfMethod($method.method,$thriftReturnType))
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
 #set ( $thriftReturn = "return ")
 #else
 #set ( $thriftReturn = $null)
 #end
 #define($returnTypeStr)
-#set ($tmp = $typeUtils.wrapType($returnType,$isAsync))
+#set ($tmp = $typeUtils.asJavaType($returnType,$isAsync))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 #if($isGeneric)
     /** 
@@ -126,27 +127,26 @@ $!{serviceComment.getMethodComment($method.method)}
 #set ($parameters = $typeUtils.signtureOfMethod($method.method,$swiftParser.signtureOfMethod($method)))
 #define( $callThrift )service.${method.name}(#join($parameters.entrySet() '$typeUtils.toRight(${e.value}, $e.key, $isGeneric)' ',
                 '))#end
-#if($typeUtils.isTypeOfDao($returnType))
-#if($isAsync)
+#if($isAsync && $typeUtils.needFromRight($returnType))
+#set ( $fromType = $typeUtils.asJavaType($thriftReturnType,true,$thriftPackage))
+#set ( $toType = $typeUtils.asJavaType($returnType))
         return Futures.transform(
                 $callThrift, 
-                new com.google.common.base.Function<$typeUtils.asJavaType($returnType,$thriftPackage),$typeUtils.asJavaType($returnType)>(){
+                new com.google.common.base.Function<$fromType,$toType>(){
                     @Override
-                    public $typeUtils.asJavaType($returnType) apply($typeUtils.asJavaType($returnType,$thriftPackage) input) {
+                    public $toType apply($fromType input) {
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
 #else
         $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
 #end
-#else
-        $!{thriftReturn}$callThrift;
-#end
     }
 #end###macro(defineMethod)
 ## 遍历所有方法输出
 #foreach($method in $sorter.sort($metadata.methods.values(),"name"))
-#defineMethod($null)
+#defineMethod(false)
+## 生成泛型方法
 #if($typeUtils.existsBinaryParam($method.method))
 #defineMethod(true)
 #end
