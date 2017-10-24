@@ -1,8 +1,8 @@
 ##$Id: dao.exception.java.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-$codewriter.setCurrentJavaFilename("$gpkg", "WrapDAOException.java")
-package $gpkg;
+$codewriter.setCurrentJavaFilename("${schemaPkg}.exception", "WrapDAOException.java")
+package ${schemaPkg}.exception;
 
 /**
  * wrap all DAOException threw by native code

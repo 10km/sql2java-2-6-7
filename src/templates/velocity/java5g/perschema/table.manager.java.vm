@@ -1,10 +1,4 @@
-#parse( "schema.include.vm" )
-#parse( "header.include.vm" )
-#set ( $javaClassName = 'TableManager' )
-
-$codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
-package $gpkg;
-###set ( $importThrows = "" )
+#set ( $importThrows = "import ${schemaPkg}.exception.ObjectRetrievalException;" )
 #set ( $B_parentClass = "BaseBean<?>")
 ###set ( $throwsString = "" )
 #set ( $B_extends = " extends BaseBean<?>" )

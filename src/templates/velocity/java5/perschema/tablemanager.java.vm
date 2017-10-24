@@ -1,10 +1,5 @@
-#parse( "schema.include.vm" )
-#parse( "header.include.vm" )
-#set ( $javaClassName = 'TableManager' )
-$codewriter.setCurrentJavaFilename($pkg, "${javaClassName}.java")
-package $pkg;
-#set ( $importThrows = "import ${pkg}.exception.DAOException;
-import ${pkg}.exception.ObjectRetrievalException;" )
+#set ( $importThrows = "import ${exceptionPkg}.DAOException;
+import ${exceptionPkg}.ObjectRetrievalException;" )
 #set ( $B_parentClass = "BaseBean<?>")
 #set ( $throwsString = "throws DAOException" )
 #set ( $B_extends = " extends BaseBean<?>" )

@@ -22,9 +22,10 @@ import ${gpkg}.$table.asManagerInterfaceNSP();
 import ${gpkg}.${linkedTable.asBeanClassNSP()};
 #end
 import ${gpkg}.TableListener;
-import ${gpkg}.WrapDAOException;
+import ${schemaPkg}.exception.WrapDAOException;
+import ${schemaPkg}.exception.ObjectRetrievalException;
 
-import ${pkg}.exception.DAOException;
+import ${exceptionPkg}.DAOException;
 import ${table.getPackage()}.${managerClass};
 import ${table.getPackage()}.${nativeClass};
 
@@ -108,41 +109,69 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
-        try{
-            return this.beanConverter.fromRight(nativeManager.loadByPrimaryKey(#join($primaryKeys "$e.getVarName()" ',')));
+        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
+            return null;
         }
-        catch(DAOException e)
-        {
+        try{
+            return loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ','));
+        }catch(ObjectRetrievalException e){
+            // not found
+            return null;
+        }
+    }
+    //1.1
+    @Override
+    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws ObjectRetrievalException
+    {
+        try{
+            return this.beanConverter.fromRight(nativeManager.loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ',')));
+        }catch(${exceptionPkg}.ObjectRetrievalException e){
+            throw new ObjectRetrievalException();
+        }catch(DAOException e){
             throw new WrapDAOException(e);
         }
     }
-
     //1.2
     @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean)
     {
-        try{
-            return this.beanConverter.fromRight(this.nativeManager.loadByPrimaryKey(this.beanConverter.toRight(bean)));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        return bean==null?null:loadByPrimaryKey(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
     }
 
+    //1.2.2
+    @Override
+    public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws ObjectRetrievalException
+    {
+        if(null == bean)
+            throw new NullPointerException();
+        return loadByPrimaryKeyChecked(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
+    }
+    
     //1.3
     @Override
     public $beanClass loadByPrimaryKey(Object ...keys){
-        if(keys.length != $table.countPrimaryKeys() )
-            throw new IllegalArgumentException("argument number mismatch with primary key number");
-#foreach ( $pk in $primaryKeys )
-#set( $kidx = $velocityCount - 1 )
-        if(! (keys[$kidx] instanceof $pk.getJavaType()))
-            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
-#end        
-        return loadByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+        try{
+            return loadByPrimaryKeyChecked(keys);
+        }catch(ObjectRetrievalException e){
+            // not found
+            return null;
+        }
     }
     
+    //1.3.2
+    @Override
+    public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws ObjectRetrievalException{
+        if(null == keys)
+            throw new NullPointerException();
+        if(keys.length != $table.countPrimaryKeys())
+            throw new IllegalArgumentException("argument number mismatch with primary key number");
+        #join($primaryKeys 'if(! (keys[$m_0count] instanceof $e.getJavaType()))
+            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");' '
+            ')
+
+          return loadByPrimaryKeyChecked(#join($primaryKeys '($e.getJavaType())keys[$m_0count]' ','));
+    }
+
     //1.4 override $table.asManagerInterfaceNSP()
     @Override 
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
@@ -249,6 +278,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //2.1
     @Override
     public int deleteByPrimaryKey(Object ...keys){
+        if(null == keys)
+            throw new NullPointerException();
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
 #foreach ( $pk in $primaryKeys )
@@ -601,6 +632,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass save($beanClass bean,Object ...args) 
     {
+        if(null == args)
+            return save(bean);
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
@@ -650,6 +683,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass saveCollection($beanClass bean,Object ...inputs)
     {
+        if(null == inputs)
+            return save(bean);
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
@@ -862,7 +897,22 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             throw new WrapDAOException(e);
         }
      }
-
+    //18-1
+    @Override
+    public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws ObjectRetrievalException
+    {
+        try{
+            return this.beanConverter.fromRight(this.nativeManager.loadUniqueUsingTemplate(this.beanConverter.toRight(bean)));
+        }
+        catch(${exceptionPkg}.ObjectRetrievalException e)
+        {
+            throw new ObjectRetrievalException();
+        }
+        catch(DAOException e)
+        {
+            throw new WrapDAOException(e);
+        }
+     }
     //20-5
     @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)
@@ -903,13 +953,26 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
-        try{
-            return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}(#join( $indexColumns "${e.getVarName()}" ',')));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        ${beanClass} bean = new ${beanClass}();
+        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
+            return null;
+        #join($indexColumns '
+        bean.${e.getSetMethod()}(${e.getVarName()});
+        ' '')
+
+        return loadUniqueUsingTemplate(bean);
+    }
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException{
+        ${beanClass} bean = new ${beanClass}();
+        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
+            throw new NullPointerException();
+        #join($indexColumns '
+        bean.${e.getSetMethod()}(${e.getVarName()});
+        ' '')
+
+        return loadUniqueUsingTemplateChecked(bean);
     }
 #if( 1 == $indexColumns.size())
 #set ($indexColumn = $indexColumns.get(0))

@@ -1,0 +1,32 @@
+##$Id: dao.exception.java.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+$codewriter.setCurrentJavaFilename("${schemaPkg}.exception", "ObjectRetrievalException.java")
+package ${schemaPkg}.exception;
+
+import java.sql.SQLException;
+
+/**
+ *
+ * @author guyadong
+ */
+public class ObjectRetrievalException extends SQLException {
+
+	private static final long serialVersionUID = -6727843698593429999L;
+
+	public ObjectRetrievalException() {
+	}
+
+	public ObjectRetrievalException(String reason) {
+		super(reason);
+	}
+
+	public ObjectRetrievalException(Throwable cause) {
+		super(cause);
+	}
+
+	public ObjectRetrievalException(String reason, Throwable cause) {
+		super(reason, cause);
+	}
+
+}

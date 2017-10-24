@@ -164,10 +164,10 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
             $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
 #end
             List<$beanClass> pReturn = this.loadByPreparedStatementAsList(ps);
-            if (0 == pReturn.size()) {
-                throw new ObjectRetrievalException();
-            } else {
+            if (1 == pReturn.size()) {
                 return pReturn.get(0);
+            } else {
+                throw new ObjectRetrievalException();
             }
         }
         catch(ObjectRetrievalException e)
@@ -189,7 +189,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean) throws DAOException
     {
-        return bean==null?null:loadByPrimaryKeyChecked(bean);
+        return bean==null?null:loadByPrimaryKey(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
     }
     
     //1.2.2
@@ -210,23 +210,27 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //1.3
     @Override
     public $beanClass loadByPrimaryKey(Object ...keys) throws DAOException{
-        try{
-            return loadByPrimaryKey(keys);
-        }catch(ObjectRetrievalException e){
-            return null;
-        }
+        if(null == keys)
+            throw new NullPointerException();
+        if(keys.length != $table.countPrimaryKeys() )
+            throw new IllegalArgumentException("argument number mismatch with primary key number");
+        #join($primaryKeys '
+        if(null == keys[$m_0count])return null;
+' '')
+        return loadByPrimaryKey(#join($primaryKeys '($e.getJavaType())keys[$m_0count]' ','));
     }
     //1.3.2
     @Override
     public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws DAOException{
+        if(null == keys)
+            throw new NullPointerException();
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
-#foreach ( $pk in $primaryKeys )
-#set( $kidx = $velocityCount - 1 )
-        if(! (keys[$kidx] instanceof $pk.getJavaType()))
-            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
-#end        
-        return loadByPrimaryKeyChecked(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
+        #join($primaryKeys '
+        if(! (keys[$m_0count] instanceof $e.getJavaType()))
+            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");
+' '')
+        return loadByPrimaryKeyChecked(#join($primaryKeys '($e.getJavaType())keys[$m_0count]' ','));
     }
     /**
      * Returns true if this $tablename contains row with primary key fields.
@@ -381,15 +385,16 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //2.1
     @Override
     public int deleteByPrimaryKey(Object ...keys) throws DAOException{
+        if(null == keys)
+            throw new NullPointerException();
         if(keys.length != $table.countPrimaryKeys() )
             throw new IllegalArgumentException("argument number mismatch with primary key number");
-        ${beanClass} bean=createBean();   
-#foreach ( $pk in $primaryKeys )
-#set( $kidx = $velocityCount - 1 )
-        if(null!= keys[$kidx] && !(keys[$kidx] instanceof $pk.getJavaType()))
+        ${beanClass} bean = createBean();   
+        #join($primaryKeys '
+        if(null != keys[$m_0count] && !(keys[$m_0count] instanceof $e.getJavaType()))
             throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
-        bean.${pk.getSetMethod()}(($pk.getJavaType())keys[$kidx]);
-#end    
+        bean.${e.getSetMethod()}(($e.getJavaType())keys[$m_0count]);' '')
+
         return delete(bean);
     }
     
@@ -740,6 +745,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public $beanClass save($beanClass bean,Object ...args) throws DAOException
     {
+        if(null == args)
+            save(bean);
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
@@ -788,6 +795,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public $beanClass saveCollection($beanClass bean,Object ...args) throws DAOException
     {
+        if(null == args)
+            save(bean);
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
@@ -1259,16 +1268,30 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     @Override
     public $beanClass loadUniqueUsingTemplate(${beanClass} bean) throws DAOException
     {
-         ${beanClass}[] beans = this.loadUsingTemplate(bean);
-         if (beans.length == 0) {
+         List<${beanClass}> beans = this.loadUsingTemplateAsList(bean);
+         switch(beans.size()){
+         case 0:
              return null;
-         }
-         if (beans.length > 1) {
+         case 1:
+             return beans.get(0);
+         default:
              throw new ObjectRetrievalException("More than one element !!");
          }
-         return beans[0];
-     }
-
+    }
+    //18-1
+    @Override
+    public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws DAOException
+    {
+         List<${beanClass}> beans = this.loadUsingTemplateAsList(bean);
+         switch(beans.size()){
+         case 0:
+             throw new ObjectRetrievalException("Not found element !!");
+         case 1:
+             return beans.get(0);
+         default:
+             throw new ObjectRetrievalException("More than one element !!");
+         }
+    }
     //20-5
     @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action) throws DAOException
@@ -1362,22 +1385,43 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #if($index.isUnique())
     /**
      * Retrieves an unique $beanClass using the ${index.getName()} index.
-     *
-#foreach ( $column in $indexColumns )
-     * @param ${column.getVarName()} the ${column.getName()} column's value filter. must not be null
-#end
-     * @return 
+     * #join($indexColumns "
+     * @param ${e.getVarName()} the ${e.getName()} column's value filter" '')
+
+     * @return an $beanClass,otherwise null if not found or exists null in input arguments
      * @throws DAOException
      */
     public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
-        ${beanClass} bean = this.createBean();
-#foreach ( $column in $indexColumns )
-        if( null == ${column.getVarName()})
+        ${beanClass} bean = new ${beanClass}();
+        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
             return null;
-        bean.${column.getSetMethod()}(${column.getVarName()});
-#end
+        #join($indexColumns '
+        bean.${e.getSetMethod()}(${e.getVarName()});
+        ' '')
+
         return loadUniqueUsingTemplate(bean);
+    }
+    /**
+     * Retrieves an unique $beanClass using the ${index.getName()} index.
+     * #join($indexColumns "
+     * @param ${e.getVarName()} the ${e.getName()} column's value filter. must not be null" '')
+
+     * @return an $beanClass
+     * @throws NullPointerException exists null in input arguments
+     * @throws ObjectRetrievalException if not found
+     * @throws DAOException
+     */
+    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    {
+        ${beanClass} bean = new ${beanClass}();
+        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
+            throw new NullPointerException();
+        #join($indexColumns '
+        bean.${e.getSetMethod()}(${e.getVarName()});
+        ' '')
+
+        return loadUniqueUsingTemplateChecked(bean);
     }
 #if( 1 == $indexColumns.size())
 #set ($indexColumn = $indexColumns.get(0))
@@ -1523,17 +1567,20 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public List<$beanClass> loadByIndexAsList(int keyIndex,Object ...keys)throws DAOException
     {
+        if(null == keys)
+            throw new NullPointerException();
         switch(keyIndex){
 #foreach($index in $table.getIndices())
 #set( $indexColumns = $index.getIndexColumnsList())
 #set ( $idxIndex = $velocityCount - 1 )
         case ${index.asConstName()}:{
-            if(keys.length != $index.getIndexColumns().size())
+            if(keys.length != $indexColumns.size())
                 throw new IllegalArgumentException("argument number mismatch with index '${index.name}' column number");
-#foreach($column in $index.getIndexColumns())
-            if(null != keys[$idxIndex] && !(keys[$idxIndex] instanceof $column.getJavaType()))
-                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
-#end
+            #join($indexColumns '
+            if(null != keys[$m_0count] && !(keys[$m_0count] instanceof $e.getJavaType()))
+                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");
+' '')
+
 #if($index.isUnique())
             $beanClass bean= this.loadBy${index.asCamelCaseName()}(#join($indexColumns "($e.getJavaType())keys[$m_0count]" ','));
             return null == bean ? new java.util.ArrayList<$beanClass>() : java.util.Arrays.asList(bean);
@@ -1558,17 +1605,19 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public int deleteByIndex(int keyIndex,Object ...keys)throws DAOException
     {
+        if(null == keys)
+            throw new NullPointerException();
         switch(keyIndex){
 #foreach($index in $table.getIndices())
 #set( $indexColumns = $index.getIndexColumnsList())
 #set ( $idxIndex = $velocityCount - 1 )
         case ${index.asConstName()}:{
-            if(keys.length != $index.getIndexColumns().size())
+            if(keys.length != $indexColumns.size())
                 throw new IllegalArgumentException("argument number mismatch with index '${index.name}' column number");
-#foreach($column in $index.getIndexColumns())
-            if(null != keys[$idxIndex] && !(keys[$idxIndex] instanceof $column.getJavaType()))
-                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$column.getJavaType()");
-#end                
+            #join($indexColumns '
+            if(null != keys[$m_0count] && !(keys[$m_0count] instanceof $e.getJavaType()))
+                throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");' '')
+
             return this.deleteBy${index.asCamelCaseName()}(#join($indexColumns "($e.getJavaType())keys[$m_0count]" ','));
         }
 #end

@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import ${schemaPkg}.TableLoadCaching;
 #if(!$isGeneral)
 import ${pkg}.exception.DAOException;
-#set ($throwsString = "throws DAOException")
 #end
 import $table.getPackage(true).$beanClass;
 #if(!$isGeneral)
@@ -57,15 +56,15 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
             }
             @Override
             public void unregisterListener() {
-                manager.unregisterListener(tableListener);        
+                manager.unregisterListener(tableListener);
             }
             @Override
             protected $columnType returnKey($beanClass bean) {
                 return bean.$indexColumn.getGetMethod()();
             }
             @Override
-            protected $beanClass loadfromDatabase($columnType key)$!throwsString {
-                return manager.loadBy${index.asCamelCaseName()}(key);
+            protected $beanClass loadfromDatabase($columnType key) throws Exception {
+                return manager.loadBy${index.asCamelCaseName()}Checked(key);
             }};
 #end###if($index.isUnique())
 #end##foreach
@@ -111,8 +110,8 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         return bean.$pk.getGetMethod()();
     }
     @Override
-    protected $beanClass loadfromDatabase($pkType key)$!throwsString {
-        return manager.loadByPrimaryKey(key);
+    protected $beanClass loadfromDatabase($pkType key)throws Exception {
+        return manager.loadByPrimaryKeyChecked(key);
     }
     @Override
     public void update($beanClass bean){
