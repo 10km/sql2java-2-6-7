@@ -109,7 +109,13 @@ public class $cacheManagerClass extends $managerClass
             }
         }
     }
-
+    //1.4 override $table.asManagerInterfaceNSP()
+    @Override 
+    public boolean existsPrimaryKey($primaryKey.getJavaType() $primaryKey.getVarName())
+    {
+        if(null != cache.getBeanIfPresent($primaryKey.getVarName()))return true;
+        return super.existsPrimaryKey($primaryKey.getVarName());
+    }
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================

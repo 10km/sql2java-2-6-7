@@ -101,6 +101,10 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
         return cache.get(key);
     }
     @Override
+    public B getBeanIfPresent(K key){
+    	return null == key ? null : cache.getIfPresent(key);
+    }
+    @Override
     public B getBeanUnchecked(K key){
         try{
             return cache.getUnchecked(key);

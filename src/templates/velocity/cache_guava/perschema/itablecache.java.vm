@@ -54,6 +54,12 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      */
     public B getBeanUnchecked(K key);
     
+    /**
+     * 返回cache中{@code key}指定的记录,如果不存在就返回{@code null}
+     * @param key  
+     * @return return false if key is null
+     */
+    public B getBeanIfPresent(K key);
     
     /**
      * 向cache中更新数据

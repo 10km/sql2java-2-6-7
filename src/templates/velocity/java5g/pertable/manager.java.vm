@@ -177,7 +177,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
         try{
-            return nativeManager.existsPrimaryKey(#join($primaryKeys "$e.getVarName()" ',') );
+            return nativeManager.existsPrimaryKey(#join($primaryKeys "$e.getVarName()" ','));
         }
         catch(DAOException e)
         {
