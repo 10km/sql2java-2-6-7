@@ -11,6 +11,7 @@ $codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheClass}.java
 package $table.getPackage(false);
 
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import ${schemaPkg}.TableLoadCaching;
 #if(!$isGeneral)
@@ -137,15 +138,21 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         return beans;
     }
     
-    public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()){
-        return super.getBean($pk.getVarName());
+    public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()) throws ExecutionException{
+        return getBean($pk.getVarName());
+    }
+    public $beanClass $pk.getGetCacheMethod()Unchecked($pkType $pk.getVarName()){
+        return getBeanUnchecked($pk.getVarName());
     }
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
-    public $beanClass $indexColumn.getGetCacheMethod()($columnType $indexColumn.getVarName()){
+    public $beanClass $indexColumn.getGetCacheMethod()($columnType $indexColumn.getVarName())  throws ExecutionException{
         return ${indexColumn.getCacheVarName()}.getBean($indexColumn.getVarName());
+    }
+    public $beanClass $indexColumn.getGetCacheMethod()Unchecked($columnType $indexColumn.getVarName()){
+        return ${indexColumn.getCacheVarName()}.getBeanUnchecked($indexColumn.getVarName());
     }
 #end
 #end

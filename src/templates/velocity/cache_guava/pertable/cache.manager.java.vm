@@ -15,10 +15,13 @@ $codewriter.setSaveCurrentFile(false)
 $codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheManagerClass}.java")
 package $table.getPackage(false);
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import ${schemaPkg}.ITableCache;
 import ${schemaPkg}.ITableCache.UpdateStrategy;
+import net.gdface.facelog.db.exception.ObjectRetrievalException;
+import net.gdface.facelog.db.exception.WrapDAOException;
 #foreach ($foreignTable in $foreignTables)
 import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass($isGeneral)};
 import ${foreignTable.getPackage(false)}.${foreignTable.asCacheManagerClass($isGeneral)};
@@ -86,17 +89,27 @@ public class $cacheManagerClass extends $managerClass
     // PRIMARY KEY METHODS
     //////////////////////////////////////
 
-    //1 override $table.asManagerInterfaceNSP()
+    //1.1 override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadByPrimaryKey($primaryKey.getJavaType() $primaryKey.getVarName()){
-        return cache.getBean($primaryKey.getVarName());
+    public $beanClass loadByPrimaryKeyChecked($primaryKey.getJavaType() $primaryKey.getVarName()) throws ObjectRetrievalException
+    {
+        try{
+            return cache.getBean($primaryKey.getVarName());
+        }catch(ExecutionException ee){
+            try{
+                throw ee.getCause();
+            }catch(ObjectRetrievalException oe){
+                throw oe;
+            } catch (WrapDAOException we) {
+                throw we;
+            } catch (RuntimeException re) {
+                throw re;
+            }catch (Throwable e) {
+                throw new RuntimeException(ee);
+            }
+        }
     }
 
-    //1.2
-    @Override
-    public $beanClass loadByPrimaryKey(${beanClass} bean){        
-        return null == bean ? null : loadByPrimaryKey(bean.$primaryKey.getGetMethod()());
-    }
 ## ======================================================
 ## xForeignKeys template
 ## ======================================================
@@ -138,7 +151,8 @@ public class $cacheManagerClass extends $managerClass
         @Override
         public $beanClass getBean() {
             return null == action?null:action.getBean();
-        }}
+        }
+    }
     //20-5
     @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)$!throwsString{
@@ -159,7 +173,32 @@ public class $cacheManagerClass extends $managerClass
     // override $table.asManagerInterfaceNSP()
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}($indexColumn.getJavaType() $indexColumn.getVarName()){
-        return cache.${indexColumn.getGetCacheMethod()}($indexColumn.getVarName());
+        try{
+            if(null == $indexColumn.getVarName())
+                return null;
+            return loadBy${index.asCamelCaseName()}Checked($indexColumn.getVarName());
+        }catch(ObjectRetrievalException ee){
+            return null;
+        }
+    }
+    // override $table.asManagerInterfaceNSP()
+    @Override 
+    public $beanClass loadBy${index.asCamelCaseName()}Checked($indexColumn.getJavaType() $indexColumn.getVarName()) throws ObjectRetrievalException{
+        try{
+            return cache.${indexColumn.getGetCacheMethod()}($indexColumn.getVarName());
+        }catch(ExecutionException ee){
+            try{
+                throw ee.getCause();
+            }catch(ObjectRetrievalException oe){
+                throw oe;
+            } catch (WrapDAOException we) {
+                throw we;
+            } catch (RuntimeException re) {
+                throw re;
+            }catch (Throwable e) {
+                throw new RuntimeException(ee);
+            }
+        }
     }
 #end## $index.isUnique() && 1 == $indexColumns.size()    
 #end

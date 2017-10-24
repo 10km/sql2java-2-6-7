@@ -3,6 +3,7 @@
 $codewriter.setCurrentJavaFilename($schemaPkg, "${javaClassName}.java")
 package $schemaPkg;
 
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.Collection;
 /**
@@ -17,17 +18,42 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      * {@code ifAbsent} update if key not exists<br>
      * {@code replace} update only key exists 
      */
-    public static enum UpdateStrategy{always,ifAbsent,replace;}
+    public static enum UpdateStrategy{
+        always,ifAbsent,replace;
+        public <K,V> void update(ConcurrentMap<K,V> map,K key,V value){
+            switch(this){
+            case always:
+                map.put(key, value);
+                break;
+            case ifAbsent:
+                map.putIfAbsent(key, value);
+                break;
+            case replace:
+                map.replace(key, value);
+                break;
+            }
+        }
+    }
     public static final UpdateStrategy DEFAULT_STRATEGY = UpdateStrategy.always;
     public static final long DEFAULT_CACHE_MAXIMUMSIZE = 10000;
     public static final long DEFAULT_DURATION = 10;
     public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MINUTES;
     /**
-     * 加载主键(key)指定的记录,如果缓存中没有则从数据库中查询
+     * 加载主键(key)指定的记录,如果缓存中没有则从数据库中查询<br>
+     * 数据库中没有找到则抛出异常
      * @param key
      * @return
      */
-    public B getBean(K key);
+    public B getBean(K key) throws Exception;
+    /**
+     * 加载主键(key)指定的记录,如果缓存中没有则从数据库中查询<br>
+     * 数据库中没有找到则返回{@code null}
+     * @param key
+     * @return
+     */
+    public B getBeanUnchecked(K key);
+    
+    
     /**
      * 向cache中更新数据
      * @param bean

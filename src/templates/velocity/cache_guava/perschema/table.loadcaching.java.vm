@@ -5,11 +5,15 @@ package $schemaPkg;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
+import net.gdface.facelog.db.exception.ObjectRetrievalException;
 
 /**
  * 
@@ -80,22 +84,29 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
                 cacheMap.remove(returnKey(bean));
             }};
     }
+    /**
+     * @see {@link com.google.common.cache.LoadingCache${esc.hash}get(Object)}
+     */
     @Override
-    public B getBean(K key) {
-        return cache.getUnchecked(key);
+    public B getBean(K key)throws ExecutionException{
+        return cache.get(key);
+    }
+    @Override
+    public B getBeanUnchecked(K key){
+        try{
+            return cache.getUnchecked(key);
+        }catch(UncheckedExecutionException e){
+            if(e.getCause() instanceof ObjectRetrievalException){
+                return null;
+            }
+            throw e;
+        }        
     }
     @Override
     public void update(B bean){
         K key;
         if(null == bean || null == (key = returnKey(bean)))return;
-        switch(updateStragey){
-        case always:
-            cacheMap.put(key,bean);break;
-        case ifAbsent:
-            cacheMap.putIfAbsent(key,bean);break;
-        case replace:
-            cacheMap.replace(key,bean);break;
-        }        
+        updateStragey.update(cacheMap, key, bean);
     }
     @Override
     public Collection<B> update(Collection<B> beans){

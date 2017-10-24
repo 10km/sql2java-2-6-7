@@ -119,7 +119,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return null;
         }
     }
-    //1.1
+    //1.1 override $table.asManagerInterfaceNSP()
     @Override
     public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws ObjectRetrievalException
     {
