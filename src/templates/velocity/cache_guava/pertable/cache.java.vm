@@ -61,7 +61,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
             }
             @Override
             protected $columnType returnKey($beanClass bean) {
-                return bean.$indexColumn.getGetMethod()();
+                return null == bean ? null : bean.$indexColumn.getGetMethod()();
             }
             @Override
             protected $beanClass loadfromDatabase($columnType key) throws Exception {
@@ -108,7 +108,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     }
     @Override
     protected $pkType returnKey($beanClass bean) {
-        return bean.$pk.getGetMethod()();
+        return null == bean ? null : bean.$pk.getGetMethod()();
     }
     @Override
     protected $beanClass loadfromDatabase($pkType key)throws Exception {

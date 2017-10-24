@@ -21,6 +21,7 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
     public static enum UpdateStrategy{
         always,ifAbsent,replace;
         public <K,V> void update(ConcurrentMap<K,V> map,K key,V value){
+            if(null == map || null == key || null == value)return ;
             switch(this){
             case always:
                 map.put(key, value);
