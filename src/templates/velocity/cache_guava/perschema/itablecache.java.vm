@@ -74,9 +74,15 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
     /**
      * @param beans
      * @return always beans 
-     * @see #update(B) 
+     * @see ${esc.hash}update(B) 
      */
     public Collection<B> update(Collection<B> beans);
+    /**
+     * @param beans
+     * @return always beans 
+     * @see ${esc.hash}remove(B) 
+     */
+    public Collection<B> remove(Collection<B> beans);
     /** 注册侦听器 */
     public void registerListener();
     /** 注销侦听器 */

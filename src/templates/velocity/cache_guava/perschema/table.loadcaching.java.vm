@@ -8,10 +8,15 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Function;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -55,8 +60,8 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
     /**
      * 构造函数
      * @param updateStragey 缓存更新策略
-     * @param maximumSize 最大缓存容量,参见 {@link CacheBuilder#maximumSize(long)}
-     * @param duration 失效时间,参见 {@link CacheBuilder#expireAfterWrite(long, TimeUnit)}
+     * @param maximumSize 最大缓存容量,参见 {@link CacheBuilder${esc.hash}maximumSize(long)}
+     * @param duration 失效时间,参见 {@link CacheBuilder${esc.hash}expireAfterWrite(long, TimeUnit)}
      * @param unit {@code duration}的时间单位
      */
     public TableLoadCaching(UpdateStrategy updateStragey,long maximumSize,long duration, TimeUnit unit) {        
@@ -96,7 +101,7 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
             }};
     }
     /**
-     * @see {@link com.google.common.cache.LoadingCache#get(Object)}
+     * @see {@link com.google.common.cache.LoadingCache${esc.hash}get(Object)}
      */
     @Override
     public B getBean(K key)throws ExecutionException{
@@ -138,14 +143,55 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
         }
         return beans;
     }
+    @Override
+    public Collection<B> remove(Collection<B> beans){
+        if(null != beans){
+            for(B bean : beans){
+                remove(bean);
+            }
+        }
+        return beans;
+    }
     /**
      * 添加删除侦听器
-     * @param e
+     * @param listener
      * @return
      * @see net.gdface.facelog.db.RemovalListenerContainer{esc.hash}add(com.google.common.cache.RemovalListener)
      */
-    public boolean addRemovalListener(RemovalListener<K, B> e) {
-        return listenerContainer.add(e);
+    public boolean addRemovalListener(RemovalListener<K, B> listener) {
+        return listenerContainer.add(listener);
     }
-
+    
+    /**
+     * 将当前cache绑定到指定的外键表cache上<br>
+     * 向{@code foreignKeyCache}添加一个{@link RemovalListener}
+     * @param foreignKeyCache
+     * @param toKey 从当前对象返回外键字段
+     * @param toDo 外键删除时的动作
+     * @return
+     */
+    public<FK,FB extends BaseBean<FB>> RemovalListener<FK, FB> bind(
+    		TableLoadCaching<FK,FB> foreignKeyCache,
+    		final Function<B,FK> toKey,
+    		final Predicate<B> toDo){
+    	checkNotNull(foreignKeyCache);
+    	checkNotNull(toKey);
+    	checkNotNull(toDo);
+    	RemovalListener<FK, FB> listener = new RemovalListener<FK,FB>(){
+    		@Override
+    		public void onRemoval(RemovalNotification<FK, FB> notification) {
+    			final FK deletedKey = notification.getKey();
+    			Collections2.filter(cacheMap.values(), new Predicate<B>(){
+    				@Override
+    				public boolean apply(B input) {
+    					if(deletedKey.equals(toKey.apply(input))){
+    						toDo.apply(input);
+    					}
+    					return false;
+    				}});				
+    		}};
+    		foreignKeyCache.addRemovalListener(listener);
+    		return listener;
+    }
 }
+

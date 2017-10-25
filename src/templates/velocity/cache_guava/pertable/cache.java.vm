@@ -39,24 +39,20 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     #join($table.getUniqueIndicesAsList() '
     private final TableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
 
-/*
-    private final RemovalListener<String, ImageBean> bindOnDeleteImageListener = new RemovalListener<String, ImageBean>(){
-        @Override
-        public void onRemoval(RemovalNotification<String, ImageBean> notification) {
-            PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());                
-            remove(bean);
-        }
-    };
-    private final RemovalListener<String, ImageBean> bindSetNullImageListener = new RemovalListener<String, ImageBean>(){
-        @Override
-        public void onRemoval(RemovalNotification<String, ImageBean> notification) {
-            PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());
-            bean.setImageMd5(null);
-            update(bean);
-        }
-    };
+/*    
     public void bind(ImageCache imageCache){
-        imageCache.addRemovalListener(bindOnDeleteImageListener);
+    	bind(imageCache,
+    			new Function<PersonBean,String>(){
+				@Override
+				public String apply(PersonBean input) {
+					return input.getImageMd5();
+				}},
+	    		new Predicate<PersonBean>(){
+				@Override
+				public boolean apply(PersonBean input) {
+					remove(input);
+					return false;
+				}});
     }
 */
     /** constructor<br>
