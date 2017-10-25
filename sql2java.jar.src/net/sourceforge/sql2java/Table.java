@@ -19,7 +19,13 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -218,7 +224,22 @@ public class Table {
 	public Index[] getIndices() {
 		return this.indices.toArray( new Index[this.indices.size()]);
 	}
-
+	public List<Index> getIndicesAsList(Boolean unique) {
+		Iterator<Index>itor = this.indices.iterator();
+		if(Boolean.TRUE == unique)
+			itor = Iterators.filter(itor, new Predicate<Index>(){
+				@Override
+				public boolean apply(Index arg0) {
+					return arg0.isUnique();
+				}});
+		return ImmutableList.copyOf(itor);
+	}
+	public List<Index> getIndicesAsList(){
+		return getIndicesAsList(false);
+	} 
+	public List<Index> getUniqueIndicesAsList(){
+		return getIndicesAsList(true);
+	} 
 	public Index getIndex(String indName) {
 		return (Index) this.indHash.get(indName.toLowerCase());
 	}
