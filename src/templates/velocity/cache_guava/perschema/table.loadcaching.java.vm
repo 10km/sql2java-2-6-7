@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -23,32 +24,32 @@ import net.gdface.facelog.db.exception.ObjectRetrievalException;
  * @param <K> 主键类型(Primary or Unique)
  * @param <B> 数据库记录对象类型(Java Bean)
  */
-public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITableCache<K, B> {
+public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITableCache<K, B> {
     private final LoadingCache<K, B> cache;
     protected final ConcurrentMap<K, B> cacheMap;
     protected final  TableListener.Adapter<B> tableListener;
     /** 当前更新策略 */
     private final UpdateStrategy updateStragey;
-
+    private final RemovalListenerContainer<K,B> listenerContainer = new RemovalListenerContainer<K,B>();    
     /** 返回bean中主键值 */
-    protected abstract K returnKey(B bean)
+    public abstract K returnKey(B bean)
     /** 从数据库中加载主键(pk)指定的记录 */;
     protected abstract B loadfromDatabase(K key)throws Exception;
 
-    public $javaClassName(){
+    public TableLoadCaching(){
         this(DEFAULT_CACHE_MAXIMUMSIZE,
                 DEFAULT_DURATION,
                 DEFAULT_TIME_UNIT);
     }
-    public $javaClassName(long maximumSize){
+    public TableLoadCaching(long maximumSize){
         this(maximumSize,
                 DEFAULT_DURATION,
                 DEFAULT_TIME_UNIT);
     }
-    public $javaClassName(long maximumSize,long durationMinutes){
+    public TableLoadCaching(long maximumSize,long durationMinutes){
         this(maximumSize,durationMinutes,DEFAULT_TIME_UNIT);
     }
-    public $javaClassName(long maximumSize,long duration, TimeUnit unit) {
+    public TableLoadCaching(long maximumSize,long duration, TimeUnit unit) {
         this(DEFAULT_STRATEGY,maximumSize,duration,unit);
     }
     /**
@@ -58,7 +59,7 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
      * @param duration 失效时间,参见 {@link CacheBuilder#expireAfterWrite(long, TimeUnit)}
      * @param unit {@code duration}的时间单位
      */
-    public $javaClassName(UpdateStrategy updateStragey,long maximumSize,long duration, TimeUnit unit) {        
+    public TableLoadCaching(UpdateStrategy updateStragey,long maximumSize,long duration, TimeUnit unit) {        
         if(null == updateStragey ) updateStragey = DEFAULT_STRATEGY;
         if(0 >= maximumSize) maximumSize = DEFAULT_CACHE_MAXIMUMSIZE;
         if(0 >= duration) maximumSize = DEFAULT_DURATION;
@@ -67,6 +68,7 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
         cache = CacheBuilder.newBuilder()
             .maximumSize(maximumSize)
             .expireAfterWrite(duration, unit)
+            .removalListener(listenerContainer)
             .build(
                 new CacheLoader<K,B>() {
                     @Override
@@ -94,7 +96,7 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
             }};
     }
     /**
-     * @see {@link com.google.common.cache.LoadingCache${esc.hash}get(Object)}
+     * @see {@link com.google.common.cache.LoadingCache#get(Object)}
      */
     @Override
     public B getBean(K key)throws ExecutionException{
@@ -102,7 +104,7 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
     }
     @Override
     public B getBeanIfPresent(K key){
-    	return null == key ? null : cache.getIfPresent(key);
+        return null == key ? null : cache.getIfPresent(key);
     }
     @Override
     public B getBeanUnchecked(K key){
@@ -131,5 +133,16 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
             }
         }
         return beans;
+    }
+    /**
+     * @param e
+     * @return
+     * @see net.gdface.facelog.db.RemovalListenerContainer{esc.hash}add(com.google.common.cache.RemovalListener)
+     */
+    public boolean addRemovalListener(RemovalListener<K, B> e) {
+        return listenerContainer.add(e);
+    }
+    public void remove(B bean){
+        cacheMap.remove(returnKey(bean));
     }
 }

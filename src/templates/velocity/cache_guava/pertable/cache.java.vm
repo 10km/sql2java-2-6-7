@@ -39,6 +39,30 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     private final TableLoadCaching<$columnType, $beanClass> ${indexColumn.getCacheVarName()};
 #end
 #end
+/*
+    private final RemovalListener<String, ImageBean> bindOnDeleteImageListener = new RemovalListener<String, ImageBean>(){
+        @Override
+        public void onRemoval(RemovalNotification<String, ImageBean> notification) {
+            PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());                
+            remove(bean);
+            imageMd5Cacher.remove(bean);
+            papersNumCacher.remove(bean);
+        }
+    };
+    private final RemovalListener<String, ImageBean> bindSetNullImageListener = new RemovalListener<String, ImageBean>(){
+        @Override
+        public void onRemoval(RemovalNotification<String, ImageBean> notification) {
+            PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());
+            bean.setImageMd5(null);
+            update(bean);
+            imageMd5Cacher.update(bean);
+            papersNumCacher.update(bean);
+        }
+    };
+    public void bind(ImageCache imageCache){
+        imageCache.addRemovalListener(bindOnDeleteImageListener);
+    }
+*/
     /** constructor<br>
      * @see {@link TableLoadCaching#TableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
      */
@@ -60,7 +84,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
                 manager.unregisterListener(tableListener);
             }
             @Override
-            protected $columnType returnKey($beanClass bean) {
+            public $columnType returnKey($beanClass bean) {
                 return null == bean ? null : bean.$indexColumn.getGetMethod()();
             }
             @Override
@@ -107,7 +131,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
 #end   
     }
     @Override
-    protected $pkType returnKey($beanClass bean) {
+    public $pkType returnKey($beanClass bean) {
         return null == bean ? null : bean.$pk.getGetMethod()();
     }
     @Override
