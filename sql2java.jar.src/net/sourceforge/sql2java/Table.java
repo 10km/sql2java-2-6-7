@@ -3,6 +3,7 @@ package net.sourceforge.sql2java;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -10,10 +11,17 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.google.common.base.Strings;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.Column;
@@ -42,11 +50,45 @@ public class Table {
 	private Database database;
 	private Vector<Column> foreignKeys = new Vector<Column>();
 	private Vector<Column> importedKeys = new Vector<Column>();
-	/* FK_NAME 为索引保存所有 foreign keys */
-	private Map<String,Vector<Column>> fkNameMap = new HashMap<String,Vector<Column>>();
+	/** FK_NAME 为索引保存所有 foreign keys */
+	private ConcurrentHashMap<String,ForeignKey> fkNameMap = new ConcurrentHashMap<String,ForeignKey>();
 	private List<Procedure> procedures = new ArrayList<Procedure>();
 	private HashMap<String,Procedure> procHash = new HashMap<String,Procedure>();
 	private Random aleatorio = new Random(new Date().getTime());
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("catalog",catalog)
+				.append("schema", schema)
+				.append("name", name)
+				.append("remarks", remarks)
+				.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(catalog)
+				.append(indices)
+				.append(name)
+				.append(schema)
+				.toHashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(super.equals(obj))return true;
+		if(!(obj instanceof Table))return false;
+		Table other = (Table)obj;
+		return new EqualsBuilder()
+			.append(catalog, other.catalog)
+			.append(indices, other.indices)
+			.append(name, other.name)
+			.append(schema, other.schema)
+			.append(type, other.type)
+			.isEquals();
+	}
 
 	public boolean isRelationTable() {
 		if ("false".equalsIgnoreCase(this.getTableProperty("nntable"))) {
@@ -208,7 +250,9 @@ public class Table {
 	public Column[] getPrimaryKeys() {
 		return this.priKey.toArray( new Column[this.priKey.size()]);
 	}
-
+	public Vector<Column> getPrimaryKeysAsList() {
+		return new Vector<Column>(this.priKey);
+	}
 	public boolean hasCompositeKey() {
 		if (this.priKey.size() > 1) {
 			return true;
@@ -266,22 +310,24 @@ public class Table {
 		return this.countForeignKeys() > 0;
 	}
 
-	public void addForeignKey(Column col, String fkName, short keySeq) {
-		if (!this.foreignKeys.contains((Object) col)) {
+	public void addForeignKey(Column col, 
+			String fkName, 
+			short keySeq,
+			Table.ForeignKeyRule updateRule,
+			Table.ForeignKeyRule deleteRule) {
+		checkNotNull(col);
+		checkArgument(!Strings.isNullOrEmpty(fkName));
+		checkArgument(keySeq>0,"the argument 'keySeq' must >0");
+
+		if (!this.foreignKeys.contains(col)) {
 			this.foreignKeys.add(col);
 		}
-		if(null!=fkName&&!fkName.isEmpty()){
-			if(keySeq<=0)
-				throw new IllegalArgumentException("the argument 'keySeq' must >0");
-			if(null==this.fkNameMap.get(fkName)){
-				this.fkNameMap.put(fkName, new Vector<Column>());
-			}
-			Vector<Column> fkCols = fkNameMap.get(fkName);
-			if(keySeq > fkCols.size()){
-				fkCols.setSize(keySeq);
-			}
-			fkCols.set(keySeq-1, col);
+		this.fkNameMap.putIfAbsent(fkName, new ForeignKey(fkName,updateRule,deleteRule,col));
+		Vector<Column> fkCols = fkNameMap.get(fkName).columns;
+		if(keySeq > fkCols.size()){
+			fkCols.setSize(keySeq);
 		}
+		fkCols.set(keySeq-1, col);
 	}
 	
 	/**
@@ -302,12 +348,10 @@ public class Table {
 	 */
 	public Vector<String> getFkMapNames(String tableName) {
 		Vector<String> names=new Vector<String>();
-		// System.out.printf("getFkMapNames of %s for %s\n", this.getName(),tableName);
-		for(Entry<String, Vector<Column>> entry:this.fkNameMap.entrySet()){
-			for(Column col:entry.getValue().get(0).getForeignKeys()){
+		for(ForeignKey entry:this.fkNameMap.values()){
+			for(Column col:entry.columns.get(0).getForeignKeys()){
 				if(col.getTableName().equals(tableName)){
-					// System.out.printf("    %s\n",entry.getKey());
-					names.add(entry.getKey());
+					names.add(entry.fkName);
 					break;
 				}
 			}
@@ -324,10 +368,20 @@ public class Table {
 	 * @return
 	 */
 	public Vector<Column> getForeignKeysByFkName(String fkName) {		
-		Vector<Column> keys=this.fkNameMap.get(fkName);
-		return null==keys?new Vector<Column>():new Vector<Column>(keys);
+		ForeignKey keys=this.fkNameMap.get(fkName);
+		return null==keys?new Vector<Column>():new Vector<Column>(keys.columns);
 	}
 	
+	/**
+	 * 检索指定 FK_NAME 的{@link ForeignKey}对象<br>
+	 * @param fkName
+	 * @return
+	 * @see java.util.concurrent.ConcurrentHashMap#get(java.lang.Object)
+	 */
+	public ForeignKey getForeignKey(String fkName) {
+		return fkNameMap.get(fkName);
+	}
+
 	/**
 	 * 判断 FK_NAME 包含的所有字段是否都允许为null
 	 * @param fkName
@@ -348,13 +402,13 @@ public class Table {
 		Vector<Column> keys = getForeignKeysByFkName(fkName);
 		for(Iterator<Column> itor = keys.iterator();itor.hasNext();){
 			Column column = itor.next();
-			if(Column.columnNullable !=column.getNullable())continue;
+			if(DatabaseMetaData.columnNullable !=column.getNullable())continue;
 			itor.remove();
 		}
 		return keys;
 	}
 	private String toUniversalFkName(String fkName) {
-		Vector<Column> keys = this.fkNameMap.get(fkName);
+		Vector<Column> keys = this.fkNameMap.get(fkName).columns;
 		if(null!=keys){
 			Vector<String> names=new Vector<String>();
 			for(Column k:keys)names.add(k.getName());
@@ -978,5 +1032,64 @@ public class Table {
 			buffer.append(")");
 			return String.format("%s &= (~%s)", varName,buffer.toString());
 		}
+	}
+	/**
+	 * 包含foreign key信息的数据对象 
+	 * @author guyadong
+	 *
+	 */
+	public static class ForeignKey{
+		/** foreign key name */
+		final String fkName;
+		/** columns of foreign key ,in KEY_SEQ order*/
+		final Vector<Column> columns = new Vector<Column>();
+		/** UPDATE_RULE */
+		final Table.ForeignKeyRule updateRule;
+		/**  DELETE_RULE */
+		final Table.ForeignKeyRule deleteRule;
+		public ForeignKey(String fkName, 
+				Table.ForeignKeyRule updateRule, 
+				Table.ForeignKeyRule deleteRule, 
+				Column columns) {
+			checkArgument(!Strings.isNullOrEmpty(fkName));
+			checkNotNull(columns);
+			this.fkName = fkName;
+			this.columns.add(columns);
+			this.updateRule = checkNotNull(updateRule);
+			this.deleteRule = checkNotNull(deleteRule);
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if(super.equals(obj))return true;
+			if(!(obj instanceof ForeignKey))return false;
+			ForeignKey other = (ForeignKey)obj;
+			return new EqualsBuilder()
+				.append(fkName, other.fkName)
+				.append(columns, other.columns)
+				.append(updateRule, other.updateRule)
+				.append(deleteRule, other.deleteRule)
+				.isEquals();
+		}
+		@Override
+		public String toString() {			
+			return new ToStringBuilder(this)
+					.append("fkName",fkName)
+					.append("columns", columns)
+					.append("updateRule", updateRule)
+					.append("deleteRule", deleteRule)
+					.toString();
+		}
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder()
+					.append(fkName)
+					.append(columns)
+					.append(updateRule)
+					.append(deleteRule)
+					.toHashCode();
+		}
+	}
+	public static enum ForeignKeyRule{
+		CASCADE,RESTRICT,SET_NULL,NO_ACTION,SET_DEFAULT
 	}
 }

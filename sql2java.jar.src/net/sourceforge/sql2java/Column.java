@@ -1,8 +1,8 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
+import java.sql.DatabaseMetaData;
 import java.sql.Types;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,6 +12,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.ConfigHelper;
 import net.sourceforge.sql2java.Database;
@@ -39,34 +41,6 @@ public class Column implements Cloneable, Comparable<Column> {
 	public static final int M_URL = 16;
 	public static final int M_OBJECT = 17;
 	public static final int M_CALENDAR = 18;
-    /**
-     * Indicates that the column might not allow <code>NULL</code> values.
-     * <P>
-     * A possible value for the column
-     * <code>NULLABLE</code>
-     * in the <code>ResultSet</code> returned by the method
-     * <code>getColumns</code>.
-     */
-	public static final int columnNoNulls = 0;
-    /**
-     * Indicates that the column definitely allows <code>NULL</code> values.
-     * <P>
-     * A possible value for the column
-     * <code>NULLABLE</code>
-     * in the <code>ResultSet</code> returned by the method
-     * <code>getColumns</code>.
-     */
-	public static final int columnNullable = 1;
-
-    /**
-     * Indicates that the nullability of columns is unknown.
-     * <P>
-     * A possible value for the column
-     * <code>NULLABLE</code>
-     * in the <code>ResultSet</code> returned by the method
-     * <code>getColumns</code>.
-     */
-	public static final int columnNullableUnknown = 2;
 	private String catalog;
 	private String schema;
 	private String tableName;
@@ -88,13 +62,49 @@ public class Column implements Cloneable, Comparable<Column> {
 	private String typeName = "";
 	private static Random rand = new Random();
 
+	@Override
 	public String toString() {
-		return "\n --------- " + this.tableName + "." + this.name + " --------- " + "\n schema        = " + this.schema
-				+ "\n tableName     = " + this.tableName + "\n catalog       = " + this.catalog + "\n remarks       = "
-				+ this.remarks + "\n defaultValue  = " + this.defaultValue + "\n decDigits     = " + this.decDigits
-				+ "\n radix         = " + this.radix + "\n nullable      = " + this.nullable + "\n ordinal       = "
-				+ this.ordinal + "\n size          = " + this.size + "\n type          = " + this.type + " "
-				+ "\n isPrimaryKey  = " + (this.isPrimaryKey ? "true" : "false");
+		return new ToStringBuilder(this)
+				.append("catalog",catalog)
+				.append("schema",schema)
+				.append("tableName",tableName)
+				.append("name",name)
+				.append("remarks",remarks)
+				.append("defaultValue",defaultValue)
+				.append("size",size)
+				.append("decDigits",decDigits)
+				.append("radix",radix)
+				.append("nullable",nullable)
+				.append("ordinal",ordinal)
+				.append("type",type)
+				.append("isPrimaryKey",isPrimaryKey)
+				.append("autoincrement",autoincrement)
+				.append("typeName",typeName)
+				.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(super.equals(obj))return true;
+		if(!(obj instanceof Column))return false;
+		Column other = (Column)obj;
+		return new EqualsBuilder()
+				.append(catalog,other.catalog)
+				.append(schema,other.schema)
+				.append(tableName,other.tableName)
+				.append(name,other.name)
+				.append(remarks,other.remarks)
+				.append(defaultValue,other.defaultValue)
+				.append(size,other.size)
+				.append(decDigits,other.decDigits)
+				.append(radix,other.radix)
+				.append(nullable,other.nullable)
+				.append(ordinal,other.ordinal)
+				.append(type,other.type)
+				.append(isPrimaryKey,other.isPrimaryKey)
+				.append(autoincrement,other.autoincrement)
+				.append(typeName,other.typeName)
+				.isEquals();
 	}
 
 	public void setCheckingType(String strValue) {
@@ -1068,9 +1078,13 @@ public class Column implements Cloneable, Comparable<Column> {
 		return this.db.getTable(this.getTableName());
 	}
 
-	public void addForeignKey(Column col, String fkName, short keySeq) {
+	public void addForeignKey(Column col, 
+			String fkName, 
+			short keySeq,
+			Table.ForeignKeyRule updateRule,
+			Table.ForeignKeyRule deleteRule) {
 		this.foreignKeys.add(col);
-		this.getTable().addForeignKey(this, fkName,keySeq);
+		this.getTable().addForeignKey(this, fkName,keySeq, updateRule, deleteRule);
 	}
 
 	public List<Column> getForeignKeys() {
@@ -1474,6 +1488,6 @@ public class Column implements Cloneable, Comparable<Column> {
 		return "YES".equals(this.autoincrement);
 	}
 	public boolean isNotNull(){
-		return columnNoNulls  == this.nullable ;
+		return DatabaseMetaData.columnNoNulls  == this.nullable ;
 	}
 }

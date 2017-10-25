@@ -12,6 +12,12 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterators;
+import static com.google.common.base.Preconditions.checkState;
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.Column;
 import net.sourceforge.sql2java.Index;
@@ -306,13 +312,19 @@ public class Database {
 				String foreignTabName = resultSet.getString("PKTABLE_NAME");
 				String foreignColName = resultSet.getString("PKCOLUMN_NAME");
 				String foreignKeyName = resultSet.getString("FK_NAME");
-				if(null==foreignKeyName|| foreignKeyName.isEmpty()){
-					Column[] primaryKeys = this.getTable(tabName).getPrimaryKeys();
-					if(1==primaryKeys.length){
-						// make a fake name
-						foreignKeyName="fk_"+ tabName + "_" +primaryKeys[0].getName();
-					}else
-						System.out.println("WARN: FK_NAME return empty,the generated code  may be incorrected.");
+				short updateRule = resultSet.getShort("UPDATE_RULE");
+				short deleteRule = resultSet.getShort("DELETE_RULE");
+				if(Strings.isNullOrEmpty(foreignKeyName)){
+					Vector<Column> primaryKeys = this.getTable(tabName).getPrimaryKeysAsList();
+					checkState(!primaryKeys.isEmpty());
+					// make a fake name
+					String combinName = Joiner.on('_').join(Iterators.transform(primaryKeys.iterator(), new Function<Column,String>(){
+						@Override
+						public String apply(Column input) {
+							return input.getName();
+						}}));
+					foreignKeyName="fk_"+ tabName + "_" +combinName;
+					System.out.println("WARN: FK_NAME return empty,the generated code  may be incorrected.");
 				}
 					
 				short seq = resultSet.getShort("KEY_SEQ");
@@ -321,9 +333,13 @@ public class Database {
 				if (null == foreignTable)
 					continue;
 				Column foreignCol = foreignTable.getColumn(foreignColName);
-				col.addForeignKey(foreignCol, foreignKeyName, seq);
+				col.addForeignKey(foreignCol, foreignKeyName, seq, 
+								Table.ForeignKeyRule.values()[updateRule],
+								Table.ForeignKeyRule.values()[deleteRule]);
 				foreignCol.addImportedKey(col);
 				System.out.println("    " + col.getFullName() + " -> " + foreignCol.getFullName() + " found seq:"+ seq+" foreign key name:"+ foreignKeyName);
+				System.out.println("    UPDATE_RULE:" + Table.ForeignKeyRule.values()[updateRule].name() 
+						         + "    DELETE_RULE:" + Table.ForeignKeyRule.values()[deleteRule].name());
 			}
 			resultSet.close();
 		}
