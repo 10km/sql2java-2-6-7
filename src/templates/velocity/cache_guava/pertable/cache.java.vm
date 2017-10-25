@@ -13,6 +13,10 @@ package $table.getPackage(false);
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+
 import ${schemaPkg}.TableLoadCaching;
 #if(!$isGeneral)
 import ${pkg}.exception.DAOException;
@@ -32,21 +36,15 @@ import $table.getPackage(false).$managerClass;
  */
 public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     private final $managerClass manager = ${managerClass}.getInstance();
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-    private final TableLoadCaching<$columnType, $beanClass> ${indexColumn.getCacheVarName()};
-#end
-#end
+    #join($table.getUniqueIndicesAsList() '
+    private final TableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
+
 /*
     private final RemovalListener<String, ImageBean> bindOnDeleteImageListener = new RemovalListener<String, ImageBean>(){
         @Override
         public void onRemoval(RemovalNotification<String, ImageBean> notification) {
             PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());                
             remove(bean);
-            imageMd5Cacher.remove(bean);
-            papersNumCacher.remove(bean);
         }
     };
     private final RemovalListener<String, ImageBean> bindSetNullImageListener = new RemovalListener<String, ImageBean>(){
@@ -55,8 +53,6 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
             PersonBean bean = imageMd5Cacher.getBeanIfPresent(notification.getKey());
             bean.setImageMd5(null);
             update(bean);
-            imageMd5Cacher.update(bean);
-            papersNumCacher.update(bean);
         }
     };
     public void bind(ImageCache imageCache){
@@ -111,24 +107,15 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     @Override
     public void registerListener() {
         manager.registerListener(tableListener);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.registerListener();
-#end
-#end
+        #join($table.getUniqueIndicesAsList() '
+        ${e.getIndexColumn().getCacheVarName()}.registerListener();' '')
     }
     @Override
     public void unregisterListener() {
         manager.unregisterListener(tableListener);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.unregisterListener();
-#end
-#end   
+        #join($table.getUniqueIndicesAsList() '
+        ${e.getIndexColumn().getCacheVarName()}.unregisterListener();' '')
+
     }
     @Override
     public $pkType returnKey($beanClass bean) {
@@ -141,27 +128,17 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     @Override
     public void update($beanClass bean){
         super.update(bean);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.update(bean);
-#end
-#end
+        #join($table.getUniqueIndicesAsList() '
+        ${e.getIndexColumn().getCacheVarName()}.update(bean);' '')
+
     }
     @Override
-    public Collection<$beanClass> update(Collection<$beanClass> beans){
-        super.update(beans);
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique())
-#set ($indexColumn = $index.getIndexColumn())
-#set ($columnType = $indexColumn.getJavaType())
-        ${indexColumn.getCacheVarName()}.update(beans);
-#end
-#end
-        return beans;
+    public void remove($beanClass bean){
+        super.remove(bean);
+        #join($table.getUniqueIndicesAsList() '
+        ${e.getIndexColumn().getCacheVarName()}.remove(bean);' '')
+
     }
-    
     public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()) throws ExecutionException{
         return getBean($pk.getVarName());
     }

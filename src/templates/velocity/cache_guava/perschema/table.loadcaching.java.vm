@@ -117,6 +117,10 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
             throw e;
         }        
     }
+    @Override
+    public void remove(B bean){
+        cacheMap.remove(returnKey(bean));
+    }
     /**
      * 根据当前更新策略({@link UpdateStrategy})将{@code bean}更新到缓存
      * @see ITableCache${esc.hash}update(net.gdface.facelog.db.BaseBean)
@@ -135,6 +139,7 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
         return beans;
     }
     /**
+     * 添加删除侦听器
      * @param e
      * @return
      * @see net.gdface.facelog.db.RemovalListenerContainer{esc.hash}add(com.google.common.cache.RemovalListener)
@@ -142,7 +147,5 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
     public boolean addRemovalListener(RemovalListener<K, B> e) {
         return listenerContainer.add(e);
     }
-    public void remove(B bean){
-        cacheMap.remove(returnKey(bean));
-    }
+
 }
