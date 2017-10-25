@@ -1090,6 +1090,17 @@ public class Table {
 		}
 	}
 	public static enum ForeignKeyRule{
-		CASCADE,RESTRICT,SET_NULL,NO_ACTION,SET_DEFAULT
+		CASCADE,RESTRICT,SET_NULL,NO_ACTION,SET_DEFAULT;
+		public boolean isCascade(){
+			return this == CASCADE;
+		}
+		public boolean equals(String value){
+			try{
+				if(Strings.isNullOrEmpty(value))return false;
+				return this == ForeignKeyRule.valueOf(value.toUpperCase());
+			}catch(Exception e){
+				return false;
+			}
+		}
 	}
 }
