@@ -117,7 +117,7 @@ public abstract class $javaClassName<K ,B extends BaseBean<B>> implements ITable
     }
     /**
      * 根据当前更新策略({@link UpdateStrategy})将{@code bean}更新到缓存
-     * @see net.gdface.facelog.db.ITableCache${esc.hash}update(net.gdface.facelog.db.BaseBean)
+     * @see ITableCache${esc.hash}update(net.gdface.facelog.db.BaseBean)
      */
     @Override
     public void update(B bean){
