@@ -675,8 +675,8 @@ public class Table {
 		return this.convertName("");
 	}
 	
-	private String getBasename(boolean nsp){
-		String basename =nsp
+	private String getBasename(Boolean nsp){
+		String basename =Boolean.TRUE == nsp
 				? this.getName().replaceFirst(this.getDatabase().getSamePrefix(), "")
 				: this.getName();
 		return  "".equals(CodeWriter.getClassPrefix())
@@ -684,7 +684,7 @@ public class Table {
 				: CodeWriter.getClassPrefix() + "_" + basename;
 	}
 	
-	public String convertName(String value,boolean nsp) {
+	public String convertName(String value,Boolean nsp) {
 		String basename = getBasename(nsp);
 		if ("".equals(value)) {
 			return StringUtilities.convertName((String) basename, false);
@@ -724,7 +724,7 @@ public class Table {
 		return this.convertNameNSP("Bean");	
 	}
 	
-	public String asBeanClass(boolean nsp) {
+	public String asBeanClass(Boolean nsp) {
 		return convertName("Bean",nsp);
 	}
 	
@@ -981,6 +981,14 @@ public class Table {
 	public String getImportedBeansDelMethod(String fkName) {		
 		return "delete" + this.asBeanClassNSP() + "s" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
 	}
+	
+	public String getForeignKeyListenerVar(String fkName) {		
+		return "foreignKeyListener" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
+	}
+	public String getBindMethod(String fkName) {		
+		return "bindListener" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
+	}
+	
 	public String stateVarType(){
 		return countColumns()>64 ? "long[]":"long";
 	}	
@@ -1109,11 +1117,26 @@ public class Table {
 					.append(deleteRule)
 					.toHashCode();
 		}
+		public String getFkName() {
+			return fkName;
+		}
+		public Vector<Column> getColumns() {
+			return columns;
+		}
+		public Table.ForeignKeyRule getUpdateRule() {
+			return updateRule;
+		}
+		public Table.ForeignKeyRule getDeleteRule() {
+			return deleteRule;
+		}
 	}
 	public static enum ForeignKeyRule{
 		CASCADE,RESTRICT,SET_NULL,NO_ACTION,SET_DEFAULT;
 		public boolean isCascade(){
 			return this == CASCADE;
+		}
+		public boolean isNoAction(){
+			return this == NO_ACTION || this == RESTRICT;
 		}
 		public boolean equals(String value){
 			try{
