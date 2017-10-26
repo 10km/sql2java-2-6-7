@@ -6,17 +6,16 @@ package $schemaPkg;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -30,6 +29,43 @@ import net.gdface.facelog.db.exception.ObjectRetrievalException;
  * @param <B> 数据库记录对象类型(Java Bean)
  */
 public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITableCache<K, B> {
+
+    private static class Singleton{
+        final static ExecutorService DEFAULT_POOL = Executors.newCachedThreadPool();
+        static{
+            Runtime.getRuntime().addShutdownHook(new Thread(){
+                @Override
+                public void run() {
+                    DEFAULT_POOL.shutdown();
+                }});
+        }
+    }
+    private static ExecutorService executor;
+
+    protected static ExecutorService getExecutorService() {
+        if(null == executor)
+            synchronized(TableLoadCaching.class){
+                if(null == executor){
+                    executor = Singleton.DEFAULT_POOL;
+                }
+            }
+        return executor;
+    }
+    /**
+     * initialize the member {@link #executor },
+     * if {@code executor} is {@code null} or the member {@link #executor } is initialized, do nothing
+     * @param executor
+     */
+    public static void setExecutorService(ExecutorService executor) {
+        checkNotNull(executor);
+        // Double Checked Locking
+        if(null == TableLoadCaching.executor)
+            synchronized(TableLoadCaching.class){
+                if(null == TableLoadCaching.executor){
+                    TableLoadCaching.executor = executor;
+                }
+            }
+    }
     private final LoadingCache<K, B> cache;
     protected final ConcurrentMap<K, B> cacheMap;
     protected final  TableListener.Adapter<B> tableListener;
@@ -162,36 +198,30 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
         return listenerContainer.add(listener);
     }
     
+    protected abstract class ForeignKeyListner<FK,FB extends BaseBean<FB>> implements RemovalListener<FK, FB>{
+        @Override
+        public void onRemoval(final RemovalNotification<FK, FB> notification) {
+            getExecutorService().execute(new Runnable(){
+                @Override
+                public void run() {
+                    onRemove(notification.getValue());
+                }});
+        }
+        protected abstract void onRemove(FB fb);
+    }
     /**
      * 将当前cache绑定到指定的外键表cache上<br>
      * 向{@code foreignKeyCache}添加一个{@link RemovalListener}
      * @param foreignKeyCache
-     * @param toKey 从当前对象返回外键字段
-     * @param toDo 外键删除时的动作
-     * @return
+     * @param asyncListener
      */
-    public<FK,FB extends BaseBean<FB>> RemovalListener<FK, FB> bind(
-    		TableLoadCaching<FK,FB> foreignKeyCache,
-    		final Function<B,FK> toKey,
-    		final Predicate<B> toDo){
-    	checkNotNull(foreignKeyCache);
-    	checkNotNull(toKey);
-    	checkNotNull(toDo);
-    	RemovalListener<FK, FB> listener = new RemovalListener<FK,FB>(){
-    		@Override
-    		public void onRemoval(RemovalNotification<FK, FB> notification) {
-    			final FK deletedKey = notification.getKey();
-    			Collections2.filter(cacheMap.values(), new Predicate<B>(){
-    				@Override
-    				public boolean apply(B input) {
-    					if(deletedKey.equals(toKey.apply(input))){
-    						toDo.apply(input);
-    					}
-    					return false;
-    				}});				
-    		}};
-    		foreignKeyCache.addRemovalListener(listener);
-    		return listener;
+    protected<FK,FB extends BaseBean<FB>> void bind(
+            TableLoadCaching<FK,FB> foreignKeyCache,
+            RemovalListener<FK, FB> asyncListener
+            ){
+        checkNotNull(foreignKeyCache);
+        checkNotNull(asyncListener);
+        foreignKeyCache.addRemovalListener(asyncListener);
     }
 }
 
