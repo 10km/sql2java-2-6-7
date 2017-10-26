@@ -118,7 +118,7 @@ public interface TableListener<B>{
                 break;
             }
         }
-        public <B extends BaseBean<B>> void fire(TableManager<B > manager,B bean) {
+        public <B extends BaseBean<B>> void fire(TableManager<B > manager,B bean)$!throwsString {
             if(null == manager || null == bean)return;
             manager.fire(this, bean);
         }

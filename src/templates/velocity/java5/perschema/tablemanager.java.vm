@@ -1,8 +1,8 @@
 #set ( $importThrows = "import ${exceptionPkg}.DAOException;
 import ${exceptionPkg}.ObjectRetrievalException;" )
-#set ( $B_parentClass = "BaseBean<?>")
+#set ( $B_parentClass = "BaseBean<B>")
 #set ( $throwsString = "throws DAOException" )
-#set ( $B_extends = " extends BaseBean<?>" )
-#set ( $T_extends = " extends BaseBean<?>" )
+#set ( $B_extends = " extends BaseBean<B>" )
+#set ( $T_extends = " extends BaseBean<T>" )
 ###set ( $M_native = '' )
 #parse( "table.manager.include.vm" )
