@@ -19,13 +19,11 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -985,8 +983,13 @@ public class Table {
 	public String getForeignKeyListenerVar(String fkName) {		
 		return "foreignKeyListener" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
 	}
-	public String getBindMethod(String fkName) {		
-		return "bindListener" + StringUtilities.convertName("By_" + toUniversalFkName(fkName),false);
+	public String getBindMethod(String fkName) {
+		return StringUtilities.convertName(
+				Joiner.on('_').join("bind",
+						toUniversalFkName(fkName),"listener",
+						"to",
+						getForeignTableByFkName(fkName).getBasename(false),"Manager"),
+				true);
 	}
 	
 	public String stateVarType(){
@@ -1087,6 +1090,9 @@ public class Table {
 			this.updateRule = checkNotNull(updateRule);
 			this.deleteRule = checkNotNull(deleteRule);
 		}
+		public Table getForeignTable(){
+			return columns.get(0).getForeignColumn().getTable();
+		}
 		@Override
 		public boolean equals(Object obj) {
 			if(super.equals(obj))return true;
@@ -1131,9 +1137,14 @@ public class Table {
 		}
 	}
 	public static enum ForeignKeyRule{
-		CASCADE,RESTRICT,SET_NULL,NO_ACTION,SET_DEFAULT;
-		public boolean isCascade(){
-			return this == CASCADE;
+		CASCADE("DELETE"),RESTRICT,SET_NULL("UPDATE"),NO_ACTION,SET_DEFAULT("UPDATE");
+		private final String eventOfDeleteRule;
+
+		private ForeignKeyRule(){
+			this("");
+		}
+		private ForeignKeyRule(String event) {
+			this.eventOfDeleteRule = event;
 		}
 		public boolean isNoAction(){
 			return this == NO_ACTION || this == RESTRICT;
@@ -1145,6 +1156,9 @@ public class Table {
 			}catch(Exception e){
 				return false;
 			}
+		}
+		public String getEventOfDeleteRule() {
+			return eventOfDeleteRule;
 		}
 	}
 }
