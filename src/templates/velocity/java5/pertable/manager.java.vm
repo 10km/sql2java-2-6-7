@@ -2270,52 +2270,52 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             throw new IllegalArgumentException("invalid event id " + event);
         }
     }
-    
-#foreach($fkName in $table.getFkMapNames())
-#set ($fkObj = $table.getForeignKey($fkName))
-#if(!$fkObj.updateRule.isNoAction())
-    // NO SUPPORTE UPDATE_RULE 
-#break
-#end
-#if($fkObj.deleteRule.eventOfDeleteRule)
+
+#set($fkObjs =  $table.getForeignKeysForListener())
+#foreach($fkObj in $fkObjs)
+#set ($fkName = $fkObj.fkName)
 #set ($foreignTable = $fkObj.foreignTable)
 #set ($foreignClass = $foreignTable.asBeanClass())
+    /** foreign key listener for DEELTE RULE : $fkObj.deleteRule */
     private final TableListener.ForeignKeyListener<$foreignClass,$beanClass> $table.getForeignKeyListenerVar($fkName) = 
             new TableListener.ForeignKeyListener<$foreignClass,$beanClass>(){
-        @Override
-        protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
-          return ${foreignTable.asManagerClass()}.getInstance().${table.getImportedBeansGetMethod($fkName)}AsList(bean);
-        }
-        @Override
-        protected void onRemove(List<$beanClass> effectBeans) throws DAOException {
-            for($beanClass bean:effectBeans){
+                @Override
+                protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
+                  return listenerContainer.isEmpty() 
+                            ? java.util.Arrays.<$beanClass>asList()
+                            : ${foreignTable.asManagerClass()}.getInstance().${table.getImportedBeansGetMethod($fkName)}AsList(bean);
+                }
+                @Override
+                protected void onRemove(List<$beanClass> effectBeans) throws DAOException {
+                    for($beanClass bean:effectBeans){
 #if($fkObj.deleteRule.equals("SET_NULL"))
-                #join($fkObj.columns 'bean.${e.getSetMethod()}(null);' '
-                ')
+                        #join($fkObj.columns 'bean.${e.getSetMethod()}(null);' '
+                        ')
 
 #elseif($fkObj.deleteRule.equals("SET_DEFAULT"))
-          #join($fkObj.columns 'bean.${e.getSetMethod()}(#if($e.defaultValue)$e.defaultValue
-                  #{else}null#end);' '
-                ')
+                        #join($fkObj.columns 'bean.${e.getSetMethod()}(#if($e.defaultValue)$e.defaultValue
+                        #{else}null#end);' '
+                        ')
 
 #end
-                Event.${fkObj.deleteRule.eventOfDeleteRule}.fire(listenerContainer, bean);
-            }
-        }};
+                        Event.${fkObj.deleteRule.eventOfDeleteRule}.fire(listenerContainer, bean);
+                    }
+                }};
+
+#end###foreach($fkObj in $fkObjs)
     /**
-     * DELETE RULE : $fkObj.deleteRule<br>
-     * bind foreign key listener  to foreign table: <br>
-     * {@code ${table.name}(#join($fkObj.columns '$e.name' ','))-> ${foreignTable.name}(#join($foreignTable.primaryKeys '$e.name' ','))} <br>
+     * bind foreign key listener to foreign table: <br>
+#foreach($fkObj in $fkObjs)
+     * DELETE RULE : $fkObj.deleteRule {@code ${table.name}(#join($fkObj.columns '$e.name' ','))-> ${fkObj.foreignTable.name}(#join($fkObj.foreignTable.primaryKeys '$e.name' ','))} <br>
+#end
      */
     //37-2
-    public void $table.getBindMethod($fkName)(){
-        ${foreignTable.asManagerClass()}.getInstance().registerListener($table.getForeignKeyListenerVar($fkName));
-    }
-#else
-    // DELETE RULE : $fkObj.deleteRule , nothing to do
-#end###if($fkObj.deleteRule.eventOfDeleteRule))
+    @Override
+    public void bindForeignKeyListenerForDeleteRule(){
+        #join($fkObjs '${e.foreignTable.asManagerClass()}.getInstance().registerListener($table.getForeignKeyListenerVar($e.fkName));
+        ' '')
 
-#end###foreach($fkName in $table.getFkMapNames())
+    }
     //_____________________________________________________________________
     //
     // UTILS

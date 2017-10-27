@@ -1249,6 +1249,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             throw new WrapDAOException(e);
         }
     }
+    //37-2
+    @Override
+    public void bindForeignKeyListenerForDeleteRule(){
+        this.nativeManager.bindForeignKeyListenerForDeleteRule();
+    }
 
     /**
      * wrap {@code TableListener<$beanClass>} as native listener

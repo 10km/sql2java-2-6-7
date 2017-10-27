@@ -1119,6 +1119,11 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      */
     //37-1
     public void fire(int event, B bean) $!throwsString;
+    /**
+     * bind foreign key listener to foreign table for DELETE RULE
+     */
+    //37-2
+    public void bindForeignKeyListenerForDeleteRule();
     //_____________________________________________________________________
     //
     // SAVE
