@@ -24,6 +24,7 @@ import $table.getPackage(false).$managerClass;
 
 #set($pk = $table.getPrimaryKey())
 #set($pkType = $pk.getJavaType())
+#set($uniqueIndices = $table.getUniqueIndicesAsList())
 /**
  * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
  * primary key ($pk.fullName) is key
@@ -32,7 +33,7 @@ import $table.getPackage(false).$managerClass;
  */
 public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     private final $managerClass manager = ${managerClass}.getInstance();
-    #join($table.getUniqueIndicesAsList() '
+    #join($uniqueIndices '
     private final TableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
 
     /** constructor<br>
@@ -83,14 +84,14 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     @Override
     public void registerListener() {
         manager.registerListener(tableListener);
-        #join($table.getUniqueIndicesAsList() '
+        #join($uniqueIndices '
         ${e.getIndexColumn().getCacheVarName()}.registerListener();' '')
 
     }
     @Override
     public void unregisterListener() {
         manager.unregisterListener(tableListener);
-        #join($table.getUniqueIndicesAsList() '
+        #join($uniqueIndices '
         ${e.getIndexColumn().getCacheVarName()}.unregisterListener();' '')
 
     }
@@ -102,20 +103,22 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     protected $beanClass loadfromDatabase($pkType key)throws Exception {
         return manager.loadByPrimaryKeyChecked(key);
     }
+#if(!$uniqueIndices.empty)
     @Override
     public void update($beanClass bean){
         super.update(bean);
-        #join($table.getUniqueIndicesAsList() '
+        #join($uniqueIndices '
         ${e.getIndexColumn().getCacheVarName()}.update(bean);' '')
 
     }
     @Override
     public void remove($beanClass bean){
         super.remove(bean);
-        #join($table.getUniqueIndicesAsList() '
+        #join($uniqueIndices '
         ${e.getIndexColumn().getCacheVarName()}.remove(bean);' '')
 
     }
+#end###if(!$uniqueIndices.empty)
     public $beanClass $pk.getGetCacheMethod()($pkType $pk.getVarName()) throws ExecutionException{
         return getBean($pk.getVarName());
     }
