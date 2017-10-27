@@ -1391,14 +1391,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
-        ${beanClass} bean = new ${beanClass}();
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
             return null;
-        #join($indexColumns '
-        bean.${e.getSetMethod()}(${e.getVarName()});
-        ' '')
-
-        return loadUniqueUsingTemplate(bean);
+        try{
+            return loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "${e.getVarName()}" ','));
+        }catch(ObjectRetrievalException e){
+            return null;
+        }
     }
     /**
      * Retrieves an unique $beanClass using the ${index.getName()} index.

@@ -178,17 +178,6 @@ public class $cacheManagerClass extends $managerClass
 #set ($columnType = $indexColumn.getJavaType())
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadBy${index.asCamelCaseName()}($indexColumn.getJavaType() $indexColumn.getVarName()){
-        try{
-            if(null == $indexColumn.getVarName())
-                return null;
-            return loadBy${index.asCamelCaseName()}Checked($indexColumn.getVarName());
-        }catch(ObjectRetrievalException ee){
-            return null;
-        }
-    }
-    // override $table.asManagerInterfaceNSP()
-    @Override 
     public $beanClass loadBy${index.asCamelCaseName()}Checked($indexColumn.getJavaType() $indexColumn.getVarName()) throws ObjectRetrievalException{
         try{
             return cache.${indexColumn.getGetCacheMethod()}($indexColumn.getVarName());

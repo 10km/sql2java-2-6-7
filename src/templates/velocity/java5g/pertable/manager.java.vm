@@ -951,16 +951,14 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #if($index.isUnique())
     // override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
-    {
-        ${beanClass} bean = new ${beanClass}();
+    public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ',')){
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
             return null;
-        #join($indexColumns '
-        bean.${e.getSetMethod()}(${e.getVarName()});
-        ' '')
-
-        return loadUniqueUsingTemplate(bean);
+        try{
+            return loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "${e.getVarName()}" ','));
+        }catch(ObjectRetrievalException e){
+            return null;
+        }
     }
     // override $table.asManagerInterfaceNSP()
     @Override 
