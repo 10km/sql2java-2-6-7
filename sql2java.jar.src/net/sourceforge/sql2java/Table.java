@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -400,7 +403,21 @@ public class Table {
 	public ForeignKey getForeignKey(String fkName) {
 		return fkNameMap.get(fkName);
 	}
-
+	/**
+	 * 返回 所有需要输出foreign key listener的 {@link ForeignKey}对象
+	 * @return
+	 */
+	public List<ForeignKey> getForeignKeysForListener(){
+		return ImmutableList.copyOf(
+				Maps.filterEntries(fkNameMap, 
+						new Predicate<Entry<String, ForeignKey>>(){
+							@Override
+							public boolean apply(Entry<String, ForeignKey> input) {
+								ForeignKey fk = input.getValue();
+								return fk.updateRule.isNoAction() 
+										&& !Strings.isNullOrEmpty(fk.deleteRule.getEventOfDeleteRule());
+							}}).values());
+	}
 	/**
 	 * 判断 FK_NAME 包含的所有字段是否都允许为null
 	 * @param fkName
