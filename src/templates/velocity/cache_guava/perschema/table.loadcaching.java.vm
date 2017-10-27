@@ -14,8 +14,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -71,7 +69,6 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
     protected final  TableListener.Adapter<B> tableListener;
     /** 当前更新策略 */
     private final UpdateStrategy updateStragey;
-    private final RemovalListenerContainer<K,B> listenerContainer = new RemovalListenerContainer<K,B>();    
     /** 返回bean中主键值 */
     public abstract K returnKey(B bean)
     /** 从数据库中加载主键(pk)指定的记录 */;
@@ -109,7 +106,6 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
         cache = CacheBuilder.newBuilder()
             .maximumSize(maximumSize)
             .expireAfterWrite(duration, unit)
-            .removalListener(listenerContainer)
             .build(
                 new CacheLoader<K,B>() {
                     @Override
@@ -169,59 +165,6 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
     @Override
     public void update(B bean){
         updateStragey.update(cacheMap, returnKey(bean), bean);
-    }
-    @Override
-    public Collection<B> update(Collection<B> beans){
-        if(null != beans){
-            for(B bean : beans){
-                update(bean);
-            }
-        }
-        return beans;
-    }
-    @Override
-    public Collection<B> remove(Collection<B> beans){
-        if(null != beans){
-            for(B bean : beans){
-                remove(bean);
-            }
-        }
-        return beans;
-    }
-    /**
-     * 添加删除侦听器
-     * @param listener
-     * @return
-     * @see net.gdface.facelog.db.RemovalListenerContainer{esc.hash}add(com.google.common.cache.RemovalListener)
-     */
-    public boolean addRemovalListener(RemovalListener<K, B> listener) {
-        return listenerContainer.add(listener);
-    }
-    
-    protected abstract class ForeignKeyListner<FK,FB extends BaseBean<FB>> implements RemovalListener<FK, FB>{
-        @Override
-        public void onRemoval(final RemovalNotification<FK, FB> notification) {
-            getExecutorService().execute(new Runnable(){
-                @Override
-                public void run() {
-                    onRemove(notification.getValue());
-                }});
-        }
-        protected abstract void onRemove(FB fb);
-    }
-    /**
-     * 将当前cache绑定到指定的外键表cache上<br>
-     * 向{@code foreignKeyCache}添加一个{@link RemovalListener}
-     * @param foreignKeyCache
-     * @param asyncListener
-     */
-    protected<FK,FB extends BaseBean<FB>> void bind(
-            TableLoadCaching<FK,FB> foreignKeyCache,
-            RemovalListener<FK, FB> asyncListener
-            ){
-        checkNotNull(foreignKeyCache);
-        checkNotNull(asyncListener);
-        foreignKeyCache.addRemovalListener(asyncListener);
     }
 }
 

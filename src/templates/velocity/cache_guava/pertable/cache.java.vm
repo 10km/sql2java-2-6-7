@@ -10,12 +10,8 @@ $codewriter.setSaveCurrentFile(false)
 $codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheClass}.java")
 package $table.getPackage(false);
 
-import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 import ${schemaPkg}.TableLoadCaching;
 #if(!$isGeneral)
@@ -39,25 +35,6 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
     #join($table.getUniqueIndicesAsList() '
     private final TableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
 
-/*
-    private RemovalListener<String, ImageBean> foreignKeyRevmovalListener = null;
-    public void bind(ImageCache fkCache){
-        if(null == foreignKeyRevmovalListener){
-            synchronized(this){
-                if(null == foreignKeyRevmovalListener){
-                    foreignKeyRevmovalListener = new ForeignKeyListner<String, ImageBean>(){
-                        @Override
-                        protected void onRemove(ImageBean fb) {
-                            for(PersonBean bean:ImageManager.getInstance().getPersonBeansByImageMd5AsList(fb)){
-                                manager.fire(Event.DELETE, bean);
-                            }    
-                        }};
-                }
-            }
-            bind(fkCache,foreignKeyRevmovalListener);
-        }
-    }
-*/
     /** constructor<br>
      * @see {@link TableLoadCaching#TableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
      */
@@ -72,11 +49,11 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(updateStragey, maximumSize, duration, unit){
             @Override
             public void registerListener() {
-                manager.registerListener(tableListener);
+                manager.registerListener(this.tableListener);
             }
             @Override
             public void unregisterListener() {
-                manager.unregisterListener(tableListener);
+                manager.unregisterListener(this.tableListener);
             }
             @Override
             public $columnType returnKey($beanClass bean) {
@@ -108,6 +85,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
         manager.registerListener(tableListener);
         #join($table.getUniqueIndicesAsList() '
         ${e.getIndexColumn().getCacheVarName()}.registerListener();' '')
+
     }
     @Override
     public void unregisterListener() {
