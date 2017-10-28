@@ -42,7 +42,7 @@ public $!{final} class ${beanClass}
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
 #end
-    private $column.getJavaType() $column.getVarName()$!{column.getDefaultValue()};
+    private $column.getJavaType() $column.getVarName()$!{column.getDefaultValueAssignment()};
 
 #end
     /** columns modified flag */
@@ -171,8 +171,8 @@ public $!{final} class ${beanClass}
 #if ( !$column.getRemarks().empty )
      * <li>comments: $column.getRemarks()</li>
 #end
-#if ( !$column.getDefaultValue().empty )
-     * <li>default value: $column.getDefaultValue()</li>
+#if ( $column.getOriginalDefaultValue() )
+     * <li>default value: '$column.getOriginalDefaultValue()'</li>
 #end
 #if ($column.isAutoincrement())
      * <li>AUTO_INCREMENT</li>
@@ -181,7 +181,7 @@ public $!{final} class ${beanClass}
      * <li>NOT NULL</li>
 #end
      * <li>column size: $column.getSize()</li>
-     * <li>jdbc type returned by the driver: $column.getJavaTypeAsTypeName()</li>
+     * <li>JDBC type returned by the driver: $column.getJavaTypeAsTypeName()</li>
      * </ul>
      *
      * @return the value of $column.getVarName()

@@ -2293,8 +2293,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         ')
 
 #elseif($fkObj.deleteRule.equals("SET_DEFAULT"))
-                        #join($fkObj.columns 'bean.${e.getSetMethod()}(#if($e.defaultValue)$e.defaultValue#{else}null#end
-                        );' '
+                        #join($fkObj.columns 'bean.${e.getSetMethod()}($e.getDefaultValue(true)$!{e.commentOfDefaultValue()});' '
                         ')
 
 #end
