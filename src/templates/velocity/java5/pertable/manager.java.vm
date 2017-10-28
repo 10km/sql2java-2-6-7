@@ -2310,7 +2310,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
      */
     //37-2
-    @Override
     public void bindForeignKeyListenerForDeleteRule(){
         #join($fkObjs '${e.foreignTable.asManagerClass()}.getInstance().registerListener($table.getForeignKeyListenerVar($e.fkName));
         ' '')
