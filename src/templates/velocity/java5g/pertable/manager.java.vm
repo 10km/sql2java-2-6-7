@@ -1254,7 +1254,15 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     void bindForeignKeyListenerForDeleteRule(){
         this.nativeManager.bindForeignKeyListenerForDeleteRule();
     }
+    /**
+     * unbind foreign key listener from all of foreign tables <br>
+     * @see ${esc.hash}bindForeignKeyListenerForDeleteRule()
+     */
+    //37-3
+    void unbindForeignKeyListenerForDeleteRule(){
+        this.nativeManager.unbindForeignKeyListenerForDeleteRule();
 
+    }
     /**
      * wrap {@code TableListener<$beanClass>} as native listener
      * @author guyadong

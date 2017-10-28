@@ -41,6 +41,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
      */
     public $cacheClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
         super(updateStragey,maximumSize, duration, unit);
+        manager.bindForeignKeyListenerForDeleteRule();
 ############ FOR INDICES ############
 #foreach ( $index in $table.getIndices() )
 #if($index.isUnique())

@@ -2315,6 +2315,16 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         ' '')
 
     }
+    /**
+     * unbind foreign key listener from all of foreign tables <br>
+     * @see ${esc.hash}bindForeignKeyListenerForDeleteRule()
+     */
+    //37-3
+    public void unbindForeignKeyListenerForDeleteRule(){
+        #join($fkObjs '${e.foreignTable.asManagerClass()}.getInstance().unregisterListener($table.getForeignKeyListenerVar($e.fkName));
+        ' '')
+
+    }
     //_____________________________________________________________________
     //
     // UTILS
