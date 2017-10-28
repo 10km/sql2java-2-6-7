@@ -6,9 +6,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -504,5 +506,15 @@ public class Database {
 	
 	public String engineAsSubPackage() {
 		return this.engine.replaceAll("[\\W_]", "").toLowerCase();
+	}
+	public List<Table> getRelationTables() {
+		Table[] tabs = this.getTables();
+		ArrayList<Table> tables = new ArrayList<Table>(tabs.length);
+		for (int i = 0; i < tabs.length; ++i) {
+			if (!tabs[i].isRelationTable())
+				continue;
+			tables.add(tabs[i]);
+		}
+		return tables;
 	}
 }

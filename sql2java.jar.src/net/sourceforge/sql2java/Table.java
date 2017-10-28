@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.table.TableRowSorter;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -23,9 +26,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -101,7 +106,18 @@ public class Table {
 		if ("false".equalsIgnoreCase(this.getTableProperty("nntable"))) {
 			return false;
 		}
-		return this.foreignKeys.size() == 2;
+		if(fkNameMap.size() ==2){
+			HashSet<Column> fkColumns = Sets.<Column>newHashSet();
+			for(ForeignKey fks:fkNameMap.values()){
+				fkColumns.addAll(fks.columns);
+			}
+			Vector<Column> pkColumns = getPrimaryKeysAsList();
+			if(pkColumns.size() == fkColumns.size()){
+				fkColumns.retainAll(getPrimaryKeysAsList());
+				return fkColumns.size() ==pkColumns.size();	
+			}			
+		}			
+		return false;
 	}
 
 	public boolean relationConnectsTo(Table otherTable) {
@@ -120,29 +136,41 @@ public class Table {
 
 	public Table[] linkedTables(Database pDatabase, Table pTable) {
 		Vector<Table> vector = new Vector<Table>();
-		int nbImported = this.importedKeys.size();
+		int nbImported = this.foreignKeys.size();
 		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
-			Table pTableToAdd;
-			Column pColumn = (Column) this.importedKeys.get(iIndex);
-			if (pColumn.getTableName().equals(pTable.getName())
-					|| vector.contains(pTableToAdd = pDatabase.getTable(pColumn.getTableName())))
-				continue;
-			vector.add(pTableToAdd);
+			Column pColumn = (Column) this.foreignKeys.get(iIndex);
+			if (pColumn.getForeignColumn().getTableName().equals(pTable.getName())
+					&& ! vector.contains(pTable))
+			vector.add(pTable);
 		}
 		return vector.toArray(new Table[vector.size()]);
 	}
 
 	public Column getForeignKeyFor(Table pTable) {
-		int nbImported = this.importedKeys.size();
+		int nbImported = this.foreignKeys.size();
 		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
-			Column pColumn = (Column) this.importedKeys.get(iIndex);
-			if (!pColumn.getTableName().equals(pTable.getName()))
+			Column pColumn = (Column) this.foreignKeys.get(iIndex);
+			if (!pColumn.getForeignColumn().getTableName().equals(pTable.getName()))
 				continue;
 			return pColumn;
 		}
 		return null;
 	}
-
+	/** 返回当前对象的关联表 */
+	public List<Table> getRelationTables() {
+		List<Table> tabs = this.getDatabase().getRelationTables();
+		if(isRelationTable()){
+			tabs.clear();
+			return tabs;
+		}
+		for(Iterator<Table> itor = tabs.iterator();itor.hasNext();){
+			Table table = itor.next();
+			if(!table.getForeignTablesAsList().contains(this)){
+				itor.remove();
+			}
+		}
+		return tabs;
+	}
 	public void setCatalog(String catalog) {
 		this.catalog = catalog;
 	}
@@ -539,7 +567,7 @@ public class Table {
 		return this.countImportedTables() > 0;
 	}
 
-	public Table[] getImportedTables() {
+	public Vector<Table> getImportedTablesAsList() {
 		Vector<Table> vector = new Vector<Table>();
 		int nbImported = this.importedKeys.size();
 		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
@@ -549,9 +577,11 @@ public class Table {
 				continue;
 			vector.add(pTableToAdd);
 		}
-		return vector.toArray(new Table[vector.size()]);
+		return vector;
 	}
-
+	public Table[] getImportedTables() {
+		return getImportedTablesAsList().toArray(new Table[0]);
+	}
 	public int countForeignTables() {
 		return this.getForeignTables().length;
 	}
@@ -560,7 +590,7 @@ public class Table {
 		return this.countForeignTables() > 0;
 	}
 
-	public Table[] getForeignTables() {
+	public Vector<Table> getForeignTablesAsList() {
 		Vector<Table> vector = new Vector<Table>();
 		int nbForeign = this.foreignKeys.size();
 		for (int iIndex = 0; iIndex < nbForeign; ++iIndex) {
@@ -570,9 +600,11 @@ public class Table {
 				continue;
 			vector.add(pTableToAdd);
 		}
-		return vector.toArray(new Table[vector.size()]);
+		return vector;
 	}
-
+	public Table[] getForeignTables() {
+		return getForeignTablesAsList().toArray(new Table[0]);
+	}
 	public Table getRelationTable(Table targetTable) {
 		System.out.println("getRelationTable " + this.getName() + "<->" + targetTable.getName() + ")");
 		Table[] importedTables = this.getImportedTables();
