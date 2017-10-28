@@ -289,7 +289,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @Override
     public $beanClass checkDuplicate($beanClass bean) throws DAOException{
         if(!existsByPrimaryKey(bean))
-            throw new ObjectRetrievalException("Duplicate entry ("+ #join( $primaryKeys "bean.$e.getGetMethod()()" ' + "" "" +') +") for key 'PRIMARY'");
+            throw new ObjectRetrievalException("Duplicate entry ("+ #join( $primaryKeys "bean.$e.getGetMethod()()" ' + " " +') +") for key 'PRIMARY'");
         return bean;
     }
 #if ( 1 == $table.countPrimaryKeys() )
@@ -1625,12 +1625,16 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end##($table.countIndices() > 0)
 
 ## Many to Many needs to be templatized.
-#set ( $rTables = $codewriter.getRelationTables() )
+#set ( $rTables = $table.getRelationTables() )
+// rTables: #join($rTables '$e.name' ',')
+
 #foreach ( $rTable in $rTables )
+// getForeignKeyFor: $!rTable.getForeignKeyFor( $table ).name
+
 #### if there is a foreign key present in that relation table
 #* *##if (! ("$!rTable.getForeignKeyFor( $table )" == "") )
 #* *##set ( $oVelocityCount = $velocityCount )
-#* *##set ( $lTables = $rTable.linkedTables($db, $codewriter.getTable() ) )
+#* *##set ( $lTables = $rTable.linkedTables($db, $table ) )
 #* *##set ( $rName = $rTable.getName() )
 #* *##foreach ( $lTable in $lTables )
 #*      *##set ( $lName = $lTable.getName() )
