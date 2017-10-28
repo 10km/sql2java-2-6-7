@@ -14,6 +14,9 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.google.common.base.Strings;
+
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.ConfigHelper;
 import net.sourceforge.sql2java.Database;
@@ -1164,13 +1167,20 @@ public class Column implements Cloneable, Comparable<Column> {
 	public boolean getDefaultIncludeFor(String webElement) {
 		return true;
 	}
-
-	public String getDefaultValue() {
+	
+	private static final String EMPTY_STRING = "";
+	/**
+	 * 生成缺省值字符串
+	 * @param nullInstead 指示{@link #defaultValue}为 {@code null}时是否用字符串'null'代替
+	 * @return
+	 */
+	public String getDefaultValue(boolean nullInstead) {
+		String empty = nullInstead?"null":EMPTY_STRING;
 		if(!CodeWriter.getPropertyBoolean("codewriter.generate.defaultvalue")){
-			return "";
+			return empty;
 		}
-		String xmlDefaultValue = ConfigHelper.getColumnProperty((String) this.getTableName(), (String) this.getName(),
-				(String) "defaultValue");
+		String xmlDefaultValue = ConfigHelper.getColumnProperty( this.getTableName(), this.getName(),
+				"defaultValue");
 		if (xmlDefaultValue != null && !"".equals(xmlDefaultValue)) {
 			return xmlDefaultValue;
 		}
@@ -1182,39 +1192,44 @@ public class Column implements Cloneable, Comparable<Column> {
 						case M_BIGDECIMAL :
 						case M_INTEGER :
 						case M_LONG : {
-							return this.generateNewAssignation(this.getJavaType(), this.defaultValue,
-									this.defaultValue);
+							return this.generateNewNumeric(this.getJavaType(), this.defaultValue);
 						}
 						case M_DOUBLE :
 						case M_FLOAT : {
-							return this.generateNewAssignation(this.getJavaType(), String.valueOf(value),
-									this.defaultValue);
+							return this.generateNewNumeric(this.getJavaType(), String.valueOf(value));
 						}
 					}
-					return "";
+					return empty;
 				} catch (NumberFormatException nfe) {
-					return "";
+					return empty;
 				}
 			}
 			if (this.isDate()) {
 				try {
-					return generateDateDefaultAssignation(this.getJavaType(),this.defaultValue);
+					return generateDateDefaultValue(this.getJavaType(),this.defaultValue);
 				} catch (IllegalArgumentException pe) {
-					return "; // DEFAULT '" + this.defaultValue + "'";
+					return empty;
 				}
 			}
 			if (this.isString()) {
-				return "".equals(this.defaultValue) ? "" : "= \"" + this.defaultValue + '\"';
+				return "\"" + this.defaultValue + '\"';
 			}
 			if (M_BOOLEAN == this.getMappedType()) {
-				return "= Boolean.valueOf(\"" + ("1".equals(this.defaultValue) ? "true" : this.defaultValue)
-						+ "\").booleanValue(); // '" + this.defaultValue + "'";
+				return "Boolean.valueOf(\"" + ("1".equals(this.defaultValue) ? "true" : "false")
+						+ "\").booleanValue()";
 			}
 		}
-		return this.defaultValue == null ? "" : "= " + this.defaultValue;
+		return this.defaultValue == null ? empty : this.defaultValue;
 	}
-	
-	/** sql类型日期字符串转为java 日期对象 */
+	/** 兼容之前版本 */
+	public String getDefaultValue() {
+		return getDefaultValue(false);
+	}
+	/** 返回{@link #defaultValue}原始值 */
+	public String getOriginalDefaultValue(){
+		return this.defaultValue;
+	}
+	/** SQL 类型日期字符串转为java 日期对象 */
 	private static Date parseSqlDate(String source){
 		if(null == source)
 			throw new IllegalArgumentException();
@@ -1229,7 +1244,7 @@ public class Column implements Cloneable, Comparable<Column> {
 		}
 	}
 	/** 生成日期类型缺省值语句 */
-	private String generateDateDefaultAssignation(String type, String parameter) {
+	private String generateDateDefaultValue(String type, String parameter) {
 		StringBuffer sb = new StringBuffer(100);
 		Date parsedDate = parseSqlDate(parameter);
 		String dateStr;
@@ -1244,38 +1259,50 @@ public class Column implements Cloneable, Comparable<Column> {
 				instanceMethod = "getDateTimeInstance";
 			}else
 				throw new IllegalStateException("invalid type");
-			sb.append("= java.text.DateFormat.").append(instanceMethod).append("().parse(\"").append(parsedDate.toString()).append("\",new java.text.ParsePosition(0))");
+			sb.append("java.text.DateFormat.").append(instanceMethod).append("().parse(\"").append(parsedDate.toString()).append("\",new java.text.ParsePosition(0))");
 			break;
 		}
 		case M_SQLDATE:{
 			dateStr = new java.sql.Date(parsedDate.getTime()).toString();
-			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			sb.append(type).append(".valueOf(\"").append(dateStr).append("\")");	
 			break;
 		}
 		case M_TIME:{
 			dateStr = new java.sql.Time(parsedDate.getTime()).toString();
-			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			sb.append(type).append(".valueOf(\"").append(dateStr).append("\")");	
 			break;
 		}
 		case M_TIMESTAMP:{
 			dateStr = new java.sql.Timestamp(parsedDate.getTime()).toString();
-			sb.append("= ").append(type).append(".valueOf(\"").append(dateStr).append("\")");	
+			sb.append(type).append(".valueOf(\"").append(dateStr).append("\")");	
 			break;
 		}
 		default:
-			return "";
+			return EMPTY_STRING;
 		}
-		sb.append("; // DEFAULT '").append(parameter).append("'");
 		return sb.toString();
 	}	
 	
-	private String generateNewAssignation(String type, String parameter, String comment) {
+	private String generateNewNumeric(String type, String parameter) {
 		StringBuffer sb = new StringBuffer(70);
-		sb.append("= new ").append(type);
-		sb.append('(').append(parameter).append("); // DEFAULT '").append(comment).append("'");
+		sb.append("new ").append(type);
+		sb.append('(').append(parameter).append(')');
 		return sb.toString();
 	}
 
+	/** 生成缺省值({@link #defaultValue})的注释信息 */
+	public String commentOfDefaultValue(){
+		return Strings.isNullOrEmpty(defaultValue)?EMPTY_STRING: "/* DEFAULT:'"+defaultValue+"'*/";
+	}
+	/** 生成缺省值赋值语句 */
+    public String getDefaultValueAssignment(){
+    	StringBuffer buffer = new StringBuffer();
+    	String value = getDefaultValue();
+    	if(!value.isEmpty())
+    		buffer.append(" = ").append(value);
+    	buffer.append(commentOfDefaultValue());
+    	return buffer.toString();
+    }
 	public String getRemarks() {
 		String xmlDefaultValue = ConfigHelper.getColumnProperty((String) this.getTableName(), (String) this.getName(),
 				(String) "description");
