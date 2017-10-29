@@ -5,14 +5,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -23,6 +21,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -615,17 +614,12 @@ public class Table {
 		return this.countImportedTables() > 0;
 	}
 
-	public Vector<Table> getImportedTablesAsList() {
-		Vector<Table> vector = new Vector<Table>();
-		int nbImported = this.importedKeys.size();
-		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
-			Table pTableToAdd;
-			Column column = (Column) this.importedKeys.get(iIndex);
-			if (column.getTableName().equals(this.getName()) || vector.contains(pTableToAdd = column.getTable()))
-				continue;
-			vector.add(pTableToAdd);
-		}
-		return vector;
+	public List<Table> getImportedTablesAsList() {
+		return Lists.newArrayList(Lists.transform(this.importedKeys, new Function<Column,Table>(){
+			@Override
+			public Table apply(Column t) {
+				return t.getTable();
+			}}));
 	}
 	public Table[] getImportedTables() {
 		return getImportedTablesAsList().toArray(new Table[0]);
@@ -638,17 +632,12 @@ public class Table {
 		return this.countForeignTables() > 0;
 	}
 
-	public Vector<Table> getForeignTablesAsList() {
-		Vector<Table> vector = new Vector<Table>();
-		int nbForeign = this.foreignKeys.size();
-		for (int iIndex = 0; iIndex < nbForeign; ++iIndex) {
-			Table pTableToAdd;
-			Column column = ((Column) this.foreignKeys.get(iIndex)).getForeignColumn();
-			if (column.getTableName().equals(this.getName()) || vector.contains(pTableToAdd = column.getTable()))
-				continue;
-			vector.add(pTableToAdd);
-		}
-		return vector;
+	public List<Table> getForeignTablesAsList() {
+		return Lists.newArrayList(Lists.transform(this.foreignKeys, new Function<Column,Table>(){
+			@Override
+			public Table apply(Column t) {
+				return t.getForeignColumn().getTable();
+			}}));
 	}
 	public Table[] getForeignTables() {
 		return getForeignTablesAsList().toArray(new Table[0]);
