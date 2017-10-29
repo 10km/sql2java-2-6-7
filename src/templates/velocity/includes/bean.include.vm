@@ -11,7 +11,9 @@ import java.io.Serializable;
 import ${schemaPkg}.Constant;
 import ${schemaPkg}.BaseBean;
 #foreach ($foreignTable in $foreignTables)
+#if(${foreignTable.getPackage(true)} != $table.getPackage(true))
 import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass()};
+#end
 #end
 import ${schemaPkg}.CompareToBuilder;
 import ${schemaPkg}.EqualsBuilder;
