@@ -507,11 +507,11 @@ public class Database {
 	public String engineAsSubPackage() {
 		return this.engine.replaceAll("[\\W_]", "").toLowerCase();
 	}
-	public List<Table> getRelationTables() {
+	public List<Table> getJunctionTables() {
 		Table[] tabs = this.getTables();
 		ArrayList<Table> tables = new ArrayList<Table>(tabs.length);
 		for (int i = 0; i < tabs.length; ++i) {
-			if (!tabs[i].isRelationTable())
+			if (!tabs[i].isJunctionTable())
 				continue;
 			tables.add(tabs[i]);
 		}

@@ -5,19 +5,19 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -106,6 +107,14 @@ public class Table {
 		if ("false".equalsIgnoreCase(this.getTableProperty("nntable"))) {
 			return false;
 		}
+		return this.foreignKeys.size() == 2;
+	}
+	
+	/**
+	 * 代替{@link #isRelationTable()},判断当前表是否为联接表
+	 * @return
+	 */
+	public boolean isJunctionTable() {
 		if(fkNameMap.size() ==2){
 			HashSet<Column> fkColumns = Sets.<Column>newHashSet();
 			for(ForeignKey fks:fkNameMap.values()){
@@ -136,30 +145,49 @@ public class Table {
 
 	public Table[] linkedTables(Database pDatabase, Table pTable) {
 		Vector<Table> vector = new Vector<Table>();
-		int nbImported = this.foreignKeys.size();
+		int nbImported = this.importedKeys.size();
 		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
-			Column pColumn = (Column) this.foreignKeys.get(iIndex);
-			if (pColumn.getForeignColumn().getTableName().equals(pTable.getName())
-					&& ! vector.contains(pTable))
-			vector.add(pTable);
+			Table pTableToAdd;
+			Column pColumn = (Column) this.importedKeys.get(iIndex);
+			if (pColumn.getTableName().equals(pTable.getName())
+					|| vector.contains(pTableToAdd = pDatabase.getTable(pColumn.getTableName())))
+				continue;
+			vector.add(pTableToAdd);
 		}
 		return vector.toArray(new Table[vector.size()]);
 	}
-
+	/**
+	 * 代替 {@link #linkedTables(Database, Table)}<br>
+	 * 对于联接表(junction)返回{@code pTable}联接的表<br>
+	 * @param pTable
+	 * @return 当前对象不是连接表或{@code pTable}不属于联接表时返回{@code null}
+	 */
+	public Table tableOfJunction(Table pTable) {
+		if(this.isJunctionTable()){			
+			for(ForeignKey fk:this.fkNameMap.values()){
+				Table jtable = fk.getForeignTable();
+				if(!jtable.equals(pTable))
+					return jtable; 
+			}
+		}
+		return null;
+	}
 	public Column getForeignKeyFor(Table pTable) {
-		int nbImported = this.foreignKeys.size();
+		int nbImported = this.importedKeys.size();
 		for (int iIndex = 0; iIndex < nbImported; ++iIndex) {
-			Column pColumn = (Column) this.foreignKeys.get(iIndex);
-			if (!pColumn.getForeignColumn().getTableName().equals(pTable.getName()))
+			Column pColumn = (Column) this.importedKeys.get(iIndex);
+			if (!pColumn.getTableName().equals(pTable.getName()))
 				continue;
 			return pColumn;
 		}
 		return null;
 	}
+
 	/** 返回当前对象的关联表 */
-	public List<Table> getRelationTables() {
-		List<Table> tabs = this.getDatabase().getRelationTables();
-		if(isRelationTable()){
+	public List<Table> getJunctionTables() {
+		List<Table> tabs = this.getDatabase().getJunctionTables();
+		if(isJunctionTable()){
+			// 当前表是关联表，则返回空
 			tabs.clear();
 			return tabs;
 		}
@@ -398,10 +426,10 @@ public class Table {
 	 */
 	public Vector<String> getFkMapNames(String tableName) {
 		Vector<String> names=new Vector<String>();
-		for(ForeignKey entry:this.fkNameMap.values()){
-			for(Column col:entry.columns.get(0).getForeignKeys()){
+		for(ForeignKey fk:this.fkNameMap.values()){
+			for(Column col:fk.columns.get(0).getForeignKeys()){
 				if(col.getTableName().equals(tableName)){
-					names.add(entry.fkName);
+					names.add(fk.fkName);
 					break;
 				}
 			}
@@ -430,6 +458,19 @@ public class Table {
 	 */
 	public ForeignKey getForeignKey(String fkName) {
 		return fkNameMap.get(fkName);
+	}
+	
+	/**
+	 * 返回{@code table}对应的所有{@link ForeignKey}对象
+	 * @param table
+	 * @return
+	 */
+	public List<ForeignKey> getForeignKeys(final Table table){		
+		return Lists.newArrayList(Collections2.filter(this.fkNameMap.values(), new Predicate<ForeignKey>(){
+			@Override
+			public boolean apply(ForeignKey input) {
+				return input.getForeignTable().equals(table);
+			}}));
 	}
 	/**
 	 * 返回 所有需要输出foreign key listener的 {@link ForeignKey}对象
@@ -554,6 +595,13 @@ public class Table {
 			if ((column = column.getForeignColumn()).getTableName().equals(this.getName())
 					|| vector.contains(pTableToAdd = column.getTable()))
 				continue;
+			vector.add(pTableToAdd);
+		}
+		for(Table jtable:getJunctionTables()){
+			Table pTableToAdd = jtable.tableOfJunction(this);
+			if(vector.contains(pTableToAdd)){
+				continue;
+			}
 			vector.add(pTableToAdd);
 		}
 		return vector.toArray(new Table[vector.size()]);
@@ -758,7 +806,9 @@ public class Table {
 	public String asCoreClassNSP() {
 		return this.convertNameNSP("");
 	}
-	
+	public String asCoreClass(Boolean nsp) {
+		return this.convertName("",nsp);
+	}
 	public String asBeanClass() {
 		return this.convertName("Bean");
 	}
@@ -1065,6 +1115,12 @@ public class Table {
 		}else{
 			return dst + " = " + src;
 		}
+	}
+	public String getLoadMethodOfJunction(){
+		if(this.isJunctionTable()){
+			return "load" + "Via" + this.asCoreClass(true);
+		}
+		return "";
 	}
 	protected Database getDatabase() {
 		return database;
