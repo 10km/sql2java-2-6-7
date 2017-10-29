@@ -176,10 +176,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
     
     /**
-     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
-     * FK_NAME:$fkName
-     * @param bean the {@link $beanClass}
-     * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     * @see ${esc.hash}${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass,int,int)
      */
     //3.2 GET IMPORTED
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean);
@@ -205,7 +202,16 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      */
     //3.2.3 DELETE IMPORTED
     public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
-    
+    /**
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
+     * FK_NAME:$fkName
+     * @param bean the {@link $beanClass}
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return the associated {@link $importedClass} beans or empty list if {@code bean} is {@code null}
+     */
+    //3.2.4 GET IMPORTED
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow,int numRows);    
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
@@ -437,4 +443,67 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     //46
     public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection);
 #end##1 == $table.countPrimaryKeys()  
+
+#set ( $jTables = $table.getJunctionTables() )
+#foreach ( $jTable in $jTables )
+#set ( $linkedTable = $jTable.tableOfJunction( $table) )
+#if ( $velocityCount == 1)
+    //_____________________________________________________________________
+    //
+    // MANY TO MANY: LOAD OTHER BEAN VIA JUNCTION TABLE
+    //_____________________________________________________________________
+#end
+#set ( $junctionBeanClass = $jTable.asBeanClass($isGeneral))
+#set ( $junctionManagerClass = ${jTable.asManagerClass($isGeneral)})
+#set ( $linkedBean = "${linkedTable.asBeanClass($isGeneral)}" )
+#set ( $localFk = $jTable.getForeignKeys($table)[0])
+#set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
+#set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
+    /**
+     * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
+     */
+    //22 MANY TO MANY
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean);
+
+    /**
+     * Retrieves an list of $beanClass using the junction table ${jTable.asCoreClass($isGeneral)}, given a $linkedBean, 
+     * specifying the start row and the number of rows.
+     *
+     * @param bean the $linkedBean bean to be used
+     * @param startRow the start row to be used (first row = 1, last row = -1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return a list of $beanClass
+     */
+    //23 MANY TO MANY
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows);
+#define($junctionParam)
+#join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
+#end
+    /**
+     * add junction between {@link $beanClass} and {@link $linkedBean} if junction not exists
+     * @param bean
+     * @param linked
+     */
+    //23.2 MANY TO MANY
+    public void addJunction($beanClass bean,$linkedBean linked);
+    /**
+     * remove junction between {@link $beanClass} and {@link $linkedBean}
+     * @param bean
+     * @param linked
+     */
+    //23.3 MANY TO MANY
+    public int deleteJunction($beanClass bean,$linkedBean linked);
+    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
+    //23.4 MANY TO MANY
+    public void addJunction($beanClass bean,$linkedBean... linkedBeans);
+    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
+    //23.5 MANY TO MANY
+    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
+    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
+    //23.6 MANY TO MANY
+    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans);
+    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
+    //23.7 MANY TO MANY
+    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
+#end
 }

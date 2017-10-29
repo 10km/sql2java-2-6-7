@@ -11,6 +11,7 @@ $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${managerClassNSP}.java
 package ${gpkg}.${subpkg};
 
 import java.util.concurrent.Callable;
+import java.util.List;
 
 import ${gpkg}.Constant;
 import ${gpkg}.${beanClass};
@@ -18,9 +19,7 @@ import ${gpkg}.IBeanConverter;
 import ${gpkg}.IDbConverter;
 import ${gpkg}.TableManager;
 import ${gpkg}.$table.asManagerInterfaceNSP();
-#foreach ($linkedTable in $linkedTables)
-import ${gpkg}.${linkedTable.asBeanClassNSP()};
-#end
+#importLinkedTable()
 import ${gpkg}.TableListener;
 import ${schemaPkg}.exception.WrapDAOException;
 import ${schemaPkg}.exception.ObjectRetrievalException;
@@ -476,13 +475,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
     {
-        try {
-            return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toRight(bean)));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
+        return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean,1,-1);
     }
     //3.2.2 GET IMPORTED override $table.asManagerInterfaceNSP()
     @Override
@@ -500,6 +493,18 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     {
         java.util.List<$importedClass> list =${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getFullVarName()" ','));
         return ${importedClassManager}.getInstance().delete(list);
+    }
+    //3.2.4 GET IMPORTED override $table.asManagerInterfaceNSP()
+    @Override 
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow, int numRows)
+    {
+        try {
+            return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toRight(bean),startRow,numRows));
+        }
+        catch(DAOException e)
+        {
+            throw new WrapDAOException(e);
+        }
     }
     //3.3 SET IMPORTED override $table.asManagerInterfaceNSP()
     @Override 
@@ -1106,66 +1111,106 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
 #end##($table.countIndices() > 0)
 
-## Many to Many needs to be templatized.
-#set ( $rTables = $codewriter.getRelationTables() )
-#foreach ( $rTable in $rTables )
-#### if there is a foreign key present in that relation table
-#* *##if (! ("$!rTable.getForeignKeyFor( $table )" == "") )
-#* *##set ( $oVelocityCount = $velocityCount )
-#* *##set ( $lTables = $rTable.linkedTables($db, $codewriter.getTable() ) )
-#* *##set ( $rName = $rTable.getName() )
-#* *##foreach ( $lTable in $lTables )
-#*      *##set ( $lName = $lTable.getName() )
-#*      *##if ( $velocityCount == 1 && $oVelocityCount == 1 )
-    
+#set ( $jTables = $table.getJunctionTables() )
+#foreach ( $jTable in $jTables )
+#set ( $linkedTable = $jTable.tableOfJunction( $table) )
+#if ( $velocityCount == 1)
     //_____________________________________________________________________
     //
     // MANY TO MANY: LOAD OTHER BEAN VIA JUNCTION TABLE
     //_____________________________________________________________________
-#*      *##end
-#set ( $strLinkedCore = "$!{codewriter.getClassPrefix()}$lTable.asCoreClass()" )
-#set ( $strLinkedBean = "${lTable.asBeanClassNSP()}" )
-#set ( $strLinkedNative = "${lTable.asBeanClass()}" )
-#set ( $strLinkedManager = "${lTable.asManagerClass()}" )
-#set ( $strRelationCore = "${rTable.asCoreClass()}" )
-#set ( $strRelationBean = "${rTable.asBeanClass()}" )
-#set ( $localKey = $rTable.getForeignKeyFor( $table ) )
-#set ( $externalKey = $rTable.getForeignKeyFor( $lTable ) )
-    /**
-     * Retrieves an array of $strLinkedBean using the relation table $strRelationCore given a $beanClass object.
-     *
-     * @param bean the $beanClass bean to be used
-     * @return an array of $strLinkedBean
-     */
-    //22 MANY TO MANY
-    public ${strLinkedBean}[] load${strLinkedCore}Via$strRelationCore($beanClass bean) 
+#end
+#set ( $junctionBeanClass = $jTable.asBeanClass($isGeneral))
+#set ( $junctionManagerClass = ${jTable.asManagerClass($isGeneral)})
+#set ( $linkedBean = "${linkedTable.asBeanClass($isGeneral)}" )
+#set ( $localFk = $jTable.getForeignKeys($table)[0])
+#set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
+#set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
+    //22 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean)
     {
-         return this.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toRight(bean), 1, -1);
+         return this.$jTable.getLoadMethodOfJunction()AsList(bean, 1, -1);
     }
 
-    /**
-     * Retrieves an array of $strLinkedBean using the relation table $strRelationCore given a $beanClass object, specifying the start row and the number of rows.
-     *
-     * @param bean the $beanClass bean to be used
-     * @param startRow the start row to be used (first row = 1, last row = -1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @return an array of $strLinkedBean
-     */
-    //23 MANY TO MANY
-    public ${strLinkedBean}[] load${strLinkedCore}Via$strRelationCore($beanClass bean, int startRow, int numRows)
+    //23 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)
     {
-        try
-        {
-            return this.dbConverter.get${$strLinkedBean}Converter.fromRight(this.nativeManager.load${strLinkedCore}Via$strRelationCore(this.beanConverter.toRight(bean), 1, -1));
-        }
-        catch(DAOException e)
-        {
+        try{
+            return this.beanConverter.fromRight(
+                this.nativeManager.$jTable.getLoadMethodOfJunction()AsList(
+                    this.dbConverter.get${linkedBean}Converter().toRight(bean),
+                    startRow,
+                    numRows));
+        }catch(DAOException e){
             throw new WrapDAOException(e);
         }
-
     }
-#* *##end
-#* *##end
+#define($junctionParam)
+#join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
+#end
+    //23.2 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public void addJunction($beanClass bean,$linkedBean linked){
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+            return ;
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+            return ;
+        if(!${junctionManagerClass}.getInstance().existsPrimaryKey($junctionParam)){
+            $junctionBeanClass junction = new ${junctionBeanClass}();
+#foreach($pk in $jTable.primaryKeys)
+#set( $fColumn = $pk.foreignColumn)
+            junction.${pk.getSetMethod()}(#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()());
+#end
+            ${junctionManagerClass}.getInstance().save(junction);
+        }
+    }
+    //23.3 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public int deleteJunction($beanClass bean,$linkedBean linked){
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+            return 0;
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+            return 0;
+        return ${junctionManagerClass}.getInstance().deleteByPrimaryKey($junctionParam);
+    }
+    //23.4 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public void addJunction($beanClass bean,$linkedBean... linkedBeans){
+        if(null == linkedBeans)return;
+        for($linkedBean linked:linkedBeans){
+            addJunction(bean,linked);
+        }
+    }
+    //23.5 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
+        if(null == linkedBeans)return;
+        for($linkedBean linked:linkedBeans){
+            addJunction(bean,linked);
+        }
+    }
+    //23.6 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans){
+        if(null == linkedBeans)return 0;
+        int count = 0;
+        for($linkedBean linked:linkedBeans){
+            count += deleteJunction(bean,linked);
+        }
+        return count;
+    }
+    //23.7 MANY TO MANY override $table.asManagerInterfaceNSP()
+    @Override
+    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
+        if(null == linkedBeans)return 0;
+        int count = 0;
+        for($linkedBean linked:linkedBeans){
+            count += deleteJunction(bean,linked);
+        }
+        return count;
+    }
 #end
     //_____________________________________________________________________
     //

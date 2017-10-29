@@ -58,3 +58,14 @@ import com.facebook.swift.codec.ThriftField.Requiredness;
 #end
 ########################
 #macro( converterClass $c)${c}Converter#end
+########################
+#macro(importLinkedTable)
+#foreach ($linkedTable in $linkedTables)
+#if(${linkedTable.getPackage(true)} != $table.getPackage(false))
+import ${linkedTable.getPackage(true)}.${linkedTable.asBeanClass($isGeneral)};
+#end
+#if(${linkedTable.getPackage(false)} != $table.getPackage(false))
+import ${linkedTable.getPackage(false)}.${linkedTable.asManagerClass($isGeneral)};
+#end
+#end
+#end

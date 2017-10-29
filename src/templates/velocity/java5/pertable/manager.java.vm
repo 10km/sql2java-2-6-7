@@ -24,10 +24,7 @@ import ${pkg}.exception.ObjectRetrievalException;
 #if ( $table.hasVersionColumn() )
 import ${pkg}.exception.OptimisticLockingException;
 #end
-#foreach ($linkedTable in $linkedTables)
-import ${linkedTable.getPackage()}.${linkedTable.asBeanClass()};
-import ${linkedTable.getPackage()}.${linkedTable.asManagerClass()};
-#end
+#importLinkedTable()
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -550,12 +547,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //3.2 GET IMPORTED
     public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean) throws DAOException
     {
-        if(null == bean)return new java.util.ArrayList<$importedClass>();
-        $importedClass other = ${importedClassManager}.getInstance().createBean();
-#foreach ( $fk in $columnsOfFk ) 
-        other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
-#end
-        return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other);
+        return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean,1,-1);
     }
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -574,6 +566,27 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
         bean.${pk.getSetMethod()}(${pk.getFullVarName()});
 #end       
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean);
+    }
+    /**
+     * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field, 
+     * given the start row and number of rows.<BR>
+     * FK_NAME:$fkName
+     * @param bean the {@link $beanClass}
+     * @param startRow the start row to be used (first row = 1, last row=-1)
+     * @param numRows the number of rows to be retrieved (all rows = a negative number)
+     * @return the associated {@link $importedClass} beans 
+     * @throws DAOException
+     */
+    //3.2.4 GET IMPORTED
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow, int numRows) throws DAOException
+    {
+        if(null == bean)
+            return new java.util.ArrayList<$importedClass>();
+        $importedClass other = new $importedClass();
+#foreach ( $fk in $columnsOfFk ) 
+        other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
+#end
+        return ${importedClassManager}.getInstance().loadUsingTemplateAsList(other,startRow,numRows);
     }
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -1624,88 +1637,148 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
 #end##($table.countIndices() > 0)
 
-## Many to Many needs to be templatized.
-#set ( $rTables = $table.getRelationTables() )
-// rTables: #join($rTables '$e.name' ',')
-
-#foreach ( $rTable in $rTables )
-// getForeignKeyFor: $!rTable.getForeignKeyFor( $table ).name
-
-#### if there is a foreign key present in that relation table
-#* *##if (! ("$!rTable.getForeignKeyFor( $table )" == "") )
-#* *##set ( $oVelocityCount = $velocityCount )
-#* *##set ( $lTables = $rTable.linkedTables($db, $table ) )
-#* *##set ( $rName = $rTable.getName() )
-#* *##foreach ( $lTable in $lTables )
-#*      *##set ( $lName = $lTable.getName() )
-#*      *##if ( $velocityCount == 1 && $oVelocityCount == 1 )
-    
+#set ( $jTables = $table.getJunctionTables() )
+#foreach ( $jTable in $jTables )
+#set ( $linkedTable = $jTable.tableOfJunction( $table) )
+#if ( $velocityCount == 1)
     //_____________________________________________________________________
     //
     // MANY TO MANY: LOAD OTHER BEAN VIA JUNCTION TABLE
     //_____________________________________________________________________
-#*      *##end
-#set ( $strLinkedCore = "$!{codewriter.getClassPrefix()}$lTable.asCoreClass()" )
-#set ( $strLinkedBean = "${lTable.asBeanClass()}" )
-#set ( $strLinkedManager = "${lTable.asManagerClass()}" )
-#set ( $strRelationCore = "${rTable.asCoreClass()}" )
-#set ( $strRelationBean = "${rTable.asBeanClass()}" )
-#set ( $localKey = $rTable.getForeignKeyFor( $table ) )
-#set ( $externalKey = $rTable.getForeignKeyFor( $lTable ) )
+#end
+#set ( $junctionBeanClass = $jTable.asBeanClass($isGeneral))
+#set ( $junctionManagerClass = ${jTable.asManagerClass($isGeneral)})
+#set ( $linkedBean = "${linkedTable.asBeanClass($isGeneral)}" )
+#set ( $localFk = $jTable.getForeignKeys($table)[0])
+#set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
+#set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
     /**
-     * Retrieves an array of $strLinkedBean using the relation table $strRelationCore given a $beanClass object.
-     *
-     * @param bean the $beanClass bean to be used
-     * @return an array of $strLinkedBean
-     * @throws DAOException
+     * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
      */
     //22 MANY TO MANY
-    public ${strLinkedBean}[] load${strLinkedCore}Via$strRelationCore($beanClass bean) throws DAOException
+    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean) throws DAOException
     {
-         return this.load${strLinkedCore}Via$strRelationCore(bean, 1, -1);
+         return this.$jTable.getLoadMethodOfJunction()AsList(bean, 1, -1);
     }
 
     /**
-     * Retrieves an array of $strLinkedBean using the relation table $strRelationCore given a $beanClass object, specifying the start row and the number of rows.
+     * Retrieves an list of $beanClass using the junction table ${jTable.asCoreClass($isGeneral)}, given a $linkedBean, 
+     * specifying the start row and the number of rows.
      *
-     * @param bean the $beanClass bean to be used
+     * @param bean the $linkedBean bean to be used
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
-     * @return an array of $strLinkedBean
+     * @return a list of $beanClass
      * @throws DAOException
      */
     //23 MANY TO MANY
-    public ${strLinkedBean}[] load${strLinkedCore}Via$strRelationCore($beanClass bean, int startRow, int numRows) throws DAOException
+    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows) throws DAOException
     {
-         Connection c = null;
-         PreparedStatement ps = null;
-         String sql = " SELECT " + ${lTable.name.toUpperCase()}_ALL_FIELDS
-                         + " FROM $lName ${lName}L, $rName ${rName}R"
-                         + " WHERE "
-                         + "     ${rName}R.$localKey.getForeignColumn().getName() = ?"
-                         + " AND ${rName}R.$externalKey.getForeignColumn().getName() = ${lName}L.$externalKey.getName()";
-         try
-         {
-             c = this.getConnection();
-             ps = c.prepareStatement(sql,
-                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                     ResultSet.CONCUR_READ_ONLY);
-             $localKey.getPreparedStatementMethod("bean.$localKey.getGetMethod()()", 1)
-             return ${strLinkedManager}.getInstance().loadByPreparedStatement(ps, null, startRow, numRows);
-         }
-         catch (SQLException e)
-         {
-             throw new DAOException(e.getMessage(), e);
-         }
-         finally
-         {
-            this.getManager().close(ps);
-            this.freeConnection(c);
-            sql = null;
-         }
+        if(null == bean #join($linkedTable.primaryKeys '|| null == bean.$e.getGetMethod()()'))
+            return java.util.Arrays.<${beanClass}>asList();
+        Connection c = null;
+        PreparedStatement ps = null;
+        String sql = " SELECT " + ${table.name.toUpperCase()}_FULL_FIELDS
+                        + " FROM $jTable.name, $table.name"
+                        + " WHERE "
+                        + "     #join($linkedFk.columns '${jTable.name}.$e.name=?' ' AND ')"
+                        + " AND #join($localFk.columns '${jTable.name}.$e.name=${table.name}.${e.getForeignColumn().name}' ' AND ')";
+        try
+        {
+            c = this.getConnection();
+            ps = c.prepareStatement(sql,
+                                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                    ResultSet.CONCUR_READ_ONLY);
+#foreach( $column in $linkedFk.columns )
+            $column.getPreparedStatementMethod("bean.$column.foreignColumn.getGetMethod()()", $velocityCount)
+#end
+            return loadByPreparedStatementAsList(ps, null, startRow, numRows);
+        }
+        catch (SQLException e)
+        {
+            throw new DAOException(e.getMessage(), e);
+        }
+        finally
+        {
+           this.getManager().close(ps);
+           this.freeConnection(c);
+           sql = null;
+        }
     }
-#* *##end
-#* *##end
+#define($junctionParam)
+#join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
+#end
+    /**
+     * add junction between {@link $beanClass} and {@link $linkedBean} if junction not exists
+     * @param bean
+     * @param linked
+     * @throws DAOException
+     */
+    //23.2 MANY TO MANY
+    public void addJunction($beanClass bean,$linkedBean linked) throws DAOException{
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+            return ;
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+            return ;
+        if(!${junctionManagerClass}.getInstance().existsPrimaryKey($junctionParam)){
+            $junctionBeanClass junction = new ${junctionBeanClass}();
+#foreach($pk in $jTable.primaryKeys)
+#set( $fColumn = $pk.foreignColumn)
+            junction.${pk.getSetMethod()}(#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()());
+#end
+            ${junctionManagerClass}.getInstance().save(junction);
+        }
+    }
+    /**
+     * remove junction between {@link $beanClass} and {@link $linkedBean}
+     * @param bean
+     * @param linked
+     * @throws DAOException
+     */
+    //23.3 MANY TO MANY
+    public int deleteJunction($beanClass bean,$linkedBean linked) throws DAOException{
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+            return 0;
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+            return 0;
+        return ${junctionManagerClass}.getInstance().deleteByPrimaryKey($junctionParam);
+    }
+    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
+    //23.4 MANY TO MANY
+    public void addJunction($beanClass bean,$linkedBean... linkedBeans) throws DAOException{
+        if(null == linkedBeans)return;
+        for($linkedBean linked:linkedBeans){
+            addJunction(bean,linked);
+        }
+    }
+    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
+    //23.5 MANY TO MANY
+    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DAOException{
+        if(null == linkedBeans)return;
+        for($linkedBean linked:linkedBeans){
+            addJunction(bean,linked);
+        }
+    }
+    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
+    //23.6 MANY TO MANY
+    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans) throws DAOException{
+        if(null == linkedBeans)return 0;
+        int count = 0;
+        for($linkedBean linked:linkedBeans){
+            count += deleteJunction(bean,linked);
+        }
+        return count;
+    }
+    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
+    //23.7 MANY TO MANY
+    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DAOException{
+        if(null == linkedBeans)return 0;
+        int count = 0;
+        for($linkedBean linked:linkedBeans){
+            count += deleteJunction(bean,linked);
+        }
+        return count;
+    }
 #end
 
     //_____________________________________________________________________

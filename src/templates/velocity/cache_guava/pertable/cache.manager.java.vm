@@ -22,10 +22,7 @@ import ${schemaPkg}.ITableCache;
 import ${schemaPkg}.ITableCache.UpdateStrategy;
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
 import net.gdface.facelog.db.exception.WrapDAOException;
-#foreach ($foreignTable in $foreignTables)
-import ${foreignTable.getPackage(true)}.${foreignTable.asBeanClass($isGeneral)};
-import ${foreignTable.getPackage(false)}.${foreignTable.asCacheManagerClass($isGeneral)};
-#end
+#importLinkedTable()
 #if(!$isGeneral)
 import ${pkg}.exception.DAOException;
 #set ($throwsString = "throws DAOException")
@@ -176,7 +173,7 @@ public class $cacheManagerClass extends $managerClass
 #if($index.isUnique() && 1 == $index.getIndexColumnsList().size())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
-    // override $table.asManagerInterfaceNSP()
+    // override $table.asManagerClassNSP()
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}Checked($indexColumn.getJavaType() $indexColumn.getVarName()) throws ObjectRetrievalException{
         try{
@@ -198,4 +195,35 @@ public class $cacheManagerClass extends $managerClass
 #end## $index.isUnique() && 1 == $indexColumns.size()    
 #end
 #end##($table.countIndices() > 0)
+
+#set ( $jTables = $table.getJunctionTables() )
+#foreach ( $jTable in $jTables )
+#set ( $linkedTable = $jTable.tableOfJunction( $table) )
+#if ( $velocityCount == 1)
+    //_____________________________________________________________________
+    //
+    // MANY TO MANY: LOAD OTHER BEAN VIA JUNCTION TABLE
+    //_____________________________________________________________________
+#end
+#set ( $junctionBeanClass = $jTable.asBeanClass($isGeneral))
+#set ( $linkedBean = "${linkedTable.asBeanClass($isGeneral)}" )
+#set ( $localFk = $jTable.getForeignKeys($table)[0])
+#set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
+#set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
+    //23 MANY TO MANY
+    // override $table.asManagerClassNSP()
+    @Override 
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)
+    {
+        java.util.List<$junctionBeanClass> junctions = 
+            ${linkManagerClass}.getInstance().${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
+        java.util.ArrayList<$beanClass> lbeans = new java.util.ArrayList<$beanClass>(junctions.size());
+        for(${jTable.asBeanClass($isGeneral)} jbean:junctions){
+        	try{
+        		lbeans.add(loadByPrimaryKeyChecked(#join($localFk.columns 'jbean.$e.getGetMethod()()' ',')));
+        	}catch(ObjectRetrievalException  e){}
+        }
+        return lbeans;
+    }
+#end
 }
