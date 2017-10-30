@@ -58,7 +58,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
                 manager.unregisterListener(this.tableListener);
             }
             @Override
-            public $columnType returnKey($beanClass bean) {
+            protected $columnType returnKey($beanClass bean) {
                 return null == bean ? null : bean.$indexColumn.getGetMethod()();
             }
             @Override
@@ -97,7 +97,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
 
     }
     @Override
-    public $pkType returnKey($beanClass bean) {
+    protected $pkType returnKey($beanClass bean) {
         return null == bean ? null : bean.$pk.getGetMethod()();
     }
     @Override

@@ -69,8 +69,8 @@ public abstract class TableLoadCaching<K ,B extends BaseBean<B>> implements ITab
     /** 当前更新策略 */
     private final UpdateStrategy updateStragey;
     /** 返回bean中主键值 */
-    public abstract K returnKey(B bean)
-    /** 从数据库中加载主键(pk)指定的记录 */;
+    protected abstract K returnKey(B bean);
+    /** 从数据库中加载主键(pk)指定的记录 */
     protected abstract B loadfromDatabase(K key)throws Exception;
 
     public TableLoadCaching(){
