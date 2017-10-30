@@ -30,6 +30,7 @@ import ${pkg}.exception.DAOException;
 import ${table.getPackage(false)}.${managerClass};
 import ${table.getPackage(true)}.${beanClass};
 import ${table.getPackage(false)}.${table.asCacheClass($isGeneral)};
+#macro(instanceOf $extMgr)#if($extMgr != $cacheManagerClass)${extMgr}.getInstance().#end#end
 
 /**
  * cache implementation for $managerClass<br>
@@ -133,7 +134,7 @@ public class $cacheManagerClass extends $managerClass
     @Override 
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean){
         if(null == bean)return null;
-        bean.$table.getReferencedVarSetMethod($fkName)(${foreignCache}.getInstance().loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
+        bean.$table.getReferencedVarSetMethod($fkName)(#instanceOf(${foreignCache})loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
         return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 #end    
@@ -216,7 +217,7 @@ public class $cacheManagerClass extends $managerClass
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)
     {
         java.util.List<$junctionBeanClass> junctions = 
-            ${linkManagerClass}.getInstance().${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
+            #instanceOf(${linkManagerClass})${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
         java.util.ArrayList<$beanClass> lbeans = new java.util.ArrayList<$beanClass>(junctions.size());
         for(${jTable.asBeanClass($isGeneral)} jbean:junctions){
         	try{
