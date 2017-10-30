@@ -127,7 +127,22 @@ public class Table {
 		}			
 		return false;
 	}
-
+	/**
+	 * 判断外键是否为自引用
+	 * @return
+	 */
+	public boolean isSelfRef(ForeignKey fk) {
+		if(null == fk)return false;
+		return fk.getForeignTable().equals(this);
+	}
+	/** 返回所有自引用外键 */
+	public List<ForeignKey> getSelfRefKeys(){
+		return ImmutableList.copyOf(Collections2.filter(this.fkNameMap.values(), new Predicate<ForeignKey>(){
+			@Override
+			public boolean apply(ForeignKey input) {
+				return isSelfRef(input);
+			}}));
+	}
 	public boolean relationConnectsTo(Table otherTable) {
 		if (this.equals(otherTable)) {
 			return false;
@@ -1187,6 +1202,13 @@ public class Table {
 		public Table getForeignTable(){
 			return columns.get(0).getForeignColumn().getTable();
 		}
+		/** 返回主键{@code primaryColumn}对应的字段 */
+		public Column foreignColumnOf(Column primaryColumn){
+			for(Column column:columns){
+				if(column.getForeignColumn().equals(primaryColumn))return column;
+			}
+			return null;
+		}
 		@Override
 		public boolean equals(Object obj) {
 			if(super.equals(obj))return true;
@@ -1254,5 +1276,27 @@ public class Table {
 		public String getEventOfDeleteRule() {
 			return eventOfDeleteRule;
 		}
+	}
+	public String getCyeleTestMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"is_cycle_on_");
+	}
+	public String getTopMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"top_of_");
+	}
+	public String getLevelMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"level_of_");
+	}
+	public String getListMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"list_of_");
+	}
+	private  String getSelftMethod(ForeignKey fk,String prefix) {
+		if(null == fk )return null;
+		return StringUtilities.convertName(
+				prefix + Joiner.on('_').join(Lists.transform(fk.columns, new Function<Column,String>(){
+					@Override
+					public String apply(Column input) {
+						return input.getName();
+					}})),
+				true);
 	}
 }
