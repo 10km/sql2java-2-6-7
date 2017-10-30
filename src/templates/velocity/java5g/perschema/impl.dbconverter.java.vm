@@ -19,7 +19,8 @@ import ${gpkg}.${table.asBeanClassNSP()};
  * @author guyadong
  *
  */
-public class DbConverter implements IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> {
+public class DbConverter implements IDbConverter<#join($tables "
+                                                ${e.getPackage()}.${e.asBeanClass()}" ',')> {
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )

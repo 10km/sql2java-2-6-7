@@ -3,7 +3,7 @@
 ######################
 #set ( $subpkg=$db.engineAsSubPackage() )
 #set ( $managerClassNSP = $table.asManagerClassNSP() )
-#set ( $nativeClass = $table.asBeanClass() )
+#set ( $nativeClass = "${table.getPackage()}.$table.asBeanClass()" )
 #set ( $beanClass = $table.asBeanClassNSP() )
 #set ( $listenerClass = $table.asListenerClassNSP() )
 #set ( $nativeListener = $table.asListenerClass() )
@@ -11,7 +11,6 @@ $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "${managerClassNSP}.java
 package ${gpkg}.${subpkg};
 
 import java.util.concurrent.Callable;
-import java.util.List;
 
 import ${gpkg}.Constant;
 import ${gpkg}.${beanClass};
@@ -25,8 +24,6 @@ import ${schemaPkg}.exception.WrapDAOException;
 import ${schemaPkg}.exception.ObjectRetrievalException;
 
 import ${exceptionPkg}.DAOException;
-import ${table.getPackage()}.${managerClass};
-import ${table.getPackage()}.${nativeClass};
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -38,8 +35,9 @@ import ${table.getPackage()}.${nativeClass};
  */
 public class $managerClassNSP extends TableManager.Adapter<$beanClass> implements $table.asManagerInterfaceNSP()
 {
-    private $managerClass nativeManager = ${managerClass}.getInstance();
-    private IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> dbConverter = DbConverter.INSTANCE;
+    private ${table.getPackage()}.$managerClass nativeManager = ${table.getPackage()}.${managerClass}.getInstance();
+    private IDbConverter<#join($tables "
+                        ${e.getPackage()}.${e.asBeanClass()}" ',')> dbConverter = DbConverter.INSTANCE;
     private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
     protected $managerClassNSP(){}

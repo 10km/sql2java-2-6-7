@@ -25,7 +25,8 @@ import ${gpkg}.${table.asBeanClassNSP()};
 #end
  *
  */
-public abstract class ${javaClassName}<#join($tables "R_${e.asCoreClassNSP().toUpperCase()}" ',')> 
+public abstract class ${javaClassName}<#join($tables "
+                    R_${e.asCoreClassNSP().toUpperCase()}" ',')> 
     implements IDbConverter<#join($tables "R_${e.asCoreClassNSP().toUpperCase()}" ',')>, Constant{
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )

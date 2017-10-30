@@ -8,7 +8,8 @@ package $gpkg;
  * @author guyadong
  *
  */
-public interface IDbConverter<#join($tables "N_${e.asCoreClassNSP().toUpperCase()}" ',')> {
+public interface IDbConverter<#join($tables "
+                            N_${e.asCoreClassNSP().toUpperCase()}" ',')> {
 #foreach ( $table in $tables )
     public abstract IBeanConverter<${table.asBeanClassNSP()}, N_${table.asCoreClassNSP().toUpperCase()}> get${table.asBeanClassNSP()}Converter();
 #end
