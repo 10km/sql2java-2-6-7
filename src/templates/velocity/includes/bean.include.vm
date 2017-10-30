@@ -321,19 +321,16 @@ public $!{final} class ${beanClass}
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
 #set ( $referencedBean = $table.getReferencedVarName($fkName) )
-#set( $fieldIndex = $fieldIndex + 1 )
     /** 
      * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
      * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
     private $foreignClass $referencedBean;
     /** Getter method for {@link #${referencedBean}}. */
-#swiftThriftField( $fieldIndex $null)
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
     /** Setter method for {@link #${referencedBean}}. */
-#swiftThriftField( $null $null )
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }
