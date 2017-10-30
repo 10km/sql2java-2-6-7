@@ -422,6 +422,9 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
                 }
             });
         }
+        protected static boolean equal(Object a, Object b) {
+            return a == b || (a != null && a.equals(b));
+        }
     }    
     
     public String getFields();
