@@ -522,7 +522,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      ')
 
      * @return  empty list if input primary key is {@code null}<br>
-     *         null if self-reference field is cycle
+     *         first element equal last if self-reference field is cycle
      * @throws WrapDAOException
      */
     //47

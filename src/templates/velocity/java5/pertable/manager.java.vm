@@ -2560,7 +2560,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      ')
 
      * @return  empty list if input primary key is {@code null}<br>
-     *         null if self-reference field is cycle
+     *         first element equal last if self-reference field is cycle
      * @throws DAOException
      */
     //47
@@ -2572,7 +2572,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         for(list = new java.util.ArrayList<$beanClass>();null != parent;list.add(parent)){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
             if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
-                return null;
+                // cycle reference
+                list.add(parent);
+                break;
             }
         }
         java.util.Collections.reverse(list);

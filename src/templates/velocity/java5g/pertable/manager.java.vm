@@ -1473,7 +1473,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         for(list = new java.util.ArrayList<$beanClass>();null != parent;list.add(parent)){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
             if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
-                return null;
+                // cycle reference
+                list.add(parent);
+                break;
             }
         }
         java.util.Collections.reverse(list);
