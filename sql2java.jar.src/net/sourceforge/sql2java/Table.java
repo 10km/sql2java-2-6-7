@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -491,15 +493,20 @@ public class Table {
 	 * @return
 	 */
 	public List<ForeignKey> getForeignKeysForListener(){
-		return ImmutableList.copyOf(
-				Maps.filterEntries(fkNameMap, 
-						new Predicate<Entry<String, ForeignKey>>(){
-							@Override
-							public boolean apply(Entry<String, ForeignKey> input) {
-								ForeignKey fk = input.getValue();
-								return fk.updateRule.isNoAction() 
-										&& !Strings.isNullOrEmpty(fk.deleteRule.getEventOfDeleteRule());
-							}}).values());
+		Collection<ForeignKey> c = Maps.filterEntries(fkNameMap, 
+				new Predicate<Entry<String, ForeignKey>>(){
+					@Override
+					public boolean apply(Entry<String, ForeignKey> input) {
+						ForeignKey fk = input.getValue();
+						return fk.updateRule.isNoAction() 
+								&& !Strings.isNullOrEmpty(fk.deleteRule.getEventOfDeleteRule());
+					}}).values();
+		// 排序输出
+		return Ordering.natural().onResultOf(new Function<ForeignKey,String>(){
+			@Override
+			public String apply(ForeignKey input) {
+				return input.fkName;
+			}}).sortedCopy(c);
 	}
 	/**
 	 * 判断 FK_NAME 包含的所有字段是否都允许为null
