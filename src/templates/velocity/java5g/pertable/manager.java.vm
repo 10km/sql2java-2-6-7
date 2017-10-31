@@ -1539,5 +1539,21 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             throw new NullPointerException();
         return $table.getTopMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
+#if($table.countPrimaryKeys() == 1)
+    //55 $table.asManagerInterfaceNSP()
+    @Override
+    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()){
+        if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName()))
+            throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        return $table.primaryKey.getVarName();
+    }
+#end
+    //56 $table.asManagerInterfaceNSP()
+    @Override
+    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean){
+        if($table.getCyeleTestMethod($selfFk)(bean))
+            throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        return bean;
+    }
 #end
 }

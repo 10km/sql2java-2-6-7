@@ -2579,7 +2579,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         return list;
     }
     /**
-     * @see ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     * see also {@link ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
     //48
     @SuppressWarnings("unchecked")
@@ -2611,7 +2611,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         return count;
     }
     /**
-     * @see ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     * see also {@link ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
     //50
     public int $table.getLevelMethod($selfFk)($beanClass bean) throws DAOException{
@@ -2665,13 +2665,43 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         return parent;
     }
     /**
-     * @see ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     * see also {@link ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
     //54
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean) throws DAOException{
         if(null == bean)
             throw new NullPointerException();
         return $table.getTopMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
+    }
+#if($table.countPrimaryKeys() == 1)
+    /**
+     * Ensures the self-reference field is not cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
+     * @param $table.primaryKey.getVarName() PK# $velocityCount
+     * @return always {@code $table.primaryKey.getVarName()}
+     * @throws IllegalStateException if self-reference field is cycle 
+     * @throws DAOException
+     * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($table.primaryKey.getJavaType())
+     */
+    //55
+    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()) throws DAOException{
+        if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName()))
+            throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        return $table.primaryKey.getVarName();
+    }
+#end
+    /**
+     * Ensures the self-reference field is not cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
+     * @param bean
+     * @return always {@code bean}
+     * @throws IllegalStateException if self-reference field is cycle
+     * @throws DAOException
+     * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
+     */
+    //56
+    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean) throws DAOException{
+        if($table.getCyeleTestMethod($selfFk)(bean))
+            throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        return bean;
     }
 #end
 }
