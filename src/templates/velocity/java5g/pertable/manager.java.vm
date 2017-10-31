@@ -1492,7 +1492,8 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
             ? null
-            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));        int count;
+            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
+        int count;
         for(count = 0;null != parent;++count){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
             if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){

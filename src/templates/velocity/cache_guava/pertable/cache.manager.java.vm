@@ -165,13 +165,14 @@ public class $cacheManagerClass extends $managerClass
         return super.loadUsingTemplate(bean,fieldList,startRow,numRows,searchType,action);
     }
 
-#if ($table.countIndices() > 0)
+#set($uniqueIndices = $table.getUniqueIndicesAsList())
+#if (!$uniqueIndices.empty)
     //_____________________________________________________________________
     //
     // USING INDICES
     //_____________________________________________________________________
-#foreach ( $index in $table.getIndices() )
-#if($index.isUnique() && 1 == $index.getIndexColumnsList().size())
+#foreach ( $index in $uniqueIndices )
+#if(1 == $index.getIndexColumnsList().size())
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
     // override $table.asManagerClassNSP()
@@ -193,9 +194,24 @@ public class $cacheManagerClass extends $managerClass
             }
         }
     }
-#end## $index.isUnique() && 1 == $indexColumns.size()    
+#end## 1 == $indexColumns.size()
 #end
 #end##($table.countIndices() > 0)
+################### CHECK CYCLE BEFORE SAVE FOR SELF-REFERENCE FIELD#################
+#if(!$table.selfRefKeys.empty)
+    //_____________________________________________________________________
+    //
+    // SAVE
+    //_____________________________________________________________________
+    //12
+    @Override
+    public $beanClass save($beanClass bean){
+#foreach($selfFk in $table.selfRefKeys)
+        $table.getCheckNotCycleMethod($selfFk)(bean);
+#end
+        return super.save(bean);
+    }
+#end
 
 #set ( $jTables = $table.getJunctionTables() )
 #foreach ( $jTable in $jTables )
