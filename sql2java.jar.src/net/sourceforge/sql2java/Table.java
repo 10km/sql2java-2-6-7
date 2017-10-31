@@ -1289,6 +1289,9 @@ public class Table {
 	public String getListMethod(ForeignKey fk) {
 		return getSelftMethod(fk,"list_of_");
 	}
+	public String getCheckNotCycleMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"check_cycle_of_");
+	}
 	private  String getSelftMethod(ForeignKey fk,String prefix) {
 		if(null == fk )return null;
 		return StringUtilities.convertName(
