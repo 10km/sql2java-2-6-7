@@ -154,6 +154,20 @@ public $!{final} class ${beanClass}
     public ${beanClass}(){
         super();
     }
+#if ( $table.hasPrimaryKey() )
+    /**
+     * construct a new instance filled with primary keys
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     */
+    public ${beanClass}(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        super();
+        #join($primaryKeys '$e.getSetMethod()($e.getVarName());' '
+        ')
+
+    }
+#end
 #foreach ( $column in $columns )
 #set( $fieldIndex = $fieldIndex + 1 )
     /**

@@ -1463,15 +1463,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     // SELF-REFERENCE
     //_____________________________________________________________________
 #end
-    //47 override $table.asManagerInterfaceNSP()
+    //47 $table.asManagerInterfaceNSP()
     @Override
-    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean){
-        final $beanClass start = null == bean ? null : bean.clone();
-        $beanClass parent = start;
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
+            ? null
+            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
         java.util.List<$beanClass> list;
         for(list = new java.util.ArrayList<$beanClass>();null != parent;list.add(parent)){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'equal(start.$e.getGetMethod()(),parent.$e.getGetMethod()())' ' && ')){
+            if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
                 return null;
             }
         }
@@ -1480,51 +1481,63 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
     //48 $table.asManagerInterfaceNSP()
     @Override
-    public int $table.getLevelMethod($selfFk)($beanClass bean){
-        final $beanClass start = null == bean ? null : bean.clone();
-        $beanClass parent = start;
-        int count;
+    @SuppressWarnings("unchecked")
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean){
+        return null == bean
+                ? java.util.Collections.EMPTY_LIST
+                : $table.getListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
+    }
+    //49 $table.asManagerInterfaceNSP()
+    @Override
+    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
+            ? null
+            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));        int count;
         for(count = 0;null != parent;++count){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'equal(start.$e.getGetMethod()(),parent.$e.getGetMethod()())' ' && ')){
+            if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
                 return -1;
             }
         }
         return count;
     }
-    /**
-     * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
-     * @param bean
-     * @throws DAOException
-     * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
-     */
-    //49 $table.asManagerInterfaceNSP()
+    //50 $table.asManagerInterfaceNSP()
+    @Override
+    public int $table.getLevelMethod($selfFk)($beanClass bean){
+        return null == bean
+                ? 0
+                : $table.getLevelMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
+    }
+    //51 $table.asManagerInterfaceNSP()
+    @Override
+    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        return $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getVarName()' ',')) < 0;
+    }
+    //52 $table.asManagerInterfaceNSP()
     @Override
     public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean){
         return $table.getLevelMethod($selfFk)(bean) < 0;
     }
-    /**
-     * return top bean that with {@code null} self-reference field  : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
-     * @param bean
-     * @return top bean
-     * @throws NullPointerException if {@code bean} is {@code null}
-     * @throws IllegalStateException if self-reference field is cycle
-     * @throws DAOException
-     */
-    // 50 $table.asManagerInterfaceNSP()
+    //53 $table.asManagerInterfaceNSP()
     @Override
-    public $beanClass $table.getTopMethod($selfFk)($beanClass bean){
-        if(null == bean)
+    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        if(#join($primaryKeys 'null == $e.getVarName()' ' || '))
             throw new NullPointerException();
-        final $beanClass start = bean.clone();
-        $beanClass parent;
-        for(parent = start;#join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
+        $beanClass parent = new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
+        for(;#join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'equal(start.$e.getGetMethod()(),parent.$e.getGetMethod()())' ' && ')){
+            if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
                 throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
             }
         }
         return parent;
+    }
+    //54 $table.asManagerInterfaceNSP()
+    @Override
+    public $beanClass $table.getTopMethod($selfFk)($beanClass bean){
+        if(null == bean)
+            throw new NullPointerException();
+        return $table.getTopMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
 #end
 }

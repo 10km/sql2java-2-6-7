@@ -516,41 +516,72 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     //_____________________________________________________________________
 #end
     /**
-     * return bean list ( include {@code bean}) by the self-reference field : {@code fl_person_group(parent) }<br>
+     * return bean list ( include {@code bean}) by the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
      * first element is top bean
-     * @param bean
-     * @return  empty list if {@code bean} is {@code null}<br>
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @return  empty list if input primary key is {@code null}<br>
      *         null if self-reference field is cycle
      * @throws WrapDAOException
      */
     //47
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    /**
+     * @see ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     */
+    //48
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean);
     /**
      * get level count on the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
-     * @param bean
-     * @return  0 if {@code bean} is {@code null}<br>
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @return  0 if input primary key is {@code null}<br>
      *         -1 if self-reference field is cycle
      * @throws WrapDAOException
      */
-    //48
+    //49
+    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    /**
+     * @see ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     */
+    //50
     public int $table.getLevelMethod($selfFk)($beanClass bean);
+    /**
+     * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @throws WrapDAOException
+     * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
+     */
+    //51
+    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * @param bean
      * @throws WrapDAOException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
-    //49
+    //52
     public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean);
     /**
      * return top bean that with {@code null} self-reference field  : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
-     * @param bean
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
      * @return top bean
-     * @throws NullPointerException if {@code bean} is {@code null}
+     * @throws NullPointerException if input primary key is {@code null}
      * @throws IllegalStateException if self-reference field is cycle
      * @throws WrapDAOException
      */
-    // 50
+    //53
+    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    /**
+     * @see ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))
+     */
+    //54
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean);
 #end
 }
