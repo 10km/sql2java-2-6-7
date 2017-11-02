@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -65,7 +66,7 @@ public class Table {
 	private Vector<Column> foreignKeys = new Vector<Column>();
 	private Vector<Column> importedKeys = new Vector<Column>();
 	/** FK_NAME 为索引保存所有 foreign keys */
-	private ConcurrentHashMap<String,ForeignKey> fkNameMap = new ConcurrentHashMap<String,ForeignKey>();
+	private LinkedHashMap<String, ForeignKey> fkNameMap = new LinkedHashMap<String,ForeignKey>();
 	private List<Procedure> procedures = new ArrayList<Procedure>();
 	private HashMap<String,Procedure> procHash = new HashMap<String,Procedure>();
 	private Random aleatorio = new Random(new Date().getTime());
@@ -423,7 +424,8 @@ public class Table {
 		if (!this.foreignKeys.contains(col)) {
 			this.foreignKeys.add(col);
 		}
-		this.fkNameMap.putIfAbsent(fkName, new ForeignKey(fkName,updateRule,deleteRule,col));
+		if(!this.fkNameMap.containsKey(fkName))
+			this.fkNameMap.put(fkName, new ForeignKey(fkName,updateRule,deleteRule,col));
 		Vector<Column> fkCols = fkNameMap.get(fkName).columns;
 		if(keySeq > fkCols.size()){
 			fkCols.setSize(keySeq);
@@ -436,9 +438,7 @@ public class Table {
 	 * @return
 	 */
 	public Vector<String> getFkMapNames() {		
-		Vector<String> res=new Vector<String>(this.fkNameMap.keySet());
-		Collections.sort(res);
-		return res;
+		return new Vector<String>(this.fkNameMap.keySet());
 	}
 
 	/**
