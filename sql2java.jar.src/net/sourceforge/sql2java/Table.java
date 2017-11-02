@@ -130,6 +130,13 @@ public class Table {
 		return false;
 	}
 	/**
+	 * 判断是否为联接表,且主键为两个字段
+	 * @return
+	 */
+	public boolean isSampleJunctionTable() {
+		return isJunctionTable() && 2 == countPrimaryKeys();
+	}
+	/**
 	 * 判断外键是否为自引用
 	 * @return
 	 */
