@@ -1,0 +1,118 @@
+#parse( "table.include.vm" )
+#parse( "header.include.vm" )
+#if (!$table.isSampleJunctionTable())
+$codewriter.setSaveCurrentFile(false)
+#stop
+#end
+#set($key1 = $primaryKeys[0])
+#set($key2 = $primaryKeys[1])
+#set($k1Type = $key1.getJavaType())
+#set($k2Type = $key2.getJavaType())
+
+#set($beanClass = $table.asBeanClass($isGeneral))
+#set($managerClass = $table.asManagerClass($isGeneral))
+#set($cacheClass = $table.asCacheClass($isGeneral) )
+$codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheClass}.java")
+package $table.getPackage(false);
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import ${schemaPkg}.TableLoadCaching;
+import net.gdface.facelog.db.exception.ObjectRetrievalException;
+import net.gdface.facelog.db.ITableCache.UpdateStrategy;
+import net.gdface.facelog.db.JunctionTableCache;
+
+
+#if(!$isGeneral)
+import ${pkg}.exception.DAOException;
+#end
+import $table.getPackage(true).$beanClass;
+#if(!$isGeneral)
+import $table.getPackage(false).$managerClass;
+#end
+
+#set($uniqueIndices = $table.getUniqueIndicesAsList())
+/**
+ * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
+ * primary key ($key1.name,$key2.name) is key
+ * @author guyadong
+ *
+ */
+public class $cacheClass extends JunctionTableCache<$k1Type,$k2Type, $beanClass> {
+    private final $managerClass manager = ${managerClass}.getInstance();
+    /** constructor<br>
+     * @see {@link TableLoadCaching#TableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
+     */
+    public $cacheClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
+        super(updateStragey,maximumSize, duration, unit);
+        manager.bindForeignKeyListenerForDeleteRule();
+    }
+    public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
+        this(TableLoadCaching.DEFAULT_STRATEGY,maximumSize,duration,unit);
+    }
+    public $cacheClass(long maximumSize, long durationMinutes) {
+        this(maximumSize, durationMinutes, TableLoadCaching.DEFAULT_TIME_UNIT);
+    }
+
+    public $cacheClass(long maximumSize) {
+        this(maximumSize,TableLoadCaching.DEFAULT_DURATION,TableLoadCaching.DEFAULT_TIME_UNIT);
+    }
+    public $cacheClass() {
+        this(TableLoadCaching.DEFAULT_CACHE_MAXIMUMSIZE,TableLoadCaching.DEFAULT_DURATION,TableLoadCaching.DEFAULT_TIME_UNIT);
+    }
+    
+    @Override
+    public void registerListener() {
+        manager.registerListener(tableListener);
+    }
+    @Override
+    public void unregisterListener() {
+        manager.unregisterListener(tableListener);
+    }
+    @Override
+    protected $key1.getJavaType() returnK1($beanClass bean) {
+        return null == bean ? null : bean.$key1.getGetMethod()();
+    }
+    @Override
+    protected $key2.getJavaType() returnK2($beanClass bean) {
+        return null == bean ? null : bean.$key2.getGetMethod()();
+    }
+    @Override
+    protected Object loadfromDatabase(Key key)throws Exception {
+        if(null != key.k1 && null != key.k2)
+            return manager.loadByPrimaryKey(key.k1, key.k2);
+        PermitBean bean = new PermitBean();
+        if(null != key.k1){
+            bean.$key1.getSetMethod()(key.k1);
+        }else if(null != key.k2){
+            bean.$key2.getSetMethod()(key.k2);
+        }else
+            throw new ObjectRetrievalException();
+        List<$beanClass> list = manager.loadUsingTemplateAsList(bean);
+        if(list.isEmpty())
+            throw new ObjectRetrievalException();
+        return list;
+    }
+    public Set<$beanClass> $key1.getGetCacheMethod()($k1Type $key1.getVarName()) throws ExecutionException{
+        return getBeansByK1($key1.getVarName());
+    }
+    public Set<$beanClass> $key1.getGetCacheMethod()Unchecked($k1Type $key1.getVarName()){
+        return getBeansByK1Unchecked($key1.getVarName());
+    }
+    public Set<$beanClass> $key2.getGetCacheMethod()($k2Type $key2.getVarName()) throws ExecutionException{
+        return getBeansByK1($key2.getVarName());
+    }
+    public Set<$beanClass> $key2.getGetCacheMethod()Unchecked($k2Type $key2.getVarName()){
+        return getBeansByK1Unchecked($key2.getVarName());
+    }
+    public $beanClass getBeanByPrimaryKey($k1Type $key1.getVarName(),$k2Type $key2.getVarName()) throws ExecutionException{
+        return getBean($key1.getVarName(),$key2.getVarName());
+    }
+    public $beanClass getBeanByPrimaryKeyUnchecked($k1Type $key1.getVarName(),$k2Type $key2.getVarName()){
+        return getBeanUnchecked($key1.getVarName(),$key2.getVarName());
+    }
+
+}
