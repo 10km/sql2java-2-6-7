@@ -20,6 +20,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.gdface.facelog.db.ITableCache.UpdateStrategy;
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -238,7 +239,7 @@ public abstract class JunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
         }
     }
     public B getBean(K1 k1,K2 k2) throws ExecutionException{
-        return null ==k1 || null == k2? null : cache.get(new Key(k1,k2));
+        return cache.get(new Key(checkNotNull(k1),checkNotNull(k2)));
     }
     public B getBeanIfPresent(K1 k1,K2 k2){
         return null ==k1 || null == k2? null : cache.getIfPresent(asTmpKey(k1,k2));
@@ -267,7 +268,7 @@ public abstract class JunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
      * @param bean
      * @param cacheMap
      */
-    protected void update(B bean){
+    public void update(B bean){
         K1 k1 = returnK1(bean);
         K2 k2 = returnK2(bean);
         if(null !=k1 && null != k2){

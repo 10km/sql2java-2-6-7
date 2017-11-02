@@ -1,17 +1,13 @@
 #parse( "table.include.vm" )
 #parse( "header.include.vm" )
-######################
-#if ($table.countPrimaryKeys() != 1)
+######################对主键为1个字段的表或联接表(junction table,2个主键字段)生成cache manager
+#if ($table.countPrimaryKeys() != 1 && !$table.isSampleJunctionTable())
 $codewriter.setSaveCurrentFile(false)
 #stop
 #end
-#set ( $primaryKey = $table.getPrimaryKey())
 #set ( $cacheManagerClass = $table.asCacheManagerClass($isGeneral) )
 #set ( $managerClass = $table.asManagerClass($isGeneral) )
-###set ( $nativeClass = $table.asBeanClass() )
 #set ( $beanClass = $table.asBeanClass($isGeneral) )
-##set ( $listenerClass = $table.asListenerClassNSP() )
-##set ( $nativeListener = $table.asListenerClass() )
 $codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheManagerClass}.java")
 package $table.getPackage(false);
 
@@ -89,10 +85,10 @@ public class $cacheManagerClass extends $managerClass
 
     //1.1 override $table.asManagerInterfaceNSP()
     @Override 
-    public $beanClass loadByPrimaryKeyChecked($primaryKey.getJavaType() $primaryKey.getVarName()) throws ObjectRetrievalException
+    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws ObjectRetrievalException
     {
         try{
-            return cache.getBean($primaryKey.getVarName());
+            return cache.getBean(#join($primaryKeys '$e.getVarName()' ','));
         }catch(ExecutionException ee){
             try{
                 throw ee.getCause();
@@ -109,10 +105,10 @@ public class $cacheManagerClass extends $managerClass
     }
     //1.4 override $table.asManagerInterfaceNSP()
     @Override 
-    public boolean existsPrimaryKey($primaryKey.getJavaType() $primaryKey.getVarName())
+    public boolean existsPrimaryKey(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))
     {
-        if(null != cache.getBeanIfPresent($primaryKey.getVarName()))return true;
-        return super.existsPrimaryKey($primaryKey.getVarName());
+        if(null != cache.getBeanIfPresent(#join($primaryKeys '$e.getVarName()' ',')))return true;
+        return super.existsPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
     }
 ## ======================================================
 ## xForeignKeys template
@@ -229,7 +225,7 @@ public class $cacheManagerClass extends $managerClass
 #set ( $linkedBean = "${linkedTable.asBeanClass($isGeneral)}" )
 #set ( $localFk = $jTable.getForeignKeys($table)[0])
 #set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
-#set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
+#set ( $linkManagerClass = ${linkedTable.asCacheManagerClass($isGeneral)})
     //23 MANY TO MANY
     // override $table.asManagerClassNSP()
     @Override 
