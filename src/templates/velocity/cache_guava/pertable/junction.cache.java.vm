@@ -36,8 +36,8 @@ import $table.getPackage(false).$managerClass;
 
 #set($uniqueIndices = $table.getUniqueIndicesAsList())
 /**
- * cache manager for $beanClass base {@link com.google.common.cache.LoadingCache}<br>
- * primary key ($key1.name,$key2.name) is key
+ * cache manager for $beanClass base {@link JunctionTableCache}<br>
+ * primary key {@code($key1.name ->K1,$key2.name -> K2)}
  * @author guyadong
  *
  */
@@ -96,23 +96,40 @@ public class $cacheClass extends JunctionTableCache<$k1Type,$k2Type, $beanClass>
             throw new ObjectRetrievalException();
         return list;
     }
+    /** 
+     * return all matched beans on field ${table.name}($key1.name) with $key1.getVarName() 
+     * @see JunctionTableCache${esc.hash}getBeansByK1($k1Type)
+     */
     public Set<$beanClass> $key1.getGetCacheMethod()($k1Type $key1.getVarName()) throws ExecutionException{
         return getBeansByK1($key1.getVarName());
     }
+    /** 
+     * return all matched beans on field ${table.name}($key1.name) with $key1.getVarName() 
+     * @see JunctionTableCache${esc.hash}getBeansByK1Unchecked($k1Type)
+     */
     public Set<$beanClass> $key1.getGetCacheMethod()Unchecked($k1Type $key1.getVarName()){
         return getBeansByK1Unchecked($key1.getVarName());
     }
+    /** 
+     * return all matched beans on field ${table.name}($key2.name) with $key2.getVarName() 
+     * @see JunctionTableCache${esc.hash}getBeansByK2($k2Type)
+     */
     public Set<$beanClass> $key2.getGetCacheMethod()($k2Type $key2.getVarName()) throws ExecutionException{
-        return getBeansByK1($key2.getVarName());
+        return getBeansByK2($key2.getVarName());
     }
+    /** 
+     * return all matched beans on field ${table.name}($key2.name) with $key2.getVarName() 
+     * @see JunctionTableCache${esc.hash}getBeansByK2Unchecked($k2Type)
+     */
     public Set<$beanClass> $key2.getGetCacheMethod()Unchecked($k2Type $key2.getVarName()){
-        return getBeansByK1Unchecked($key2.getVarName());
+        return getBeansByK2Unchecked($key2.getVarName());
     }
+    /** see also {@link JunctionTableCache${esc.hash}getBean($k1Type,$k1Type)} */
     public $beanClass getBeanByPrimaryKey($k1Type $key1.getVarName(),$k2Type $key2.getVarName()) throws ExecutionException{
         return getBean($key1.getVarName(),$key2.getVarName());
     }
+    /** see also {@link JunctionTableCache${esc.hash}getBeanUnchecked($k1Type,$k1Type)} */
     public $beanClass getBeanByPrimaryKeyUnchecked($k1Type $key1.getVarName(),$k2Type $key2.getVarName()){
         return getBeanUnchecked($key1.getVarName(),$key2.getVarName());
     }
-
 }

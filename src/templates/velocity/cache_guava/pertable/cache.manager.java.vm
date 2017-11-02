@@ -6,6 +6,7 @@ $codewriter.setSaveCurrentFile(false)
 #stop
 #end
 #set ( $cacheManagerClass = $table.asCacheManagerClass($isGeneral) )
+#set ( $cacheClass = ${table.asCacheClass($isGeneral)})
 #set ( $managerClass = $table.asManagerClass($isGeneral) )
 #set ( $beanClass = $table.asBeanClass($isGeneral) )
 $codewriter.setCurrentJavaFilename($table.getPackage(false), "${cacheManagerClass}.java")
@@ -25,7 +26,7 @@ import ${pkg}.exception.DAOException;
 #end
 import ${table.getPackage(false)}.${managerClass};
 import ${table.getPackage(true)}.${beanClass};
-import ${table.getPackage(false)}.${table.asCacheClass($isGeneral)};
+import ${table.getPackage(false)}.${cacheClass};
 #macro(instanceOf $extMgr)#if($extMgr != $cacheManagerClass)${extMgr}.getInstance().#end#end
 
 /**
@@ -69,13 +70,13 @@ public class $cacheManagerClass extends $managerClass
     public static final $cacheManagerClass makeInstance(long maximumSize){
         return makeInstance(maximumSize,ITableCache.DEFAULT_DURATION,ITableCache.DEFAULT_TIME_UNIT);
     }
-    /** instance of {@link ${table.asCacheClass($isGeneral)}} */
-    private final ${table.asCacheClass($isGeneral)} cache;
+    /** instance of {@link ${cacheClass}} */
+    private final ${cacheClass} cache;
     /** constructor<br>
-     * @see {@link ${table.asCacheClass($isGeneral)}#${table.asCacheClass($isGeneral)}(UpdateStrategy ,long , long , TimeUnit )}
+     * @see {@link ${cacheClass}#${cacheClass}(UpdateStrategy ,long , long , TimeUnit )}
      */
     protected $cacheManagerClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
-        cache = new ${table.asCacheClass($isGeneral)}(updateStragey,maximumSize,duration,unit);
+        cache = new ${cacheClass}(updateStragey,maximumSize,duration,unit);
         cache.registerListener();
     }
 
@@ -231,15 +232,51 @@ public class $cacheManagerClass extends $managerClass
     @Override 
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)
     {
+#if($jTable.isSampleJunctionTable())
+#set($linkedCol = $linkedFk.columns[0])
+#set($localCol = $localFk.columns[0])
+        java.util.List<$junctionBeanClass> junctions = 
+            com.google.common.collect.Lists.newArrayList(#instanceOf(${jTable.asCacheManagerClass($isGeneral)})${linkedCol.getGetCacheMethod()}Unchecked(bean.$linkedCol.foreignColumn.getGetMethod()()));
+        startRow = Math.min(Math.max(0, startRow - 1), junctions.size() - 1);
+        numRows = numRows < 0 ? junctions.size():Math.min(junctions.size(), numRows);
+        numRows = Math.min(junctions.size() - startRow , numRows) ;
+        junctions = com.google.common.collect.Ordering
+                    .natural()
+                    .onResultOf(new com.google.common.base.Function<$junctionBeanClass,$localCol.getJavaType()>(){
+                        @Override
+                        public $localCol.foreignColumn.getJavaType() apply($junctionBeanClass input) {
+                            return input.${localCol.getGetMethod()}();
+                        }})
+                    .sortedCopy(junctions)
+                    .subList(startRow, startRow + numRows);
+#else
         java.util.List<$junctionBeanClass> junctions = 
             #instanceOf(${linkManagerClass})${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
+#end
         java.util.ArrayList<$beanClass> lbeans = new java.util.ArrayList<$beanClass>(junctions.size());
         for(${jTable.asBeanClass($isGeneral)} jbean:junctions){
-        	try{
-        		lbeans.add(loadByPrimaryKeyChecked(#join($localFk.columns 'jbean.$e.getGetMethod()()' ',')));
-        	}catch(ObjectRetrievalException  e){}
+            try{
+                lbeans.add(loadByPrimaryKeyChecked(#join($localFk.columns 'jbean.$e.getGetMethod()()' ',')));
+            }catch(ObjectRetrievalException  e){}
         }
         return lbeans;
     }
+#end
+#if ($table.isSampleJunctionTable())
+    //_____________________________________________________________________
+    //
+    // SIMPLE JUNCTION TABLE
+    //_____________________________________________________________________
+#foreach( $pk in $primaryKeys)
+#set ($method = $pk.getGetCacheMethod())
+    /** see also {@link ${cacheClass}${esc.hash}${method}($pk.getJavaType())} */
+    public java.util.Set<$beanClass> ${method}($pk.getJavaType() $pk.getVarName()) throws ExecutionException{
+        return cache.${method}($pk.getVarName());
+    }
+    /** see also {@link ${cacheClass}${esc.hash}${method}Unchecked($pk.getJavaType())} */
+    public java.util.Set<$beanClass> ${method}Unchecked($pk.getJavaType() $pk.getVarName()){
+        return cache.${method}Unchecked($pk.getVarName());
+    }
+#end
 #end
 }
