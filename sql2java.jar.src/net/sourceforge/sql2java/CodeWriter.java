@@ -201,14 +201,26 @@ public class CodeWriter {
 		this.vc.put("sorter", new SortTool());
 		this.vc.put("pkg", (Object) basePackage);
 		this.vc.put("gpkg", (Object) generalPackage);
-		this.vc.put("schemaPkg", isGeneral()?generalPackage : basePackage);
+		this.vc.put("schemaPkg", getSchemaPkg());
+		this.vc.put("extensionPkg",getExtensionPkg());
 		this.vc.put("isGeneral", isGeneral());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
 		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
 		this.vc.put("fecha", (Object) new Date());
 		this.current_vc = new VelocityContext((Context) this.vc);
 		generate("velocity.templates");
-		generate("velocity.templates.extension");
+		// 如果定义了扩展模板的输出文件夹就用它替换destDir,用完后恢复
+		String destDirExt = getProperty("codewriter.destdir.extension","");
+		String oldDest = destDir;
+		if(!destDirExt.isEmpty()){
+			destDir = destDirExt;
+		}
+		try{
+			// 生成外部扩展模板代码
+			generate("velocity.templates.extension");
+		}finally{
+			destDir = oldDest;
+		}
 	}
 	private void generate(String  propName) throws Exception{
 		if(null ==Main.getProperty(propName))
@@ -543,6 +555,10 @@ public class CodeWriter {
 	public static String getSchemaPkg(){
 		return isGeneral()?generalPackage : basePackage;
 	}
+	public static String getExtensionPkg(){
+		String extPkg = getProperty("codewriter.package.extension","");
+		return extPkg.isEmpty()?getSchemaPkg():extPkg;
+	}
 	public  String getImplPackageOfSchema(){
 		String pkg = getSchemaPkg();
 		if(isGeneral())
@@ -639,4 +655,5 @@ public class CodeWriter {
 		if(null == baseDir || null == clazz )return null;
 		return baseDir + File.separatorChar + clazz.getName().replace('.', File.separatorChar) + ".java";
 	}
+
 }
