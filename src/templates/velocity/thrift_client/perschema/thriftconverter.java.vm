@@ -17,7 +17,7 @@ public class $javaClassName implements Constant{
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #if($codewriter.existsInDependencyPackage($leftClass))
 #set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )
-    /** {@link IBeanConverter} implemention for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
+    /** {@link IBeanConverter} implementation for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
     public static final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass})
 
             = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
