@@ -4,6 +4,7 @@ package net.sourceforge.sql2java;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,6 +34,9 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.apache.velocity.tools.generic.SortTool;
+
+import com.google.common.base.Joiner;
+import static com.google.common.base.Preconditions.checkNotNull;;
 
 public class CodeWriter {
 	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
@@ -186,9 +190,9 @@ public class CodeWriter {
 			return;
 		}
 		Properties vprops = new Properties();
-		vprops.put("file.resource.loader.path", this.getLoadingPath());
-		vprops.put("velocimacro.library", "macros.include.vm");
-		vprops.put("directive.set.null.allowed", "true");
+		vprops.put(Velocity.FILE_RESOURCE_LOADER_PATH, Joiner.on(',').join(this.getLoadingPath()));
+		vprops.put(Velocity.VM_LIBRARY, "macros.include.vm");
+		vprops.put(Velocity.SET_NULL_ALLOWED, "true");
 		Velocity.init((Properties) vprops);
 		this.vc = new VelocityContext();
 		this.vc.put("CodeWriter", (Object) new FieldMethodizer((Object) this));
@@ -203,7 +207,13 @@ public class CodeWriter {
 		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
 		this.vc.put("fecha", (Object) new Date());
 		this.current_vc = new VelocityContext((Context) this.vc);
-		String[] schema_templates = this.getSchemaTemplates("velocity.templates");
+		generate("velocity.templates");
+		generate("velocity.templates.extension");
+	}
+	private void generate(String  propName) throws Exception{
+		if(null ==Main.getProperty(propName))
+			return;
+		String[] schema_templates = this.getSchemaTemplates(propName);
 		for (int i = 0; i < schema_templates.length; ++i) {
 			this.writeComponent(schema_templates[i]);
 		}
@@ -214,25 +224,42 @@ public class CodeWriter {
 		for (int i2 = 0; i2 < tables.length; ++i2) {
 			if (!CodeWriter.authorizeProcess(tables[i2].getName(), "tables.include", "tables.exclude"))
 				continue;
-			this.writeTable(tables[i2]);
+			this.writeTable(tables[i2], propName);
 		}
 	}
-
-	private void writeTable(Table currentTable) throws Exception {
+	private void writeTable(Table currentTable, String propName) throws Exception {
 		if (currentTable.getColumns().length == 0) {
 			return;
 		}
 		this.current_vc = new VelocityContext((Context) this.vc);
 		this.table = currentTable;
 		this.current_vc.put("table", (Object) currentTable);
-		String[] table_templates = this.getTableTemplates("velocity.templates");
+		String[] table_templates = this.getTableTemplates(propName);
 		for (int i = 0; i < table_templates.length; ++i) {
 			this.writeComponent(table_templates[i]);
 		}
 	}
-
+	
+	private String clearHeadOfLoadPath(String templateName){
+		checkNotNull(templateName);
+		List<String> loadPath = getLoadingPath();
+		File template= new File(templateName);
+		for(String path:loadPath){
+			File pfile = new File(path);
+			try {
+				if(template.getCanonicalPath().startsWith(pfile.getCanonicalPath())){
+					templateName = template.getCanonicalPath().replace(pfile.getCanonicalPath(), "").replace('\\', '/');
+					return templateName;
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return templateName;
+	}
 	public void writeComponent(String templateName) throws Exception {
 		try {
+			templateName = clearHeadOfLoadPath(templateName);
 			System.out.println("Generating template " + templateName);
 			Velocity.getTemplate((String) templateName);
 		} catch (ResourceNotFoundException rnfe) {
@@ -390,14 +417,11 @@ public class CodeWriter {
 		}
 	}
 	
-	public String getLoadingPath() {
-		String ret = "";
-		String[] paths = CodeWriter.getPropertyExploded("velocity.templates.loadingpath", ".");
-		for (int i = 0; i < paths.length; ++i) {
-			ret = ret + paths[i] + ",";
-		}
-		System.out.println("getLoadingPath = " + ret);
-		return ret;
+	public List<String> getLoadingPath() {
+		List<String> paths = getPropertyExplodedAsList("velocity.templates.loadingpath", ".");
+		List<String> pathsExt = getPropertyExplodedAsList("velocity.templates.loadingpath.extension", "");
+		paths.addAll(pathsExt);
+		return paths;
 	}
 
 	public String[] getSchemaTemplates(String property) {
