@@ -114,7 +114,7 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
 #if($isGeneric)
     /** 
-     * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withName':true,'rawTypeOnly':true}))}<br>
+     * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withType':true,'rawTypeOnly':true}))}<br>
      * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
      * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
      * @see {@link GenericUtils#toBytes(Object)}
