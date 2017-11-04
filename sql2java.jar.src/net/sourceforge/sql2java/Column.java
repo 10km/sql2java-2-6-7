@@ -1426,7 +1426,7 @@ public class Column implements Cloneable, Comparable<Column> {
 		return this.convertName(this.escape() + "_cacher");
 	}
 	public String getFullVarName() {
-		return this.convertName(this.getTable().asCoreClassNSP() +"_" + this.name );
+		return this.convertName(this.name +"_of_" + this.getTable().getBasename(true));
 	}
 	public String getModifiedVarName() {
 		return this.convertName(this.escape() + "_is_modified");

@@ -786,7 +786,7 @@ public class Table {
 		return this.convertName("");
 	}
 	
-	private String getBasename(Boolean nsp){
+	public String getBasename(Boolean nsp){
 		String basename =Boolean.TRUE == nsp
 				? this.getName().replaceFirst(this.getDatabase().getSamePrefix(), "")
 				: this.getName();
@@ -794,7 +794,7 @@ public class Table {
 				? basename
 				: CodeWriter.getClassPrefix() + "_" + basename;
 	}
-	
+
 	public String convertName(String value,Boolean nsp) {
 		String basename = getBasename(nsp);
 		if ("".equals(value)) {
@@ -967,6 +967,12 @@ public class Table {
 	}
 	public String asVar(){
 		return asVar("","");
+	}
+	public String asVarBean(){
+		return asVar("","_Bean");
+	}
+	public String asVarManager(){
+		return asVar("","_Manager");
 	}
 	public String asCacheVarName(){
 		return StringUtilities.convertName( getBasename(true) +  "_cache",true);
