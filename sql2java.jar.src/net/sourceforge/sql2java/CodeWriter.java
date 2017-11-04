@@ -193,7 +193,9 @@ public class CodeWriter {
 		vprops.put(Velocity.FILE_RESOURCE_LOADER_PATH, Joiner.on(',').join(this.getLoadingPath()));
 		vprops.put(Velocity.VM_LIBRARY, "macros.include.vm");
 		vprops.put(Velocity.SET_NULL_ALLOWED, "true");
-		Velocity.init((Properties) vprops);
+		vprops.put(Velocity.INPUT_ENCODING,"UTF-8");
+		vprops.put(Velocity.OUTPUT_ENCODING,"UTF-8");
+		Velocity.init(vprops);
 		this.vc = new VelocityContext();
 		this.vc.put("CodeWriter", (Object) new FieldMethodizer((Object) this));
 		this.vc.put("codewriter", (Object) this);
@@ -205,8 +207,8 @@ public class CodeWriter {
 		this.vc.put("extensionPkg",getExtensionPkg());
 		this.vc.put("isGeneral", isGeneral());
 		this.vc.put("pkgPath", (Object) basePackage.replace('.', '/'));
-		this.vc.put("strUtil", (Object) new FieldMethodizer(StringUtilities.getInstance()));
-		this.vc.put("fecha", (Object) new Date());
+		this.vc.put("strUtil",StringUtilities.getInstance());
+		this.vc.put("fecha", new Date());
 		this.current_vc = new VelocityContext((Context) this.vc);
 		generate("velocity.templates");
 		// 如果定义了扩展模板的输出文件夹就用它替换destDir,用完后恢复
@@ -446,7 +448,10 @@ public class CodeWriter {
 
 	public String[] getTemplates(String property, boolean perShema) {
 		Vector<String> files = new Vector<String>();
-		this.recurseTemplate(files, Main.getProperty((String) property), perShema);
+		// 支持多个模板路径
+		for(String path:getPropertyExploded(property)){
+			this.recurseTemplate(files, path, perShema);
+		}
 		return files.toArray(new String[files.size()]);
 	}
 
