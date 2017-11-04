@@ -118,7 +118,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
             return null!=loadByPrimaryKey(bean);
         }
         @Override
-        public B checkDuplicate(B bean)$!throwsString{
+        public B checkDuplicate(B bean)#if($throwsString)$throwsString,ObjectRetrievalException#else throws ObjectRetrievalException#end{
             throw new UnsupportedOperationException();
         }
         @Override
@@ -730,7 +730,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
      */
     //1.7
-    public B checkDuplicate(B bean)$!throwsString;
+    public B checkDuplicate(B bean)#if($throwsString)$throwsString,ObjectRetrievalException#else throws ObjectRetrievalException#end;
    
     //////////////////////////////////////
     // SQL 'WHERE' METHOD

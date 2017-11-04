@@ -190,7 +190,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
     //1.7
     @Override
-    public $beanClass checkDuplicate($beanClass bean){
+    public $beanClass checkDuplicate($beanClass bean)throws ObjectRetrievalException{
 #if ( 1 == $table.countPrimaryKeys() )
         if(null != bean)
             checkDuplicate(bean.$table.getPrimaryKey().getGetMethod()());            
@@ -212,9 +212,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #end
     //1.4.1 override $table.asManagerInterfaceNSP()
     @Override 
-    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName()){
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException{
         try{
             return this.nativeManager.checkDuplicate($pk.getVarName());
+        }catch(net.gdface.facelog.dborm.exception.ObjectRetrievalException e){
+        	throw new ObjectRetrievalException(e);
         }catch(DAOException e){
             throw new WrapDAOException(e);
         }

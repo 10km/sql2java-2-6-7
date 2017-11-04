@@ -68,7 +68,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType()
      */
     //1.4.1
-    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName());
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException;
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *

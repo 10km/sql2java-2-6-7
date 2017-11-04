@@ -10,7 +10,7 @@ import java.sql.SQLException;
  *
  * @author guyadong
  */
-public class ObjectRetrievalException extends SQLException {
+public class ObjectRetrievalException extends RuntimeException {
 
 	private static final long serialVersionUID = -6727843698593429999L;
 
