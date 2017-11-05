@@ -984,7 +984,7 @@ public class Table {
 		return StringUtilities.convertName("get_" +  getBasename(true) +  "_cache",true);
 	}
 	public String asInstanceMethod(Boolean nsp){
-		return "getInstanceOf" + asManagerClass(nsp);
+		return "instanceOf" + asManagerClass(nsp);
 	}
 	public String asModelClass() {
 		return this.convertName("Model");
