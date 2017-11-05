@@ -380,6 +380,9 @@ public class Database {
 				column.setSortSequence(resultSet.getString("ASC_OR_DESC"));
 				column.setFilterCondition(resultSet.getString("FILTER_CONDITION"));
 				column.setType(col.getType());
+				column.setRemarks(col.getRemarks());
+				column.setTableName(col.getTableName());
+				column.setDatabase(this);
 				index.addIndexColumn(column);
 			}
 			resultSet.close();
