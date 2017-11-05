@@ -79,7 +79,7 @@ public class $cacheManagerClass extends $managerClass
         cache = new ${cacheClass}(updateStragey,maximumSize,duration,unit);
         cache.registerListener();
     }
-
+    #defineInstanceMehod($table $cacheManagerClass true)
     //////////////////////////////////////
     // PRIMARY KEY METHODS
     //////////////////////////////////////
@@ -129,7 +129,7 @@ public class $cacheManagerClass extends $managerClass
     @Override 
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean){
         if(null == bean)return null;
-        bean.$table.getReferencedVarSetMethod($fkName)(#instanceOf(${foreignCache})loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asInstanceMethod(true)}().loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
         return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 #end    
@@ -234,7 +234,7 @@ public class $cacheManagerClass extends $managerClass
 #set($linkedCol = $linkedFk.columns[0])
 #set($localCol = $localFk.columns[0])
         java.util.List<$junctionBeanClass> junctions = 
-            com.google.common.collect.Lists.newArrayList(#instanceOf(${jTable.asCacheManagerClass($isGeneral)})${linkedCol.getGetCacheMethod()}Unchecked(bean.$linkedCol.foreignColumn.getGetMethod()()));
+            com.google.common.collect.Lists.newArrayList(${jTable.asInstanceMethod(true)}().${linkedCol.getGetCacheMethod()}Unchecked(bean.$linkedCol.foreignColumn.getGetMethod()()));
         startRow = Math.min(Math.max(0, startRow - 1), junctions.size() - 1);
         numRows = numRows < 0 ? junctions.size():Math.min(junctions.size(), numRows);
         numRows = Math.min(junctions.size() - startRow , numRows) ;
@@ -249,7 +249,7 @@ public class $cacheManagerClass extends $managerClass
                     .subList(startRow, startRow + numRows);
 #else
         java.util.List<$junctionBeanClass> junctions = 
-            #instanceOf(${linkManagerClass})${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
+            ${linkedTable.asInstanceMethod(true)}().${jTable.getImportedBeansGetMethod($linkedFk.fkName)}AsList(bean,startRow,numRows);
 #end
         java.util.ArrayList<$beanClass> lbeans = new java.util.ArrayList<$beanClass>(junctions.size());
         for(${jTable.asBeanClass($isGeneral)} jbean:junctions){

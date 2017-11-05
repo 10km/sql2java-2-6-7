@@ -24,7 +24,6 @@ import ${schemaPkg}.exception.WrapDAOException;
 import ${schemaPkg}.exception.ObjectRetrievalException;
 
 import ${exceptionPkg}.DAOException;
-#macro(instanceOf $extMgr)#if($extMgr != $managerClassNSP)${extMgr}.getInstance().#end#end
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -42,6 +41,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     private IBeanConverter<$beanClass,${nativeClass}> beanConverter = dbConverter.get${beanClass}Converter();
     private static $managerClassNSP singleton = new $managerClassNSP();
     protected $managerClassNSP(){}
+    #defineInstanceMehod($table $managerClassNSP false)
     /**
     * @return table name
     */
@@ -493,7 +493,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))
     {
         java.util.List<$importedClass> list =${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getFullVarName()" ','));
-        return #instanceOf(${importedClassManager})delete(list);
+        return ${importedTable.asInstanceMethod($isGeneral)}().delete(list);
     }
     //3.2.4 GET IMPORTED override $table.asManagerInterfaceNSP()
     @Override 
@@ -513,7 +513,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
-                #instanceOf(${importedClassManager})$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
+                ${importedTable.asInstanceMethod($isGeneral)}().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
         }
         return importedBeans;
@@ -525,7 +525,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
-                #instanceOf(${importedClassManager})$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
+                ${importedTable.asInstanceMethod($isGeneral)}().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
         }
         return importedBeans;
@@ -563,7 +563,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
         this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        #instanceOf(${importedClassManager})save( $impVar );
+        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
 #end
 #end
         return bean;
@@ -606,7 +606,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
         this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        #instanceOf(${importedClassManager})save( $impVar );
+        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
 #end
 #end
         return bean;
@@ -1158,13 +1158,13 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return ;
         if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
             return ;
-        if(!#instanceOf(${junctionManagerClass})existsPrimaryKey($junctionParam)){
+        if(!${jTable.asInstanceMethod($isGeneral)}().existsPrimaryKey($junctionParam)){
             $junctionBeanClass junction = new ${junctionBeanClass}();
 #foreach($pk in $jTable.primaryKeys)
 #set( $fColumn = $pk.foreignColumn)
             junction.${pk.getSetMethod()}(#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()());
 #end
-            #instanceOf(${junctionManagerClass})save(junction);
+            ${jTable.asInstanceMethod($isGeneral)}().save(junction);
         }
     }
     //23.3 MANY TO MANY override $table.asManagerInterfaceNSP()
@@ -1174,7 +1174,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return 0;
         if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
             return 0;
-        return #instanceOf(${junctionManagerClass})deleteByPrimaryKey($junctionParam);
+        return ${jTable.asInstanceMethod($isGeneral)}().deleteByPrimaryKey($junctionParam);
     }
     //23.4 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override

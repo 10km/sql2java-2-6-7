@@ -25,7 +25,6 @@ import ${pkg}.exception.ObjectRetrievalException;
 import ${pkg}.exception.OptimisticLockingException;
 #end
 #importLinkedTable()
-#macro(instanceOf $extMgr)#if($extMgr != $managerClass)${extMgr}.getInstance().#end#end
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -100,7 +99,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     protected Class<$beanClass> _beanType(){
         return ${beanClass}.class;
     }
-    
+    #defineInstanceMehod($table $managerClass false)
 #if ( $table.hasPrimaryKey() )
     //////////////////////////////////////
     // PRIMARY KEY METHODS
@@ -586,7 +585,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #foreach ( $fk in $columnsOfFk ) 
         other.$fk.getSetMethod()(bean.$fk.getForeignColumn().getGetMethod()());
 #end
-        return #instanceOf(${importedClassManager})loadUsingTemplateAsList(other,startRow,numRows);
+        return ${importedTable.asInstanceMethod($isGeneral)}().loadUsingTemplateAsList(other,startRow,numRows);
     }
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -602,7 +601,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
-                #instanceOf(${importedClassManager})$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
+                ${importedTable.asInstanceMethod($isGeneral)}().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
         }
         return importedBeans;
@@ -622,7 +621,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
-                #instanceOf(${importedClassManager})$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
+                ${importedTable.asInstanceMethod($isGeneral)}().$importedTable.getReferencedVarSetMethod($fkName)(importBean , bean);
             }
         }
         return importedBeans;
@@ -666,7 +665,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
         this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        #instanceOf(${importedClassManager})save( $impVar );
+        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
 #end
 #end
         return bean;
@@ -720,7 +719,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
         this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        #instanceOf(${importedClassManager})save( $impVar );
+        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
 #end
 #end
         return bean;
@@ -933,7 +932,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DAOException
     {
         if(null == bean)return null;
-        bean.$table.getReferencedVarSetMethod($fkName)(#instanceOf(${foreignClassManager})loadByPrimaryKey(#join($columnsOfFk "bean.$e.getGetMethod()()" ','))); 
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asInstanceMethod($isGeneral)}().loadByPrimaryKey(#join($columnsOfFk "bean.$e.getGetMethod()()" ','))); 
         return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 
@@ -949,7 +948,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
     {
         if(null != bean){
-            #instanceOf(${foreignClassManager})save(beanToSet);
+            ${foreignTable.asInstanceMethod($isGeneral)}().save(beanToSet);
             bean.$table.getReferencedVarSetMethod($fkName)(beanToSet);
             if( null == beanToSet){
 #set( $notNullColumns = $table.noNullableColumns($fkName))
@@ -1720,13 +1719,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             return ;
         if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
             return ;
-        if(!#instanceOf(${junctionManagerClass})existsPrimaryKey($junctionParam)){
+        if(!${jTable.asInstanceMethod($isGeneral)}().existsPrimaryKey($junctionParam)){
             $junctionBeanClass junction = new ${junctionBeanClass}();
 #foreach($pk in $jTable.primaryKeys)
 #set( $fColumn = $pk.foreignColumn)
             junction.${pk.getSetMethod()}(#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()());
 #end
-            #instanceOf(${junctionManagerClass})save(junction);
+            ${jTable.asInstanceMethod($isGeneral)}().save(junction);
         }
     }
     /**
@@ -1741,7 +1740,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             return 0;
         if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
             return 0;
-        return #instanceOf(${junctionManagerClass})deleteByPrimaryKey($junctionParam);
+        return ${jTable.asInstanceMethod($isGeneral)}().deleteByPrimaryKey($junctionParam);
     }
     /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
     //23.4 MANY TO MANY
@@ -2360,7 +2359,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
                     return listenerContainer.isEmpty() 
                             ? java.util.Collections.EMPTY_LIST
-                            : #instanceOf(${foreignTable.asManagerClass()})${table.getImportedBeansGetMethod($fkName)}AsList(bean);
+                            : ${foreignTable.asInstanceMethod($isGeneral)}().${table.getImportedBeansGetMethod($fkName)}AsList(bean);
                 }
                 @Override
                 protected void onRemove(List<$beanClass> effectBeans) throws DAOException {
@@ -2387,7 +2386,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     //37-2
     public void bindForeignKeyListenerForDeleteRule(){
-        #join($fkObjs '#instanceOf(${e.foreignTable.asManagerClass()})registerListener($table.getForeignKeyListenerVar($e.fkName));
+        #join($fkObjs '${e.foreignTable.asInstanceMethod($isGeneral)}().registerListener($table.getForeignKeyListenerVar($e.fkName));
         ' '')
 
     }
@@ -2397,7 +2396,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     //37-3
     public void unbindForeignKeyListenerForDeleteRule(){
-        #join($fkObjs '#instanceOf(${e.foreignTable.asManagerClass()})unregisterListener($table.getForeignKeyListenerVar($e.fkName));
+        #join($fkObjs '${e.foreignTable.asInstanceMethod($isGeneral)}().unregisterListener($table.getForeignKeyListenerVar($e.fkName));
         ' '')
 
     }
