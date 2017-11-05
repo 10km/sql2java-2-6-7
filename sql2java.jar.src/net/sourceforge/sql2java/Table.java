@@ -493,6 +493,9 @@ public class Table {
 				return input.getForeignTable().equals(table);
 			}}));
 	}
+	public List<ForeignKey> getForeignKeysAsList(){
+		return ImmutableList.copyOf(this.fkNameMap.values());
+	}
 	/**
 	 * 返回 所有需要输出foreign key listener的 {@link ForeignKey}对象
 	 * @return
