@@ -109,32 +109,6 @@ public class $cacheManagerClass extends $managerClass
     public boolean existsPrimaryKey(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         return null != loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
     }
-## ======================================================
-## xForeignKeys template
-## ======================================================
-    
-#foreach ($foreignTable in $foreignTables)
-#if ( $velocityCount == 1 )
-    //////////////////////////////////////
-    // GET/SET FOREIGN KEY BEAN METHOD
-    //////////////////////////////////////
-
-#end
-#set ( $foreignClass = "$foreignTable.asBeanClass($isGeneral)" )
-#set ( $foreignCache = "$foreignTable.asCacheManagerClass($isGeneral)" )
-#foreach( $fkName in $table.getFkMapNames($foreignTable.name))
-#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-#if( 1 == $columnsOfFk.size() )
-    //5.1 GET REFERENCED VALUE override $table.asManagerInterfaceNSP()
-    @Override 
-    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean){
-        if(null == bean)return null;
-        bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asInstanceMethod(true)}().loadByPrimaryKey(bean.${columnsOfFk.get(0).getGetMethod()}())); 
-        return bean.$table.getReferencedVarGetMethod($fkName)();
-    }
-#end    
-#end
-#end
     private class CacheAction implements Action<$beanClass>{
         final Action<$beanClass> action;
         CacheAction(Action<$beanClass>action){

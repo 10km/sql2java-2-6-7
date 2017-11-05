@@ -808,14 +808,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
     {
-        try{
-            return this.dbConverter.get${foreignClass}Converter().fromRight(this.nativeManager.$table.getReferencedVarGetMethod($fkName)(this.beanConverter.toRight(bean)));
-        }
-        catch(DAOException e)
-        {
-            throw new WrapDAOException(e);
-        }
-        
+        if(null == bean)return null;
+        bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asInstanceMethod($isGeneral)}().loadByPrimaryKey(#join($columnsOfFk "bean.$e.getGetMethod()()" ','))); 
+        return bean.$table.getReferencedVarGetMethod($fkName)();
     }
 
     //5.2 SET REFERENCED override $table.asManagerInterfaceNSP()
