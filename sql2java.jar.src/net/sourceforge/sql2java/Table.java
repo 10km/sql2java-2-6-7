@@ -934,7 +934,7 @@ public class Table {
 	public String asManagerClass() {
 		return this.convertName("Manager");
 	}
-	public String asManagerClass(boolean nsp) {
+	public String asManagerClass(Boolean nsp) {
 		return this.convertName("Manager",nsp);
 	}
 	public String asManagerClassNSP() {
@@ -982,6 +982,9 @@ public class Table {
 	}
 	public String asCacheVarGetMethod(){
 		return StringUtilities.convertName("get_" +  getBasename(true) +  "_cache",true);
+	}
+	public String asInstanceMethod(Boolean nsp){
+		return "getInstanceOf" + asManagerClass(nsp);
 	}
 	public String asModelClass() {
 		return this.convertName("Model");
