@@ -11,8 +11,9 @@ public interface ${javaClassName} <B> {
     public boolean isModified(int columnID);
     public boolean isInitialized(String column);
     public boolean isModified(String column);
-    public void copy(B bean, String... fieldList);
-    public void copy(B bean, int... fieldList);
+    public B copy(B bean);
+    public B copy(B bean, int... fieldList);
+    public B copy(B bean, String... fieldList);
     public <T> T getValue(int columnID);
     public <T> void setValue(int columnID,T value);
     public <T> T getValue(String column);
