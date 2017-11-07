@@ -151,6 +151,12 @@ public $!{final} class ${beanClass}
         $table.stateVarAssignStatement("initialized","this.initialized");
     }
 #end
+    public static final boolean equal(Object a, Object b) {
+        return a == b || (a != null && a.equals(b));
+    }
+    public static final <T extends Comparable<T>>boolean compare(T a, T b) {
+        return a == b || (a != null && 0==a.compareTo(b));
+    }
     public ${beanClass}(){
         super();
         reset();
@@ -233,14 +239,12 @@ public $!{final} class ${beanClass}
 #if(!$column.isDate())#swiftThriftField( $null $null)#end
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
-#if ($column.hasCompareTo())
-        if ((newVal != null && $column.getVarName() != null && (newVal.compareTo($column.getVarName()) == 0)) ||
-            (newVal == null && $column.getVarName() == null && ${column.getInitializedMethod()}())) {
+#if ($column.useEqualsInSetter())
+        if (equal(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
             return;
         }
-#elseif ( $column.useEqualsInSetter() )
-        if ((newVal != null && $column.getVarName() != null && newVal.equals($column.getVarName())) ||
-            (newVal == null && $column.getVarName() == null && ${column.getInitializedMethod()}())) {
+#elseif ($column.hasCompareTo())
+        if (compare(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
             return;
         }
 #end
@@ -501,16 +505,21 @@ public $!{final} class ${beanClass}
 
     @Override
     public String toString() {
-        return new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[\n")
+        // only output initialized field
+        StringBuilder builder = new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[");
+        int count = 0;        
 #foreach ( $column in $columns )
-#if($column.getJavaType().equals('byte[]'))
-            .append("\t$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes\n")
+        if(${column.getInitializedMethod()}()){
+            if(count++ >0)builder.append(",");
+#if($column.getJavaType().equals('byte[]'))            
+            builder.append("$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes");
 #else
-            .append("\t$column.getName()=").append(${column.getGetMethod()}()).append("\n")
+            builder.append("$column.getName()=").append(${column.getGetMethod()}());
 #end
+        }
 #end
-            .append("]\n")
-            .toString();
+        builder.append("]");
+        return builder.toString();
     }
 
     @Override

@@ -16,6 +16,7 @@
      */
     public $beanClass fromThrift($thriftClass thriftBean){
         if(null != thriftBean){
+            reset();
             return ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
         }
         return this;
@@ -28,6 +29,7 @@
     public $beanClass($thriftClass thriftBean){
         if(null != thriftBean)
             throw new NullPointerException();
+        reset();
         ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
     }
 #end
