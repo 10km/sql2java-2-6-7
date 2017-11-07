@@ -27,6 +27,12 @@ import ${gpkg}.${table.asBeanClassNSP()};
  *
  */
 public class ${javaClassName} implements Constant {
+    public static final String GET_INITIALIZED = "getInitialized";
+    public static final String SET_INITIALIZED = "setInitialized";
+    public static final String GET_MODIFIED = "getModified";
+    public static final String SET_MODIFIED = "setModified";
+    public static final String SET_NEW = "setNew";
+    public static final String IS_NEW = "isNew";
     private static class NullCastPrimitiveException extends ClassCastException {
         private static final long serialVersionUID = 1L;
         NullCastPrimitiveException(String message) {
@@ -204,21 +210,21 @@ public class ${javaClassName} implements Constant {
                 rightIndexs.put(field,i);
             }
             try{
-                methods.put("isNew",rightType.getMethod("isNew"));
-                methods.put("getModified",rightType.getMethod("getModified"));
-                getSetter("setNew",boolean.class);
+                methods.put(IS_NEW,rightType.getMethod(IS_NEW));
+                methods.put(GET_INITIALIZED,rightType.getMethod(GET_INITIALIZED));
+                getSetter(SET_NEW,boolean.class);
                 if(rightIndexs.size() > 64)
-                    getSetter("setModified",long[].class,List.class);
+                    getSetter(SET_INITIALIZED,long[].class,List.class);
                 else
-                    getSetter("setModified",long.class);
+                    getSetter(SET_INITIALIZED,long.class);
+                getGetter(GET_MODIFIED);
+                if(rightIndexs.size() > 64)
+                    getSetter(SET_MODIFIED,long[].class,List.class);
+                else
+                    getSetter(SET_MODIFIED,long.class);
             }catch(NoSuchMethodException e){
                 throw new RuntimeException(e);
             }
-            getGetter("getInitialized");
-            if(rightIndexs.size() > 64)
-                getSetterNoThrow("setInitialized",long[].class,List.class);
-            else
-                getSetterNoThrow("setInitialized",long.class);
 
 #foreach ( $column in $table.columns ) 
 #set ( $methodName = ${column.getSetMethod()}) 
@@ -236,23 +242,33 @@ public class ${javaClassName} implements Constant {
 #else
             getSetterNoThrow("$methodName",${javaType}.class); 
 #end
-#end
+#end###foreach ( $column in $table.columns ) 
         }
         @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method getterMethod;
                 left.resetIsModified();
+                $table.stateVarType() selfModified = $table.maskInitializeWithZero();
+                long[] initialized;
                 long[] modified;
-                if(rightIndexs.size() > 64)
-                    modified = (long[])methods.get("getModified").invoke(right);
-                else
-                    modified = new long[]{(Long)methods.get("getModified").invoke(right)};
+                if(rightIndexs.size() > 64){
+                    initialized = (long[])methods.get(GET_INITIALIZED).invoke(right);
+                    modified = (long[])methods.get(GET_MODIFIED).invoke(right);
+                }else{
+                    initialized = new long[]{(Long)methods.get(GET_INITIALIZED).invoke(right)};
+                    modified = new long[]{(Long)methods.get(GET_MODIFIED).invoke(right)};
+                }
 #foreach ( $column in $table.columns )
-                if( bitCheck("$column.getJavaName()",modified) && (null != (getterMethod = methods.get("${column.getGetMethod()}"))))
+                if( bitCheck("$column.getJavaName()",initialized) && (null != (getterMethod = methods.get("${column.getGetMethod()}")))){
                     left.$column.getSetMethod()(cast(${column.getJavaType()}.class,getterMethod.invoke(right)));
-#end
-                left.isNew((Boolean)methods.get("isNew").invoke(right));
+                    if(bitCheck("$column.getJavaName()",modified))
+                        $column.bitORAssignExpression("selfModified");
+
+                }
+#end###foreach ( $column in $table.columns )
+                left.isNew((Boolean)methods.get(IS_NEW).invoke(right));
+                left.setModified(selfModified);
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
@@ -264,7 +280,9 @@ public class ${javaClassName} implements Constant {
         protected void _toRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method setterMethod;
+                long[] initialized = new long[(rightIndexs.size() + 63)>>6];
                 long[] modified = new long[(rightIndexs.size() + 63)>>6];
+                Arrays.fill(initialized, 0L);
                 Arrays.fill(modified, 0L);
 #foreach ( $column in $table.columns )
 #set ( $setterName = ${column.getSetMethod()}) 
@@ -275,23 +293,28 @@ public class ${javaClassName} implements Constant {
                 if(null != (setterMethod = methods.get("$setterName")) && left.${column.getInitializedMethod()}()){
                     try{
                         setterMethod.invoke(right,cast(setterParams.get("$setterName"),left.${column.getGetMethod()}()));
-                        bitOR("$column.getJavaName()",modified);
+                        bitOR("$column.getJavaName()",initialized);
+                        if(left.${column.getModifiedMethod()}())
+                            bitOR("$column.getJavaName()",modified);
                     }catch(NullCastPrimitiveException e){}
                 }
 #if( $isIgnore )*/
 #end
-#end
-                if(null != (setterMethod = methods.get("setInitialized"))){
-                    if( modified.length > 1)
-                        setterMethod.invoke(right,cast(setterParams.get("setInitialized"),modified));
+#end###foreach ( $column in $table.columns )
+                if(null != (setterMethod = methods.get(SET_MODIFIED))){
+                    if( initialized.length > 1)
+                        setterMethod.invoke(right,cast(setterParams.get(SET_MODIFIED),initialized));
                     else
-                        setterMethod.invoke(right,modified[0]);
+                        setterMethod.invoke(right,initialized[0]);
                 }
-                methods.get("setNew").invoke(right,left.isNew());
-                if( modified.length > 1)
-                    methods.get("setModified").invoke(right,cast(setterParams.get("setModified"),modified));
-                else
-                    methods.get("setModified").invoke(right,modified[0]);
+                methods.get(SET_NEW).invoke(right,left.isNew());
+                if( initialized.length > 1){
+                    methods.get(SET_INITIALIZED).invoke(right,cast(setterParams.get(SET_INITIALIZED),initialized));
+                    methods.get(SET_MODIFIED).invoke(right,cast(setterParams.get(SET_MODIFIED),modified));
+                }else{
+                    methods.get(SET_INITIALIZED).invoke(right,initialized[0]);
+                    methods.get(SET_MODIFIED).invoke(right,modified[0]);
+                }
             }catch(RuntimeException e){
                 throw e;
             }catch(Exception e){
@@ -299,6 +322,5 @@ public class ${javaClassName} implements Constant {
             }
         }
     }; 
-#end
-
+#end###foreach ( $table in $tables )
 }
