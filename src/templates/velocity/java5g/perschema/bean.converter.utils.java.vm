@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -264,14 +265,14 @@ public class ${javaClassName} implements Constant {
             try{
                 Method setterMethod;
                 long[] modified = new long[(rightIndexs.size() + 63)>>6];
-                for(int i = 0 ;i < modified.length; ++i)modified[i] = 0L;
+                Arrays.fill(modified, 0L);
 #foreach ( $column in $table.columns )
 #set ( $setterName = ${column.getSetMethod()}) 
 #set($isIgnore = $ignorefields.contains($column.name))
 #if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 /*
 #end
-               if(null != (setterMethod = methods.get("$setterName")) && left.${column.getInitializedMethod()}()){
+                if(null != (setterMethod = methods.get("$setterName")) && left.${column.getInitializedMethod()}()){
                     try{
                         setterMethod.invoke(right,cast(setterParams.get("$setterName"),left.${column.getGetMethod()}()));
                         bitOR("$column.getJavaName()",modified);

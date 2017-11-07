@@ -44,14 +44,14 @@ public $!{final} class ${beanClass}
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
 #end
-    private $column.getJavaType() $column.getVarName()$!{column.getDefaultValueAssignment()};
+    private $column.getJavaType() $column.getVarName();
 
 #end
     /** columns modified flag */
-    private $table.stateVarType() modified = $table.stateVarInitializedStatement();
+    private $table.stateVarType() modified;
     /** columns initialized flag */
-    private $table.stateVarType() initialized = $table.stateVarInitializedStatement();
-    private boolean _isNew = true;
+    private $table.stateVarType() initialized;
+    private boolean _isNew;
 #if( $swiftBeanSupport && $table.countColumns() > 64  )
     private static final java.util.List<Long> toList(long[] array) {
         java.util.ArrayList<Long> result = new java.util.ArrayList<Long>(array.length);
@@ -153,6 +153,7 @@ public $!{final} class ${beanClass}
 #end
     public ${beanClass}(){
         super();
+        reset();
     }
 #if ( $table.hasPrimaryKey() )
     /**
@@ -162,7 +163,7 @@ public $!{final} class ${beanClass}
 
      */
     public ${beanClass}(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
-        super();
+        this();
         #join($primaryKeys '$e.getSetMethod()($e.getVarName());' '
         ')
 
@@ -429,7 +430,7 @@ public $!{final} class ${beanClass}
     public void resetIsModified()
     {
 #if( $table.countColumns() > 64 )
-        for( int i=0;i<modified.length;++i)modified[i]= 0L;
+        java.util.Arrays.fill(modified,0L);
 #else
         modified = 0L;
 #end
@@ -454,10 +455,19 @@ public $!{final} class ${beanClass}
     private void resetInitialized()
     {
 #if( $table.countColumns() > 64 )
-        for( int i=0;i<initialized.length;++i)initialized[i]= 0L;
+        java.util.Arrays.fill(initialized,0L);
 #else
         initialized = 0L;
 #end
+    }
+    /** reset all fields to initial value, equal to a new bean */
+    public void reset(){
+#foreach($column in $columns)
+        this.$column.getVarName()${column.getDefaultValueAssignment(true)};
+#end
+        this._isNew = true;
+        this.modified = $table.maskInitializeWithZero();
+        this.initialized = $table.maskInitializeWithDefaultValue();
     }
     @Override
     public boolean equals(Object object)
