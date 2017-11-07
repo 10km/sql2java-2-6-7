@@ -693,9 +693,9 @@ public $!{final} class ${beanClass}
         }
 #foreach($column in $columns)
         /** 
-         * fill the field : $column.fullName         
+         * fill the field : $column.fullName
          * @param $column.varName $!{column.remarks}
-         * @see {@link $beanClass${esc.hash}${column.getGetMethod()}}
+         * @see {@link $beanClass${esc.hash}${column.getGetMethod()}()}
          * @see {@link $beanClass${esc.hash}${column.getSetMethod()}($column.javaType)}
          */
         public Builder ${column.varName}($column.javaType $column.varName){
