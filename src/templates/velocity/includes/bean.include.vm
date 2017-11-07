@@ -657,6 +657,53 @@ public $!{final} class ${beanClass}
             index = ${table.name.toUpperCase()}_JAVA_FIELDS_LIST.indexOf(column);
         return index;    
     }
+    public static final Builder builder(){
+        return new Builder();
+    }
+    /** 
+     * a builder for $beanClass,the template instance is thread local variable
+     * a instance of Builder can be reused.
+     */
+    public static final class Builder{
+        /** $beanClass instance used for template to create new $beanClass instance. */
+        static final ThreadLocal<$beanClass> template = new ThreadLocal<$beanClass>(){
+            @Override
+            protected $beanClass initialValue() {
+                return new ${beanClass}();
+            }};
+        private Builder() {}
+        /** 
+         * reset the bean as template 
+         * @see ${beanClass}${esc.hash}reset()
+         */
+        public Builder reset(){
+            template.get().reset();
+            return this;
+        }
+        /** set a bean as template,must not be {@code null} */
+        public Builder asTemplate($beanClass bean){
+            if(null == bean)
+                throw new NullPointerException();
+            template.set(bean);
+            return this;
+        }
+        /** return a clone instance of {@link ${esc.hash}template}*/
+        public $beanClass build(){
+            return template.get().clone();
+        }
+#foreach($column in $columns)
+        /** 
+         * fill the field : $column.fullName         
+         * @param $column.varName $!{column.remarks}
+         * @see {@link $beanClass${esc.hash}${column.getGetMethod()}}
+         * @see {@link $beanClass${esc.hash}${column.getSetMethod()}($column.javaType)}
+         */
+        public Builder ${column.varName}($column.javaType $column.varName){
+            template.get().${column.getSetMethod()}($column.varName);
+            return this;
+        }
+#end
+    }
 ####### FOR EXTENSION ##############
 #parse( $codewriter.getProperty("template.extension.bean"))
 }
