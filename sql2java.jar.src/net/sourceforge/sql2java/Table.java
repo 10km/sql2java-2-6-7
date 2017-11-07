@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Longs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -260,8 +262,11 @@ public class Table {
 	}
 
 	public Column[] getColumns() {
+		return this.getColumnsAsList().toArray(new Column[this.cols.size()]);
+	}
+	public Vector<Column> getColumnsAsList() {
 		Collections.sort(this.cols);
-		return this.cols.toArray(new Column[this.cols.size()]);
+		return this.cols;
 	}
 	public Column[] getColumnsExceptPrimary() {
 		if(!this.hasPrimaryKey())
@@ -1121,9 +1126,9 @@ public class Table {
 	
 	public String stateVarType(){
 		return countColumns()>64 ? "long[]":"long";
-	}	
-	
-	public String stateVarInitializedStatement(){
+	}
+	/** 生成全0L的modified初始值  */
+	public String maskInitializeWithZero(){
 		if(countColumns()>64){
 			int len = (countColumns()+63)>>6;
 			StringBuffer sb = new StringBuffer();
@@ -1136,6 +1141,42 @@ public class Table {
 			return "0L";
 		}
 	}
+	/** 根据字段是否有default value生成initialized字段初始值  */
+	public String maskInitializeWithDefaultValue(){
+		if(countColumns()>64){
+			final long[] array = new long[(countColumns()+63)>>6];
+			Arrays.fill(array, 0L);
+			Collections2.filter(getColumnsAsList(), new Predicate<Column>(){
+				@Override
+				public boolean apply(Column input) {
+					if(!input.getDefaultValue().isEmpty()){
+						int index = input.getOrdinalPosition()-1;
+						array[index>>6] |= (1L << (index & 0x3f));
+					}
+					return false;
+				}});
+			String initValue = Joiner.on(',').join(Lists.transform(Longs.asList(array),new Function<Long,String>(){
+				@Override
+				public String apply(Long input) {
+					return Long.toBinaryString(input.longValue());
+				}}));
+			return String.format("new long[]{%s}",initValue);
+		}else{
+			Collection<Column> defCols = Collections2.filter(getColumnsAsList(), new Predicate<Column>(){
+				@Override
+				public boolean apply(Column input) {
+					return !input.getDefaultValue().isEmpty();
+				}});
+			String mask = Joiner.on(" | ").join(Collections2.transform(defCols,
+					new Function<Column,String>(){
+						@Override
+						public String apply(Column input) {
+							return input.getIDMaskConstName();
+						}}));
+			return mask.isEmpty()?"0L":"("+mask+")";
+		}
+	}
+
 	public String stateVarAssignStatement(String src,String dst){
 		if(countColumns()>64){
 	        return "if( null != ${src} && ${dst}.length != ${src}.length )System.arraycopy(${src},0,${dst},0,${dst}.length)"

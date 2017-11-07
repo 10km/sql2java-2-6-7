@@ -259,7 +259,7 @@ public class Database {
 				c.setDefaultValue(resultSet.getString("COLUMN_DEF"));
 				c.setOrdinalPosition(resultSet.getInt("ORDINAL_POSITION"));
 				c.setAutoincrement(resultSet.getString("IS_AUTOINCREMENT"));
-				System.out.printf("        %s %s %s\n", c.getFullName(),c.getTypeName(),c.isAutoincrement()?"AUTOINCREMENT":"");
+				System.out.printf("        %s %s %s default value: %s\n", c.getFullName(),c.getTypeName(),c.isAutoincrement()?"AUTOINCREMENT":"",c.getOriginalDefaultValue());
 				table.addColumn(c);
 				if(c.isAutoincrement())
 					table.setAutoincrement(c);
