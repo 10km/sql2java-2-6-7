@@ -478,10 +478,14 @@ public class Column implements Cloneable, Comparable<Column> {
 		return "setObject";
 	}
 
+	/**
+	 * 返回对应的Java类型,除java语言内置类型(java.lang)外,其他类型返回全名
+	 * @return
+	 */
 	public String getJavaType() {
 		switch (this.getMappedType()) {
 			case M_ARRAY : {
-				return "Array";
+				return "java.sql.Array";
 			}
 			case M_BIGDECIMAL : {
 				return "java.math.BigDecimal";
@@ -518,7 +522,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return "Long";
 			}
 			case M_REF : {
-				return "Ref";
+				return "java.sql.Ref";
 			}
 			case M_STRING : {
 				return "String";
@@ -764,8 +768,7 @@ public class Column implements Cloneable, Comparable<Column> {
 				return true;
 			}
 			case M_BLOB : {
-				// Blob map to byte[] that has not compareTo
-				return false;
+				return CodeWriter.binaryIsByteBuffer();
 			}
 			case M_INTEGER : {
 				return true;
@@ -791,17 +794,21 @@ public class Column implements Cloneable, Comparable<Column> {
 			case M_OBJECT : {
 				return false;
 			}
+			case M_CALENDAR : {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	public boolean useEqualsInSetter() throws Exception {
+		// 优先使用equals方法
+		if(hasCompareTo())return true;
 		switch (this.getMappedType()) {
 			case M_BOOLEAN : {
 				return true;
 			}
-			case M_BLOB : {
-				// Blob map to byte[] that can use equals Object.method method to compare
+			case M_URL : {
 				return true;
 			}
 		}
