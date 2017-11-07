@@ -1295,9 +1295,9 @@ public class Column implements Cloneable, Comparable<Column> {
 		return Strings.isNullOrEmpty(defaultValue)?EMPTY_STRING: "/* DEFAULT:'"+defaultValue+"'*/";
 	}
 	/** 生成缺省值赋值语句 */
-    public String getDefaultValueAssignment(){
+    public String getDefaultValueAssignment(boolean nullInstead){
     	StringBuffer buffer = new StringBuffer();
-    	String value = getDefaultValue();
+    	String value = getDefaultValue(nullInstead);
     	if(!value.isEmpty())
     		buffer.append(" = ").append(value);
     	buffer.append(commentOfDefaultValue());
