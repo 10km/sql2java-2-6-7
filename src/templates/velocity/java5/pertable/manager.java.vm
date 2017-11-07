@@ -2606,7 +2606,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         int count;
         for(count = 0;null != parent;++count){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'equal($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
+            if(null != parent #join($primaryKeys ' && equal($e.getVarName(),parent.$e.getGetMethod()())' '')){
                 return -1;
             }
         }

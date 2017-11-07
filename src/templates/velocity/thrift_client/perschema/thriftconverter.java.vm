@@ -51,6 +51,7 @@ public class $javaClassName implements Constant{
 #end
             right.setNew(left.isNew());
             right.setModified(left.getModified());
+            right.setInitialized(left.getInitialized());
         }};
 #end###if($codewriter.existsInDependencyPackage())
 #end

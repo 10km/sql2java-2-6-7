@@ -15,6 +15,8 @@ package $table.getPackage(false);
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import ${schemaPkg}.ITableCache;
 import ${schemaPkg}.ITableCache.UpdateStrategy;
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
@@ -101,6 +103,18 @@ public class $cacheManagerClass extends $managerClass
                 throw re;
             }catch (Throwable e) {
                 throw new RuntimeException(ee);
+            }
+        }catch(UncheckedExecutionException ue){
+            try{
+                throw ue.getCause();
+            }catch(ObjectRetrievalException oe){
+                throw oe;
+            } catch (WrapDAOException we) {
+                throw we;
+            } catch (RuntimeException re) {
+                throw re;
+            }catch (Throwable e) {
+                throw new RuntimeException(ue);
             }
         }
     }
