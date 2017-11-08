@@ -133,7 +133,7 @@ $!{serviceComment.getMethodComment($method.method)}
     // $velocityCount SERIVCE PORT : $method.name
 #end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
-            '}))$swiftParser.defineThrows($method,$isAsync){
+            '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
