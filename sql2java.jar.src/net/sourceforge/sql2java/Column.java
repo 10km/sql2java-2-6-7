@@ -1,12 +1,14 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
+import java.math.BigDecimal;
 import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -15,7 +17,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.primitives.Primitives;
 
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.ConfigHelper;
@@ -601,7 +607,30 @@ public class Column implements Cloneable, Comparable<Column> {
 		}
 		return null;
 	}
-
+	
+	public String getNullInstead(){
+		if(isDate()){
+			return "new "+getJavaType() + "(0L)";
+		}else if(isString()){
+			return "\"\"";
+		}else{
+			String primitiveName = getJavaPrimaryType();		
+			if(null != primitiveName){
+				ImmutableMap<String, Class<?>> primtypes = Maps.uniqueIndex(Primitives.allWrapperTypes(),new Function<Class<?>,String>(){
+					@Override
+					public String apply(Class<?> input) {
+						return Primitives.unwrap(input).getSimpleName();
+					}});
+				Class<?> wrapType = primtypes.get(primitiveName);
+				if(Number.class.isAssignableFrom(wrapType) || Character.class==wrapType){
+					return wrapType.getSimpleName()+".MIN_VALUE";
+				}else if(Boolean.class == wrapType)
+					return wrapType.getSimpleName()+".FALSE";
+				tuoe();
+			}
+		}
+		return "null";
+	}
 	public String getJavaTypeAsTypeName() {
 		switch (this.getType()) {
 			case Types.ARRAY : {

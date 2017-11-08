@@ -268,16 +268,15 @@ public class Table {
 		Collections.sort(this.cols);
 		return this.cols;
 	}
+	public List<Column> getColumnsExceptPrimaryAsList() {
+		return Lists.newArrayList(Collections2.filter(getColumnsAsList(), new Predicate<Column>(){
+			@Override
+			public boolean apply(Column input) {
+				return !input.isPrimaryKey();
+			}}));
+	}
 	public Column[] getColumnsExceptPrimary() {
-		if(!this.hasPrimaryKey())
-			return getColumns();
-		Vector<Column> columns = new Vector<Column>(this.cols);
-		for(Iterator<Column> itor = columns.iterator();itor.hasNext();){
-			Column column = itor.next();
-			if(column.isPrimaryKey())itor.remove();
-		}
-		Collections.sort(columns);
-		return columns.toArray(new Column[columns.size()]);
+		return getColumnsExceptPrimaryAsList().toArray(new Column[0]);
 	}
 	public Column getColumn(String columnName) {
 		return (Column) this.colHash.get(columnName.toLowerCase());
