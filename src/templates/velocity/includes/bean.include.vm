@@ -234,9 +234,8 @@ public $!{final} class ${beanClass}
      * means calling this method will mark the field as 'modified' in all cases.
 #end
      *
-     * @param newVal the new value #if ($column.isNotNull())(NOT NULL)#end to be assigned to $column.getVarName()
+     * @param newVal the new value#if( !$column.isAutoincrement() && $column.isNotNull())( NOT NULL)#end to be assigned to $column.getVarName()
      */
-#if(!$column.isDate())#swiftThriftField( $null $null)#end
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
 #if ($column.useEqualsInSetter())
@@ -283,17 +282,25 @@ public $!{final} class ${beanClass}
         $column.bitORAssignExpression("modified");
         $column.bitORAssignExpression("initialized");
     }
-
-#if($swiftBeanSupport && $column.isDate())
+################ SETTER METHOD FOR SWIFT ###############
+#if($swiftBeanSupport)
     /** 
-     * use Long to represent date type for thrift:swift support
-     * @see #${column.getSetMethod()}($column.getJavaType())  
+     * setter for thrift:swift support<br>
+     * without modification for {@link ${esc.hash}modified and {@link ${esc.hash}initialized}<br>
+     * <b>NOTE:</b>DO NOT use the method in your code
      */
-    @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
+#if($column.isDate())
+    @ThriftField(name = "$column.getVarName()")
     public void ${column.getWriteMethod()}(Long newVal){
-        ${column.getSetMethod()}(null == newVal?null:new ${column.getJavaType()}(newVal));
+        $column.getVarName() = null == newVal?null:new ${column.getJavaType()}(newVal);
+    }
+#else
+    @ThriftField(name = "$column.getVarName()")
+    public void $column.getWriteMethod()($column.getJavaType() newVal){
+        $column.getVarName() = newVal;
     }
 #end
+#end###if($swiftBeanSupport)
 #if ( $column.hasPrimaryType() )
     /**
      * Setter method for {@link #$column.getVarName()}.<br>
