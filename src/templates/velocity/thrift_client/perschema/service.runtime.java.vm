@@ -1,0 +1,28 @@
+#parse( "header.include.vm" )
+#set ( $javaClassName = "ServiceRuntime" )
+$codewriter.setCurrentJavaFilename("${schemaPkg}", "${javaClassName}.java")
+package ${schemaPkg};
+
+/**
+ * 服务器运行时异常<br>
+ * 所有服务端调用产生的运行时异常({@link RuntimeExceptoin})封装在此异常中抛出
+ * @author guyadong
+ *
+ */
+public final class ServiceRuntime extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    public ServiceRuntime() {
+    }
+
+    public ServiceRuntime(String message) {
+        super(message);
+    }
+
+    public ServiceRuntime(Throwable cause) {
+        super(cause);
+    }
+
+    public ServiceRuntime(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

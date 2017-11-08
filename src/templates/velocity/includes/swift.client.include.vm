@@ -25,12 +25,18 @@ $codewriter.setSaveCurrentFile(false);
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
-## disable to show @throws tag
-#set ( $thriftSrc = $codewriter.getProperty("dependency.src"))
-#set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
+#set ( $thriftSrc = $codewriter.getDependencySrc())
+#set ( $thriftPackage = ${codewriter.getDependencyPackage()})
+## 服务端运行时异常类名
+#set ( $runtimeErrorName = $codewriter.getProperty('swift.service.exception.runtime','ServiceRuntime'))
+#set ($nothing = $swiftParser.setRuntimeErrorName($runtimeErrorName))
 #set ( $serviceName = ${metadata.name} )
 ## 删除原注释中的 @throws 标记
+#if($isAsync)
 #set ($nothing = $serviceComment.addExcludeTag("@throws"))
+#else
+#set ($nothing = $serviceComment.removeExcludeTag("@throws"))
+#end
 ## 修改注释
 #set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
 all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}<br>
@@ -47,6 +53,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
 import java.util.*;
+
 #macro( convertVar $c)converter$c#end
 #macro( eachDepencyTable $do $separator)
 #set ( $m_count = 0 )
@@ -54,7 +61,7 @@ import java.util.*;
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #if($codewriter.existsInDependencyPackage($leftClass))
 #set ( $m_count = $m_count + 1 )
-#set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
+#set ( $rightClass = "${thriftPackage}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
 #end
 #end
 #define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
@@ -111,7 +118,8 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #end
 #define($returnTypeStr)
 #set ($tmp = $typeUtils.asJavaType($returnType,$isAsync))
-#if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end
+#if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end####define($returnTypeStr)
+###################
 #if($isGeneric)
     /** 
      * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withType':true,'rawTypeOnly':true}))}<br>
@@ -123,9 +131,9 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #else
 $!{serviceComment.getMethodComment($method.method)}
     // $velocityCount SERIVCE PORT : $method.name
-#end    
+#end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
-            '})){
+            '}))$swiftParser.defineThrows($method,$isAsync){
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
@@ -139,9 +147,16 @@ $!{serviceComment.getMethodComment($method.method)}
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
+#elseif(!$isAsync && $swiftParser.throwRuntimeError($method))
+## 抛出本地的基于RuntimeException的 ServiceRuntime
+        try{
+            $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+        }catch(${thriftPackage}.${runtimeErrorName} e){
+            throw new ${runtimeErrorName}(e);
+        }
 #else
         $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
-#end
+#end###if($isAsync && $typeUtils.needFromRight($returnType))
     }
 #end###macro(defineMethod)
 ## 遍历所有方法输出
