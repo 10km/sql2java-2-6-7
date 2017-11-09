@@ -120,8 +120,7 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #end
 ############## 定义返回类型输出字符串#######
 #define($returnTypeStr)
-#set ($wrap = ! ${returnType.primitive} || $isAsync)
-#set ($tmp = $typeUtils.asJavaType($returnType,$wrap))
+#set ($tmp = $typeUtils.asReturnType($returnType,$isAsync))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end####define($returnTypeStr)
 ###################
 #if($isGeneric)
@@ -141,7 +140,7 @@ $!{serviceComment.getMethodComment($method.method)}
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
-#set ( $fromType = $typeUtils.asJavaType($thriftReturnType,true,$thriftPackage))
+#set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
         return Futures.transform(
                 $callThrift, 
@@ -162,7 +161,8 @@ $!{serviceComment.getMethodComment($method.method)}
 #if($thriftReturn && !$returnType.isPrimitive())
         catch(RuntimeTApplicationException e){
             Throwable cause = e.getCause();
-            if (cause instanceof TApplicationException  && ((TApplicationException) cause).getType() ==   TApplicationException.MISSING_RESULT){
+            if (cause instanceof TApplicationException  
+                && ((TApplicationException) cause).getType() == TApplicationException.MISSING_RESULT){
                 return null;
             }
             throw e;
