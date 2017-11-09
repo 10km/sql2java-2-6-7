@@ -1,14 +1,12 @@
 /** <a href="http://www.cpupk.com/decompiler">Eclipse Class Decompiler</a> plugin, Copyright (c) 2017 Chen Chao. **/
 package net.sourceforge.sql2java;
 
-import java.math.BigDecimal;
 import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -931,13 +929,14 @@ public class Column implements Cloneable, Comparable<Column> {
 		StringBuffer sb = new StringBuffer();
 		StringBuffer end = new StringBuffer();
 		end.append(pos).append(", ").append(var).append(");");
+		String fillNull = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "if(fillNull)";
         Pattern p = Pattern.compile("^((?:\"%+\"\\s*\\+)*)([\\w\\. \\(\\)-]*)((?:\\+\\s*\"%+\")*)$");
         Matcher m = p.matcher(var);
         if(!m.matches()){
         	throw new IllegalArgumentException(String.format("Not match found %s", var));
         }
 		String v = m.group(2);
-		sb.append("if (").append(v).append(" == null) { ps.setNull(").append(pos).append(", ")
+		sb.append("if (").append(v).append(" == null) {"+fillNull+" ps.setNull(").append(pos).append(", ")
 				.append(this.getJavaTypeAsTypeName()).append("); } else { ");
 		end.append(" }");
 		switch (this.getMappedType()) {

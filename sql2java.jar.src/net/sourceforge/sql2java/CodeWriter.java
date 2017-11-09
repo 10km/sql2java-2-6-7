@@ -52,6 +52,12 @@ public class CodeWriter {
 	protected static Hashtable<String, String> excludeHash;
 	protected static String generalPackage;
 	protected static String basePackage;
+	/** 参见 {@link Column#getPreparedStatementMethod(String, String)} */
+	private static final ThreadLocal<Boolean> fillNull = new ThreadLocal<Boolean>(){
+		@Override
+		protected Boolean initialValue() {
+			return true;
+		}};
 	protected static String destDir;
 	protected static String optimisticLockType;
 	protected static String optimisticLockColumn;
@@ -659,6 +665,12 @@ public class CodeWriter {
 	public static String getSourceFile(String baseDir,Class<?> clazz){
 		if(null == baseDir || null == clazz )return null;
 		return baseDir + File.separatorChar + clazz.getName().replace('.', File.separatorChar) + ".java";
+	}
+	public static Boolean getFillNull(){
+		return fillNull.get();
+	}
+	public static void setFillNull(Boolean fill){
+		fillNull.set(fill);
 	}
 
 }
