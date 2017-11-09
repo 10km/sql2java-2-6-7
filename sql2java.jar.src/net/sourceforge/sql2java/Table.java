@@ -1369,4 +1369,7 @@ public class Table {
 					}})),
 				true);
 	}
+	public String getGetManagerMethod(){
+		return "get" +  asManagerClassNSP();		
+	}
 }
