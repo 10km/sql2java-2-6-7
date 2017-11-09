@@ -48,6 +48,9 @@ package ${gpkg};
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+#else
+import org.apache.thrift.TApplicationException;
+import com.facebook.swift.service.RuntimeTApplicationException;
 #end
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
@@ -108,14 +111,17 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #########################
 #macro(defineMethod $isGeneric)
 #set ($thriftReturnType = $method.returnType.javaType)
+#### 计算方法的返回值类型
 #set ($returnType = $typeUtils.returnTypeOfMethod($method.method,$thriftReturnType))
 #if(!$typeUtils.isVoid($returnType) || $isAsync)
 #set ( $thriftReturn = "return ")
 #else
 #set ( $thriftReturn = $null)
 #end
+############## 定义返回类型输出字符串#######
 #define($returnTypeStr)
-#set ($tmp = $typeUtils.asJavaType($returnType,$isAsync))
+#set ($wrap = ! ${returnType.primitive} || $isAsync)
+#set ($tmp = $typeUtils.asJavaType($returnType,$wrap))
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end####define($returnTypeStr)
 ###################
 #if($isGeneric)
@@ -145,15 +151,28 @@ $!{serviceComment.getMethodComment($method.method)}
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
-#elseif(!$isAsync && $swiftParser.throwRuntimeError($method))
+#elseif($isAsync)
+        $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+#else
 ## 抛出本地的基于RuntimeException的 ServiceRuntime
         try{
             $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
-        }catch(${thriftPackage}.${runtimeErrorName} e){
+        }
+## thrift不允许返回null,这里通过判断异常类型返回null
+#if($thriftReturn && !$returnType.isPrimitive())
+        catch(RuntimeTApplicationException e){
+            Throwable cause = e.getCause();
+            if (cause instanceof TApplicationException  && ((TApplicationException) cause).getType() ==   TApplicationException.MISSING_RESULT){
+                return null;
+            }
+            throw e;
+        }
+#end
+#if($swiftParser.throwRuntimeError($method))
+        catch(${thriftPackage}.${runtimeErrorName} e){
             throw new ${runtimeErrorName}(e);
         }
-#else
-        $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+#end
 #end###if($isAsync && $typeUtils.needFromRight($returnType))
     }
 #end###macro(defineMethod)
