@@ -1107,7 +1107,7 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
 
             ps = c.prepareStatement(sql.toString(), $prestArgs);
 
-            this.fillPreparedStatement(ps, bean, SEARCH_EXACT);
+            this.fillPreparedStatement(ps, bean, SEARCH_EXACT,true);
 
             ps.executeUpdate();
 ##------------------writePostInsert
@@ -1233,7 +1233,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
 
-            int _dirtyCount = this.fillPreparedStatement(ps, bean, SEARCH_EXACT);
+            int _dirtyCount = this.fillPreparedStatement(ps, bean, SEARCH_EXACT,true);
 
             if (_dirtyCount == 0) {
                 // System.out.println("The bean to look is not initialized... do not update.");
@@ -1311,13 +1311,12 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         String sql=createSelectSql(fieldList,this.fillWhere(sqlWhere, bean, searchType) > 0?" WHERE "+sqlWhere.toString():null);
         PreparedStatement ps = null;
         Connection connection = null;
-        // logger.debug("sql string:\n" + sql + "\n");
         try {
             connection = this.getConnection();
             ps = connection.prepareStatement(sql,
                     ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY);
-            this.fillPreparedStatement(ps, bean, searchType);
+            this.fillPreparedStatement(ps, bean, searchType,false);
             return this.loadByPreparedStatement(ps, fieldList, startRow, numRows, action);
         } catch (DAOException e) {
             throw e;
@@ -1364,7 +1363,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
-            this.fillPreparedStatement(ps, bean, SEARCH_EXACT);
+            this.fillPreparedStatement(ps, bean, SEARCH_EXACT, false);
 
             int _rows = ps.executeUpdate();
             return _rows;
@@ -1886,7 +1885,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             ps = c.prepareStatement(sql.toString(),
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
-            this.fillPreparedStatement(ps, bean, searchType);
+            this.fillPreparedStatement(ps, bean, searchType,false);
 
             return this.countByPreparedStatement(ps);
         }
@@ -1903,7 +1902,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
     }
 
-    //
 
 
     /**
@@ -1919,10 +1917,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
             return 0;
         }
         int _dirtyCount = 0;
-        String sqlEqualsOperation = "=";
-        if (searchType != SEARCH_EXACT) {
-            sqlEqualsOperation = " like ";
-        }
+        String sqlEqualsOperation = searchType == SEARCH_EXACT ? "=" : " like ";
         try
         {
 #foreach( $column in $columns )
@@ -1947,6 +1942,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         return _dirtyCount;
     }
 
+#set($codewriter.fillNull = false)
     /**
      * fill the given prepared statement with the bean values and a search type
      * @param ps the PreparedStatement that will be filled
@@ -1955,7 +1951,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return the number of clauses returned
      * @throws DAOException
      */
-    protected int fillPreparedStatement(PreparedStatement ps, $beanClass bean, int searchType) throws DAOException
+    protected int fillPreparedStatement(PreparedStatement ps, $beanClass bean, int searchType,boolean fillNull) throws DAOException
     {
         if (bean == null) {
             return 0;
@@ -1999,6 +1995,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
         return _dirtyCount;
     }
+#set($codewriter.fillNull = true)
 
 
     //_____________________________________________________________________
