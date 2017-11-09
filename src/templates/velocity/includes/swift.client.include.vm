@@ -45,7 +45,6 @@ all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
-#macro( convertVar $c)converter$c#end
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -54,7 +53,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-#macro( convertVar $c)converter$c#end
 #macro( eachDepencyTable $do $separator)
 #set ( $m_count = 0 )
 #foreach($table in $tables)
@@ -71,7 +69,7 @@ class $javaClassName implements Constant{
 #set ( $converterInit = $codewriter.getProperty('swift.service.converter.init'))
     #eachDepencyTable("
     /** bean converter between {@link $leftClass} and corresponding thrift bean */
-    private IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass}) $!converterInit;" $null)
+    private IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()} $!converterInit;" $null)
 ## 如果properties 文件中没有指定初始化代码,就生成getter/setter方法
 #if(!$converterInit)
 #eachDepencyTable('
@@ -79,16 +77,16 @@ class $javaClassName implements Constant{
      * @return converter of $leftClass 
      */
     public IBeanConverter<$leftClass,$rightClass> get${leftClass}Converter(){
-        return #convertVar(${leftClass});
+        return ${table.asConverterVar()};
     }
     /** 
      * setup converter of $leftClass 
-     * @param #convertVar(${leftClass}) must not be null. 
+     * @param ${table.asConverterVar()} must not be null. 
      */
-    public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> #convertVar(${leftClass})){
-        if(null == #convertVar(${leftClass}))
+    public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()}){
+        if(null == ${table.asConverterVar()})
             throw new NullPointerException();
-        this.#convertVar(${leftClass}) = #convertVar(${leftClass});
+        this.${table.asConverterVar()} = ${table.asConverterVar()};
     }' $null)
 #end##(!$converterInit)
 

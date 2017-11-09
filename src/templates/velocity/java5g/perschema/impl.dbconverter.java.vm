@@ -12,7 +12,6 @@ import ${gpkg}.IDbConverter;
 #foreach ( $table in $tables )
 import ${gpkg}.${table.asBeanClassNSP()};
 #end
-#macro( convertVar $c)converter$c#end
 
 /**
  * {@link IDbConverter} implemention for $db.engine
@@ -24,7 +23,7 @@ public class DbConverter implements IDbConverter<#join($tables "
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
-    public static final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass})=new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
+    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterVar()}=new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
 
         @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {
@@ -60,7 +59,7 @@ public class DbConverter implements IDbConverter<#join($tables "
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
-            add(new Object[]{${leftClass}.class, ${rightClass}.class, #convertVar(${leftClass})});
+            add(new Object[]{${leftClass}.class, ${rightClass}.class, ${table.asConverterVar()}});
 #end
         }};
     
@@ -122,7 +121,7 @@ public class DbConverter implements IDbConverter<#join($tables "
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
     @Override
     public IBeanConverter<${leftClass}, ${rightClass}> get${leftClass}Converter() {
-        return #convertVar(${leftClass});
+        return ${table.asConverterVar()};
     }
 #end    
 }

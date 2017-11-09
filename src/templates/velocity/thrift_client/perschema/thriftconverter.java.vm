@@ -10,7 +10,6 @@ $codewriter.setSaveCurrentFile(false);
 #set ( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
-#macro( convertVar $c)converter$c#end
 
 public class $javaClassName implements Constant{
 #foreach ( $table in $tables )
@@ -18,8 +17,7 @@ public class $javaClassName implements Constant{
 #if($codewriter.existsInDependencyPackage($leftClass))
 #set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )
     /** {@link IBeanConverter} implementation for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
-    public static final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass})
-
+    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterVar()}
             = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
         @Override
         protected void _fromRight(${leftClass} left, ${rightClass} right) {

@@ -14,7 +14,6 @@ import ${gpkg}.IDbConverter;
 #foreach ( $table in $tables )
 import ${gpkg}.${table.asBeanClassNSP()};
 #end
-#macro( convertVar $c)converter$c#end
 /**
  * generic type converter of {@link IDbConverter} implementation<br>
  * usage:<pre>new ${javaClassName}&lt;#join($tables "Model$velocityCount" ',')&gt;(){};</pre>
@@ -31,7 +30,7 @@ public abstract class ${javaClassName}<#join($tables "
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "R_${table.asCoreClassNSP().toUpperCase()}" )
-    private final IBeanConverter<${leftClass},${rightClass}> #convertVar(${leftClass});
+    private final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterVar()};
 #end
     private static Class<?> getRawClass(Type type){
         if(type instanceof Class<?>){
@@ -59,7 +58,7 @@ public abstract class ${javaClassName}<#join($tables "
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "R_${table.asCoreClassNSP().toUpperCase()}" )
 #set ( $idx = $velocityCount - 1 )
-        this.#convertVar(${leftClass}) = new BeanConverterUtils.#converterClass(${leftClass})<${rightClass}>(${leftClass}.class,
+        this.${table.asConverterVar()} = new BeanConverterUtils.#converterClass(${leftClass})<${rightClass}>(${leftClass}.class,
             (Class<$rightClass>)getRawClass(typeArguments[$idx]),${table.asVar($vprefix)});            
 #end
     }
@@ -81,7 +80,7 @@ public abstract class ${javaClassName}<#join($tables "
 #set ( $rightClass = "R_${table.asCoreClassNSP().toUpperCase()}" )
     @Override
     public IBeanConverter<${leftClass}, ${rightClass}> get${leftClass}Converter() {
-        return #convertVar(${leftClass});
+        return ${table.asConverterVar()};
     }
 #end    
 }
