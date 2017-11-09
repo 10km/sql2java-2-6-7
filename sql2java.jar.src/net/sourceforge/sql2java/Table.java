@@ -981,6 +981,9 @@ public class Table {
 	public String asVarManager(){
 		return asVar("","_Manager");
 	}
+	public String asConverterVar(){
+		return "converter" + asBeanClassNSP() ;
+	}
 	public String asCacheVarName(){
 		return StringUtilities.convertName( getBasename(true) +  "_cache",true);
 	}
