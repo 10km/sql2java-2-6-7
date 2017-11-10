@@ -17,10 +17,11 @@ $codewriter.setSaveCurrentFile(false);
 #set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
 #set ($nothing = $typeUtils.setPackagePrefix("net.gdface.facelog.db"))
 ## $bean$ÓÃÓÚÌæ»»beanClass
-#set ($nothing = $typeUtils.setConvertVar('converter$bean$'))
-#set ($nothing = $typeUtils.setToBytesMethodPrefix("GenericUtils.toBytes"))
-#set ($nothing = $typeUtils.setToLongMethodPrefix("GenericUtils.toLong"))
-#set ($nothing = $typeUtils.setToDateMethodPrefix("GenericUtils.toDate"))
+#set ($typeUtils.convertVar = 'converter$bean$')
+#set ($typeUtils.toBytesMethodPrefix = 'GenericUtils.toBytes')
+#set ($typeUtils.toLongMethodPrefix  = 'GenericUtils.toLong')
+#set ($typeUtils.toDateMethodPrefix  = 'GenericUtils.toDate')
+#set ($typeUtils.checkNotNullElementPrefix = 'CollectionUtils.checkNotNullElement')
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
 #set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
@@ -40,7 +41,8 @@ $codewriter.setSaveCurrentFile(false);
 ## ÐÞ¸Ä×¢ÊÍ
 #set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
 all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}<br>
-<b>NOTE:</b>methods with 'Generic' suffix support generic type argument for {@code byte[]}.<br>
+<b>NOTE 1:</b>methods with 'Generic' suffix support generic type argument for {@code byte[]}.See also {@link GenericUtils${esc.hash}toBytes(Object)}<br>
+<b>NOTE 2:</b>for each method,{@link List} type input argument must not have {@code null} element.<br>
 ","APPEND","CLASS"))
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")

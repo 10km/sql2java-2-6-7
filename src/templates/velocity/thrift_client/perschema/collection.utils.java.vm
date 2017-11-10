@@ -5,6 +5,7 @@ package ${schemaPkg};
 
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -62,11 +63,37 @@ public class $javaClassName {
     private static boolean equal( Object a, Object b) {
         return a == b || (a != null && a.equals(b));
     }
-    static <T> T checkNotNull(T reference) {
+    /** 
+     * Ensures that an object reference passed as a parameter to the calling method is not null. 
+     * @return the non-null reference that was validated
+     */
+    public static <T> T checkNotNull(T reference) {
         if (reference == null) {
             throw new NullPointerException();
         }
         return reference;
+    }
+    /** 
+     * Ensures that an object reference passed as a parameter to the calling method is not null. 
+     * @return the non-null reference that was validated
+     */
+    public static <T> T checkNotNull(T reference, Object errorMessage) {
+        if (reference == null) {
+            throw new NullPointerException(String.valueOf(errorMessage));
+        }
+        return reference;
+    }
+    /** 
+     * Ensures that a collection  reference passed as a parameter to the calling method not exists null element if it's not null.
+     * @return the non-null-element reference that was validated
+     */
+    public static<C extends Collection<?>> C checkNotNullElement(C c){
+        if(null != c){
+            for(Object e:c){
+                checkNotNull(e,"element of collection must not be null");
+            }
+        }
+        return c;
     }
     static <V> V safeGet(Map<?, V> map, Object key) {
         checkNotNull(map);
