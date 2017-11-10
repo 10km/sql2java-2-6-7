@@ -90,6 +90,8 @@ public class $cacheManagerClass extends $managerClass
     @Override 
     public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws ObjectRetrievalException
     {
+       if(#join($primaryKeys 'null == ${e.getVarName()}' ' || '))
+           throw new ObjectRetrievalException(new NullPointerException());
         try{
             return cache.getBean(#join($primaryKeys '$e.getVarName()' ','));
         }catch(ExecutionException ee){
@@ -161,6 +163,8 @@ public class $cacheManagerClass extends $managerClass
     // override $table.asManagerClassNSP()
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}Checked($indexColumn.getJavaType() $indexColumn.getVarName()) throws ObjectRetrievalException{
+        if(null == ${indexColumn.getVarName()})
+            throw new ObjectRetrievalException(new NullPointerException());
         try{
             return cache.${indexColumn.getGetCacheMethod()}($indexColumn.getVarName());
         }catch(ExecutionException ee){
@@ -174,6 +178,18 @@ public class $cacheManagerClass extends $managerClass
                 throw re;
             }catch (Throwable e) {
                 throw new RuntimeException(ee);
+            }
+        }catch(UncheckedExecutionException ue){
+            try{
+                throw ue.getCause();
+            }catch(ObjectRetrievalException oe){
+                throw oe;
+            } catch (WrapDAOException we) {
+                throw we;
+            } catch (RuntimeException re) {
+                throw re;
+            }catch (Throwable e) {
+                throw new RuntimeException(ue);
             }
         }
     }

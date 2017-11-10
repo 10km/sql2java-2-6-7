@@ -107,9 +107,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
-        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
-            return null;
-        }
         try{
             return loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ','));
         }catch(ObjectRetrievalException e){
@@ -903,7 +900,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws ObjectRetrievalException
     {
         try{
-            return this.beanConverter.fromRight(this.nativeManager.loadUniqueUsingTemplate(this.beanConverter.toRight(bean)));
+            return this.beanConverter.fromRight(this.nativeManager.loadUniqueUsingTemplateChecked(this.beanConverter.toRight(bean)));
         }
         catch(${exceptionPkg}.ObjectRetrievalException e)
         {
@@ -953,8 +950,6 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     // override $table.asManagerInterfaceNSP()
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ',')){
-        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
-            return null;
         try{
             return loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "${e.getVarName()}" ','));
         }catch(ObjectRetrievalException e){
@@ -966,7 +961,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException{
         ${beanClass} bean = new ${beanClass}();
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
-            throw new NullPointerException();
+            throw new ObjectRetrievalException(new NullPointerException());
         #join($indexColumns '
         bean.${e.getSetMethod()}(${e.getVarName()});
         ' '')

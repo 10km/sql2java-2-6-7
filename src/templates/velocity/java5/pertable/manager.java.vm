@@ -117,9 +117,6 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     //1
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
-        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
-            return null;
-        }
         try{
             return loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ','));
         }catch(ObjectRetrievalException e){
@@ -142,9 +139,8 @@ public class $managerClass extends TableManager.Adapter<$beanClass>
     @SuppressWarnings("unused")
     public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
     {
-        if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
-            throw new NullPointerException();
-        }
+        if(#join($primaryKeys "null == $e.getVarName()" ' || '))
+            throw new ObjectRetrievalException(new NullPointerException());
         Connection c = null;
         PreparedStatement ps = null;
         try
@@ -1402,8 +1398,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      */
     public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
     {
-        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
-            return null;
         try{
             return loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "${e.getVarName()}" ','));
         }catch(ObjectRetrievalException e){
@@ -1424,7 +1418,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     {
         ${beanClass} bean = new ${beanClass}();
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
-            throw new NullPointerException();
+            throw new ObjectRetrievalException(new NullPointerException());
         #join($indexColumns '
         bean.${e.getSetMethod()}(${e.getVarName()});
         ' '')
