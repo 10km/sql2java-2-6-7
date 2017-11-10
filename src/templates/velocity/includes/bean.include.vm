@@ -426,8 +426,9 @@ public $!{final} class ${beanClass}
         case $column.getIDConstName():
             return ${column.getModifiedMethod()}();
 #end
-        }
-        return false;
+        default:
+            return false;
+        }        
     }
     /**
      * Determines if the {@code column} has been initialized.
@@ -616,7 +617,7 @@ public $!{final} class ${beanClass}
      */
     public static final List<$beanClass> replaceNull(List<$beanClass> source){
         if(null != source){
-            for(int i = 0,end_i = source.size();i<end_i;++i){
+            for(int i = 0,endIndex = source.size();i<endIndex;++i){
                 if(null == source.get(i))source.set(i, NULL);
             }
         }
@@ -628,7 +629,7 @@ public $!{final} class ${beanClass}
      */
     public static final List<$beanClass> replaceNullInstance(List<$beanClass> source){
         if(null != source){
-            for(int i = 0,end_i = source.size();i<end_i;++i){
+            for(int i = 0,endIndex = source.size();i<endIndex;++i){
                 if(source.get(i).checkNULL())source.set(i, null);
             }
         }
@@ -754,7 +755,7 @@ public $!{final} class ${beanClass}
      */
     public static final class Builder{
         /** $beanClass instance used for template to create new $beanClass instance. */
-        static final ThreadLocal<$beanClass> template = new ThreadLocal<$beanClass>(){
+        static final ThreadLocal<$beanClass> TEMPLATE = new ThreadLocal<$beanClass>(){
             @Override
             protected $beanClass initialValue() {
                 return new ${beanClass}();
@@ -765,7 +766,7 @@ public $!{final} class ${beanClass}
          * @see ${beanClass}${esc.hash}reset()
          */
         public Builder reset(){
-            template.get().reset();
+            TEMPLATE.get().reset();
             return this;
         }
         /** 
@@ -773,19 +774,19 @@ public $!{final} class ${beanClass}
          * @see ${beanClass}${esc.hash}immutable(Boolean)
          */
         public Builder immutable(){
-            template.get().immutable(Boolean.TRUE);
+            TEMPLATE.get().immutable(Boolean.TRUE);
             return this;
         }
         /** set a bean as template,must not be {@code null} */
         public Builder template($beanClass bean){
             if(null == bean)
                 throw new NullPointerException();
-            template.set(bean);
+            TEMPLATE.set(bean);
             return this;
         }
-        /** return a clone instance of {@link ${esc.hash}template}*/
+        /** return a clone instance of {@link ${esc.hash}TEMPLATE}*/
         public $beanClass build(){
-            return template.get().clone();
+            return TEMPLATE.get().clone();
         }
 #foreach($column in $columns)
         /** 
@@ -795,7 +796,7 @@ public $!{final} class ${beanClass}
          * @see {@link $beanClass${esc.hash}${column.getSetMethod()}($column.javaType)}
          */
         public Builder ${column.varName}($column.javaType $column.varName){
-            template.get().${column.getSetMethod()}($column.varName);
+            TEMPLATE.get().${column.getSetMethod()}($column.varName);
             return this;
         }
 #end
