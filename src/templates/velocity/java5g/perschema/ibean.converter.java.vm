@@ -83,7 +83,7 @@ public interface IBeanConverter<L,R> {
             if(null == lefts)return null;
             @SuppressWarnings("unchecked")
             R[] rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;
-            for(int i=0;i<rights.length;++i){
+            for(int i=0;i<lefts.length;++i){
                 rights[i]=null == lefts[i]?null:_newInstanceR();
             }
             return rights;
@@ -92,7 +92,7 @@ public interface IBeanConverter<L,R> {
             if(null == rights)return null;
             @SuppressWarnings("unchecked")
             L[] lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;
-            for(int i=0;i<lefts.length;++i){
+            for(int i=0;i<rights.length;++i){
                 lefts[i]=null == rights[i]?null:_newInstanceL();
             }
             return lefts;
@@ -100,7 +100,7 @@ public interface IBeanConverter<L,R> {
         private List<R> makeRights(List<L> lefts){
             if(null == lefts)return null;
             ArrayList<R> rights = new ArrayList<R>(lefts.size());
-            for(int i=0;i<rights.size();++i){
+            for(int i=0;i<lefts.size();++i){
                 rights.add (null == lefts.get(i)?null:_newInstanceR());
             }
             return rights;
@@ -108,7 +108,7 @@ public interface IBeanConverter<L,R> {
         private List<L> makeLefts(List<R> rights){
             if(null == rights)return null;
             ArrayList<L> lefts = new ArrayList<L>(rights.size());
-            for(int i=0;i<lefts.size();++i){
+            for(int i=0;i<rights.size();++i){
                 lefts.add (null == rights.get(i)?null:_newInstanceL());
             }
             return lefts;
