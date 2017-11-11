@@ -2,6 +2,9 @@
 package net.sourceforge.sql2java;
 
 import java.util.Random;
+
+import com.google.common.base.Strings;
+
 import net.sourceforge.sql2java.Column;
 import net.sourceforge.sql2java.Table;
 
@@ -79,6 +82,21 @@ public final class StringUtilities {
 		return buffer.toString();
 	}
 
+	/**
+	 * 字符串首字母大写
+	 * @param name
+	 * @return
+	 */
+	public static String firstUpperCase(String name){
+		if(Strings.isNullOrEmpty(name))return name;
+		StringBuffer buffer = new StringBuffer(name.length());
+		char[] list = name.toLowerCase().toCharArray();
+		buffer.append(Character.toUpperCase(list[0]));
+		if(list.length >1){
+			buffer.append(list,1,list.length-1);
+		}
+		return buffer.toString();
+	}
 	public static String escape(String s) {
 		return StringUtilities.isReserved(s) ? "my_" + s : s;
 	}
