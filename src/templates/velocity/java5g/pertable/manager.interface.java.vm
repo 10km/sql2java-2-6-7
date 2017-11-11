@@ -24,6 +24,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     // PRIMARY KEY METHODS
     //////////////////////////////////////
 
+    //1
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      *
@@ -32,9 +33,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end     
      * @return a unique $beanClass or {@code null} if not found
      */
-    //1
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
 
+    //1.1
     /**
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      *
@@ -44,17 +45,17 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return a unique $beanClass
      * @throws ObjectRetrievalException if not found
      */
-    //1.1
     public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws ObjectRetrievalException;
     
+    //1.4
     /**
      * Returns true if this $tablename contains row with primary key fields.
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end
      * @see #loadByPrimaryKey($keys)
+     * @return
      */
-    //1.4
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
 #if ( 1 == $table.countPrimaryKeys() )
 #set ($pk = $table.getPrimaryKey())
@@ -63,29 +64,32 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #else
 #set ($pkType = $pk.getJavaType())
 #end
+    //1.4.1
     /**
      * Check duplicated row by primary keys,if row exists throw exception
      * @param $pk.getVarName() $pk.getJavaType()
+     * @return 
+     * @throws ObjectRetrievalException
      */
-    //1.4.1
     public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException;
+    //1.8
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *
      * @param keys primary keys array
      * @return list of $beanClass
      */
-    //1.8
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys);
+    //1.9
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *
      * @param keys primary keys collection
      * @return list of $beanClass
      */
-    //1.9
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
 #end##1 == $table.countPrimaryKeys()   
+    //2
     /**
      * Delete row according to its primary keys.<br>
      * all keys must not be null
@@ -95,7 +99,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end     
      * @return the number of deleted rows
      */
-    //2
     public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
 #if ( 1 == $table.countPrimaryKeys() )
 #set ($pk = $table.getPrimaryKey())
@@ -104,38 +107,38 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #else
 #set ($pkType = $pk.getJavaType())
 #end
+    //2.2
     /**
      * Delete rows according to primary key.<br>
      *
      * @param keys primary keys array
      * @return the number of deleted rows
      */
-    //2.2
     public int deleteByPrimaryKey($pkType... keys);
+    //2.3
     /**
      * Delete rows according to primary key.<br>
      *
      * @param keys primary keys collection
      * @return the number of deleted rows
      */
-    //2.3
     public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
 #end##1 == $table.countPrimaryKeys()  
-    /**
-     * Delete beans.<br>
-     *
-     * @param beans $beanClass collection wille be deleted
-     * @return the number of deleted rows
-     */
     //2.4
-    public int delete($beanClass... beans);
     /**
      * Delete beans.<br>
      *
      * @param beans $beanClass collection wille be deleted
      * @return the number of deleted rows
      */
+    public int delete($beanClass... beans);
     //2.5
+    /**
+     * Delete beans.<br>
+     *
+     * @param beans $beanClass collection wille be deleted
+     * @return the number of deleted rows
+     */
     public int delete(java.util.Collection<$beanClass> beans);
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
@@ -154,54 +157,57 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #set ( $importedClassManager = "$importedTable.asManagerClassNSP()" )
 #foreach( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
+    //3.1 GET IMPORTED
     /**
      * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
      * @param bean the {@link $beanClass}
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      */
-    //3.1 GET IMPORTED
     public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
     
+    //3.1.2 GET IMPORTED
     /**
      * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
 #foreach ( $pk in $primaryKeys )
-     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+     * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      * @throws DAOException
      */
-    //3.1.2 GET IMPORTED
     public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
     
-    /**
-     * @see ${esc.hash}${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass,int,int)
-     */
     //3.2 GET IMPORTED
+    /**
+     * see also ${esc.hash}${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass,int,int)
+     * @param bean
+     * @return
+     */
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean);
 
+    //3.2.2 GET IMPORTED
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
 #foreach ( $pk in $primaryKeys )
-     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+     * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans 
      * @throws DAOException
      */
-    //3.2.2 GET IMPORTED
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    //3.2.3 DELETE IMPORTED
     /**
      * delete the associated {@link $importedClass} objects from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
 #foreach ( $pk in $primaryKeys )
-     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+     * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the number of deleted rows
      */
-    //3.2.3 DELETE IMPORTED
     public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    //3.2.4 GET IMPORTED
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
@@ -210,8 +216,8 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return the associated {@link $importedClass} beans or empty list if {@code bean} is {@code null}
      */
-    //3.2.4 GET IMPORTED
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow,int numRows);    
+    //3.3 SET IMPORTED
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
@@ -220,9 +226,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return importedBeans always
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
-    //3.3 SET IMPORTED
     public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans);
 
+    //3.4 SET IMPORTED
     /**
      * set  the {@link $importedClass} object java.util.Collection associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
@@ -231,7 +237,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return importedBeans always
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
-    //3.4 SET IMPORTED
     public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans);
 
 #end
@@ -240,6 +245,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 ## only xImportedKeys template
 ## ======================================================
 #if( $table.hasForeignTables() || $table.hasImportedTables() )
+    //3.5 SYNC SAVE 
     /**
      * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
@@ -248,21 +254,25 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
      */
-    //3.5 SYNC SAVE 
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
         #foreachImportedTables('native' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
-    /**
-     * Transaction version for sync save
-     * @see {@link ${esc.hash}save(${beanClass} #foreachForeignTables('native' ${table}  ", ${m_foreignClass} " '' '')#foreachImportedTables('native' ${table}  ", ${m_importedClass}[] " '' ''))}
-     */
     //3.6 SYNC SAVE AS TRANSACTION
+    /**
+     * Transaction version for sync save<br>
+     * see also {@link ${esc.hash}save(${beanClass} #foreachForeignTables('native' ${table}  ", ${m_foreignClass} " '' '')#foreachImportedTables('native' ${table}  ", ${m_importedClass}[] " '' ''))}
+     * @param bean the {@link $beanClass} bean to be saved
+    #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+     * @return the inserted or updated {@link $beanClass} bean
+     */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
         #foreachImportedTables('native' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
 #if( $table.hasImportedTables() )
+    //3.7 SYNC SAVE 
     /**
      * Save the $beanClass bean and referenced beans and imported beans into the database.
      *
@@ -271,16 +281,19 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
      */
-    //3.7 SYNC SAVE 
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
         #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
-    /**
-     * Transaction version for sync save
-     * @see {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
-     */
     //3.8 SYNC SAVE AS TRANSACTION
+    /**
+     * Transaction version for sync save<br>
+     * see also {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
+     * @param bean the {@link $beanClass} bean to be saved
+    #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
+    #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
+     * @return the inserted or updated {@link $beanClass} bean
+     */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
@@ -301,15 +314,16 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+    //5.1 GET REFERENCED VALUE
     /**
      * Retrieves the {@link $foreignClass} object referenced by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.<br>
      * FK_NAME : $fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
      */
-    //5.1 GET REFERENCED VALUE
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean);
 
+    //5.2 SET REFERENCED 
     /**
      * Associates the {@link $beanClass} object to the {@link $foreignClass} object by #join($columnsOfFk "{@link $beanClass#$e.getGetMethod()}()" ",") field.
      *
@@ -318,7 +332,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return always beanToSet saved
      * @throws WrapDAOException
      */
-    //5.2 SET REFERENCED 
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet);
 #end
 #end
@@ -430,18 +443,20 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #else
 #set ($pkType = $pk.getJavaType())
 #end
+    //45
     /**
      * return a primary key list from {@link $beanClass} array
-     * @param array
+     * @param beans
+     * @return
      */
-    //45
-    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array);
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... beans);
+    //46
     /**
      * return a primary key list from {@link $beanClass} collection
-     * @param array
+     * @param beans
+     * @return
      */
-    //46
-    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection);
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> beans);
 #end##1 == $table.countPrimaryKeys()  
 
 #set ( $jTables = $table.getJunctionTables() )
@@ -459,12 +474,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #set ( $localFk = $jTable.getForeignKeys($table)[0])
 #set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
 #set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
-    /**
-     * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
-     */
     //22 MANY TO MANY
+    /**
+     * see also ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
+     * @param bean
+     * @return
+     */
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean);
 
+    //23 MANY TO MANY
     /**
      * Retrieves an list of $beanClass using the junction table ${jTable.asCoreClass($isGeneral)}, given a $linkedBean, 
      * specifying the start row and the number of rows.
@@ -474,36 +492,54 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return a list of $beanClass
      */
-    //23 MANY TO MANY
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows);
 #define($junctionParam)
 #join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
 #end
+    //23.2 MANY TO MANY
     /**
      * add junction between {@link $beanClass} and {@link $linkedBean} if junction not exists
      * @param bean
      * @param linked
      */
-    //23.2 MANY TO MANY
     public void addJunction($beanClass bean,$linkedBean linked);
+    //23.3 MANY TO MANY
     /**
      * remove junction between {@link $beanClass} and {@link $linkedBean}
      * @param bean
      * @param linked
+     * @return deleted rows count
      */
-    //23.3 MANY TO MANY
     public int deleteJunction($beanClass bean,$linkedBean linked);
-    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
     //23.4 MANY TO MANY
+    /** 
+     * see also {@link ${esc.hash}addJunction($beanClass,$linkedBean)}
+     * @param bean
+     * @param linkedBeans
+     */
     public void addJunction($beanClass bean,$linkedBean... linkedBeans);
-    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
     //23.5 MANY TO MANY
+    /** 
+     * see also {@link ${esc.hash}addJunction($beanClass,$linkedBean)}
+     * @param bean
+     * @param linkedBeans
+     */
     public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
-    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
     //23.6 MANY TO MANY
+    /** 
+     * see also {@link ${esc.hash}deleteJunction($beanClass,$linkedBean)}
+     * @param bean
+     * @param linkedBeans
+     * @return
+     */
     public int deleteJunction($beanClass bean,$linkedBean... linkedBeans);
-    /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
     //23.7 MANY TO MANY
+    /** 
+     * see also {@link ${esc.hash}deleteJunction($beanClass,$linkedBean)} 
+     * @param bean
+     * @param linkedBeans
+     * @return
+     */
     public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
 #end
 ################### method for self-reference field#################
@@ -515,6 +551,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     // SELF-REFERENCE
     //_____________________________________________________________________
 #end
+    //47
     /**
      * return bean list ( include {@code bean}) by the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
      * first element is top bean
@@ -525,13 +562,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *         first element equal last if self-reference field is cycle
      * @throws WrapDAOException
      */
-    //47
     public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    //48
     /**
      * see also {@link ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
+     * @param bean
+     * @return
      */
-    //48
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean);
+    //49
     /**
      * get level count on the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
@@ -541,13 +580,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *         -1 if self-reference field is cycle
      * @throws WrapDAOException
      */
-    //49
     public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    //50
     /**
      * see also {@link ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
+     * @param bean
+     * @return 
      */
-    //50
     public int $table.getLevelMethod($selfFk)($beanClass bean);
+    //51
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
@@ -555,17 +596,19 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 
      * @throws WrapDAOException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
+     * @return
      */
-    //51
     public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    //52
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * @param bean
+     * @return
      * @throws WrapDAOException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
-    //52
     public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean);
+    //53
     /**
      * return top bean that with {@code null} self-reference field  : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
@@ -576,14 +619,16 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws IllegalStateException if self-reference field is cycle
      * @throws WrapDAOException
      */
-    //53
     public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    //54
     /**
      * see also {@link ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
+     * @param bean
+     * @return
      */
-    //54
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean);
 #if($table.countPrimaryKeys() == 1)
+    //55
     /**
      * Ensures the self-reference field is not cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * @param $table.primaryKey.getVarName() PK# $velocityCount
@@ -592,9 +637,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws WrapDAOException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($table.primaryKey.getJavaType())
      */
-    //55
     public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName());
 #end
+    //56
     /**
      * Ensures the self-reference field is not cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
      * @param bean
@@ -603,7 +648,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws WrapDAOException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
      */
-    //56
     public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean);
 #end
 }

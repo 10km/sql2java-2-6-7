@@ -109,6 +109,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //////////////////////////////////////
 
     //1 override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
@@ -120,6 +121,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //1.1 override $table.asManagerInterfaceNSP()
+
     @Override
     public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws ObjectRetrievalException
     {
@@ -132,6 +134,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //1.2
+
     @Override
     public $beanClass loadByPrimaryKey(${beanClass} bean)
     {
@@ -139,6 +142,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //1.2.2
+
     @Override
     public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws ObjectRetrievalException
     {
@@ -149,6 +153,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
     
     //1.3
+
     @Override
     public $beanClass loadByPrimaryKey(Object ...keys){
         try{
@@ -160,6 +165,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
     
     //1.3.2
+
     @Override
     public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws ObjectRetrievalException{
         if(null == keys){
@@ -177,6 +183,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //1.4 override $table.asManagerInterfaceNSP()
+
     @Override 
     public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
@@ -189,12 +196,14 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //1.6
+
     @Override
     public boolean existsByPrimaryKey($beanClass bean)
     {
         return null == bean ? false : existsPrimaryKey(#join($primaryKeys "bean.$e.getGetMethod()()" ','));
     }
     //1.7
+
     @Override
     public $beanClass checkDuplicate($beanClass bean)throws ObjectRetrievalException{
 #if ( 1 == $table.countPrimaryKeys() )
@@ -218,6 +227,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ($pkType = $pk.getJavaType())
 #end
     //1.4.1 override $table.asManagerInterfaceNSP()
+
     @Override 
     public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException{
         try{
@@ -229,6 +239,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //1.8 override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys){
         if(null == keys){
@@ -241,6 +252,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return list;
     }
     //1.9 override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
         if(null == keys ){
@@ -263,6 +275,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 #end##1 == $table.countPrimaryKeys()    
     //2 override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
     {
@@ -276,6 +289,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //2
+
     @Override
     public int delete($beanClass bean){
         try
@@ -288,6 +302,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }   
     }
     //2.1
+
     @Override
     public int deleteByPrimaryKey(Object ...keys){
         if(null == keys){
@@ -312,6 +327,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ($pkType = $pk.getJavaType())
 #end
     //2.2 override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteByPrimaryKey($pkType... keys){
         int count = 0;
@@ -323,6 +339,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return count;
     }
     //2.3 override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
         int count = 0;
@@ -335,6 +352,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 #end##1 == $table.countPrimaryKeys()  
     //2.4 override $table.asManagerInterfaceNSP()
+
     @Override 
     public int delete($beanClass... beans){
         int count = 0;
@@ -346,6 +364,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return count;
     }
     //2.5 override $table.asManagerInterfaceNSP()
+
     @Override 
     public int delete(java.util.Collection<$beanClass> beans){
         int count = 0;
@@ -479,12 +498,14 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #foreach( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
     //3.1 GET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override 
     public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean)
     {
         return this.${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean).toArray(new ${importedClass}[0]);
     }
     //3.1.2 GET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override
     public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))
     {
@@ -495,12 +516,14 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return ${importedTable.getImportedBeansGetMethod($fkName)}(bean);
     }
     //3.2 GET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)
     {
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean,1,-1);
     }
     //3.2.2 GET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))
     {
@@ -511,6 +534,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean);
     }
     //3.2.3 DELETE IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override
     public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))
     {
@@ -518,6 +542,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return ${importedTable.asInstanceMethod($isGeneral)}().delete(list);
     }
     //3.2.4 GET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow, int numRows)
     {
@@ -530,6 +555,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //3.3 SET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override 
     public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans)
     {
@@ -542,6 +568,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //3.4 SET IMPORTED override $table.asManagerInterfaceNSP()
+
     @Override 
     public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans)
     {
@@ -562,6 +589,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 ## ======================================================
 #if( $table.hasForeignTables() || $table.hasImportedTables() )
     //3.5 SYNC SAVE override $table.asManagerInterfaceNSP()
+
     @Override  
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -595,6 +623,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     } 
 
     //3.6 SYNC SAVE AS TRANSACTION override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -609,6 +638,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 #if( $table.hasImportedTables() )
     //3.7 SYNC SAVE override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -640,6 +670,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }   
 
     //3.8 SYNC SAVE AS TRANSACTION override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -653,6 +684,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             }});
     }
 #end ## $table.hasImportedTables()
+    //3.9 SYNC SAVE 
     /**
      * Save the {@link $beanClass} bean and referenced beans and imported beans into the database.
      *
@@ -661,7 +693,6 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", ${m_importedClass}[] " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      */
-    //3.9 SYNC SAVE 
     @Override
     public $beanClass save($beanClass bean,Object ...args) 
     {
@@ -705,6 +736,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return save(bean$callList);
     } 
 
+    //3.10 SYNC SAVE 
     /**
      * Save the {@link $beanClass} bean and referenced beans and imported beans into the database.
      *
@@ -713,7 +745,6 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      */
-    //3.10 SYNC SAVE 
     @SuppressWarnings("unchecked")
     @Override
     public $beanClass saveCollection($beanClass bean,Object ...inputs)
@@ -838,6 +869,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
 
     //5.1 GET REFERENCED VALUE override $table.asManagerInterfaceNSP()
+
     @Override 
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
     {
@@ -849,6 +881,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //5.2 SET REFERENCED override $table.asManagerInterfaceNSP()
+
     @Override 
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet)
     {
@@ -874,6 +907,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //////////////////////////////////////
 
     //11
+
     @Override
     public int deleteByWhere(String where)
     {
@@ -892,6 +926,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //_____________________________________________________________________
 
     //13
+
     @Override
     protected $beanClass insert($beanClass bean)
     {
@@ -906,6 +941,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 
     //14
     @Override
+
     protected $beanClass update($beanClass bean)
     {
         try{
@@ -923,6 +959,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //_____________________________________________________________________
     //18
     @Override
+
     public $beanClass loadUniqueUsingTemplate(${beanClass} bean)
     {
         try{
@@ -935,6 +972,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      }
     //18-1
     @Override
+
     public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws ObjectRetrievalException
     {
         try{
@@ -950,6 +988,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
      }
     //20-5
+
     @Override
     public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action)
     {
@@ -963,6 +1002,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //21
+
     @Override
     public int deleteUsingTemplate(${beanClass} bean)
     {
@@ -986,6 +1026,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set( $indexColumns = $index.getIndexColumnsList())
 #if($index.isUnique())
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ',')){
         try{
@@ -995,6 +1036,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException{
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || ')){
@@ -1015,6 +1057,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ($columnType = $indexColumn.getJavaType())
 #end
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)
     {
@@ -1028,6 +1071,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return list;
     }
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
     {
@@ -1050,6 +1094,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return list;
     }
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteBy${index.asCamelCaseName()}($columnType... indexs)
     {
@@ -1062,6 +1107,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return count;
     }
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
     {
@@ -1076,6 +1122,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #end##1 == $indexColumns.size()
 #else ## $index.isUnique()
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
@@ -1083,6 +1130,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
     
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
@@ -1097,6 +1145,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #end## $index.isUnique()
 
     // override $table.asManagerInterfaceNSP()
+
     @Override 
     public int deleteBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))
     {
@@ -1164,6 +1213,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ( $linkedFk = $jTable.getForeignKeys($linkedTable)[0])
 #set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
     //22 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean)
     {
@@ -1171,6 +1221,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //23 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)
     {
@@ -1188,6 +1239,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
 #end
     //23.2 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public void addJunction($beanClass bean,$linkedBean linked){
         if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
@@ -1206,6 +1258,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //23.3 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public int deleteJunction($beanClass bean,$linkedBean linked){
         if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
@@ -1217,6 +1270,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return ${jTable.asInstanceMethod($isGeneral)}().deleteByPrimaryKey($junctionParam);
     }
     //23.4 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public void addJunction($beanClass bean,$linkedBean... linkedBeans){
         if(null != linkedBeans){
@@ -1226,6 +1280,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //23.5 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
         if(null != linkedBeans){
@@ -1235,6 +1290,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         }
     }
     //23.6 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public int deleteJunction($beanClass bean,$linkedBean... linkedBeans){
         int count = 0;
@@ -1246,6 +1302,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return count;
     }
     //23.7 MANY TO MANY override $table.asManagerInterfaceNSP()
+
     @Override
     public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
         int count = 0;
@@ -1262,6 +1319,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     // COUNT
     //_____________________________________________________________________
     //25
+
     @Override
     public int countWhere(String where)
     {
@@ -1275,6 +1333,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //20
+
     @Override
     public int countUsingTemplate(${beanClass} bean, int searchType)
     {
@@ -1293,10 +1352,10 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     // LISTENER
     //_____________________________________________________________________
 
+    //35
     /**
      * @return {@link WrapListener} instance
      */
-    //35
     @Override
     public TableListener<$beanClass> registerListener(TableListener<$beanClass> listener)
     {
@@ -1312,6 +1371,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 
     //36
+
     @Override
     public void unregisterListener(TableListener<$beanClass> listener)
     {
@@ -1322,12 +1382,14 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
     
     //37
+
     @Override
     public void fire(TableListener.Event event, $beanClass bean){
         fire(event.ordinal(), bean);
     }
     
     //37-1
+
     @Override
     public void fire(int event, $beanClass bean){
         try{
@@ -1338,25 +1400,24 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             throw new WrapDAOException(e);
         }
     }
+    //37-2
     /**
      * bind foreign key listener to foreign table for DELETE RULE
      */
-    //37-2
     void bindForeignKeyListenerForDeleteRule(){
         this.nativeManager.bindForeignKeyListenerForDeleteRule();
     }
+    //37-3
     /**
      * unbind foreign key listener from all of foreign tables <br>
      * @see ${esc.hash}bindForeignKeyListenerForDeleteRule()
      */
-    //37-3
     void unbindForeignKeyListenerForDeleteRule(){
         this.nativeManager.unbindForeignKeyListenerForDeleteRule();
 
     }
     /**
      * wrap {@code TableListener<$beanClass>} as native listener
-     *
      */
     public class WrapListener implements TableListener<$beanClass>{
         private final TableListener<$beanClass> listener;
@@ -1436,6 +1497,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //_____________________________________________________________________
 
     //43
+
     @Override
     public boolean isPrimaryKey(String column){
         return this.nativeManager.isPrimaryKey(column);
@@ -1488,25 +1550,27 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ($pkType = $pk.getJavaType())
 #end
     //45 override $table.asManagerInterfaceNSP()
+
     @Override 
-    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array){        
-        if(null == array){
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... beans){        
+        if(null == beans){
             return new java.util.ArrayList<$pk.getJavaType()>();
         }
-        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(array.length);
-        for($beanClass bean:array){
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(beans.length);
+        for($beanClass bean:beans){
             list.add(null == bean ? null : bean.$pk.getGetMethod()());
         }
         return list;
     }
     //46 override $table.asManagerInterfaceNSP()
+
     @Override 
-    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection){        
-        if(null == collection){
+    public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> beans){        
+        if(null == beans){
             return new java.util.ArrayList<$pk.getJavaType()>();
         }
-        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(collection.size());
-        for($beanClass bean:collection){
+        java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(beans.size());
+        for($beanClass bean:beans){
             list.add(null == bean ? null : bean.$pk.getGetMethod()());
         }
         return list;
@@ -1522,6 +1586,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //_____________________________________________________________________
 #end
     //47 $table.asManagerInterfaceNSP()
+
     @Override
     public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
@@ -1540,6 +1605,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return list;
     }
     //48 $table.asManagerInterfaceNSP()
+
     @Override
     @SuppressWarnings("unchecked")
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean){
@@ -1548,6 +1614,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
                 : $table.getListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
     //49 $table.asManagerInterfaceNSP()
+
     @Override
     public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
@@ -1563,6 +1630,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return count;
     }
     //50 $table.asManagerInterfaceNSP()
+
     @Override
     public int $table.getLevelMethod($selfFk)($beanClass bean){
         return null == bean
@@ -1570,16 +1638,19 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
                 : $table.getLevelMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
     //51 $table.asManagerInterfaceNSP()
+
     @Override
     public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         return $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getVarName()' ',')) < 0;
     }
     //52 $table.asManagerInterfaceNSP()
+
     @Override
     public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean){
         return $table.getLevelMethod($selfFk)(bean) < 0;
     }
     //53 $table.asManagerInterfaceNSP()
+
     @Override
     public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
         if(#join($primaryKeys 'null == $e.getVarName()' ' || ')){
@@ -1595,6 +1666,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return parent;
     }
     //54 $table.asManagerInterfaceNSP()
+
     @Override
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean){
         if(null == bean){
@@ -1604,6 +1676,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 #if($table.countPrimaryKeys() == 1)
     //55 $table.asManagerInterfaceNSP()
+
     @Override
     public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()){
         if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName())){
@@ -1613,6 +1686,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     }
 #end
     //56 $table.asManagerInterfaceNSP()
+
     @Override
     public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean){
         if($table.getCyeleTestMethod($selfFk)(bean)){

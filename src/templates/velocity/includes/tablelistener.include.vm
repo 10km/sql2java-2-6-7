@@ -7,7 +7,7 @@ package $schemaPkg;
 import java.util.LinkedHashSet;
 #if(!$isGeneral)
 import ${schemaPkg}.exception.DAOException;
-#set ( $throwsString = " throws DAOException" )
+#set ( $throwsString = "throws DAOException" )
 #end
 
 /**
@@ -45,6 +45,9 @@ public interface TableListener<B>{
      * Invoked just before inserting a B record into the database.
      *
      * @param bean the B that is about to be inserted
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void beforeInsert(B bean)$!throwsString;
 
@@ -53,6 +56,9 @@ public interface TableListener<B>{
      * Invoked just after a B record is inserted in the database.
      *
      * @param bean the B that was just inserted
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void afterInsert(B bean)$!throwsString;
 
@@ -61,6 +67,9 @@ public interface TableListener<B>{
      * Invoked just before updating a B record in the database.
      *
      * @param bean the B that is about to be updated
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void beforeUpdate(B bean)$!throwsString;
 
@@ -69,6 +78,9 @@ public interface TableListener<B>{
      * Invoked just after updating a B record in the database.
      *
      * @param bean the B that was just updated
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void afterUpdate(B bean)$!throwsString;
 
@@ -77,6 +89,9 @@ public interface TableListener<B>{
      * Invoked just before deleting a B record in the database.
      *
      * @param bean the B that is about to be deleted
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void beforeDelete(B bean)$!throwsString;
 
@@ -85,6 +100,9 @@ public interface TableListener<B>{
      * Invoked just after deleting a B record in the database.
      *
      * @param bean the B that was just deleted
+#if($throwsString)
+     * @$!throwsString
+#end  
      */
     public void afterDelete(B bean)$!throwsString;
 
@@ -103,7 +121,7 @@ public interface TableListener<B>{
          * @param container
          * @param bean
 #if($throwsString)
-         * @throws DAOException
+         * @$!throwsString
 #end
          */
         public <B> void fire(ListenerContainer<B> container,B bean)$!throwsString {
