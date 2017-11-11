@@ -11,10 +11,15 @@ package $gpkg;
 public interface IDbConverter<#join($tables "
                             N_${e.asCoreClassNSP().toUpperCase()}" ',')> {
 #foreach ( $table in $tables )
+    /**
+     * return a converter {@code ${table.asBeanClassNSP()} -> N_${table.asCoreClassNSP().toUpperCase()}}
+     * @return
+     */
     public abstract IBeanConverter<${table.asBeanClassNSP()}, N_${table.asCoreClassNSP().toUpperCase()}> get${table.asBeanClassNSP()}Converter();
 #end
 
     /**
+     * return a converter {@code L - > R}
      * @param <L> general type
      * @param <R> native type
      * @param lClass
@@ -23,6 +28,7 @@ public interface IDbConverter<#join($tables "
      */
     public abstract<L, R> IBeanConverter<L,R> getBeanConverter(Class<L> lClass,Class<R> rClass);
     /**
+     * set converter 
      * @param <L> general type
      * @param <R> native type
      * @param lClass

@@ -1,7 +1,7 @@
 #parse( "schema.include.vm" )
 #parse( "header.include.vm" )
 #parse( "macros.include.vm" )
-#set ( $javaClassName = 'DbConverterGeneric' )
+#set ( $javaClassName = 'BaseDbConverterGeneric' )
 #set( $subpkg=$db.engineAsSubPackage() )
 #set( $ignorefields= $codewriter.getProperty('general.beanconverter.tonative.ignore') )
 $codewriter.setCurrentJavaFilename($gpkg, "${javaClassName}.java")
@@ -50,8 +50,10 @@ public abstract class ${javaClassName}<#join($tables "
     @SuppressWarnings("unchecked")
     public ${javaClassName}(#join($tables 'String ${e.asVar($vprefix)}' ',
                     ')){
-        #join($tables 'if(null == ${e.asVar($vprefix)} || ${e.asVar($vprefix)}.isEmpty())${e.asVar($vprefix)} = $e.name.toUpperCase()_JAVA_FIELDS;
-        ' '')
+        #join($tables '
+        if(null == ${e.asVar($vprefix)} || ${e.asVar($vprefix)}.isEmpty()){
+            ${e.asVar($vprefix)} = $e.name.toUpperCase()_JAVA_FIELDS;
+        }' '')
 
         Type[] typeArguments = ((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments();
 #foreach ( $table in $tables )

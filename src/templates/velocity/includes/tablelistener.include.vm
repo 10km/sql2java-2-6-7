@@ -5,7 +5,6 @@ $codewriter.setCurrentJavaFilename($schemaPkg, "TableListener.java")
 package $schemaPkg;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 #if(!$isGeneral)
 import ${schemaPkg}.exception.DAOException;
 #set ( $throwsString = " throws DAOException" )
@@ -108,7 +107,9 @@ public interface TableListener<B>{
 #end
          */
         public <B> void fire(ListenerContainer<B> container,B bean)$!throwsString {
-            if(null == container || null == bean)return;
+            if(null == container || null == bean){
+                return;
+            }
             switch(this){
             case INSERT:
                 container.afterInsert(bean);
@@ -119,10 +120,14 @@ public interface TableListener<B>{
             case DELETE:
                 container.afterDelete(bean);
                 break;
+            default:
+                break;
             }
         }
         public <B extends BaseBean<B>> void fire(TableManager<B > manager,B bean)$!throwsString {
-            if(null == manager || null == bean)return;
+            if(null == manager || null == bean){
+                return;
+            }
             manager.fire(this, bean);
         }
     }
@@ -183,8 +188,9 @@ public interface TableListener<B>{
         }
     
         public synchronized boolean add(TableListener<B> e) {
-            if(null == e)
+            if(null == e){
                 throw new NullPointerException();
+            }
             return listeners.add(e);
         }
     

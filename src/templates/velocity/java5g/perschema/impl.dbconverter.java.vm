@@ -23,25 +23,27 @@ public class DbConverter implements IDbConverter<#join($tables "
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
-    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterVar()}=new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
+    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterConstVar()}=new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
 
         @Override
-        protected void _fromRight(${leftClass} left, ${rightClass} right) {
+        protected void doFromRight(${leftClass} left, ${rightClass} right) {
 #foreach ( $column in $table.columns )
-            if(right.${column.getInitializedMethod()}())
+            if(right.${column.getInitializedMethod()}()){
                 left.$column.getSetMethod()(right.${column.getGetMethod()}());
+            }
 #end
             left.setNew(right.isNew());
             left.setModified(right.getModified());
         }
 
         @Override
-        protected void _toRight(${leftClass} left, ${rightClass} right) {
+        protected void doToRight(${leftClass} left, ${rightClass} right) {
 #foreach ( $column in $table.columns )
 #if( $ignorefields.contains($column.name) )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 #end
-#if( $ignorefields.contains($column.name) )// #end            if(left.${column.getInitializedMethod()}() )
+#if( $ignorefields.contains($column.name) )// #end            if(left.${column.getInitializedMethod()}() ){
 #if( $ignorefields.contains($column.name) )// #end                right.$column.getSetMethod()(left.${column.getGetMethod()}());
+#if( $ignorefields.contains($column.name) )// #end            }
 #end
             right.setNew(left.isNew());
             right.setModified(left.getModified());
@@ -59,7 +61,7 @@ public class DbConverter implements IDbConverter<#join($tables "
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
-            add(new Object[]{${leftClass}.class, ${rightClass}.class, ${table.asConverterVar()}});
+            add(new Object[]{${leftClass}.class, ${rightClass}.class, ${table.asConverterConstVar()}});
 #end
         }};
     
@@ -96,18 +98,20 @@ public class DbConverter implements IDbConverter<#join($tables "
     @SuppressWarnings("unchecked")
     public <L,R>IBeanConverter<L,R>getBeanConverter(Class<L> lClass,Class<R> rClass){
         int index = getIndex(lClass, rClass);
-        if(index<0)
+        if(index<0){
             throw new IllegalArgumentException(
                     String.format("not found converter for (%s,%s)"
                             ,null==lClass?"null":lClass.getSimpleName()
                             ,null==rClass?"null":rClass.getSimpleName()));
+        }
         return (IBeanConverter<L, R>) CONVERTERS.get(index)[2];
     }
     
     @Override
     public synchronized <L,R>void setBeanConverter(Class<L> lClass,Class<R> rClass,IBeanConverter<L,R>converter){
-        if(null == lClass || null == rClass || null == converter)
+        if(null == lClass || null == rClass || null == converter){
             throw new NullPointerException();
+        }
         Object[] c = new Object[]{lClass,rClass,converter};
         int index = getIndex(lClass, rClass);
         if(index<0){
@@ -121,7 +125,7 @@ public class DbConverter implements IDbConverter<#join($tables "
 #set ( $rightClass = "${table.getPackage()}.${table.asBeanClass()}" )
     @Override
     public IBeanConverter<${leftClass}, ${rightClass}> get${leftClass}Converter() {
-        return ${table.asConverterVar()};
+        return ${table.asConverterConstVar()};
     }
 #end    
 }

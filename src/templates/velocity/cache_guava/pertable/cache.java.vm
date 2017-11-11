@@ -13,7 +13,7 @@ package $table.getPackage(false);
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import ${schemaPkg}.TableLoadCaching;
+import ${schemaPkg}.BaseTableLoadCaching;
 #if(!$isGeneral)
 import ${pkg}.exception.DAOException;
 #end
@@ -31,13 +31,13 @@ import $table.getPackage(false).$managerClass;
  * @author guyadong
  *
  */
-public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
+public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
     private final $managerClass manager = ${managerClass}.getInstance();
     #join($uniqueIndices '
-    private final TableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
+    private final BaseTableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
 
     /** constructor<br>
-     * @see {@link TableLoadCaching#TableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
+     * @see {@link BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
      */
     public $cacheClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
         super(updateStragey,maximumSize, duration, unit);
@@ -48,7 +48,7 @@ public class $cacheClass extends TableLoadCaching<$pkType, $beanClass> {
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
 
-        ${indexColumn.getCacheVarName()} = new TableLoadCaching<$columnType, $beanClass>(updateStragey, maximumSize, duration, unit){
+        ${indexColumn.getCacheVarName()} = new BaseTableLoadCaching<$columnType, $beanClass>(updateStragey, maximumSize, duration, unit){
             @Override
             public void registerListener() {
                 manager.registerListener(this.tableListener);

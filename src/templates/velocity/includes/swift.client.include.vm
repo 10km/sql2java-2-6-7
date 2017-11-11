@@ -23,13 +23,13 @@ $codewriter.setSaveCurrentFile(false);
 #set ($typeUtils.toDateMethodPrefix  = 'GenericUtils.toDate')
 #set ($typeUtils.checkNotNullElementPrefix = 'CollectionUtils.checkNotNullElement')
 #set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
-#set ($metadata = $swiftParser.parse('net.gdface.facelog.FaceLogDefinition',$classpath))
+#set ($metadata = $swiftParser.parse('net.gdface.facelog.BaseFaceLog',$classpath))
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
 #set ( $thriftSrc = $codewriter.getDependencySrc())
 #set ( $thriftPackage = ${codewriter.getDependencyPackage()})
 ## 服务端运行时异常类名
-#set ( $runtimeErrorName = $codewriter.getProperty('swift.service.exception.runtime','ServiceRuntime'))
+#set ( $runtimeErrorName = $codewriter.getProperty('swift.service.exception.runtime','ServiceRuntimeException'))
 #set ($nothing = $swiftParser.setRuntimeErrorName($runtimeErrorName))
 #set ( $serviceName = ${metadata.name} )
 ## 删除原注释中的 @throws 标记
@@ -126,16 +126,16 @@ $typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signt
 #if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end####define($returnTypeStr)
 ###################
 #if($isGeneric)
+    // $velocityCount GENERIC
     /** 
      * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withType':true,'rawTypeOnly':true}))}<br>
      * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
      * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
      * @see {@link GenericUtils#toBytes(Object)}
      */
-    // $velocityCount GENERIC
 #else
-$!{serviceComment.getMethodComment($method.method)}
     // $velocityCount SERIVCE PORT : $method.name
+$!{serviceComment.getMethodComment($method.method)}
 #end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
             '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
@@ -155,7 +155,7 @@ $!{serviceComment.getMethodComment($method.method)}
 #elseif($isAsync)
         $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
 #else
-## 抛出本地的基于RuntimeException的 ServiceRuntime
+## 抛出本地的基于RuntimeException的 ServiceRuntimeException
         try{
             $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
         }

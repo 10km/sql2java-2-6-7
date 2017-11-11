@@ -18,9 +18,12 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      * {@code replace} update only key exists 
      */
     public static enum UpdateStrategy{
+        /** update no matter whether key exists */
         always,ifAbsent,replace;
         public <K,V> void update(ConcurrentMap<K,V> map,K key,V value){
-            if(null == map || null == key || null == value)return ;
+            if(null == map || null == key || null == value){
+                return ;
+            }
             switch(this){
             case always:
                 map.put(key, value);
@@ -30,6 +33,8 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
                 break;
             case replace:
                 map.replace(key, value);
+                break;
+            default:
                 break;
             }
         }
@@ -43,6 +48,7 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
      * 数据库中没有找到则抛出异常
      * @param key
      * @return
+     * @throws Exception
      */
     public B getBean(K key) throws Exception;
     /**

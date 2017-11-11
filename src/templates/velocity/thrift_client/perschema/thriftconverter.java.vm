@@ -11,27 +11,33 @@ $codewriter.setSaveCurrentFile(false);
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 
+/**
+ * {@link IBeanConverter} implementation classes for thrift class 
+ * @author guyadong
+ *
+ */
 public class $javaClassName implements Constant{
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #if($codewriter.existsInDependencyPackage($leftClass))
 #set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )
     /** {@link IBeanConverter} implementation for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
-    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterVar()}
+    public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterConstVar()}
             = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
         @Override
-        protected void _fromRight(${leftClass} left, ${rightClass} right) {
+        protected void doFromRight(${leftClass} left, ${rightClass} right) {
             $table.stateVarType() initialized = right.getInitialized();
 #foreach ( $column in $table.columns )
-            if(0L !=  $column.bitAndExpression("initialized"))
+            if(0L !=  $column.bitAndExpression("initialized")){
                 left.$column.getSetMethod()(right.${column.getGetMethod()}());
+            }
 #end
             left.setNew(right.isNew());
             left.setModified(right.getModified());
         }
 
         @Override
-        protected void _toRight(${leftClass} left, ${rightClass} right) {
+        protected void doToRight(${leftClass} left, ${rightClass} right) {
 #foreach ( $column in $table.columns )
 #set($isIgnore = $ignorefields.contains($column.name))
 #if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file

@@ -7,7 +7,7 @@
      * @see {@link ThriftConverter#converter${beanClass}}
      */
     public $thriftClass toThrift(){
-        return ThriftConverter.converter${beanClass}.toRight(this);
+        return ThriftConverter.${table.asConverterConstVar()}.toRight(this);
     }
     /** 
      * copy all fields from {@link $thriftClass},do nothing if {@code thriftBean} is null
@@ -17,7 +17,7 @@
     public $beanClass fromThrift($thriftClass thriftBean){
         if(null != thriftBean){
             reset();
-            return ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
+            return ThriftConverter.${table.asConverterConstVar()}.fromRight(this,thriftBean);
         }
         return this;
     }
@@ -27,9 +27,10 @@
      * @see {@link ThriftConverter#converter${beanClass}}
      */
     public $beanClass($thriftClass thriftBean){
-        if(null != thriftBean)
+        if(null != thriftBean){
             throw new NullPointerException();
+        }
         reset();
-        ThriftConverter.converter${beanClass}.fromRight(this,thriftBean);
+        ThriftConverter.${table.asConverterConstVar()}.fromRight(this,thriftBean);
     }
 #end

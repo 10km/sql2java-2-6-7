@@ -33,7 +33,7 @@ import ${exceptionPkg}.DAOException;
 #end
  * @author guyadong
  */
-public class $managerClassNSP extends TableManager.Adapter<$beanClass> implements $table.asManagerInterfaceNSP()
+public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> implements $table.asManagerInterfaceNSP()
 {
     private ${table.getPackage()}.$managerClass nativeManager = ${table.getPackage()}.${managerClass}.getInstance();
     private IDbConverter<#join($tables "
@@ -43,26 +43,30 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     protected $managerClassNSP(){}
     #defineInstanceMehod($table $managerClassNSP false)
     /**
-    * @return table name
-    */
+     * @return table name
+     */
+    @Override
     public String getTableName() {
         return this.nativeManager.getTableName();
     }
 
     /**
-    * @return field names of table
-    */
+     * @return field names of table
+     */
+    @Override
     public String getFields() {
         return this.nativeManager.getFields();
     }
-    
+
+    @Override
     public String getFullFields() {
         return this.nativeManager.getFullFields();
     }
     
     /**
-    * @return primarykeyNames
-    */
+     * @return primarykeyNames
+     */
+    @Override
     public String[] getPrimarykeyNames() {
         return this.nativeManager.getPrimarykeyNames();
     }
@@ -78,7 +82,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
    
     @Override
-    protected Class<$beanClass> _beanType(){
+    protected Class<$beanClass> beanType(){
         return ${beanClass}.class;
     }
     
@@ -93,8 +97,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void setDbConverter(IDbConverter dbConverter) {
-        if( null == dbConverter)
+        if( null == dbConverter){
             throw new NullPointerException();
+        }
         this.dbConverter = dbConverter;
         this.beanConverter = this.dbConverter.get${beanClass}Converter();
     }
@@ -137,8 +142,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws ObjectRetrievalException
     {
-        if(null == bean)
+        if(null == bean){
             throw new NullPointerException();
+        }
         return loadByPrimaryKeyChecked(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
     }
     
@@ -156,15 +162,18 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //1.3.2
     @Override
     public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws ObjectRetrievalException{
-        if(null == keys)
+        if(null == keys){
             throw new NullPointerException();
-        if(keys.length != $table.countPrimaryKeys())
+        }
+        if(keys.length != $table.countPrimaryKeys()){
             throw new IllegalArgumentException("argument number mismatch with primary key number");
-        #join($primaryKeys 'if(! (keys[$m_0count] instanceof $e.getJavaType()))
-            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");' '
-            ')
+        }
+        #join($primaryKeys '
+        if(! (keys[$m_0count] instanceof $e.getJavaType())){
+            throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$e.getJavaType()");
+        }' '')
 
-          return loadByPrimaryKeyChecked(#join($primaryKeys '($e.getJavaType())keys[$m_0count]' ','));
+        return loadByPrimaryKeyChecked(#join($primaryKeys '($e.getJavaType())keys[$m_0count]' ','));
     }
 
     //1.4 override $table.asManagerInterfaceNSP()
@@ -189,8 +198,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass checkDuplicate($beanClass bean)throws ObjectRetrievalException{
 #if ( 1 == $table.countPrimaryKeys() )
-        if(null != bean)
-            checkDuplicate(bean.$table.getPrimaryKey().getGetMethod()());            
+        if(null != bean){
+            checkDuplicate(bean.$table.getPrimaryKey().getGetMethod()());
+        }
 #else
         try{
             nativeManager.checkDuplicate(this.beanConverter.toRight(bean));            
@@ -221,7 +231,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //1.8 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys){
-        if(null == keys)return new java.util.ArrayList<$beanClass>();
+        if(null == keys){
+            return new java.util.ArrayList<$beanClass>();
+        }
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.length);
         for(int i = 0 ;i< keys.length;++i){
             list.add(loadByPrimaryKey(keys[i]));
@@ -231,7 +243,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //1.9 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
-        if(null == keys )return new java.util.ArrayList<$beanClass>();
+        if(null == keys ){
+            return new java.util.ArrayList<$beanClass>();
+        }
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(keys.size());
         if(keys instanceof java.util.List){
             for($pk.getJavaType() key: keys){
@@ -240,8 +254,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         }else{
             $beanClass bean;
             for($pk.getJavaType() key: keys){
-                if(null != (bean = loadByPrimaryKey(key)))
+                if(null != (bean = loadByPrimaryKey(key))){
                     list.add(bean);
+                }
             }
         }
         return list;
@@ -275,14 +290,17 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //2.1
     @Override
     public int deleteByPrimaryKey(Object ...keys){
-        if(null == keys)
+        if(null == keys){
             throw new NullPointerException();
-        if(keys.length != $table.countPrimaryKeys() )
+        }
+        if(keys.length != $table.countPrimaryKeys()){
             throw new IllegalArgumentException("argument number mismatch with primary key number");
+        }
 #foreach ( $pk in $primaryKeys )
 #set( $kidx = $velocityCount - 1 )
-        if(! (keys[$kidx] instanceof $pk.getJavaType()))
+        if(! (keys[$kidx] instanceof $pk.getJavaType())){
             throw new IllegalArgumentException("invalid type for the No.$velocityCount argument,expected type:$pk.getJavaType()");
+        }
 #end        
         return deleteByPrimaryKey(#foreach($pk in $primaryKeys)#if ( $velocityCount > 1 ),#end#set( $kidx = $velocityCount - 1 )($pk.getJavaType())keys[$kidx]#end);
     }
@@ -296,20 +314,22 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //2.2 override $table.asManagerInterfaceNSP()
     @Override 
     public int deleteByPrimaryKey($pkType... keys){
-        if(null == keys)return 0;
         int count = 0;
-        for($pkType key:keys){
-            count += deleteByPrimaryKey(key);
+        if(null != keys){        
+            for($pkType key:keys){
+                count += deleteByPrimaryKey(key);
+            }
         }
         return count;
     }
     //2.3 override $table.asManagerInterfaceNSP()
     @Override 
     public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys){
-        if(null == keys)return 0;
         int count = 0;
-        for($pk.getJavaType() key :keys){
-            count += deleteByPrimaryKey(key);
+        if(null != keys){        
+            for($pk.getJavaType() key :keys){
+                count += deleteByPrimaryKey(key);
+            }
         }
         return count;
     }
@@ -317,20 +337,22 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //2.4 override $table.asManagerInterfaceNSP()
     @Override 
     public int delete($beanClass... beans){
-        if(null == beans)return 0;
         int count = 0;
-        for($beanClass bean :beans){
-            count += delete(bean);
+        if(null != beans){
+            for($beanClass bean :beans){
+                count += delete(bean);
+            }
         }
         return count;
     }
     //2.5 override $table.asManagerInterfaceNSP()
     @Override 
     public int delete(java.util.Collection<$beanClass> beans){
-        if(null == beans)return 0;
         int count = 0;
-        for($beanClass bean :beans){
-            count += delete(bean);
+        if(null != beans){
+            for($beanClass bean :beans){
+                count += delete(bean);
+            }
         }
         return count;
     }
@@ -344,7 +366,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     // IMPORT KEY GENERIC METHOD
     //////////////////////////////////////
     
-    private static final Class<?>[] importedBeanTypes = new Class<?>[]{#foreachImportedTables('native' $table "${m_importedClass}.class" ',' '')};
+    private static final Class<?>[] IMPORTED_BEAN_TYPES = new Class<?>[]{#foreachImportedTables('native' $table "${m_importedClass}.class" ',' '')};
 
     /**
      * @see ${esc.hash}getImportedBeansAsList($beanClass,int)
@@ -352,7 +374,7 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ${gpkg}.BaseBean<T>> T[] getImportedBeans($beanClass bean, int ikIndex){
-        return getImportedBeansAsList(bean, ikIndex).toArray((T[])java.lang.reflect.Array.newInstance(importedBeanTypes[ikIndex],0));
+        return getImportedBeansAsList(bean, ikIndex).toArray((T[])java.lang.reflect.Array.newInstance(IMPORTED_BEAN_TYPES[ikIndex],0));
     }
     
     /**
@@ -379,8 +401,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return (java.util.List<T>)this.${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean);
 #end
 #end
+        default:
+            throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
         }
-        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
      * Set the T objects as imported beans of bean object by ikIndex.<br>
@@ -408,8 +431,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return (T[])${importedTable.getImportedBeansSetMethod($fkName)}(bean,(${importedClass}[])importedBeans);
 #end
 #end
+        default:
+            throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
         }
-        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
     /**
      * Set the importedBeans associates to the bean by ikIndex<br>
@@ -436,8 +460,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return (C)${importedTable.getImportedBeansSetMethod($fkName)}(bean,(java.util.Collection<${importedClass}>)importedBeans);
 #end
 #end
+        default:
+            throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
         }
-        throw new IllegalArgumentException(String.format("invalid ikIndex %d", ikIndex));
     }
 #end ## $table.hasImportedKeys()
 
@@ -543,13 +568,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 
         #foreachImportedTables('native' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
-        if(null == bean) return null;
+        if(null == bean){
+            return null;
+        }
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClassManager = "$foreignTable.asManagerClassNSP()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        if(null != $table.asRefArg($fkName))
+        if(null != $table.asRefArg($fkName)){
             this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+        }
 #end
 #end
         bean = this.save( bean );
@@ -587,7 +615,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
 
         #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))
     {
-        if(null == bean) return null;
+        if(null == bean){
+            return null;
+        }
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClassManager = "$foreignTable.asManagerClassNSP()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
@@ -635,14 +665,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass save($beanClass bean,Object ...args) 
     {
-        if(null == args)
+        if(null == args){
             return save(bean);
+        }
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength)
+        if(args.length > $argLength){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
+        }
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
@@ -686,14 +718,16 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public $beanClass saveCollection($beanClass bean,Object ...inputs)
     {
-        if(null == inputs)
+        if(null == inputs){
             return save(bean);
+        }
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(inputs.length > $argLength)
+        if(inputs.length > $argLength){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
+        }
         Object[] args = new Object[$argLength];
         System.arraycopy(inputs,0,args,0,$argLength);
 #foreach($foreignTable in $foreignTables)
@@ -758,8 +792,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return  (T)this.${table.getReferencedVarGetMethod($fkName)}(bean);
 #end
 #end
+        default:
+            throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
         }
-        throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
     }
     /**
      * Associates the {@link $beanClass} object to the bean object by fkIndex field.<br>
@@ -783,8 +818,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
             return  (T)this.${table.getReferencedVarSetMethod($fkName)}(bean, (${foreignClass})beanToSet);
 #end
 #end
+        default:
+            throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
         }
-        throw new IllegalArgumentException(String.format("invalid fkIndex %d", fkIndex));
     }
 #end## $table.hasForeignKeys()
     
@@ -805,7 +841,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)
     {
-        if(null == bean)return null;
+        if(null == bean){
+            return null;
+        }
         bean.$table.getReferencedVarSetMethod($fkName)(${foreignTable.asInstanceMethod($isGeneral)}().loadByPrimaryKey(#join($columnsOfFk "bean.$e.getGetMethod()()" ','))); 
         return bean.$table.getReferencedVarGetMethod($fkName)();
     }
@@ -959,9 +997,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     // override $table.asManagerInterfaceNSP()
     @Override 
     public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException{
-        ${beanClass} bean = new ${beanClass}();
-        if(#join($indexColumns 'null == ${e.getVarName()}' ' || '))
+        if(#join($indexColumns 'null == ${e.getVarName()}' ' || ')){
             throw new ObjectRetrievalException(new NullPointerException());
+        }
+        ${beanClass} bean = new ${beanClass}();
         #join($indexColumns '
         bean.${e.getSetMethod()}(${e.getVarName()});
         ' '')
@@ -979,7 +1018,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)
     {
-        if(null == indexs)return new java.util.ArrayList<$beanClass>();
+        if(null == indexs){
+            return new java.util.ArrayList<$beanClass>();
+        }
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.length);
         for(int i = 0 ;i< indexs.length;++i){
             list.add(loadBy${index.asCamelCaseName()}(indexs[i]));
@@ -990,7 +1031,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
     {
-        if(null == indexs )return new java.util.ArrayList<$beanClass>();
+        if(null == indexs ){
+            return new java.util.ArrayList<$beanClass>();
+        }
         java.util.ArrayList<$beanClass> list = new java.util.ArrayList<$beanClass>(indexs.size());
         if(indexs instanceof java.util.List){
             for($indexColumn.getJavaType() key: indexs){
@@ -999,8 +1042,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
         }else{
             $beanClass bean;
             for($indexColumn.getJavaType() key: indexs){
-                if(null != (bean = loadBy${index.asCamelCaseName()}(key)))
+                if(null != (bean = loadBy${index.asCamelCaseName()}(key))){
                     list.add(bean);
+                }
             }
         }
         return list;
@@ -1009,10 +1053,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public int deleteBy${index.asCamelCaseName()}($columnType... indexs)
     {
-        if(null == indexs)return 0;
         int count = 0;
-        for($columnType index : indexs){
-            count += deleteBy${index.asCamelCaseName()}(index);
+        if(null != indexs){
+            for($columnType index : indexs){
+                count += deleteBy${index.asCamelCaseName()}(index);
+            }
         }
         return count;
     }
@@ -1020,10 +1065,11 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override 
     public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)
     {
-        if(null == indexs)return 0;
         int count = 0;
-        for($columnType index : indexs){
-            count += deleteBy${index.asCamelCaseName()}(index);
+        if(null != indexs){
+            for($columnType index : indexs){
+                count += deleteBy${index.asCamelCaseName()}(index);
+            }
         }
         return count;
     }
@@ -1144,10 +1190,12 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //23.2 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public void addJunction($beanClass bean,$linkedBean linked){
-        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
             return ;
-        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+        }
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' '')){
             return ;
+        }
         if(!${jTable.asInstanceMethod($isGeneral)}().existsPrimaryKey($junctionParam)){
             $junctionBeanClass junction = new ${junctionBeanClass}();
 #foreach($pk in $jTable.primaryKeys)
@@ -1160,45 +1208,51 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //23.3 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public int deleteJunction($beanClass bean,$linkedBean linked){
-        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' ''))
+        if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
             return 0;
-        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' ''))
+        }
+        if(null == linked #join($linkedTable.primaryKeys '|| null ==bean.$e.getGetMethod()()' '')){
             return 0;
+        }
         return ${jTable.asInstanceMethod($isGeneral)}().deleteByPrimaryKey($junctionParam);
     }
     //23.4 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public void addJunction($beanClass bean,$linkedBean... linkedBeans){
-        if(null == linkedBeans)return;
-        for($linkedBean linked:linkedBeans){
-            addJunction(bean,linked);
+        if(null != linkedBeans){
+            for($linkedBean linked:linkedBeans){
+                addJunction(bean,linked);
+            }
         }
     }
     //23.5 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
-        if(null == linkedBeans)return;
-        for($linkedBean linked:linkedBeans){
-            addJunction(bean,linked);
+        if(null != linkedBeans){
+            for($linkedBean linked:linkedBeans){
+                addJunction(bean,linked);
+            }
         }
     }
     //23.6 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public int deleteJunction($beanClass bean,$linkedBean... linkedBeans){
-        if(null == linkedBeans)return 0;
         int count = 0;
-        for($linkedBean linked:linkedBeans){
-            count += deleteJunction(bean,linked);
+        if(null != linkedBeans){
+            for($linkedBean linked:linkedBeans){
+                count += deleteJunction(bean,linked);
+            }
         }
         return count;
     }
     //23.7 MANY TO MANY override $table.asManagerInterfaceNSP()
     @Override
     public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans){
-        if(null == linkedBeans)return 0;
         int count = 0;
-        for($linkedBean linked:linkedBeans){
-            count += deleteJunction(bean,linked);
+        if(null != linkedBeans){
+            for($linkedBean linked:linkedBeans){
+                count += deleteJunction(bean,linked);
+            }
         }
         return count;
     }
@@ -1261,9 +1315,10 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     @Override
     public void unregisterListener(TableListener<$beanClass> listener)
     {
-        if(listener instanceof WrapListener)
-            this.nativeManager.unregisterListener(((WrapListener)listener).nativeListener);
-        throw new IllegalArgumentException("invalid listener type: " + WrapListener.class.getName() +" required");
+        if(!(listener instanceof WrapListener)){
+            throw new IllegalArgumentException("invalid listener type: " + WrapListener.class.getName() +" required");
+        }
+        this.nativeManager.unregisterListener(((WrapListener)listener).nativeListener);
     }
     
     //37
@@ -1301,15 +1356,15 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
     /**
      * wrap {@code TableListener<$beanClass>} as native listener
-     * @author guyadong
      *
      */
     public class WrapListener implements TableListener<$beanClass>{
         private final TableListener<$beanClass> listener;
         private final net.gdface.facelog.dborm.TableListener<$nativeClass> nativeListener;
         private WrapListener(final TableListener<$beanClass> listener) {
-            if(null == listener)
+            if(null == listener){
                 throw new NullPointerException();
+            }
             this.listener = listener;
             this.nativeListener = new net.gdface.facelog.dborm.TableListener<$nativeClass> (){
 
@@ -1344,26 +1399,32 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
                 }};
         }
 
+        @Override
         public void beforeInsert($beanClass bean) {
             listener.beforeInsert(bean);
         }
 
+        @Override
         public void afterInsert($beanClass bean) {
             listener.afterInsert(bean);
         }
 
+        @Override
         public void beforeUpdate($beanClass bean) {
             listener.beforeUpdate(bean);
         }
 
+        @Override
         public void afterUpdate($beanClass bean) {
             listener.afterUpdate(bean);
         }
 
+        @Override
         public void beforeDelete($beanClass bean) {
             listener.beforeDelete(bean);
         }
 
+        @Override
         public void afterDelete($beanClass bean) {
             listener.afterDelete(bean);
         }        
@@ -1403,8 +1464,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     }
     
     private ${pkg}.TableManager.Action<$nativeClass> toNative(final Action<$beanClass> action){
-        if(null == action)
+        if(null == action){
             throw new NullPointerException();
+        }
         return new ${pkg}.TableManager.Action<$nativeClass>(){
 
             @Override
@@ -1428,7 +1490,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //45 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$pk.getJavaType()> toPrimaryKeyList($beanClass... array){        
-        if(null == array)return new java.util.ArrayList<$pk.getJavaType()>();
+        if(null == array){
+            return new java.util.ArrayList<$pk.getJavaType()>();
+        }
         java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(array.length);
         for($beanClass bean:array){
             list.add(null == bean ? null : bean.$pk.getGetMethod()());
@@ -1438,7 +1502,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //46 override $table.asManagerInterfaceNSP()
     @Override 
     public java.util.List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection){        
-        if(null == collection)return new java.util.ArrayList<$pk.getJavaType()>();
+        if(null == collection){
+            return new java.util.ArrayList<$pk.getJavaType()>();
+        }
         java.util.ArrayList<$pk.getJavaType()> list = new java.util.ArrayList<$pk.getJavaType()>(collection.size());
         for($beanClass bean:collection){
             list.add(null == bean ? null : bean.$pk.getGetMethod()());
@@ -1516,8 +1582,9 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //53 $table.asManagerInterfaceNSP()
     @Override
     public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
-        if(#join($primaryKeys 'null == $e.getVarName()' ' || '))
+        if(#join($primaryKeys 'null == $e.getVarName()' ' || ')){
             throw new NullPointerException();
+        }
         $beanClass parent = new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
         for(;#join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
             parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
@@ -1530,24 +1597,27 @@ public class $managerClassNSP extends TableManager.Adapter<$beanClass> implement
     //54 $table.asManagerInterfaceNSP()
     @Override
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean){
-        if(null == bean)
+        if(null == bean){
             throw new NullPointerException();
+        }
         return $table.getTopMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
 #if($table.countPrimaryKeys() == 1)
     //55 $table.asManagerInterfaceNSP()
     @Override
     public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()){
-        if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName()))
+        if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName())){
             throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        }
         return $table.primaryKey.getVarName();
     }
 #end
     //56 $table.asManagerInterfaceNSP()
     @Override
     public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean){
-        if($table.getCyeleTestMethod($selfFk)(bean))
+        if($table.getCyeleTestMethod($selfFk)(bean)){
             throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+        }
         return bean;
     }
 #end

@@ -52,25 +52,25 @@ public interface IBeanConverter<L,R> {
             this.rightType = rightClass;
         }
         /** copy right -> left, left and right must not be null */
-        protected abstract void _fromRight(L left, R right);
+        protected abstract void doFromRight(L left, R right);
         /** copy left -> right, left and right must not be null */
-        protected abstract void _toRight(L left, R right);
+        protected abstract void doToRight(L left, R right);
         /**
          *  Creates a new  L instance by calling constructor with an empty argument list<br>
          *  you must override the method if the L class haven't default constructor.
          * @return
          */
         @SuppressWarnings("unchecked")
-        protected L _newInstanceL(){ return (L) _newInstance(this.leftType); }
+        protected L newInstanceL(){ return (L) newInstance(this.leftType); }
         /**
          *  Creates a new R instance by calling constructor with an empty argument list<br>
          *  you must override the method if the R class haven't default constructor.
          * @return
          */
         @SuppressWarnings("unchecked")
-        protected R _newInstanceR(){ return (R) _newInstance(this.rightType); }
+        protected R newInstanceR(){ return (R) newInstance(this.rightType); }
         
-        protected  static<T> T _newInstance(Class<T>clazz){
+        protected  static<T> T newInstance(Class<T>clazz){
             try {
                 return (T) clazz.newInstance();
             } catch (InstantiationException e) {
@@ -80,43 +80,51 @@ public interface IBeanConverter<L,R> {
             }
         }
         private R[] makeRights(L[] lefts){
-            if(null == lefts)return null;
+            if(null == lefts){
+                return null;
+            }
             @SuppressWarnings("unchecked")
             R[] rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;
             for(int i=0;i<lefts.length;++i){
-                rights[i]=null == lefts[i]?null:_newInstanceR();
+                rights[i]=null == lefts[i]?null:newInstanceR();
             }
             return rights;
         }
         private L[] makeLefts(R[] rights){
-            if(null == rights)return null;
+            if(null == rights){
+                return null;
+            }
             @SuppressWarnings("unchecked")
             L[] lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;
             for(int i=0;i<rights.length;++i){
-                lefts[i]=null == rights[i]?null:_newInstanceL();
+                lefts[i]=null == rights[i]?null:newInstanceL();
             }
             return lefts;
         }
         private List<R> makeRights(List<L> lefts){
-            if(null == lefts)return null;
+            if(null == lefts){
+                return null;
+            }
             ArrayList<R> rights = new ArrayList<R>(lefts.size());
             for(int i=0;i<lefts.size();++i){
-                rights.add (null == lefts.get(i)?null:_newInstanceR());
+                rights.add (null == lefts.get(i)?null:newInstanceR());
             }
             return rights;
         }
         private List<L> makeLefts(List<R> rights){
-            if(null == rights)return null;
+            if(null == rights){
+                return null;
+            }
             ArrayList<L> lefts = new ArrayList<L>(rights.size());
             for(int i=0;i<rights.size();++i){
-                lefts.add (null == rights.get(i)?null:_newInstanceL());
+                lefts.add (null == rights.get(i)?null:newInstanceL());
             }
             return lefts;
         }
         @Override
         public L fromRight(L left, R right) {
             if(null != right && null != left){
-                this._fromRight(left, right);
+                this.doFromRight(left, right);
             }            
             return left;
         }
@@ -124,26 +132,27 @@ public interface IBeanConverter<L,R> {
         @Override
         public R toRight(L left, R right) {
             if(null != left && null != right){
-                this._toRight(left, right);
+                this.doToRight(left, right);
             }
             return right;
         }
 
         @Override
         public L fromRight(R bean) {
-            return null == bean? null : fromRight(_newInstanceL(),bean);
+            return null == bean? null : fromRight(newInstanceL(),bean);
         }
 
         @Override
         public R toRight(L bean) {
-            return null == bean? null : toRight(bean,_newInstanceR());
+            return null == bean? null : toRight(bean,newInstanceR());
         }
 
         @Override
         public R[] toRight(L[] lefts, R[] rights) {
             if(null != lefts && null != rights){
-                if( lefts.length != rights.length)
+                if( lefts.length != rights.length){
                     throw new IllegalArgumentException("mismatched length between left and right array");
+                }
                 for(int i=0;i<lefts.length;++i){
                     this.toRight(lefts[i],rights[i]);
                 }
@@ -154,8 +163,9 @@ public interface IBeanConverter<L,R> {
         @Override
         public L[] fromRight(L[] lefts, R[] rights) {
             if(null != rights && null != lefts){
-                if( lefts.length != rights.length)
+                if( lefts.length != rights.length){
                     throw new IllegalArgumentException("mismatched length between left and right array");
+                }
                 for(int i=0;i<lefts.length;++i){
                     this.fromRight(lefts[i],rights[i]);
                 }
@@ -175,7 +185,9 @@ public interface IBeanConverter<L,R> {
 
         @Override
         public List<R> toRight(Collection<L> beans) {
-            if(null==beans)return null;
+            if(null==beans){
+                return null;
+            }
             ArrayList<R> rights = new ArrayList<R>(beans.size());
             for(L g:beans){
                 rights.add(this.toRight(g));
@@ -185,7 +197,9 @@ public interface IBeanConverter<L,R> {
 
         @Override
         public List<L> fromRight(Collection<R> beans) {
-            if(null==beans)return null;
+            if(null==beans){
+                return null;
+            }
             ArrayList<L> lefts = new ArrayList<L>(beans.size());
             for(R n:beans){
                 lefts.add(this.fromRight(n));
@@ -196,8 +210,9 @@ public interface IBeanConverter<L,R> {
         @Override
         public List<R> toRight(List<L> lefts, List<R> rights) {
             if(null != lefts && null != rights){
-                if( lefts.size() != rights.size())
+                if( lefts.size() != rights.size()){
                     throw new IllegalArgumentException("mismatched length between left and right list");
+                }
                 for(int i=0;i<lefts.size();++i){
                     this.toRight(lefts.get(i),rights.get(i));
                 }
@@ -208,8 +223,9 @@ public interface IBeanConverter<L,R> {
         @Override
         public List<L> fromRight(List<L> lefts, List<R> rights) {
             if(null != rights && null != lefts){
-                if( lefts.size() != rights.size())
+                if( lefts.size() != rights.size()){
                     throw new IllegalArgumentException("mismatched length between left and right list");
+                }
                 for(int i=0;i<lefts.size();++i){
                     this.fromRight(lefts.get(i),rights.get(i));
                 }
@@ -228,8 +244,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public<V> Map<R,V> toRightKey(Map<L,V> lmap) {
-            if(null == lmap)return null;
-            HashMap<R,V> rmap = new HashMap<R,V>();
+            if(null == lmap){
+                return null;
+            }
+            HashMap<R,V> rmap = new HashMap<R,V>(16);
             for(Entry<L, V> entry:lmap.entrySet()){
                 rmap.put(this.toRight(entry.getKey()),entry.getValue());
             }
@@ -237,8 +255,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public<K> Map<K,R> toRightValue(Map<K,L> lmap) {
-            if(null == lmap)return null;
-            HashMap<K, R> rmap = new HashMap<K, R>();
+            if(null == lmap){
+                return null;
+            }
+            HashMap<K, R> rmap = new HashMap<K, R>(16);
             for(Entry<K, L> entry:lmap.entrySet()){
                 rmap.put(entry.getKey(), this.toRight(entry.getValue()));
             }
@@ -246,8 +266,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public<V> Map<L,V> fromRightKey(Map<R,V> rmap) {
-            if(null == rmap)return null;
-            HashMap<L,V> lmap = new HashMap<L,V>();
+            if(null == rmap){
+                return null;
+            }
+            HashMap<L,V> lmap = new HashMap<L,V>(16);
             for(Entry<R, V> entry:rmap.entrySet()){
                 lmap.put(this.fromRight(entry.getKey()),entry.getValue());
             }
@@ -255,8 +277,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public<K> Map<K,L> fromRightValue(Map<K,R> rmap) {
-            if(null == rmap)return null;
-            HashMap<K, L> lmap = new HashMap<K, L>();
+            if(null == rmap){
+                return null;
+            }
+            HashMap<K, L> lmap = new HashMap<K, L>(16);
             for(Entry<K, R> entry:rmap.entrySet()){
                 lmap.put(entry.getKey(), this.fromRight(entry.getValue()));
             }
@@ -264,8 +288,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public Map<R,R> toRight(Map<L,L> lmap) {
-            if(null == lmap)return null;
-            HashMap<R,R> rmap = new HashMap<R,R>();
+            if(null == lmap){
+                return null;
+            }
+            HashMap<R,R> rmap = new HashMap<R,R>(16);
             for(Entry<L, L> entry:lmap.entrySet()){
                 rmap.put(this.toRight(entry.getKey()),this.toRight(entry.getValue()));
             }
@@ -273,8 +299,10 @@ public interface IBeanConverter<L,R> {
         }
         @Override
         public Map<L,L> fromRight(Map<R,R> rmap) {
-            if(null == rmap)return null;
-            HashMap<L,L> lmap = new HashMap<L,L>();
+            if(null == rmap){
+                return null;
+            }
+            HashMap<L,L> lmap = new HashMap<L,L>(16);
             for(Entry<R, R> entry:rmap.entrySet()){
                 lmap.put(this.fromRight(entry.getKey()),this.fromRight(entry.getValue()));
             }
@@ -298,13 +326,15 @@ public interface IBeanConverter<L,R> {
      */
     public R toRight(L left, R right);
     /**
+     * return an new instance converted from R bean
      * @param bean
-     * @return an new instance converted from R bean
+     * @return L bean
      */
     public L fromRight(R bean);
     /**
+     * return an new instance converted from L bean
      * @param bean
-     * @return an new instance converted from L bean
+     * @return R bean
      */
     public R toRight( L bean);
     /**
@@ -322,13 +352,15 @@ public interface IBeanConverter<L,R> {
      */
     public R[] toRight(L[] lefts,R[] rights);
     /**
+     * return an new array converted from R beans
      * @param beans
-     * @return an new array converted from R beans
+     * @return L bean array
      */
     public L[] fromRight(R[] beans);
     /**
+     * an new array converted from L beans
      * @param beans
-     * @return an new array converted from L beans
+     * @return R bean array
      */
     public R[] toRight(L[] beans);
     /**
@@ -346,54 +378,64 @@ public interface IBeanConverter<L,R> {
      */
     public List<R> toRight(List<L> lefts,List<R> rights);
     /**
+     * return an new list converted from R beans
      * @param beans
-     * @return an new list converted from R beans
+     * @return L bean list
      */
     public List<L> fromRight(List<R> beans);
     /**
+     * return an new list converted from L beans
      * @param beans
-     * @return an new list converted from L beans
+     * @return R bean list
      */
     public List<R> toRight(List<L> beans);
     /**
+     * return an new list converted from R beans
      * @param beans
-     * @return an new list converted from R beans
+     * @return L bean list
      */
     public List<L> fromRight(Collection<R> beans);
     /**
+     * an new list converted from L beans
      * @param beans
-     * @return an new list converted from L beans
+     * @return R bean list
      */
     public List<R> toRight(Collection<L> beans);
     
     /**
+     * return an new map with R key converted from map with L key
      * @param lmap
-     * @return an new map with R key converted from map with L key
+     * @return Map with R key
      */
     public <V> Map<R,V> toRightKey(Map<L,V> lmap);
     /**
+     * return an new map with R value converted from map with L value
      * @param lmap
-     * @return an new map with R value converted from map with L value
+     * @return Map with R value
      */
     public <K> Map<K,R> toRightValue(Map<K,L> lmap);
     /**
+     * return an new map with L key converted from map with R key
      * @param rmap
-     * @return an new map with L key converted from map with R key
+     * @return Map with L key
      */
     public <V> Map<L,V> fromRightKey(Map<R,V> rmap);
     /**
+     * return an new map with L value converted from map with R value
      * @param rmap
-     * @return an new map with L value converted from map with R value
+     * @return Map with L value
      */
     public <K> Map<K,L> fromRightValue(Map<K,R> rmap);
     /**
+     * an new map with R key and  R value converted from map with L key and L value
      * @param lmap
-     * @return an new map with R key and  R value converted from map with L key and L value
+     * @return Map with R key & value
      */
     public Map<R,R> toRight(Map<L,L> lmap);
     /**
+     * return an new map with L key and  L value converted from map with R key and R value
      * @param rmap
-     * @return an new map with L key and  L value converted from map with R key and R value
+     * @return Map with L key & value
      */
     public Map<L,L> fromRight(Map<R,R> rmap);
 }
