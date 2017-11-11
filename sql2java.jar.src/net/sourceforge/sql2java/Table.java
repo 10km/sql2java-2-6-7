@@ -984,6 +984,9 @@ public class Table {
 	public String asConverterVar(){
 		return "converter" + asBeanClassNSP() ;
 	}
+	public String asConverterConstVar(){		
+		return  "converter_".concat(asBeanClassNSP()).toUpperCase();
+	}
 	public String asCacheVarName(){
 		return StringUtilities.convertName( getBasename(true) +  "_cache",true);
 	}
