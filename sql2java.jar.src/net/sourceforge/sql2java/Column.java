@@ -929,15 +929,16 @@ public class Column implements Cloneable, Comparable<Column> {
 		StringBuffer sb = new StringBuffer();
 		StringBuffer end = new StringBuffer();
 		end.append(pos).append(", ").append(var).append(");");
-		String fillNull = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "if(fillNull)";
+		String fillNullStart = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "if(fillNull){";
+		String fillNullEnd = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "}";
         Pattern p = Pattern.compile("^((?:\"%+\"\\s*\\+)*)([\\w\\. \\(\\)-]*)((?:\\+\\s*\"%+\")*)$");
         Matcher m = p.matcher(var);
         if(!m.matches()){
         	throw new IllegalArgumentException(String.format("Not match found %s", var));
         }
 		String v = m.group(2);
-		sb.append("if (").append(v).append(" == null) {"+fillNull+" ps.setNull(").append(pos).append(", ")
-				.append(this.getJavaTypeAsTypeName()).append("); } else { ");
+		sb.append("if (").append(v).append(" == null) {"+fillNullStart+" ps.setNull(").append(pos).append(", ")
+				.append(this.getJavaTypeAsTypeName()).append(");").append(fillNullEnd).append(" } else { ");
 		end.append(" }");
 		switch (this.getMappedType()) {
 			case M_ARRAY : {

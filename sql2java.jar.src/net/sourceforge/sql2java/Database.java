@@ -17,8 +17,13 @@ import java.util.Vector;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+
 import static com.google.common.base.Preconditions.checkState;
 import net.sourceforge.sql2java.CodeWriter;
 import net.sourceforge.sql2java.Column;
@@ -519,5 +524,23 @@ public class Database {
 			tables.add(tabs[i]);
 		}
 		return tables;
+	}
+	public List<Table> getTablesWithPk(){
+		return Lists.newArrayList(Collections2.filter(ImmutableList.copyOf(getTables()), new Predicate<Table>(){
+			@Override
+			public boolean apply(Table input) {
+				return input.hasPrimaryKey();
+			}}));
+	}
+	/**
+	 * 返回主键字段数目为指定值的表
+	 * @return
+	 */
+	public List<Table> getTablesWithPk(final Integer pkLimit){
+		return Lists.newArrayList(Collections2.filter(ImmutableList.copyOf(getTables()), new Predicate<Table>(){
+			@Override
+			public boolean apply(Table input) {
+				return input.countPrimaryKeys() == pkLimit;
+			}}));
 	}
 }
