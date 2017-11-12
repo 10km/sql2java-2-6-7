@@ -1801,8 +1801,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
         return ${jTable.asInstanceMethod($isGeneral)}().deleteByPrimaryKey($junctionParam);
     }
-    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
     //23.4 MANY TO MANY
+    /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
     public void addJunction($beanClass bean,$linkedBean... linkedBeans) throws DAOException{
         if(null != linkedBeans){
             for($linkedBean linked:linkedBeans){
@@ -2433,8 +2433,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #set ($foreignTable = $fkObj.foreignTable)
 #set ($foreignClass = $foreignTable.asBeanClass())
     /** foreign key listener for DEELTE RULE : $fkObj.deleteRule */
-    private final ${pkg}.ForeignKeyListener<$foreignClass,$beanClass> $table.getForeignKeyListenerVar($fkName) = 
-            new ${pkg}.ForeignKeyListener<$foreignClass,$beanClass>(){
+    private final ${pkg}.BaseForeignKeyListener<$foreignClass,$beanClass> $table.getForeignKeyListenerVar($fkName) = 
+            new ${pkg}.BaseForeignKeyListener<$foreignClass,$beanClass>(){
                 @Override
                 protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
                     return listenerContainer.isEmpty() 
@@ -2449,8 +2449,12 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         ')
 
 #elseif($fkObj.deleteRule.equals("SET_DEFAULT"))
-                        #join($fkObj.columns 'bean.${e.getSetMethod()}($e.getDefaultValue(true)$!{e.commentOfDefaultValue()});' '
-                        ')
+                        #join($fkObj.columns '
+#if($e.originalDefaultValue)
+### Default value ÐÐ×¢ÊÍ 
+                        $!{e.commentOfDefaultValue()}
+#end
+                        bean.${e.getSetMethod()}($e.getDefaultValue(true));' '')
 
 #end
                         Event.${fkObj.deleteRule.eventOfDeleteRule}.fire(listenerContainer, bean);

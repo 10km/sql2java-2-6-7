@@ -474,6 +474,10 @@ public $!{final} class ${beanClass}
     public void reset(){
         checkMutable();
 #foreach($column in $columns)
+#if($column.originalDefaultValue)
+### Default value ÐÐ×¢ÊÍ 
+        $!{column.commentOfDefaultValue()}
+#end
         this.$column.getVarName()${column.getDefaultValueAssignment(true)};
 #end
         this.isNew = true;

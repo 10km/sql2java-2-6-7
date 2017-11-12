@@ -71,7 +71,7 @@ public final class Manager
         return instance;
     }
     
-    //dispose pool
+    /** dispose pool */
     public void disposePool(){
         try{
             DataSources.destroy(ds);
@@ -882,10 +882,10 @@ public final class Manager
 
         "yy-MMM-dd",
         "yy-MMM-d",
-
-        "EEE dd, MMM yyyy", // ex: Wed 19, Feb 2003
-
-        "EEE dd, MMM yy" // ex: Wed 19, Feb 03
+        // ex: Wed 19, Feb 2003
+        "EEE dd, MMM yyyy", 
+        // ex: Wed 19, Feb 03
+        "EEE dd, MMM yy" 
     };
 
 
