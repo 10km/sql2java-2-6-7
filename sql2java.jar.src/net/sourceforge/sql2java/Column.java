@@ -931,7 +931,8 @@ public class Column implements Cloneable, Comparable<Column> {
 		end.append(pos).append(", ").append(var).append(");");
 		String fillNullStart = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "if(fillNull){";
 		String fillNullEnd = Boolean.TRUE == CodeWriter.getFillNull() ? "" : "}";
-        Pattern p = Pattern.compile("^((?:\"%+\"\\s*\\+)*)([\\w\\. \\(\\)-]*)((?:\\+\\s*\"%+\")*)$");
+        Pattern p = Pattern.compile("^((?:SQL_LIKE_WILDCARD\\s*\\+)*)([\\w\\. \\(\\)-]*)((?:\\+\\s*SQL_LIKE_WILDCARD)*)$");
+        
         Matcher m = p.matcher(var);
         if(!m.matches()){
         	throw new IllegalArgumentException(String.format("Not match found %s", var));
