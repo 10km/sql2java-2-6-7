@@ -1336,7 +1336,6 @@ public class Column implements Cloneable, Comparable<Column> {
     	String value = getDefaultValue(nullInstead);
     	if(!value.isEmpty())
     		buffer.append(" = ").append(value);
-    	buffer.append(commentOfDefaultValue());
     	return buffer.toString();
     }
 	public String getRemarks() {
