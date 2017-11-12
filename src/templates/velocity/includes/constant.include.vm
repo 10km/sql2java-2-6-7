@@ -37,7 +37,8 @@
  * @author guyadong
  */
 public interface $javaClassName {    
-
+    public static final int LONG_BIT_NUM = 64;
+    public static final String SQL_LIKE_WILDCARD = "%";
     /** set =QUERY for loadUsingTemplate */
     public static final int SEARCH_EXACT = 0;
     /** set %QUERY% for loadLikeTemplate */
@@ -46,7 +47,12 @@ public interface $javaClassName {
     public static final int SEARCH_STARTING_LIKE = 2;
     /** set QUERY% for loadLikeTemplate */
     public static final int SEARCH_ENDING_LIKE = 3;
-    
+   
+    //////////////////////////////////////
+    // COLUMN COLUMN CONSTANT
+    //////////////////////////////////////    
+    #join($tables 'public static final Integer ${e.name.toUpperCase()}_COLUMN_COUNT = $e.countColumns();
+    ' '') 
     //////////////////////////////////////
     // FOREIGN KEY INDEX DECLARE
     //////////////////////////////////////    
@@ -91,7 +97,7 @@ public interface $javaClassName {
                             + ",')";
     public static final java.util.List<String> $t.name.toUpperCase()_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_FIELDS.split(","));
     /** Field that contains the comma separated java fields of the $t.name table. */
-    public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.getJavaName()' '"
+    public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.varName' '"
                             + ",')";
     public static final java.util.List<String> $t.name.toUpperCase()_JAVA_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_JAVA_FIELDS.split(","));
 #end

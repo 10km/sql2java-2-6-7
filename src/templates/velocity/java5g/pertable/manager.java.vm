@@ -667,6 +667,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             }});
     }
 #end ## $table.hasImportedTables()
+#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
+    private static final int SYNC_SAVE_ARG_LEN = $argLength;
     //3.9 SYNC SAVE 
     /**
      * Save the {@link $beanClass} bean and referenced beans and imported beans into the database.
@@ -682,12 +684,11 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         if(null == args){
             return save(bean);
         }
-#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength){
-            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
+        if(args.length > SYNC_SAVE_ARG_LEN){
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: SYNC_SAVE_ARG_LEN");
         }
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
@@ -735,15 +736,14 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         if(null == inputs){
             return save(bean);
         }
-#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(inputs.length > $argLength){
+        if(inputs.length > SYNC_SAVE_ARG_LEN){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
-        Object[] args = new Object[$argLength];
-        System.arraycopy(inputs,0,args,0,$argLength);
+        Object[] args = new Object[SYNC_SAVE_ARG_LEN];
+        System.arraycopy(inputs,0,args,0,SYNC_SAVE_ARG_LEN);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
@@ -764,7 +764,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof java.util.Collection)){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:java.util.Collection<$importedClass>");
         }
-#set ( $callList = "$callList,null == args[$argIndex]?null:(java.util.Collection<$importedClass>)args[$argIndex]")
+#set ( $callList = "$callList,
+                    null == args[$argIndex]?null:(java.util.Collection<$importedClass>)args[$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end

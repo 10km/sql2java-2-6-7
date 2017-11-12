@@ -140,6 +140,17 @@ public class ${javaClassName} implements Constant {
      *
      */
     public static class #converterClass(${leftClass})<$rightClass> extends IBeanConverter.AbstractHandle<${leftClass},${rightClass}>{
+        static enum Column{
+            /** column method info */
+            #join($table.columns '${e.varName}("$e.getGetMethod()","$e.getSetMethod()")' ',
+            ');
+            final String getter;
+            final String setter;
+            Column(String getter,String setter){
+                this.getter = setter;
+                this.setter = setter;
+            }
+        }
         private final Map<String,Method> methods = new Hashtable<String,Method>();
         private final Map<String,Integer> rightIndexs = new Hashtable<String,Integer>();
         private final Map<String, Class<?>> setterParams = new Hashtable<String,Class<?>>();
@@ -216,13 +227,13 @@ public class ${javaClassName} implements Constant {
                 methods.put(IS_NEW,rightType.getMethod(IS_NEW));
                 methods.put(GET_INITIALIZED,rightType.getMethod(GET_INITIALIZED));
                 getSetter(SET_NEW,boolean.class);
-                if(rightIndexs.size() > 64){
+                if(rightIndexs.size() > LONG_BIT_NUM){
                     getSetter(SET_INITIALIZED,long[].class,List.class);
                 }else{
                     getSetter(SET_INITIALIZED,long.class);
                 }
                 getGetter(GET_MODIFIED);
-                if(rightIndexs.size() > 64){
+                if(rightIndexs.size() > LONG_BIT_NUM){
                     getSetter(SET_MODIFIED,long[].class,List.class);
                 }else{
                     getSetter(SET_MODIFIED,long.class);
@@ -232,20 +243,20 @@ public class ${javaClassName} implements Constant {
             }
 
 #foreach ( $column in $table.columns ) 
-#set ( $methodName = ${column.getSetMethod()}) 
+#set ( $setterName = "Column.${column.varName}.setter") 
 #set ( $javaType = ${column.getJavaType()})
 #set ( $javaPrimaryType = ${column.getJavaPrimaryType()})
-            getGetter("$methodName");
+            getGetter(Column.${column.varName}.getter);
 #if ( $column.hasPrimaryType())
 #if($column.isDate())
-            getSetterNoThrow("$methodName",${javaType}.class,Long.class,long.class);  
+            getSetterNoThrow($setterName,${javaType}.class,Long.class,long.class);  
 #else
-            getSetterNoThrow("$methodName",${javaType}.class,${javaPrimaryType}.class);                    
+            getSetterNoThrow($setterName,${javaType}.class,${javaPrimaryType}.class);                    
 #end
 #elseif($column.isBinary())
-            getSetterNoThrow("$methodName",java.nio.ByteBuffer.class,byte[].class);                    
+            getSetterNoThrow($setterName,java.nio.ByteBuffer.class,byte[].class);                    
 #else
-            getSetterNoThrow("$methodName",${javaType}.class); 
+            getSetterNoThrow($setterName,${javaType}.class); 
 #end
 #end###foreach ( $column in $table.columns ) 
         }
@@ -257,7 +268,7 @@ public class ${javaClassName} implements Constant {
                 $table.stateVarType() selfModified = $table.maskInitializeWithZero();
                 long[] initialized;
                 long[] modified;
-                if(rightIndexs.size() > 64){
+                if(rightIndexs.size() > LONG_BIT_NUM){
                     initialized = (long[])methods.get(GET_INITIALIZED).invoke(right);
                     modified = (long[])methods.get(GET_MODIFIED).invoke(right);
                 }else{
@@ -265,9 +276,10 @@ public class ${javaClassName} implements Constant {
                     modified = new long[]{(Long)methods.get(GET_MODIFIED).invoke(right)};
                 }
 #foreach ( $column in $table.columns )
-                if( bitCheck("$column.getJavaName()",initialized) && (null != (getterMethod = methods.get("${column.getGetMethod()}")))){
+#set ($name = "Column.${column.varName}.name()")
+                if( bitCheck($name,initialized) && (null != (getterMethod = methods.get(Column.${column.varName}.getter)))){
                     left.$column.getSetMethod()(cast(${column.getJavaType()}.class,getterMethod.invoke(right)));
-                    if(bitCheck("$column.getJavaName()",modified)){
+                    if(bitCheck($name,modified)){
                         $column.bitORAssignExpression("selfModified");
                     }
                 }
@@ -285,22 +297,23 @@ public class ${javaClassName} implements Constant {
         protected void doToRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method setterMethod;
-                long[] initialized = new long[(rightIndexs.size() + 63)>>6];
-                long[] modified = new long[(rightIndexs.size() + 63)>>6];
+                long[] initialized = new long[(rightIndexs.size() + LONG_BIT_NUM - 1)>>6];
+                long[] modified = new long[(rightIndexs.size() + LONG_BIT_NUM - 1)>>6];
                 Arrays.fill(initialized, 0L);
                 Arrays.fill(modified, 0L);
 #foreach ( $column in $table.columns )
-#set ( $setterName = ${column.getSetMethod()}) 
+#set ($name = "Column.${column.varName}.name()")
+#set ( $setterName = "Column.${column.varName}.setter") 
 #set($isIgnore = $ignorefields.contains($column.name))
 #if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
 /*
 #end
-                if(null != (setterMethod = methods.get("$setterName")) && left.${column.getInitializedMethod()}()){
+                if(null != (setterMethod = methods.get(Column.${column.varName}.setter)) && left.${column.getInitializedMethod()}()){
                     try{
-                        setterMethod.invoke(right,cast(setterParams.get("$setterName"),left.${column.getGetMethod()}()));
-                        bitOR("$column.getJavaName()",initialized);
+                        setterMethod.invoke(right,cast(setterParams.get($setterName),left.${column.getGetMethod()}()));
+                        bitOR($name,initialized);
                         if(left.${column.getModifiedMethod()}()){
-                            bitOR("$column.getJavaName()",modified);
+                            bitOR($name,modified);
                         }
                     }catch(NullCastPrimitiveException e){}
                 }

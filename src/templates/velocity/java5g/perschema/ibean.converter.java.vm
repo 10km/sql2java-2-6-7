@@ -51,9 +51,17 @@ public interface IBeanConverter<L,R> {
             this.leftType = leftClass;
             this.rightType = rightClass;
         }
-        /** copy right -> left, left and right must not be null */
+        /** 
+         * copy right -> left, left and right must not be null
+         * @param left
+         * @param right
+         */
         protected abstract void doFromRight(L left, R right);
-        /** copy left -> right, left and right must not be null */
+        /** 
+         * copy left -> right, left and right must not be null 
+         * @param left
+         * @param right
+         */
         protected abstract void doToRight(L left, R right);
         /**
          *  Creates a new  L instance by calling constructor with an empty argument list<br>
