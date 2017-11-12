@@ -781,7 +781,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     public $beanClass save($beanClass bean,Object ...args) throws DAOException
     {
         if(null == args){
-            save(bean);
+            return save(bean);
         }
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
@@ -833,7 +833,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     public $beanClass saveCollection($beanClass bean,Object ...args) throws DAOException
     {
         if(null == args){
-            save(bean);
+            return save(bean);
         }
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
