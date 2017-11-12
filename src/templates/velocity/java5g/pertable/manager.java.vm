@@ -1607,10 +1607,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     //48 $table.asManagerInterfaceNSP()
 
     @Override
-    @SuppressWarnings("unchecked")
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean){
         return null == bean
-                ? java.util.Collections.EMPTY_LIST
+                ? java.util.Collections.<$beanClass>emptyList()
                 : $table.getListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
     //49 $table.asManagerInterfaceNSP()

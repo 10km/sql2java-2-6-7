@@ -2439,7 +2439,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 @Override
                 protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
                     return listenerContainer.isEmpty() 
-                            ? java.util.Collections.EMPTY_LIST
+                            ? java.util.Collections.<$beanClass>emptyList()
                             : ${foreignTable.asInstanceMethod($isGeneral)}().${table.getImportedBeansGetMethod($fkName)}AsList(bean);
                 }
                 @Override
@@ -2680,7 +2680,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     @SuppressWarnings("unchecked")
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean) throws DAOException{
         return null == bean
-                ? java.util.Collections.EMPTY_LIST
+                ? java.util.Collections.<$beanClass>emptyList()
                 : $table.getListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
     }
     //49
