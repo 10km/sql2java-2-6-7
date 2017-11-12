@@ -688,7 +688,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ( $argCount = 1 )
 #set ( $callList= "" )
         if(args.length > SYNC_SAVE_ARG_LEN){
-            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: SYNC_SAVE_ARG_LEN");
+            throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClassNSP()" )

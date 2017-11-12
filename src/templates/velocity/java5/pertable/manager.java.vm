@@ -151,7 +151,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
 #foreach( $pk in $primaryKeys )
-            $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
+            $pk.getPreparedStatementMethod($pk.getVarName(), "$pk.getIDConstName() + 1")
 #end
             List<$beanClass> pReturn = this.loadByPreparedStatementAsList(ps);
             if (1 == pReturn.size()) {
@@ -206,7 +206,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         if(null == keys){
             throw new NullPointerException();
         }
-        if(keys.length != $table.countPrimaryKeys()){
+        if(keys.length != ${table.name.toUpperCase()}_PK_COUNT){
             throw new IllegalArgumentException("argument number mismatch with primary key number");
         }
         #join($primaryKeys '
@@ -223,7 +223,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         if(null == keys){
             throw new NullPointerException();
         }
-        if(keys.length != $table.countPrimaryKeys()){
+        if(keys.length != ${table.name.toUpperCase()}_PK_COUNT){
             throw new IllegalArgumentException("argument number mismatch with primary key number");
         }
         #join($primaryKeys '
@@ -257,7 +257,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
 #foreach( $pk in $primaryKeys )
-            $pk.getPreparedStatementMethod($pk.getVarName(), $velocityCount)
+            $pk.getPreparedStatementMethod($pk.getVarName(), "$pk.getIDConstName() + 1")
 #end
             return 1 == this.countByPreparedStatement(ps);
         }catch(SQLException e){
@@ -363,7 +363,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
                                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                                     ResultSet.CONCUR_READ_ONLY);
 #foreach( $pk in $primaryKeys )
-            $pk.getPreparedStatementMethod("bean.${pk.getGetMethod()}()", $velocityCount)
+            $pk.getPreparedStatementMethod("bean.${pk.getGetMethod()}()", "$pk.getIDConstName() + 1")
 #end
             int rows=ps.executeUpdate();
             if(rows>0){
@@ -396,7 +396,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         if(null == keys){
             throw new NullPointerException();
         }
-        if(keys.length != $table.countPrimaryKeys()){
+        if(keys.length != ${table.name.toUpperCase()}_PK_COUNT){
             throw new IllegalArgumentException("argument number mismatch with primary key number");
         }
         ${beanClass} bean = createBean();   
@@ -767,6 +767,8 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
             }});
     }
 #end## $table.hasImportedTables()
+#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
+    private static final int SYNC_SAVE_ARG_LEN = $argLength;
     //3.9 SYNC SAVE 
     /**
      * Save the $beanClass bean and referenced beans and imported beans (array) into the database.
@@ -783,11 +785,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         if(null == args){
             return save(bean);
         }
-#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength){
+        if(args.length > SYNC_SAVE_ARG_LEN){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
 #foreach($foreignTable in $foreignTables)
@@ -835,11 +836,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         if(null == args){
             return save(bean);
         }
-#set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > $argLength){
+        if(args.length > SYNC_SAVE_ARG_LEN){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
 #foreach($foreignTable in $foreignTables)
@@ -2035,15 +2035,15 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         break;
                     case SEARCH_LIKE:
                         // System.out.println("Setting for " + dirtyCount + " [%" + bean.$column.getGetMethod()() + "%]");
-                        $column.getPreparedStatementMethod("${Q}%${Q} + bean.$column.getGetMethod()() + ${Q}%${Q}", "++dirtyCount")
+                        $column.getPreparedStatementMethod("SQL_LIKE_WILDCARD + bean.$column.getGetMethod()() + SQL_LIKE_WILDCARD", "++dirtyCount")
                         break;
                     case SEARCH_STARTING_LIKE:
                         // System.out.println("Setting for " + dirtyCount + " [%" + bean.$column.getGetMethod()() + "]");
-                        $column.getPreparedStatementMethod("${Q}%${Q} + bean.$column.getGetMethod()()", "++dirtyCount")
+                        $column.getPreparedStatementMethod("SQL_LIKE_WILDCARD + bean.$column.getGetMethod()()", "++dirtyCount")
                         break;
                     case SEARCH_ENDING_LIKE:
                         // System.out.println("Setting for " + dirtyCount + " [" + bean.$column.getGetMethod()() + "%]");
-                        $column.getPreparedStatementMethod("bean.$column.getGetMethod()() + ${Q}%${Q}", "++dirtyCount")
+                        $column.getPreparedStatementMethod("bean.$column.getGetMethod()() + SQL_LIKE_WILDCARD", "++dirtyCount")
                         break;
                     default:
                         throw new DAOException("Unknown search type " + searchType);
