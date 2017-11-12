@@ -2435,7 +2435,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /** foreign key listener for DEELTE RULE : $fkObj.deleteRule */
     private final ${pkg}.ForeignKeyListener<$foreignClass,$beanClass> $table.getForeignKeyListenerVar($fkName) = 
             new ${pkg}.ForeignKeyListener<$foreignClass,$beanClass>(){
-                @SuppressWarnings("unchecked")
                 @Override
                 protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
                     return listenerContainer.isEmpty() 
@@ -2677,7 +2676,6 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * see also {@link ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
-    @SuppressWarnings("unchecked")
     public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean) throws DAOException{
         return null == bean
                 ? java.util.Collections.<$beanClass>emptyList()

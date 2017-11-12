@@ -88,15 +88,15 @@ public class ${javaClassName} implements Constant {
             return (T) source;
         }catch(ClassCastException cce){
             // long[] -> List  
-            if(List.class.isAssignableFrom(type) && (source instanceof long[])){
+            if(List.class.isAssignableFrom(type) && null != source && source instanceof long[]){
                 return (T) toList((long[]) source);
             }
             // List -> long[]   
-            if(long[].class == type && (source instanceof List)){
+            if(long[].class == type && null != source && source instanceof List){
                 return (T) toPrimitive( (List<Long>) source);
             }
             // Long -> Date
-            if(java.util.Date.class.isAssignableFrom(type) && (source instanceof Long)){
+            if(java.util.Date.class.isAssignableFrom(type) && null != source && source instanceof Long){
                 try {
                     // call constructor,such as  java.util.Date#Date(long), java.sql.Time.Time(long)
                     return type.getConstructor(long.class).newInstance(source);
@@ -107,16 +107,16 @@ public class ${javaClassName} implements Constant {
                 }
             }
             // Date -> Long,long
-            if( (long.class == type || Long.class == type) && source instanceof java.util.Date){
+            if( (long.class == type || Long.class == type) && null != source && source instanceof java.util.Date){
                     Long time = ((java.util.Date)source).getTime();
                     return (T)time;
             }
             // byte[] -> ByteBuffer
-            if(ByteBuffer.class == type && source instanceof byte[]){
+            if(ByteBuffer.class == type && null != source && source instanceof byte[]){
                 return (T) ByteBuffer.wrap((byte[]) source);
             }
             // ByteBuffer -> byte[]
-            if(byte[].class == type && source instanceof ByteBuffer){
+            if(byte[].class == type && null != source && source instanceof ByteBuffer){
                 return (T) getBytesInBuffer((ByteBuffer) source);
             }
             throw cce;

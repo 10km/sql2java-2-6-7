@@ -108,16 +108,18 @@ public class DbConverter implements IDbConverter<#join($tables "
     }
     
     @Override
-    public synchronized <L,R>void setBeanConverter(Class<L> lClass,Class<R> rClass,IBeanConverter<L,R>converter){
+    public <L,R>void setBeanConverter(Class<L> lClass,Class<R> rClass,IBeanConverter<L,R>converter){
         if(null == lClass || null == rClass || null == converter){
             throw new NullPointerException();
         }
-        Object[] c = new Object[]{lClass,rClass,converter};
-        int index = getIndex(lClass, rClass);
-        if(index<0){
-            CONVERTERS.add(c);
-        }else{
-            CONVERTERS.set(index, c);
+        synchronized(this){
+            Object[] c = new Object[]{lClass,rClass,converter};
+            int index = getIndex(lClass, rClass);
+            if(index<0){
+                CONVERTERS.add(c);
+            }else{
+                CONVERTERS.set(index, c);
+            }
         }
     }
 #foreach ( $table in $tables )

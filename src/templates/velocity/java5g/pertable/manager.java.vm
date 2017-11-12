@@ -86,23 +86,6 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         return ${beanClass}.class;
     }
     
-    public IDbConverter<#join($tables "${e.getPackage()}.${e.asBeanClass()}" ',')> getDbConverter() {
-        return dbConverter;
-    }
-
-    /**
-     * set  {@link IDbConverter} as converter used by manager.<br>
-     * throw {@link NullPointerException} if {@code dbConverter} is null
-     * @param dbConverter
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public synchronized void setDbConverter(IDbConverter dbConverter) {
-        if( null == dbConverter){
-            throw new NullPointerException();
-        }
-        this.dbConverter = dbConverter;
-        this.beanConverter = this.dbConverter.get${beanClass}Converter();
-    }
 #if ( $table.countPrimaryKeys() > 0 )
     //////////////////////////////////////
     // PRIMARY KEY METHODS

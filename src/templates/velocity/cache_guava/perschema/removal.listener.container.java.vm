@@ -27,8 +27,7 @@ public class RemovalListenerContainer<K,V> implements RemovalListener<K, V> {
      * @see java.util.HashSet{esc.hash}add(java.lang.Object)
      */
     public boolean add(RemovalListener<K, V> e) {
-        Preconditions.checkNotNull(e);
-        return listeners.add(e);
+        return listeners.add(Preconditions.checkNotNull(e));
     }
 
     /**

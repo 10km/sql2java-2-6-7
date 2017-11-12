@@ -46,10 +46,10 @@ public final class Manager
     private String jdbcUrl = null;
     private String jdbcUsername = null;
     private String jdbcPassword = null;
-    private static String maxIdleTime;
-    private static String idleConnectionTestPeriod;
-    private static String maxPoolSize;
-    private static String minPoolSize;
+    private String maxIdleTime;
+    private String idleConnectionTestPeriod;
+    private String maxPoolSize;
+    private String minPoolSize;
     
     /**
      * Returns the manager singleton instance.
