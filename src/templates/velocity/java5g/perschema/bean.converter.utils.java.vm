@@ -107,9 +107,11 @@ public class ${javaClassName} implements Constant {
                 }
             }
             // Date -> Long,long
-            if( (long.class == type || Long.class == type) && null != source && source instanceof java.util.Date){
+            if( long.class == type || Long.class == type){
+                if(null != source && source instanceof java.util.Date){
                     Long time = ((java.util.Date)source).getTime();
                     return (T)time;
+                }
             }
             // byte[] -> ByteBuffer
             if(ByteBuffer.class == type && null != source && source instanceof byte[]){

@@ -53,7 +53,8 @@ public interface $javaClassName {
     //////////////////////////////////////    
     #join($tables '
     public static final int ${e.name.toUpperCase()}_COLUMN_COUNT = $e.countColumns();
-    public static final int ${e.name.toUpperCase()}_PK_COUNT = $e.countPrimaryKeys();' '') 
+    public static final int ${e.name.toUpperCase()}_PK_COUNT = $e.countPrimaryKeys();' '')
+
     //////////////////////////////////////
     // FOREIGN KEY INDEX DECLARE
     //////////////////////////////////////    

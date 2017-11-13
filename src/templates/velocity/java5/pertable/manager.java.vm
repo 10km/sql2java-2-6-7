@@ -768,7 +768,12 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     }
 #end## $table.hasImportedTables()
 #set ( $argLength = $table.countForeignKeyNames() + $table.countImportedKeyNames() )
+
     private static final int SYNC_SAVE_ARG_LEN = $argLength;
+#foreach($count in [1..$argLength])
+#set($idx = $count - 1 )
+    private static final int SYNC_SAVE_ARG_$idx = $idx;
+#end
     //3.9 SYNC SAVE 
     /**
      * Save the $beanClass bean and referenced beans and imported beans (array) into the database.
@@ -780,26 +785,29 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @throws DAOException
      */
     @Override
-    public $beanClass save($beanClass bean,Object ...args) throws DAOException
+    public $beanClass save($beanClass bean,Object ...inputs) throws DAOException
     {
-        if(null == args){
+        if(null == inputs){
             return save(bean);
         }
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > SYNC_SAVE_ARG_LEN){
+        if(inputs.length > SYNC_SAVE_ARG_LEN){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
+        Object[] args = new Object[SYNC_SAVE_ARG_LEN];
+        System.arraycopy(inputs, 0, args, 0, inputs.length);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+        if( null != args[SYNC_SAVE_ARG_$argIndex] && !(args[SYNC_SAVE_ARG_$argIndex] instanceof $foreignClass)){
             throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:$foreignClass");
         }
-#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:($foreignClass)args[$argIndex]")
-#set ( $argIndex = $argIndex + 1 )            
+#set ( $callList = "$callList,
+                    ($foreignClass)args[SYNC_SAVE_ARG_$argIndex]")
+#set ( $argIndex = $argIndex + 1 )
 #set ( $argCount = $argCount + 1 )
 #end
 #end
@@ -808,10 +816,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof ${importedClass}[])){
+        if( null != args[SYNC_SAVE_ARG_$argIndex] && !(args[SYNC_SAVE_ARG_$argIndex] instanceof ${importedClass}[])){
             throw new IllegalArgumentException("invalid type for the No.$argCount dynamic argument,expected type:${importedClass}[]");
         }
-#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:(${importedClass}[])args[$argIndex]")
+#set ( $callList = "$callList,
+                    (${importedClass}[])args[SYNC_SAVE_ARG_$argIndex]")
 #set ( $argIndex = $argIndex + 1 )            
 #set ( $argCount = $argCount + 1 )
 #end
@@ -831,27 +840,30 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public $beanClass saveCollection($beanClass bean,Object ...args) throws DAOException
+    public $beanClass saveCollection($beanClass bean,Object ...inputs) throws DAOException
     {
-        if(null == args){
+        if(null == inputs){
             return save(bean);
         }
 #set ( $argIndex = 0 )
 #set ( $argCount = 1 )
 #set ( $callList= "" )
-        if(args.length > SYNC_SAVE_ARG_LEN){
+        if(inputs.length > SYNC_SAVE_ARG_LEN){
             throw new IllegalArgumentException("too many dynamic arguments,max dynamic arguments number: $argLength");
         }
+        Object[] args = new Object[SYNC_SAVE_ARG_LEN];
+        System.arraycopy(inputs, 0, args, 0, inputs.length);
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
 #set ( $foreignClassManager = "$foreignTable.asManagerClass()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof $foreignClass)){
+        if( null != args[SYNC_SAVE_ARG_$argIndex] && !(args[SYNC_SAVE_ARG_$argIndex] instanceof $foreignClass)){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:$foreignClass");
         }
-#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:($foreignClass)args[$argIndex]")
-#set ( $argIndex = $argIndex + 1 )            
+#set ( $callList = "$callList,
+                    ($foreignClass)args[SYNC_SAVE_ARG_$argIndex]")
+#set ( $argIndex = $argIndex + 1 )    
 #set ( $argCount = $argCount + 1 )
 #end
 #end
@@ -861,10 +873,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        if( args.length > $argIndex && null != args[$argIndex] && !(args[$argIndex] instanceof java.util.Collection)){
+        if( null != args[SYNC_SAVE_ARG_$argIndex] && !(args[SYNC_SAVE_ARG_$argIndex] instanceof java.util.Collection)){
             throw new IllegalArgumentException("invalid type for the No.$argCount argument,expected type:java.util.Collection<$importedClass>");
         }
-#set ( $callList = "$callList,(args.length < $argCount || null == args[$argIndex])?null:(java.util.Collection<$importedClass>)args[$argIndex]")
+#set ( $callList = "$callList,
+                    (java.util.Collection<$importedClass>)args[SYNC_SAVE_ARG_$argIndex]")
 #set ( $argIndex = $argIndex + 1 )
 #set ( $argCount = $argCount + 1 )
 #end
