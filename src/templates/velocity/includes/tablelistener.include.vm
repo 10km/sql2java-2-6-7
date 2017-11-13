@@ -6,8 +6,8 @@ package $schemaPkg;
 
 import java.util.LinkedHashSet;
 #if(!$isGeneral)
-import ${schemaPkg}.exception.DAOException;
-#set ( $throwsString = "throws DAOException" )
+import ${schemaPkg}.exception.DaoException;
+#set ( $throwsString = "throws DaoException" )
 #end
 
 /**

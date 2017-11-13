@@ -7,7 +7,7 @@ package $table.getPackage();
 #if ($table.countPrimaryKeys() == 1)
 import java.util.HashMap;
 
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 
 /**
  * This cache manager is based on code from Mark GRAND in "Patterns in Java,
@@ -113,7 +113,7 @@ public final class ${cacheClass} {
 			${beanClass} bean = null;
 			try {
 				bean = ${managerClass}.getInstance().loadByPrimaryKey(id);
-			} catch (DAOException e) {
+			} catch (DaoException e) {
 				return null;
 			}
 			if (null != bean) {

@@ -17,7 +17,7 @@ import ${pkg}.Constant;
 import ${pkg}.Manager;
 import ${pkg}.TableListener;
 import ${pkg}.TableManager;
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 import ${pkg}.exception.DataAccessException;
 import net.gdface.facelog.dborm.exception.DataRetrievalException;
 import ${pkg}.exception.ObjectRetrievalException;
@@ -111,9 +111,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return a unique $beanClass or {@code null} if not found or have null argument
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
+    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DaoException
     {
         try{
             return loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ','));
@@ -132,10 +132,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 #end     
      * @return a unique $beanClass
      * @throws ObjectRetrievalException if not found
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unused")
-    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
+    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DaoException
     {
         if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
             throw new ObjectRetrievalException(new NullPointerException());
@@ -178,7 +178,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //1.2
     
     @Override
-    public $beanClass loadByPrimaryKey(${beanClass} bean) throws DAOException
+    public $beanClass loadByPrimaryKey(${beanClass} bean) throws DaoException
     {
         return bean==null?null:loadByPrimaryKey(#join($primaryKeys 'bean.${e.getGetMethod()}()' ','));
     }
@@ -186,7 +186,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //1.2.2
     
     @Override
-    public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws DAOException
+    public $beanClass loadByPrimaryKeyChecked(${beanClass} bean) throws DaoException
     {
         if(null == bean){
             throw new NullPointerException();
@@ -202,7 +202,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @see {@link ${esc.hash}loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))}
      */
     @Override
-    public $beanClass loadByPrimaryKey(Object ...keys) throws DAOException{
+    public $beanClass loadByPrimaryKey(Object ...keys) throws DaoException{
         if(null == keys){
             throw new NullPointerException();
         }
@@ -219,7 +219,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //1.3.2
 
     @Override
-    public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws DAOException{
+    public $beanClass loadByPrimaryKeyChecked(Object ...keys) throws DaoException{
         if(null == keys){
             throw new NullPointerException();
         }
@@ -239,10 +239,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unused")
-    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
+    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DaoException
     {
         if(#join($primaryKeys "null == $e.getVarName()" ' || ')){
             return false;
@@ -271,12 +271,12 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     /**
      * Return true if this $tablename contains row with primary key fields.
      * @param bean  
-     * @throws DAOException
+     * @throws DaoException
      * @return false if primary kes has null
      * @see ${esc.hash}countUsingTemplate($beanClass)
      */
     @Override
-    public boolean existsByPrimaryKey($beanClass bean) throws DAOException
+    public boolean existsByPrimaryKey($beanClass bean) throws DaoException
     {
         if(null == bean #join($primaryKeys " || null == bean.${e.getGetMethod()}()" '')){
             return false;
@@ -292,7 +292,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //1.7
 
     @Override
-    public $beanClass checkDuplicate($beanClass bean) throws DAOException{
+    public $beanClass checkDuplicate($beanClass bean) throws DaoException{
         if(!existsByPrimaryKey(bean)){
             throw new ObjectRetrievalException("Duplicate entry ("+ #join( $primaryKeys "bean.$e.getGetMethod()()" ' + " " +') +") for key 'PRIMARY'");
         }
@@ -304,10 +304,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     /**
      * Check duplicated row by primary keys,if row exists throw {@link ObjectRetrievalException}
      * @param $pk.getVarName() $pk.getJavaType()
-     * @throws DAOException
+     * @throws DaoException
      * @see ${esc.hash}existsPrimaryKey($pk.getJavaType() $pk.getVarName())
      */
-    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName()) throws DAOException
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName()) throws DaoException
     {
         if(existsPrimaryKey($pk.getVarName())){
             throw new ObjectRetrievalException("Duplicate entry '"+ $pk.getVarName() +"' for key 'PRIMARY'");
@@ -324,10 +324,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the number of deleted rows
-     * @throws DAOException
+     * @throws DaoException
      * @see {@link ${esc.hash}delete($beanClass)}
      */
-    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DAOException
+    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DaoException
     {
         ${beanClass} bean=createBean();
 #foreach ( $pk in $primaryKeys )
@@ -342,10 +342,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * 
      * @param bean will be deleted ,all keys must not be null
      * @return the number of deleted rows,0 returned if bean is null
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public int delete($beanClass bean) throws DAOException
+    public int delete($beanClass bean) throws DaoException
     {
         if(null == bean #join($primaryKeys " || null == bean.${e.getGetMethod()}()" '')){
             return 0;
@@ -392,7 +392,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @see {@link ${esc.hash}delete($beanClass)}
      */   
     @Override
-    public int deleteByPrimaryKey(Object ...keys) throws DAOException{
+    public int deleteByPrimaryKey(Object ...keys) throws DaoException{
         if(null == keys){
             throw new NullPointerException();
         }
@@ -425,7 +425,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>> T[] getImportedBeans($beanClass bean, int ikIndex) throws DAOException {
+    public <T extends ${pkg}.BaseBean<T>> T[] getImportedBeans($beanClass bean, int ikIndex) throws DaoException {
         return getImportedBeansAsList(bean, ikIndex).toArray((T[])java.lang.reflect.Array.newInstance(IMPORTED_BEAN_TYPES[ikIndex],0));
     }
     
@@ -439,11 +439,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param ikIndex valid values: #foreachImportedTables('' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<T>> List<T> getImportedBeansAsList($beanClass bean,int ikIndex)throws DaoException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -466,11 +466,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
      * @param ikIndex valid values: see also {@link ${esc.hash}getImportedBeansAsList($beanClass,int)}
      * @return importedBeans always
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>> T[] setImportedBeans($beanClass bean,T[] importedBeans,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<T>> T[] setImportedBeans($beanClass bean,T[] importedBeans,int ikIndex)throws DaoException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -493,11 +493,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param ikIndex valid values: see also {@link ${esc.hash}getImportedBeansAsList($beanClass,int)}
 
      * @return importedBeans always
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,int ikIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<T>,C extends java.util.Collection<T>> C setImportedBeans($beanClass bean,C importedBeans,int ikIndex)throws DaoException{
         switch(ikIndex){
 #foreach($importedTable in $importedTables)
 #set ( $importedClass = "$importedTable.asBeanClass()" )
@@ -531,9 +531,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * FK_NAME : $fkName 
      * @param bean the {@link $beanClass}
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean) throws DAOException
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean) throws DaoException
     {
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean).toArray(new ${importedClass}[0]);
     }
@@ -545,9 +545,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DAOException
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DaoException
     {
         ${beanClass} bean = createBean();
 #foreach ( $pk in $primaryKeys )
@@ -561,9 +561,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * FK_NAME:$fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $importedClass} beans 
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean) throws DAOException
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean) throws DaoException
     {
         return ${importedTable.getImportedBeansGetMethod($fkName)}AsList(bean,1,-1);
     }
@@ -575,9 +575,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans 
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DAOException
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ',')) throws DaoException
     {
          ${beanClass} bean = createBean();
 #foreach ( $pk in $primaryKeys )
@@ -594,9 +594,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return the associated {@link $importedClass} beans 
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow, int numRows) throws DAOException
+    public List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow, int numRows) throws DaoException
     {
         if(null == bean){
             return new java.util.ArrayList<$importedClass>();
@@ -614,10 +614,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param bean the referenced {@link $beanClass}
      * @param importedBeans imported beans from $importedTable.name
      * @return importedBeans always
-     * @throws DAOException
+     * @throws DaoException
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans) throws DAOException
+    public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans) throws DaoException
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
@@ -634,10 +634,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param bean the referenced {@link $beanClass} 
      * @param importedBeans imported beans from $importedTable.name 
      * @return importedBeans always
-     * @throws DAOException
+     * @throws DaoException
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
-    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans) throws DAOException
+    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans) throws DaoException
     {
         if(null != importedBeans){
             for( $importedClass importBean : importedBeans ){
@@ -661,12 +661,12 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     #foreachForeignTables('' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} beans refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
-     * @throws DAOException
+     * @throws DaoException
      */
     public $beanClass save($beanClass bean
         #foreachForeignTables('' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DaoException
     {
         if(null == bean) {
             return null;
@@ -702,7 +702,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' '')) throws DaoException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
@@ -719,12 +719,12 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     #foreachForeignTables('' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
-     * @throws DAOException
+     * @throws DaoException
      */
     public $beanClass save($beanClass bean
         #foreachForeignTables('' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DaoException
     {
         if(null == bean) {
             return null;
@@ -758,7 +758,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DAOException
+        #foreachImportedTables('' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' '')) throws DaoException
     {
         return this.runAsTransaction(new Callable<$beanClass>(){
             @Override
@@ -782,10 +782,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param args referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", ${m_importedClass}[] " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public $beanClass save($beanClass bean,Object ...inputs) throws DAOException
+    public $beanClass save($beanClass bean,Object ...inputs) throws DaoException
     {
         if(null == inputs){
             return save(bean);
@@ -836,11 +836,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param args referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public $beanClass saveCollection($beanClass bean,Object ...inputs) throws DAOException
+    public $beanClass saveCollection($beanClass bean,Object ...inputs) throws DaoException
     {
         if(null == inputs){
             return save(bean);
@@ -904,11 +904,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      *        #foreachForeignTables('' $table "{@link Constant#${table.asFKConst($m_fkName)}}" ',' '')
 
      * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>> T getReferencedBean($beanClass bean,int fkIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<T>> T getReferencedBean($beanClass bean,int fkIndex)throws DaoException{
         switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
@@ -932,11 +932,11 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param beanToSet the <T> object to associate to the {@link $beanClass}
      * @param fkIndex valid values: see also {@link ${esc.hash}getReferencedBean($beanClass,int)}
      * @return always beanToSet saved
-     * @throws DAOException
+     * @throws DaoException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ${pkg}.BaseBean<T>> T setReferencedBean($beanClass bean,T beanToSet,int fkIndex)throws DAOException{
+    public <T extends ${pkg}.BaseBean<T>> T setReferencedBean($beanClass bean,T beanToSet,int fkIndex)throws DaoException{
         switch(fkIndex){
 #foreach($foreignTable in $foreignTables)
 #set ( $foreignClass = "$foreignTable.asBeanClass()" )
@@ -971,9 +971,9 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * FK_NAME : $fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DAOException
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean) throws DaoException
     {
         if(null == bean){
             return null;
@@ -991,7 +991,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @return always beanToSet saved
      * @throws Exception
      */
-    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DAOException
+    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DaoException
     {
         if(null != bean){
             ${foreignTable.asInstanceMethod($isGeneral)}().save(beanToSet);
@@ -1027,10 +1027,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      *
      * @param where the sql 'where' clause
      * @return the number of deleted rows
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public int deleteByWhere(String where) throws DAOException
+    public int deleteByWhere(String where) throws DaoException
     {
         if( !this.listenerContainer.isEmpty()){
             final DeleteBeanAction action = new DeleteBeanAction(); 
@@ -1067,7 +1067,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //13
 
     @Override
-    public $beanClass insert($beanClass bean) throws DAOException
+    public $beanClass insert($beanClass bean) throws DaoException
     {
         // mini checks
         if (null == bean || !bean.isModified()) {
@@ -1220,7 +1220,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //14
 
     @Override
-    public $beanClass update($beanClass bean) throws DAOException
+    public $beanClass update($beanClass bean) throws DaoException
     {
         // mini checks
         if (null == bean || !bean.isModified()) {
@@ -1329,7 +1329,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //18
 
     @Override
-    public $beanClass loadUniqueUsingTemplate(${beanClass} bean) throws DAOException
+    public $beanClass loadUniqueUsingTemplate(${beanClass} bean) throws DaoException
     {
          List<${beanClass}> beans = this.loadUsingTemplateAsList(bean);
          switch(beans.size()){
@@ -1344,7 +1344,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //18-1
 
     @Override
-    public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws DAOException
+    public $beanClass loadUniqueUsingTemplateChecked(${beanClass} bean) throws DaoException
     {
          List<${beanClass}> beans = this.loadUsingTemplateAsList(bean);
          switch(beans.size()){
@@ -1359,7 +1359,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //20-5
 
     @Override
-    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action) throws DAOException
+    public int loadUsingTemplate(${beanClass} bean, int[] fieldList, int startRow, int numRows,int searchType, Action<$beanClass> action) throws DaoException
     {
         // System.out.println("loadUsingTemplate startRow:" + startRow + ", numRows:" + numRows + ", searchType:" + searchType);
         StringBuilder sqlWhere = new StringBuilder("");
@@ -1373,7 +1373,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                     ResultSet.CONCUR_READ_ONLY);
             this.fillPreparedStatement(ps, bean, searchType,false);
             return this.loadByPreparedStatement(ps, fieldList, startRow, numRows, action);
-        } catch (DAOException e) {
+        } catch (DaoException e) {
             throw e;
         }catch (SQLException e) {
             throw new DataAccessException(e);
@@ -1386,7 +1386,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //21
 
     @Override
-    public int deleteUsingTemplate(${beanClass} bean) throws DAOException
+    public int deleteUsingTemplate(${beanClass} bean) throws DaoException
     {
 #if ( $table.hasPrimaryKey())
         if(#join($primaryKeys "bean.$e.getInitializedMethod()() && null != bean.$e.getGetMethod()()" ' && ' )){
@@ -1453,9 +1453,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ${e.getVarName()} the ${e.getName()} column's value filter" '')
 
      * @return an $beanClass,otherwise null if not found or exists null in input arguments
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public $beanClass loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DaoException
     {
         try{
             return loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "${e.getVarName()}" ','));
@@ -1471,9 +1471,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return an $beanClass
      * @throws NullPointerException exists null in input arguments
      * @throws ObjectRetrievalException if not found
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DaoException
     {
         ${beanClass} bean = new ${beanClass}();
         if(#join($indexColumns 'null == ${e.getVarName()}' ' || ')){
@@ -1497,9 +1497,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param indexs index array
      * @return an list of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)throws DAOException
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)throws DaoException
     {
         if(null == indexs){
             return new java.util.ArrayList<$beanClass>();
@@ -1515,9 +1515,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param indexs index array
      * @return an list of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DAOException
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DaoException
     {
         if(null == indexs ){
             return new java.util.ArrayList<$beanClass>();
@@ -1542,9 +1542,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param indexs index array
      * @return the number of deleted rows
-     * @throws DAOException
+     * @throws DaoException
      */
-    public int deleteBy${index.asCamelCaseName()}($columnType... indexs)throws DAOException
+    public int deleteBy${index.asCamelCaseName()}($columnType... indexs)throws DaoException
     {
         int count = 0;
         if(null != indexs){
@@ -1559,9 +1559,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param indexs index collection
      * @return the number of deleted rows
-     * @throws DAOException
+     * @throws DaoException
      */
-    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DAOException
+    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws DaoException
     {
         int count = 0;
         if(null != indexs){
@@ -1580,9 +1580,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DaoException
     {
         return (${beanClass}[])this.loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "${e.getVarName()}" ',')).toArray(new ${beanClass}[0]);
     }
@@ -1594,9 +1594,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return a list of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DaoException
     {
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $indexColumns )
@@ -1612,9 +1612,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return the number of deleted objects
-     * @throws DAOException
+     * @throws DaoException
      */
-    public int deleteBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DAOException
+    public int deleteBy${index.asCamelCaseName()}(#join($indexColumns "$e.getJavaType() ${e.getVarName()}" ',')) throws DaoException
     {
         ${beanClass} bean = this.createBean();
 #foreach ( $column in $indexColumns )
@@ -1632,10 +1632,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 
      * @param keys key values of index
      * @return a list of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public List<$beanClass> loadByIndexAsList(int keyIndex,Object ...keys)throws DAOException
+    public List<$beanClass> loadByIndexAsList(int keyIndex,Object ...keys)throws DaoException
     {
         if(null == keys){
             throw new NullPointerException();
@@ -1673,10 +1673,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 
      * @param keys key values of index
      * @return the number of deleted objects
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public int deleteByIndex(int keyIndex,Object ...keys)throws DAOException
+    public int deleteByIndex(int keyIndex,Object ...keys)throws DaoException
     {
         if(null == keys){
             throw new NullPointerException();
@@ -1722,7 +1722,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
      */
-    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean) throws DAOException
+    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean) throws DaoException
     {
          return this.$jTable.getLoadMethodOfJunction()AsList(bean, 1, -1);
     }
@@ -1736,9 +1736,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return a list of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows) throws DAOException
+    public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows) throws DaoException
     {
         if(null == bean #join($linkedTable.primaryKeys '|| null == bean.$e.getGetMethod()()')){
             return java.util.Arrays.<${beanClass}>asList();
@@ -1763,7 +1763,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
         catch (SQLException e)
         {
-            throw new DAOException(e.getMessage(), e);
+            throw new DaoException(e.getMessage(), e);
         }
         finally
         {
@@ -1780,9 +1780,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * add junction between {@link $beanClass} and {@link $linkedBean} if junction not exists
      * @param bean
      * @param linked
-     * @throws DAOException
+     * @throws DaoException
      */
-    public void addJunction($beanClass bean,$linkedBean linked) throws DAOException{
+    public void addJunction($beanClass bean,$linkedBean linked) throws DaoException{
         if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
             return ;
         }
@@ -1803,9 +1803,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * remove junction between {@link $beanClass} and {@link $linkedBean}
      * @param bean
      * @param linked
-     * @throws DAOException
+     * @throws DaoException
      */
-    public int deleteJunction($beanClass bean,$linkedBean linked) throws DAOException{
+    public int deleteJunction($beanClass bean,$linkedBean linked) throws DaoException{
         if(null == bean #join($table.primaryKeys '|| null == bean.$e.getGetMethod()()' '')){
             return 0;
         }
@@ -1816,7 +1816,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     //23.4 MANY TO MANY
     /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
-    public void addJunction($beanClass bean,$linkedBean... linkedBeans) throws DAOException{
+    public void addJunction($beanClass bean,$linkedBean... linkedBeans) throws DaoException{
         if(null != linkedBeans){
             for($linkedBean linked:linkedBeans){
                 addJunction(bean,linked);
@@ -1825,7 +1825,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     //23.5 MANY TO MANY
     /** @see ${esc.hash}addJunction($beanClass,$linkedBean) */
-    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DAOException{
+    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DaoException{
         if(null != linkedBeans){
             for($linkedBean linked:linkedBeans){
                 addJunction(bean,linked);
@@ -1834,7 +1834,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     //23.6 MANY TO MANY
     /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
-    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans) throws DAOException{
+    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans) throws DaoException{
         int count = 0;
         if(null != linkedBeans){
             for($linkedBean linked:linkedBeans){
@@ -1845,7 +1845,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
     //23.7 MANY TO MANY
     /** @see ${esc.hash}deleteJunction($beanClass,$linkedBean) */
-    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DAOException{
+    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans) throws DaoException{
         int count = 0;
         if(null != linkedBeans){
             for($linkedBean linked:linkedBeans){
@@ -1864,7 +1864,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //25
 
     @Override
-    public int countWhere(String where) throws DAOException
+    public int countWhere(String where) throws DaoException
     {
         String sql = "SELECT COUNT(*) AS MCOUNT FROM $tablename " + where;
         // System.out.println("countWhere: " + sql);
@@ -1904,9 +1904,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param ps the PreparedStatement to be used
      * @return the number of rows returned
-     * @throws DAOException
+     * @throws DaoException
      */
-    private int countByPreparedStatement(PreparedStatement ps) throws DAOException
+    private int countByPreparedStatement(PreparedStatement ps) throws DaoException
     {
         ResultSet rs =  null;
         try
@@ -1938,10 +1938,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param bean the $beanClass template to look for
      * @param searchType exact ?  like ? starting like ?
      * @return the number of rows returned
-     * @throws DAOException
+     * @throws DaoException
      */
     @Override
-    public int countUsingTemplate(${beanClass} bean, int searchType) throws DAOException
+    public int countUsingTemplate(${beanClass} bean, int searchType) throws DaoException
     {
         Connection c = null;
         PreparedStatement ps = null;
@@ -2028,9 +2028,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param bean the bean to use for creating the where clauses
      * @param searchType exact ?  like ? starting like ?
      * @return the number of clauses returned
-     * @throws DAOException
+     * @throws DaoException
      */
-    protected int fillPreparedStatement(PreparedStatement ps, $beanClass bean, int searchType,boolean fillNull) throws DAOException
+    protected int fillPreparedStatement(PreparedStatement ps, $beanClass bean, int searchType,boolean fillNull) throws DaoException
     {
         if (bean == null) {
             return 0;
@@ -2059,7 +2059,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         $column.getPreparedStatementMethod("bean.$column.getGetMethod()() + SQL_LIKE_WILDCARD", "++dirtyCount")
                         break;
                     default:
-                        throw new DAOException("Unknown search type " + searchType);
+                        throw new DaoException("Unknown search type " + searchType);
                 }
 #else
                 // System.out.println("Setting for " + dirtyCount + " [" + bean.$column.getGetMethod()() + "]");
@@ -2091,9 +2091,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return the resulting $beanClass table
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${beanClass}[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException
+    public ${beanClass}[] decodeResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DaoException
     {
         return this.decodeResultSetAsList(rs, fieldList, startRow, numRows).toArray(new ${beanClass}[0]);
     }
@@ -2107,9 +2107,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return the resulting $beanClass table
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$beanClass> decodeResultSetAsList(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DAOException
+    public List<$beanClass> decodeResultSetAsList(ResultSet rs, int[] fieldList, int startRow, int numRows) throws DaoException
     {
         ListAction action = new ListAction();
         actionOnResultSet(rs, fieldList, numRows, numRows, action);
@@ -2123,10 +2123,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param action interface obj for do something
      * @return the count dealt by action  
-     * @throws DAOException
+     * @throws DaoException
      * @throws IllegalArgumentException
      */
-    public int actionOnResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows, Action<$beanClass> action) throws DAOException{
+    public int actionOnResultSet(ResultSet rs, int[] fieldList, int startRow, int numRows, Action<$beanClass> action) throws DaoException{
         try{
             int count = 0;
             if(0!=numRows){
@@ -2163,7 +2163,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 }
             }
             return count;
-        }catch(DAOException e){
+        }catch(DaoException e){
             throw e;
         }catch(SQLException e){
             throw new DataAccessException(e);
@@ -2176,9 +2176,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param rs the ResultSet to be transformed
      * @return bean resulting $beanClass bean
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass decodeRow(ResultSet rs,$beanClass bean) throws DAOException
+    public $beanClass decodeRow(ResultSet rs,$beanClass bean) throws DaoException
     {
         if(null==bean){
             bean = this.createBean();
@@ -2208,9 +2208,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param rs the ResultSet to be transformed
      * @param fieldList table of the field's associated constants
      * @return bean resulting $beanClass bean
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass decodeRow(ResultSet rs, int[] fieldList,$beanClass bean) throws DAOException
+    public $beanClass decodeRow(ResultSet rs, int[] fieldList,$beanClass bean) throws DaoException
     {
         if(null==bean){
             bean = this.createBean();
@@ -2229,7 +2229,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         break;
 #end
                     default:
-                        throw new DAOException("Unknown field id " + fieldList[i]);
+                        throw new DaoException("Unknown field id " + fieldList[i]);
                 }
             }
         }
@@ -2249,9 +2249,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param rs the ResultSet to be transformed
      * @return bean resulting $beanClass bean
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass metaDataDecodeRow(ResultSet rs) throws DAOException
+    public $beanClass metaDataDecodeRow(ResultSet rs) throws DaoException
     {
         $beanClass bean = this.createBean();
         try
@@ -2281,9 +2281,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param ps the PreparedStatement to be used
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps) throws DAOException
+    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps) throws DaoException
     {
         return this.loadByPreparedStatement(ps, null);
     }
@@ -2294,9 +2294,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      *
      * @param ps the PreparedStatement to be used
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps) throws DAOException
+    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps) throws DaoException
     {
         return this.loadByPreparedStatementAsList(ps, null);
     }
@@ -2308,9 +2308,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ps the PreparedStatement to be used
      * @param fieldList table of the field's associated constants
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList) throws DAOException
+    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList) throws DaoException
     {
         return this.loadByPreparedStatementAsList(ps, fieldList).toArray(new ${beanClass}[0]);
     }
@@ -2322,9 +2322,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ps the PreparedStatement to be used
      * @param fieldList table of the field's associated constants
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList) throws DAOException
+    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList) throws DaoException
     { 
         return loadByPreparedStatementAsList(ps,fieldList,1,-1);
     }
@@ -2339,9 +2339,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param fieldList table of the field's associated constants
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException
+    public ${beanClass}[] loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DaoException
     {
         return loadByPreparedStatementAsList(ps,fieldList,startRow,numRows).toArray(new ${beanClass}[0]);
     }
@@ -2356,9 +2356,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param fieldList table of the field's associated constants
      * @return an array of $beanClass
-     * @throws DAOException
+     * @throws DaoException
      */
-    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DAOException
+    public List<$beanClass> loadByPreparedStatementAsList(PreparedStatement ps, int[] fieldList, int startRow, int numRows) throws DaoException
     {
         ListAction action = new ListAction();
         loadByPreparedStatement(ps,fieldList,startRow,numRows,action);
@@ -2376,16 +2376,16 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param fieldList table of the field's associated constants
      * @param action Action object for do something(not null)
      * @return the count dealt by action
-     * @throws DAOException
+     * @throws DaoException
      */     
-    public int loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows,Action<$beanClass> action) throws DAOException
+    public int loadByPreparedStatement(PreparedStatement ps, int[] fieldList, int startRow, int numRows,Action<$beanClass> action) throws DaoException
     {
         ResultSet rs =  null;
         try {
             ps.setFetchSize(100);
             rs = ps.executeQuery();
             return this.actionOnResultSet(rs, fieldList, startRow, numRows, action);
-        } catch (DAOException e) {
+        } catch (DaoException e) {
             throw e;
         } catch (SQLException e) {
             throw new DataAccessException(e);
@@ -2422,7 +2422,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //37
 
     @Override
-    public void fire(TableListener.Event event, $beanClass bean) throws DAOException{
+    public void fire(TableListener.Event event, $beanClass bean) throws DaoException{
         if(null == event){
             throw new NullPointerException();
         }
@@ -2432,7 +2432,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //37-1
 
     @Override
-    public void fire(int event, $beanClass bean) throws DAOException{
+    public void fire(int event, $beanClass bean) throws DaoException{
         try{
             fire(TableListener.Event.values()[event],bean);
         }catch(ArrayIndexOutOfBoundsException e){
@@ -2449,13 +2449,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     private final ${pkg}.BaseForeignKeyListener<$foreignClass,$beanClass> $table.getForeignKeyListenerVar($fkName) = 
             new ${pkg}.BaseForeignKeyListener<$foreignClass,$beanClass>(){
                 @Override
-                protected List<$beanClass> getImportedBeans($foreignClass bean) throws DAOException {
+                protected List<$beanClass> getImportedBeans($foreignClass bean) throws DaoException {
                     return listenerContainer.isEmpty() 
                             ? java.util.Collections.<$beanClass>emptyList()
                             : ${foreignTable.asInstanceMethod($isGeneral)}().${table.getImportedBeansGetMethod($fkName)}AsList(bean);
                 }
                 @Override
-                protected void onRemove(List<$beanClass> effectBeans) throws DAOException {
+                protected void onRemove(List<$beanClass> effectBeans) throws DaoException {
                     for($beanClass bean:effectBeans){
 #if($fkObj.deleteRule.equals("SET_NULL"))
                         #join($fkObj.columns 'bean.${e.getSetMethod()}(null);' '
@@ -2529,7 +2529,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * Gets the connection.
      */
-    private Connection getConnection() throws DAOException
+    private Connection getConnection() throws DaoException
     {
         try
         {
@@ -2557,9 +2557,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * Fill the given prepared statement with the values in argList
      * @param ps the PreparedStatement that will be filled
      * @param argList the arguments to use fill given prepared statement
-     * @throws DAOException
+     * @throws DaoException
      */
-    private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws DAOException{
+    private void fillPrepareStatement(PreparedStatement ps, Object[] argList) throws DaoException{
         try {
             if (!(argList == null || ps == null)) {
                 for (int i = 0; i < argList.length; i++) {
@@ -2571,13 +2571,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                 }
             }
         } catch (SQLException e) {
-            throw new DAOException(e);
+            throw new DaoException(e);
         }
     }
     
     @Override    
 
-    public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action<$beanClass> action) throws DAOException{
+    public int loadBySqlForAction(String sql, Object[] argList, int[] fieldList,int startRow, int numRows,Action<$beanClass> action) throws DaoException{
         PreparedStatement ps = null;
         Connection connection = null;
         // logger.debug("sql string:\n" + sql + "\n");
@@ -2588,7 +2588,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                     ResultSet.CONCUR_READ_ONLY);
             fillPrepareStatement(ps, argList);
             return this.loadByPreparedStatement(ps, fieldList, startRow, numRows, action);
-        } catch (DAOException e) {
+        } catch (DaoException e) {
             throw e;
         }catch (SQLException e) {
             throw new DataAccessException(e);
@@ -2600,14 +2600,14 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
    
     @Override
 
-    public <T>T runAsTransaction(Callable<T> fun) throws DAOException{
+    public <T>T runAsTransaction(Callable<T> fun) throws DaoException{
         return Manager.getInstance().runAsTransaction(fun);
     }
     
     class DeleteBeanAction extends Action.BaseAdapter<$beanClass>{
         private final AtomicInteger count=new AtomicInteger(0);
         @Override
-        public void call($beanClass bean) throws DAOException {
+        public void call($beanClass bean) throws DaoException {
                 ${managerClass}.this.delete(bean);
                 count.incrementAndGet();
         }
@@ -2671,9 +2671,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 
      * @return  empty list if input primary key is {@code null}<br>
      *         first element equal last if self-reference field is cycle
-     * @throws DAOException
+     * @throws DaoException
      */
-    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DAOException{
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
         $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
             ? null
             : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
@@ -2693,7 +2693,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * see also {@link ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
-    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean) throws DAOException{
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean) throws DaoException{
         return null == bean
                 ? java.util.Collections.<$beanClass>emptyList()
                 : $table.getListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
@@ -2706,9 +2706,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 
      * @return  0 if input primary key is {@code null}<br>
      *         -1 if self-reference field is cycle
-     * @throws DAOException
+     * @throws DaoException
      */
-    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DAOException{
+    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
         $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
             ? null
             : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
@@ -2725,7 +2725,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * see also {@link ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
-    public int $table.getLevelMethod($selfFk)($beanClass bean) throws DAOException{
+    public int $table.getLevelMethod($selfFk)($beanClass bean) throws DaoException{
         return null == bean
                 ? 0
                 : $table.getLevelMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
@@ -2736,20 +2736,20 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
      ')
 
-     * @throws DAOException
+     * @throws DaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
-    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DAOException{
+    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
         return $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getVarName()' ',')) < 0;
     }
     //52
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * @param bean
-     * @throws DAOException
+     * @throws DaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
-    public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean) throws DAOException{
+    public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean) throws DaoException{
         return $table.getLevelMethod($selfFk)(bean) < 0;
     }
     //53
@@ -2761,9 +2761,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @return top bean
      * @throws NullPointerException if input primary key is {@code null}
      * @throws IllegalStateException if self-reference field is cycle
-     * @throws DAOException
+     * @throws DaoException
      */
-    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DAOException{
+    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
         if(#join($primaryKeys 'null == $e.getVarName()' ' || ')){
             throw new NullPointerException();
         }
@@ -2780,7 +2780,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * see also {@link ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      */
-    public $beanClass $table.getTopMethod($selfFk)($beanClass bean) throws DAOException{
+    public $beanClass $table.getTopMethod($selfFk)($beanClass bean) throws DaoException{
         if(null == bean){
             throw new NullPointerException();
         }
@@ -2793,10 +2793,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param $table.primaryKey.getVarName() PK# $velocityCount
      * @return always {@code $table.primaryKey.getVarName()}
      * @throws IllegalStateException if self-reference field is cycle 
-     * @throws DAOException
+     * @throws DaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($table.primaryKey.getJavaType())
      */
-    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()) throws DAOException{
+    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName()) throws DaoException{
         if($table.getCyeleTestMethod($selfFk)($table.primaryKey.getVarName())){
             throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
         }
@@ -2809,10 +2809,10 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param bean
      * @return always {@code bean}
      * @throws IllegalStateException if self-reference field is cycle
-     * @throws DAOException
+     * @throws DaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
      */
-    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean) throws DAOException{
+    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean) throws DaoException{
         if($table.getCyeleTestMethod($selfFk)(bean)){
             throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
         }

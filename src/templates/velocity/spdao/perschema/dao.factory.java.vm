@@ -13,7 +13,7 @@ import ${pkg}.dao.$table.asDAOClass();
 #end
 #end
 
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 
 /**
  * The abstract factory defining all the DAO objects we can get.
@@ -29,20 +29,20 @@ public abstract class DAOFactory {
 	 *            el nombre plenamente cualificado de la clase de la factory concreta.
 	 * @return DAOFactory
 	 */
-	public static final DAOFactory getConcreteFactory(final String tipoFactory) throws DAOException {
+	public static final DAOFactory getConcreteFactory(final String tipoFactory) throws DaoException {
 		DAOFactory factory = null;
 		
 		try {
 			factory = (DAOFactory) Class.forName(tipoFactory).newInstance();
 		} catch (ClassNotFoundException cnfe) {
 			// logger.error("getConcreteFactory", cnfe);
-			throw new DAOException("ClassNotFoundException for " + tipoFactory, cnfe);
+			throw new DaoException("ClassNotFoundException for " + tipoFactory, cnfe);
 		} catch (IllegalAccessException iae) {
 			// logger.error("getConcreteFactory", iae);
-			throw new DAOException("IllegalAccessException for " + tipoFactory, iae);
+			throw new DaoException("IllegalAccessException for " + tipoFactory, iae);
 		} catch (InstantiationException ie) {
 			// logger.error("getConcreteFactory", ie);
-			throw new DAOException("InstantiationException for " + tipoFactory, ie);
+			throw new DaoException("InstantiationException for " + tipoFactory, ie);
 		}
 		
 		return factory;

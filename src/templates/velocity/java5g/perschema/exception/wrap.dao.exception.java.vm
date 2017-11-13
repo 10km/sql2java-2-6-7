@@ -1,22 +1,22 @@
 ##$Id: dao.exception.java.vm,v 1.1 2008/04/22 12:11:32 kameleono Exp $
 #parse( "header.include.vm" )
 #parse( "schema.include.vm" )
-$codewriter.setCurrentJavaFilename("${schemaPkg}.exception", "WrapDAOException.java")
+$codewriter.setCurrentJavaFilename("${schemaPkg}.exception", "WrapDaoException.java")
 package ${schemaPkg}.exception;
 
 /**
- * wrap all DAOException threw by native code
+ * wrap all DaoException threw by native code
  *
  * @author guyadong
  */
-public class WrapDAOException extends RuntimeException
+public class WrapDaoException extends RuntimeException
 {
     private static final long serialVersionUID = 2448402307057993837L;
 
     /**
      * contructor
      */
-    public WrapDAOException(Throwable cause)
+    public WrapDaoException(Throwable cause)
     {
         super(cause);
     }

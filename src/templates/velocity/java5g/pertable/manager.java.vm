@@ -20,14 +20,14 @@ import ${gpkg}.TableManager;
 import ${gpkg}.$table.asManagerInterfaceNSP();
 #importLinkedTable()
 import ${gpkg}.TableListener;
-import ${schemaPkg}.exception.WrapDAOException;
+import ${schemaPkg}.exception.WrapDaoException;
 import ${schemaPkg}.exception.ObjectRetrievalException;
 
-import ${exceptionPkg}.DAOException;
+import ${exceptionPkg}.DaoException;
 
 /**
  * Handles database calls (save, load, count, etc...) for the $tablename table.<br>
- * all {@link DAOException} be wrapped as {@link WrapDAOException} to throw.<br>
+ * all {@link DaoException} be wrapped as {@link WrapDaoException} to throw.<br>
 #if ( $table.hasRemarks() )
  * Remarks: $table.getRemarks()<br>
 #end
@@ -112,8 +112,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             return this.beanConverter.fromRight(nativeManager.loadByPrimaryKeyChecked(#join($primaryKeys "$e.getVarName()" ',')));
         }catch(${exceptionPkg}.ObjectRetrievalException e){
             throw new ObjectRetrievalException();
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
     }
     //1.2
@@ -173,9 +173,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return nativeManager.existsPrimaryKey(#join($primaryKeys "$e.getVarName()" ','));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     //1.6
@@ -196,8 +196,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #else
         try{
             nativeManager.checkDuplicate(this.beanConverter.toRight(bean));            
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
 #end     
         return bean;   
@@ -217,8 +217,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             return this.nativeManager.checkDuplicate($pk.getVarName());
         }catch(net.gdface.facelog.dborm.exception.ObjectRetrievalException e){
         	throw new ObjectRetrievalException(e);
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
     }
     //1.8 override $table.asManagerInterfaceNSP()
@@ -266,9 +266,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         {
             return nativeManager.deleteByPrimaryKey(#join($primaryKeys "$e.getVarName()" ','));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     //2
@@ -279,9 +279,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         {
             return nativeManager.delete(this.beanConverter.toRight(bean));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }   
     }
     //2.1
@@ -532,9 +532,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try {
             return this.dbConverter.get${importedClass}Converter().fromRight(nativeManager.${importedTable.getImportedBeansGetMethod($fkName)}AsList( this.beanConverter.toRight(bean),startRow,numRows));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     //3.3 SET IMPORTED override $table.asManagerInterfaceNSP()
@@ -888,9 +888,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             foreignConverter.fromRight(beanToSet,foreignNativeBean);
             return beanToSet;
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 #end
@@ -908,9 +908,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.deleteByWhere(where);
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -927,9 +927,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.beanConverter.fromRight(bean,this.nativeManager.insert(this.beanConverter.toRight(bean)));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -941,9 +941,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.beanConverter.fromRight(bean,this.nativeManager.update(this.beanConverter.toRight(bean)));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -959,9 +959,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.beanConverter.fromRight(this.nativeManager.loadUniqueUsingTemplate(this.beanConverter.toRight(bean)));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
      }
     //18-1
@@ -976,9 +976,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         {
             throw new ObjectRetrievalException();
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
      }
     //20-5
@@ -989,9 +989,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try {
             return this.nativeManager.loadUsingTemplate(this.beanConverter.toRight(bean),fieldList,startRow,numRows,searchType,this.toNative(action));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -1003,9 +1003,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.deleteUsingTemplate(this.beanConverter.toRight(bean));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -1131,9 +1131,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.beanConverter.fromRight(this.nativeManager.loadBy${index.asCamelCaseName()}AsList(#join( $indexColumns "${e.getVarName()}" ',')));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 #end## $index.isUnique()
@@ -1146,9 +1146,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.deleteBy${index.asCamelCaseName()}(#join( $indexColumns "${e.getVarName()}" ','));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     
@@ -1167,8 +1167,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     {
         try{
             return this.beanConverter.fromRight(this.nativeManager.loadByIndexAsList(keyIndex,keys));
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
     }
     
@@ -1185,8 +1185,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     {
         try{
             return this.nativeManager.deleteByIndex(keyIndex,keys);
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
     }
 #end##($table.countIndices() > 0)
@@ -1225,8 +1225,8 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
                     this.dbConverter.get${linkedBean}Converter().toRight(bean),
                     startRow,
                     numRows));
-        }catch(DAOException e){
-            throw new WrapDAOException(e);
+        }catch(DaoException e){
+            throw new WrapDaoException(e);
         }
     }
 #define($junctionParam)
@@ -1320,9 +1320,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.countWhere(where);
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -1334,9 +1334,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.countUsingTemplate(this.beanConverter.toRight(bean),searchType);
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
 
@@ -1389,9 +1389,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             this.nativeManager.fire(event, this.beanConverter.toRight(bean));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     //37-2
@@ -1424,32 +1424,32 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             this.nativeListener = new net.gdface.facelog.dborm.TableListener<$nativeClass> (){
 
                 @Override
-                public void beforeInsert($nativeClass bean) throws DAOException {
+                public void beforeInsert($nativeClass bean) throws DaoException {
                     listener.beforeInsert(${managerClassNSP}.this.beanConverter.fromRight(bean));                
                 }
 
                 @Override
-                public void afterInsert($nativeClass bean) throws DAOException {
+                public void afterInsert($nativeClass bean) throws DaoException {
                     listener.afterInsert(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 }
 
                 @Override
-                public void beforeUpdate($nativeClass bean) throws DAOException {
+                public void beforeUpdate($nativeClass bean) throws DaoException {
                     listener.beforeUpdate(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 }
 
                 @Override
-                public void afterUpdate($nativeClass bean) throws DAOException {
+                public void afterUpdate($nativeClass bean) throws DaoException {
                     listener.afterUpdate(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 }
 
                 @Override
-                public void beforeDelete($nativeClass bean) throws DAOException {
+                public void beforeDelete($nativeClass bean) throws DaoException {
                     listener.beforeDelete(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 }
 
                 @Override
-                public void afterDelete($nativeClass bean) throws DAOException {
+                public void afterDelete($nativeClass bean) throws DaoException {
                     listener.afterDelete(${managerClassNSP}.this.beanConverter.fromRight(bean));
                 }};
         }
@@ -1502,9 +1502,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.loadBySqlForAction(sql,argList,fieldList,startRow,numRows,this.toNative(action));
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     
@@ -1513,9 +1513,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.runAsTransaction(fun);
         }
-        catch(DAOException e)
+        catch(DaoException e)
         {
-            throw new WrapDAOException(e);
+            throw new WrapDaoException(e);
         }
     }
     

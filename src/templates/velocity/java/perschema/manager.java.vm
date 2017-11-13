@@ -21,7 +21,7 @@ import java.util.PropertyResourceBundle;
 
 import javax.sql.DataSource;
 
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 
 /**
  * The Manager provides connections and manages transactions transparently.
@@ -56,7 +56,7 @@ public final class Manager
         {
             this.defaultConfigure();
         }
-        catch(DAOException de)
+        catch(DaoException de)
         {
             System.err.println(de.getMessage());
         }
@@ -75,7 +75,7 @@ public final class Manager
      * com/capgemini/scp/generated/Manager.properties
      * @throws Exception
      */
-    public void defaultConfigure() throws DAOException
+    public void defaultConfigure() throws DaoException
     {
         String folder=this.getClass().getPackage().getName().replaceAll("((\\w+\\.)+)", "");
         this.configure("database_"+folder+".properties");
@@ -86,7 +86,7 @@ public final class Manager
      * @param fileName the resource filename to be used
      * @throws Exception
      */
-    public void configure(String fileName) throws DAOException
+    public void configure(String fileName) throws DaoException
     {
         try
         {
@@ -100,22 +100,22 @@ public final class Manager
         catch(IOException ioe)
         {
             System.err.println("The property file " + fileName + " could not be found.");
-            throw new DAOException(ioe.getMessage(), ioe);
+            throw new DaoException(ioe.getMessage(), ioe);
         }
         catch(ClassNotFoundException cnfe)
         {
             System.err.println("The driver class " + this.jdbcDriver + " could not be found.");
-            throw new DAOException(cnfe.getMessage(), cnfe);
+            throw new DaoException(cnfe.getMessage(), cnfe);
         }
         catch(InstantiationException ie)
         {
             System.err.println("The driver class " + this.jdbcDriver + " could not be instantiated.");
-            throw new DAOException(ie.getMessage(), ie);
+            throw new DaoException(ie.getMessage(), ie);
         }
         catch(IllegalAccessException iae)
         {
             System.err.println("The driver class " + this.jdbcDriver + " could not be instantiated.");
-            throw new DAOException(iae.getMessage(), iae);
+            throw new DaoException(iae.getMessage(), iae);
         }
     }
 

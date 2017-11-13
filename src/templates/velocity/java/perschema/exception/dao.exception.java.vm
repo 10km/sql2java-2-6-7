@@ -1,7 +1,7 @@
 ##$Id: dao.exception.java.vm,v 1.6 2008/04/01 20:36:55 kameleono Exp $
 #parse( "schema.include.vm" )
 #parse( "header.include.vm" )
-$codewriter.setCurrentJavaFilename("$exceptionPkg", "DAOException.java")
+$codewriter.setCurrentJavaFilename("$exceptionPkg", "DaoException.java")
 package $exceptionPkg;
 
 import java.sql.SQLException;
@@ -9,14 +9,14 @@ import java.sql.SQLException;
 /**
  * @author sql2java
  */
-public class DAOException extends SQLException
+public class DaoException extends SQLException
 {
     private static final long serialVersionUID = 5165438223391151142L;
 
     /**
      * contructor
      */
-    public DAOException()
+    public DaoException()
     {
         super();
     }
@@ -24,7 +24,7 @@ public class DAOException extends SQLException
     /**
      * contructor
      */
-    public DAOException(String message)
+    public DaoException(String message)
     {
         super(message);
     }
@@ -32,7 +32,7 @@ public class DAOException extends SQLException
     /**
      * contructor
      */
-    public DAOException(Throwable cause)
+    public DaoException(Throwable cause)
     {
         super(cause);
     }
@@ -40,7 +40,7 @@ public class DAOException extends SQLException
     /**
      * contructor
      */
-    public DAOException(String message, Throwable cause)
+    public DaoException(String message, Throwable cause)
     {
         super(message, cause);
     }

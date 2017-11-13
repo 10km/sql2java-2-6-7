@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import ${schemaPkg}.BaseTableLoadCaching;
 #if(!$isGeneral)
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 #end
 import $table.getPackage(true).$beanClass;
 #if(!$isGeneral)

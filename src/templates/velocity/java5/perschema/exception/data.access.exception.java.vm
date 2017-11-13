@@ -7,7 +7,7 @@ package $exceptionPkg;
 /**
  * @author sql2java
  */
-public class DataAccessException extends DAOException
+public class DataAccessException extends DaoException
 {
     private static final long serialVersionUID = 5584785072347143333L;
 

@@ -27,7 +27,7 @@ import net.gdface.facelog.db.BaseJunctionTableCache;
 
 
 #if(!$isGeneral)
-import ${pkg}.exception.DAOException;
+import ${pkg}.exception.DaoException;
 #end
 import $table.getPackage(true).$beanClass;
 #if(!$isGeneral)
