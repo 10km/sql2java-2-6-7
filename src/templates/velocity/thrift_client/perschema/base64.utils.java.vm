@@ -9,7 +9,7 @@ import java.io.Writer;
 
 /**
  * copy from org.apache.axiom.util.base64.Base64Utils(axiom-api-1.2.13.jar)
- *
+ * @author apache
  */
 public class Base64Utils {
     private static final char[] S_BASE64CHAR = { 'A', 'B', 'C', 'D', 'E', 'F',
