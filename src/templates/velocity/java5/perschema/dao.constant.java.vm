@@ -1,0 +1,6 @@
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+#set ( $javaClassName = 'DaoConstant' )
+$codewriter.setCurrentJavaFilename($pkg, "${javaClassName}.java")
+package $pkg;
+#parse( "dao.constant.include.vm" )

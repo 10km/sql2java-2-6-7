@@ -1,0 +1,155 @@
+#####################
+#macro(defineFkConst $m_table)
+#set ( $m_fkIndex = 0)
+#foreach($m_foreignTable in $m_table.foreignTables)
+#foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
+#set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
+    /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
+    public static final int ${m_table.asFKConst($m_fkName)} = $m_fkIndex;
+#set ( $m_fkIndex = $m_fkIndex +1 )
+#end
+#end
+#end
+#####################
+#macro(defineIkConst $m_table)
+#set ( $m_ikIndex = 0)
+#foreach($m_importedTable in $m_table.importedTables)
+#foreach( $m_ikName in $m_importedTable.getFkMapNames($m_table.name) )
+#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_ikName) )
+    /** imported key ${m_importedTable.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_table.name */
+    public static final int ${m_importedTable.asIKConst($m_ikName)} = $m_ikIndex;
+#set ( $m_ikIndex = $m_ikIndex +1 )
+#end
+#end
+#end
+#####################
+#macro(defineIndexConst $m_table)
+#set ( $m_idxIndex = 0)
+#foreach($m_index in $m_table.getIndices())
+    /** $m_index.table.name index (#join($m_index.getIndexColumnsList() "$e.name" ',')) */
+    public static final int ${m_index.asConstName()} = $m_idxIndex;
+#set ( $m_idxIndex = $m_idxIndex +1 )
+#end
+#end
+#####################
+/**
+ * constant declare
+ * @author guyadong
+ */
+public interface $javaClassName {    
+    public static final int LONG_BIT_NUM = 64;
+    public static final String SQL_LIKE_WILDCARD = "%";
+    /** set =QUERY for loadUsingTemplate */
+    public static final int SEARCH_EXACT = 0;
+    /** set %QUERY% for loadLikeTemplate */
+    public static final int SEARCH_LIKE = 1;
+    /** set %QUERY for loadLikeTemplate */
+    public static final int SEARCH_STARTING_LIKE = 2;
+    /** set QUERY% for loadLikeTemplate */
+    public static final int SEARCH_ENDING_LIKE = 3;
+   
+    //////////////////////////////////////
+    // COLUMN COLUMN CONSTANT
+    //////////////////////////////////////    
+    #join($tables '
+    public static final int ${e.name.toUpperCase()}_COLUMN_COUNT = $e.countColumns();
+    public static final int ${e.name.toUpperCase()}_PK_COUNT = $e.countPrimaryKeys();' '')
+
+    //////////////////////////////////////
+    // FOREIGN KEY INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineFkConst($t)
+#end
+    //////////////////////////////////////
+    // IMPORTED KEY INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineIkConst($t)
+#end
+    //////////////////////////////////////
+    // INDEX INDEX DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#defineIndexConst($t)
+#end
+    //////////////////////////////////////
+    // COLUMN ID DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+#foreach ( $column in $t.columns )
+#set ( $vcmo = $velocityCount - 1 )
+    /** Identify the $column.getFullName() field (ordinal:$column.getOrdinalPosition()). */
+    public static final int $column.getIDConstName() = $vcmo;
+#if( $t.countColumns() <= 64 )
+    public static final long $column.getIDMaskConstName() = 1L << $vcmo;
+#end
+#end
+#end
+    //////////////////////////////////////
+    // COLUMN NAME DECLARE
+    //////////////////////////////////////    
+#foreach($t in $tables)
+    /////////////////// $t.name ////////////
+    /** Contains all the full fields of the $t.name table.*/
+    public static final String $t.name.toUpperCase()_FULL_FIELDS ="#join($t.columns '$e.fullName' '"
+                            + ",')";
+    /** Field that contains the comma separated fields of the $t.name table. */
+    public static final String $t.name.toUpperCase()_FIELDS = "#join($t.columns '$e.name' '"
+                            + ",')";
+    public static final java.util.List<String> $t.name.toUpperCase()_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_FIELDS.split(","));
+    /** Field that contains the comma separated java fields of the $t.name table. */
+    public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.varName' '"
+                            + ",')";
+    public static final java.util.List<String> $t.name.toUpperCase()_JAVA_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_JAVA_FIELDS.split(","));
+#end
+
+#foreach($table in $tables)
+    /**
+     * Constant definition for $table.name
+     * @author guyadong
+     */
+    public static class $table.asCoreClassNSP(){
+        public static final int COLUMN_COUNT = $table.countColumns();
+        public static final int PRIMARY_KEY_COUNT = $table.countPrimaryKeys();
+        public static enum Index{
+#foreach($index in $table.getIndices())
+#if($velocityCount > 1),
+#end
+            /** $index.table.name index (#join($index.getIndexColumnsList() "$e.name" ',')) */
+            $strUtil.convertName(${index.asIndexName()},false)#end
+
+        }
+        /**
+         * Column Constant definition for $table.name
+         * @author guyadong
+         */
+        public static enum Column{            
+            #join($table.columns '/** constant for $e.fullName  */
+            ${e.varName}("$e.name",$e.ordinalPosition,"$e.getGetMethod()","$e.getSetMethod()")' ',
+            ');
+            final String field;
+            final String fullName;
+            final int index;
+            final int ordinal;
+            final long mask;
+            final String getter;
+            final String setter;
+            private Column(String field,int ordinal,String getter,String setter){
+                this.field = field;
+                this.fullName = "${table.name}." + field;
+                this.ordinal = ordinal;
+                this.index = ordinal -1;
+#if($table.countColumns() <= 64)
+                this.mask = 1L << index;
+#else
+                // unused
+                this.mask = -1;
+#end
+                this.getter = setter;
+                this.setter = setter;
+            }
+        }
+    }
+#end
+}
