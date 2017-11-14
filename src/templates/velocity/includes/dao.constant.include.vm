@@ -1,37 +1,3 @@
-#####################
-#macro(defineFkConst $m_table)
-#set ( $m_fkIndex = 0)
-#foreach($m_foreignTable in $m_table.foreignTables)
-#foreach( $m_fkName in $m_table.getFkMapNames($m_foreignTable.name) )
-#set ( $m_columnsOfFk = $m_table.getForeignKeysByFkName($m_fkName) )
-    /** foreign key ${m_table.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_foreignTable.name */
-    public static final int ${m_table.asFKConst($m_fkName)} = $m_fkIndex;
-#set ( $m_fkIndex = $m_fkIndex +1 )
-#end
-#end
-#end
-#####################
-#macro(defineIkConst $m_table)
-#set ( $m_ikIndex = 0)
-#foreach($m_importedTable in $m_table.importedTables)
-#foreach( $m_ikName in $m_importedTable.getFkMapNames($m_table.name) )
-#set ( $m_columnsOfFk = $m_importedTable.getForeignKeysByFkName($m_ikName) )
-    /** imported key ${m_importedTable.name}(#join($m_columnsOfFk "$e.name" ',')) -> $m_table.name */
-    public static final int ${m_importedTable.asIKConst($m_ikName)} = $m_ikIndex;
-#set ( $m_ikIndex = $m_ikIndex +1 )
-#end
-#end
-#end
-#####################
-#macro(defineIndexConst $m_table)
-#set ( $m_idxIndex = 0)
-#foreach($m_index in $m_table.getIndices())
-    /** $m_index.table.name index (#join($m_index.getIndexColumnsList() "$e.name" ',')) */
-    public static final int ${m_index.asConstName()} = $m_idxIndex;
-#set ( $m_idxIndex = $m_idxIndex +1 )
-#end
-#end
-#####################
 /**
  * constant declare
  * @author guyadong
@@ -47,92 +13,83 @@ public interface $javaClassName {
     public static final int SEARCH_STARTING_LIKE = 2;
     /** set QUERY% for loadLikeTemplate */
     public static final int SEARCH_ENDING_LIKE = 3;
-
+    /** meta data of table's column */
+    public static class ColumnMeta{            
+        final String table;
+        final String field;
+        final String fullName;
+        final int index;
+        final int ordinal;
+        final long mask;
+        final String getter;
+        final String setter;
+        private ColumnMeta(String table,String field,int ordinal,String getter,String setter){
+            this.table = table;
+            this.field = field;
+            this.fullName = this.table + field;
+            this.ordinal = ordinal;
+            this.index = ordinal -1;
+            this.mask = (1L << index);
+            this.getter = setter;
+            this.setter = setter;
+        }
+    }
 #foreach($table in $tables)
-    /**
-     * Constant definition for $table.name
-     * @author guyadong
-     */
+    /** Constant definition for $table.name */
     public static interface $table.asConstClassNSP(){
+        public static final String TABLENAME = "$table.name";
+        /** column count for $table.name table */
         public static final int COLUMN_COUNT = $table.countColumns();
+        /** primary keys count for $table.name table */
         public static final int PRIMARY_KEY_COUNT = $table.countPrimaryKeys();
-        /** Contains all the full fields of the $t.name table.*/
+        /** foreign keys count for $table.name table */
+        public static final int FOREIGN_KEY_COUNT = $table.countForeignKeyNames();
+        /** imported keys count for $table.name table */
+        public static final int IMPORTED_KEY_COUNT = $table.countImportedKeyNames();
+        /** Contains all the primary key fields of the $table.name table. */
+        public static final String[] PRIMARYKEY_NAMES = {#join($table.primaryKeys '"$e.name"' ',')};
+        /** Contains all the full fields of the $table.name table.*/
         public static final String FULL_FIELDS ="#join($table.columns '$e.fullName' '"
                             + ",')";
-
         /** Field that contains the comma separated fields of the $table.name table. */
         public static final String FIELDS = "#join($table.columns '$e.name' '"
                             + ",')";
-                            
-        public static final java.util.List<String> FIELDS_LIST = java.util.Arrays.asList(FIELDS.split(","));
-
+        /** immutable list of {@link ${esc.hash}FIELDS} */
+        public static final java.util.List<String> FIELDS_LIST = java.util.Collections.unmodifiableList(java.util.Arrays.asList(FIELDS.split(",")));
         /** Field that contains the comma separated java fields of the $table.name table. */
         public static final String JAVA_FIELDS = "#join($table.columns '$e.varName' '"
                             + ",')";
-                            
-        public static final java.util.List<String> JAVA_FIELDS_LIST = java.util.Arrays.asList(JAVA_FIELDS.split(","));
+        /** immutable list of {@link ${esc.hash}JAVA_FIELDS} */
+        public static final java.util.List<String> JAVA_FIELDS_LIST = java.util.Collections.unmodifiableList(java.util.Arrays.asList(JAVA_FIELDS.split(",")));
         public static enum Fk{
-#set ( $count = 1)
-#foreach($foreignTable in $table.foreignTables)
-#if($count > 1),
+#foreach($fkObj in $table.getForeignKeysAsList())
+#if($velocityCount > 1),
 #end
-#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
-#set ( $count = $count + 1)
-#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
-            /** foreign key ${table.name}(#join($columnsOfFk "$e.name" ',')) -> $foreignTable.name */
-            ${table.asFkVar($fkName)}#end
-#end
+            /** foreign key ${table.name}(#join($fkObj.columns "$e.name" ',')) -> $fkObj.foreignTable.name */${fkObj.asFkVar()}#end
 
         }
         public static enum Ik{
-#set ( $count = 1)
-#foreach($importedTable in $table.importedTables)
-#if($count > 1),
+#foreach($fkObj in $table.getImportedFoeignKeysAsList())
+#if($velocityCount > 1),
 #end
-#foreach( $ikName in $importedTable.getFkMapNames($table.name) )
-#set ( $count = $count +1 )
-#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($ikName) )
-            /** imported key ${importedTable.name}(#join($columnsOfFk "$e.name" ',')) -> $table.name */
-            ${importedTable.asIKVar($ikName)}#end
-#end
+            /** imported key ${fkObj.table.name}(#join($fkObj.columns "$e.name" ',')) -> $fkObj.foreignTable.name */${fkObj.asIkVar()}#end
 
         }
         public static enum Index{
 #foreach($index in $table.getIndices())
 #if($velocityCount > 1),
 #end
-            /** $index.table.name index (#join($index.getIndexColumnsList() "$e.name" ',')) */
-            ${index.asIndexVar()}#end
+            /** $index.table.name index (#join($index.getIndexColumnsList() "$e.name" ',')) */${index.asIndexVar()}#end
 
         }
-        /**
-         * Column Constant definition for $table.name
-         * @author guyadong
-         */
+        /** Column Constant definition for $table.name */
         public static enum Column{            
             #join($table.columns '/** constant for $e.fullName  */
-            ${e.varName}("$e.name",$e.ordinalPosition,"$e.getGetMethod()","$e.getSetMethod()")' ',
+            ${e.varName}("$table.name","$e.name",$e.ordinalPosition,"$e.getGetMethod()","$e.getSetMethod()")' ',
             ');
-            final String field;
-            final String fullName;
-            final int index;
-            final int ordinal;
-            final long mask;
-            final String getter;
-            final String setter;
-            private Column(String field,int ordinal,String getter,String setter){
-                this.field = field;
-                this.fullName = "${table.name}." + field;
-                this.ordinal = ordinal;
-                this.index = ordinal -1;
-#if($table.countColumns() <= 64)
-                this.mask = 1L << index;
-#else
-                // unused
-                this.mask = -1;
-#end
-                this.getter = setter;
-                this.setter = setter;
+            final ColumnMeta meta;
+            private Column(String table,String field,int ordinal,String getter,String setter){
+                meta = new ColumnMeta(table,field,ordinal,getter,setter);
             }
         }
     }

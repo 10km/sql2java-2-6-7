@@ -40,8 +40,8 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      */
     public static final String TABLE_NAME="$tablename";
 
-   /**
-     * Contains all the primarykey fields of the $tablename table.
+    /**
+     * Contains all the primary key fields of the $tablename table.
      */
     public static final String[] PRIMARYKEY_NAMES =
     {
