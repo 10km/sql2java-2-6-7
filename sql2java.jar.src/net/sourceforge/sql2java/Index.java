@@ -104,4 +104,7 @@ public class Index {
 	public String asConstName(){
 		return (this.table.getName() + "_" +this.asIndexName()).toUpperCase();
 	}
+	public String asIndexVar(){
+		return StringUtilities.convertName(this.asIndexName(),true);
+	}
 }

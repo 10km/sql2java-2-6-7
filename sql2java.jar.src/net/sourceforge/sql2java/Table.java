@@ -1077,6 +1077,15 @@ public class Table {
 		byte[] md5 = getMD5(input.getBytes());
 		return longFrom8Bytes(md5,0, false)  ^ longFrom8Bytes(md5,8, false);
 	}	
+	public String asFkVar(String fkName){
+		return StringUtilities.convertName(toUniversalFkName(fkName),true);
+	}
+	public String asIKVar(String fkName){
+		Table foreignTable = this.getForeignTableByFkName(fkName);
+		return null==foreignTable
+				? ""
+				: StringUtilities.convertName(toUniversalFkName(fkName) + "_of_" +getBasename(true), true);
+	}
 
 	public String asFKConst(String fkName){
 		return (this.name+"_FK_" + toUniversalFkName(fkName)).toUpperCase();
