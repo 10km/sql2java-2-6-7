@@ -497,6 +497,13 @@ public class Table {
 				return input.getForeignTable().equals(table);
 			}}));
 	}
+	public List<ForeignKey> getImportedFoeignKeysAsList(){
+		ArrayList<ForeignKey> list = new ArrayList<ForeignKey>();
+		for(Table table:getImportedTablesAsList()){
+			list.addAll(table.getForeignKeys(this));
+		}
+		return list;
+	}
 	public List<ForeignKey> getForeignKeysAsList(){
 		return ImmutableList.copyOf(this.fkNameMap.values());
 	}
@@ -546,17 +553,9 @@ public class Table {
 		return keys;
 	}
 	private String toUniversalFkName(String fkName) {
-		Vector<Column> keys = this.fkNameMap.get(fkName).columns;
-		if(null!=keys){
-			Vector<String> names=new Vector<String>();
-			for(Column k:keys)names.add(k.getName());
-			StringBuilder sb=new StringBuilder();
-			for(int i=0;i<keys.size();++i){
-				if(i>0)
-					sb.append("_");
-				sb.append(keys.get(i).getName());
-			}
-			return sb.toString();
+		ForeignKey key = this.fkNameMap.get(fkName);
+		if(null!=key){
+			return key.getUniversalName();
 		}
 		return "";
 	}
@@ -1289,6 +1288,9 @@ public class Table {
 		public Table getForeignTable(){
 			return columns.get(0).getForeignColumn().getTable();
 		}
+		public Table getTable(){
+			return columns.get(0).getTable();
+		}
 		/** 返回主键{@code primaryColumn}对应的字段 */
 		public Column foreignColumnOf(Column primaryColumn){
 			for(Column column:columns){
@@ -1337,6 +1339,21 @@ public class Table {
 		}
 		public Table.ForeignKeyRule getDeleteRule() {
 			return deleteRule;
+		}
+		public String asFkVar(){
+			return StringUtilities.convertName(getUniversalName(),true);
+		}
+		public String asIkVar(){
+			return StringUtilities.convertName(getUniversalName() + "_of_" +getTable().getBasename(true), true);
+		}
+		public String getUniversalName() {
+			return Joiner.on('_').join(Lists.transform(
+					columns, 
+					new Function<Column,String>(){
+						@Override
+							public String apply(Column input) {
+								return input.getName();
+							}}));
 		}
 	}
 	public static enum ForeignKeyRule{
