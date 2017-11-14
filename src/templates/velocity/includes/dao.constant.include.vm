@@ -47,77 +47,62 @@ public interface $javaClassName {
     public static final int SEARCH_STARTING_LIKE = 2;
     /** set QUERY% for loadLikeTemplate */
     public static final int SEARCH_ENDING_LIKE = 3;
-   
-    //////////////////////////////////////
-    // COLUMN COLUMN CONSTANT
-    //////////////////////////////////////    
-    #join($tables '
-    public static final int ${e.name.toUpperCase()}_COLUMN_COUNT = $e.countColumns();
-    public static final int ${e.name.toUpperCase()}_PK_COUNT = $e.countPrimaryKeys();' '')
-
-    //////////////////////////////////////
-    // FOREIGN KEY INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineFkConst($t)
-#end
-    //////////////////////////////////////
-    // IMPORTED KEY INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineIkConst($t)
-#end
-    //////////////////////////////////////
-    // INDEX INDEX DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#defineIndexConst($t)
-#end
-    //////////////////////////////////////
-    // COLUMN ID DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-#foreach ( $column in $t.columns )
-#set ( $vcmo = $velocityCount - 1 )
-    /** Identify the $column.getFullName() field (ordinal:$column.getOrdinalPosition()). */
-    public static final int $column.getIDConstName() = $vcmo;
-#if( $t.countColumns() <= 64 )
-    public static final long $column.getIDMaskConstName() = 1L << $vcmo;
-#end
-#end
-#end
-    //////////////////////////////////////
-    // COLUMN NAME DECLARE
-    //////////////////////////////////////    
-#foreach($t in $tables)
-    /////////////////// $t.name ////////////
-    /** Contains all the full fields of the $t.name table.*/
-    public static final String $t.name.toUpperCase()_FULL_FIELDS ="#join($t.columns '$e.fullName' '"
-                            + ",')";
-    /** Field that contains the comma separated fields of the $t.name table. */
-    public static final String $t.name.toUpperCase()_FIELDS = "#join($t.columns '$e.name' '"
-                            + ",')";
-    public static final java.util.List<String> $t.name.toUpperCase()_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_FIELDS.split(","));
-    /** Field that contains the comma separated java fields of the $t.name table. */
-    public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.varName' '"
-                            + ",')";
-    public static final java.util.List<String> $t.name.toUpperCase()_JAVA_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_JAVA_FIELDS.split(","));
-#end
 
 #foreach($table in $tables)
     /**
      * Constant definition for $table.name
      * @author guyadong
      */
-    public static class $table.asCoreClassNSP(){
+    public static interface $table.asCoreClassNSP(){
         public static final int COLUMN_COUNT = $table.countColumns();
         public static final int PRIMARY_KEY_COUNT = $table.countPrimaryKeys();
+        /** Contains all the full fields of the $t.name table.*/
+        public static final String FULL_FIELDS ="#join($table.columns '$e.fullName' '"
+                            + ",')";
+
+        /** Field that contains the comma separated fields of the $table.name table. */
+        public static final String FIELDS = "#join($table.columns '$e.name' '"
+                            + ",')";
+                            
+        public static final java.util.List<String> FIELDS_LIST = java.util.Arrays.asList(FIELDS.split(","));
+
+        /** Field that contains the comma separated java fields of the $table.name table. */
+        public static final String JAVA_FIELDS = "#join($table.columns '$e.varName' '"
+                            + ",')";
+                            
+        public static final java.util.List<String> JAVA_FIELDS_LIST = java.util.Arrays.asList(JAVA_FIELDS.split(","));
+        public static enum Fk{
+#set ( $count = 1)
+#foreach($foreignTable in $table.foreignTables)
+#if($count > 1),
+#end
+#foreach( $fkName in $table.getFkMapNames($foreignTable.name) )
+#set ( $count = $count + 1)
+#set ( $columnsOfFk = $table.getForeignKeysByFkName($fkName) )
+            /** foreign key ${table.name}(#join($columnsOfFk "$e.name" ',')) -> $foreignTable.name */
+            ${table.asFkVar($fkName)}#end
+#end
+
+        }
+        public static enum Ik{
+#set ( $count = 1)
+#foreach($importedTable in $table.importedTables)
+#if($count > 1),
+#end
+#foreach( $ikName in $importedTable.getFkMapNames($table.name) )
+#set ( $count = $count +1 )
+#set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($ikName) )
+            /** imported key ${importedTable.name}(#join($columnsOfFk "$e.name" ',')) -> $table.name */
+            ${importedTable.asIKVar($ikName)}#end
+#end
+
+        }
         public static enum Index{
 #foreach($index in $table.getIndices())
 #if($velocityCount > 1),
 #end
             /** $index.table.name index (#join($index.getIndexColumnsList() "$e.name" ',')) */
-            $strUtil.convertName(${index.asIndexName()},false)#end
+            ${index.asIndexVar()}#end
 
         }
         /**
