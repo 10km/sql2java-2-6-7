@@ -847,7 +847,15 @@ public class Table {
 	public String asBeanClass(Boolean nsp) {
 		return convertName("Bean",nsp);
 	}
-	
+	public String asConstClass() {
+		return this.convertName("Const");
+	}
+	public String asConstClass(boolean nsp) {
+		return this.convertName("Const",nsp);
+	}
+	public String asConstClassNSP() {
+		return asConstClass(true);
+	}
 	public String asCacheClass() {
 		return this.convertName("Cache");
 	}
