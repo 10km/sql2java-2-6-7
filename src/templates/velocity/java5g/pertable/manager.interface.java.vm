@@ -8,7 +8,7 @@
 $codewriter.setCurrentJavaFilename(${gpkg}, "${javaClassName}.java")
 package ${gpkg};
 import ${schemaPkg}.exception.ObjectRetrievalException;
-import ${schemaPkg}.exception.WrapDaoException;
+import ${schemaPkg}.exception.RuntimeDaoException;
 
 /**
  * Interface to handle database calls (save, load, count, etc...) for the $tablename table.<br>
@@ -330,7 +330,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass}
      * @return always beanToSet saved
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet);
 #end
@@ -351,7 +351,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param ${e.getVarName()} the ${e.getName()} column's value filter" '')
 
      * @return an $beanClass,otherwise null if not found or exists null in input arguments
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','));
     /**
@@ -362,7 +362,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return an $beanClass
      * @throws NullPointerException exists null in input arguments
      * @throws ObjectRetrievalException if not found
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException;
 #if( 1 == $indexColumns.size())
@@ -560,7 +560,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 
      * @return  empty list if input primary key is {@code null}<br>
      *         first element equal last if self-reference field is cycle
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
     //48
@@ -578,7 +578,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 
      * @return  0 if input primary key is {@code null}<br>
      *         -1 if self-reference field is cycle
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
     //50
@@ -594,7 +594,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
      ')
 
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      * @return
      */
@@ -604,7 +604,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
      * @param bean
      * @return
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
     public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean);
@@ -617,7 +617,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return top bean
      * @throws NullPointerException if input primary key is {@code null}
      * @throws IllegalStateException if self-reference field is cycle
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      */
     public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
     //54
@@ -634,7 +634,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $table.primaryKey.getVarName() PK# $velocityCount
      * @return always {@code $table.primaryKey.getVarName()}
      * @throws IllegalStateException if self-reference field is cycle 
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($table.primaryKey.getJavaType())
      */
     public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName());
@@ -645,7 +645,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param bean
      * @return always {@code bean}
      * @throws IllegalStateException if self-reference field is cycle
-     * @throws WrapDaoException
+     * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
      */
     public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean);
