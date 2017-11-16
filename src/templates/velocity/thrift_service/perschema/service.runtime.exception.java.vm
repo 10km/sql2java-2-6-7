@@ -1,0 +1,118 @@
+#parse( "header.include.vm" )
+#set($servicePkg = $codewriter.getProperty('swift.service.package'))
+#if(!$servicePkg)
+#set($servicePkg = $schemaPkg)
+#end
+#set ( $javaClassName = "ServiceRuntimeException" )
+$codewriter.setCurrentJavaFilename("${servicePkg}", "${javaClassName}.java")
+package ${servicePkg};
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import com.facebook.swift.codec.ThriftField;
+import com.facebook.swift.codec.ThriftStruct;
+
+import com.google.common.base.Preconditions;
+
+/**
+ * 服务调用产生的运行时异常<br>
+ * 调用service端方法时产生的所有{@link RuntimeException}在抛出到客户端时被封装在{@link ServiceRuntimeException}中<br>
+ * @author guyadong
+ *
+ */
+@ThriftStruct
+public final class ServiceRuntimeException extends Exception{
+    private static final long serialVersionUID = 1L;
+    private int type = 0;
+    private String serverMessage;
+    private String causeClass;
+    private String serverStackTraceMessage = null;
+
+    public ServiceRuntimeException() {
+    }
+    /**
+     * @param cause
+     */
+    public ServiceRuntimeException(Throwable cause) {
+        super(stripRuntimeShell(Preconditions.checkNotNull(cause)));
+        this.serverMessage = getMessage();
+        this.causeClass = getCause().getClass().getName();
+        fillStackTraceMessage(getCause());
+    }
+    /**
+     * @param cause
+     */
+    public ServiceRuntimeException(int type,Throwable cause) {
+        this(cause);
+        this.type = type;
+    }
+    /**
+     * 以递归方式返回被{@link RuntimeException}多层封装的异常<br>
+     * @param e
+     * @return
+     */
+    private static final Throwable stripRuntimeShell(Throwable e){
+        if(null != e && null !=e.getCause() && e.getClass() == RuntimeException.class){
+            return stripRuntimeShell(e.getCause());
+        }
+        return e;
+    }
+    /**
+     * 调用{@link #printStackTrace(PrintWriter)}将错误堆栈信息存入 {@link #serverStackTraceMessage}
+     * 
+     * @param cause
+     * @see #printStackTrace(PrintWriter)
+     */
+    private void fillStackTraceMessage(Throwable cause) {
+        if (null != cause) {
+            StringWriter write = new StringWriter(256);
+            PrintWriter pw = new PrintWriter(write);
+            cause.printStackTrace(pw);
+            serverStackTraceMessage = write.toString();
+        }
+    }
+
+    /** 返回异常类型 */
+    @ThriftField(1)
+    public int getType() {
+        return type;
+    }
+    @ThriftField
+    public void setType(int type) {
+        this.type = type;
+    }
+    /** 返回服务端错误信息 */
+    @ThriftField(2)
+    public String getServerMessage() {
+        return serverMessage;
+    }
+    @ThriftField
+    public void setServerMessage(String serverMessage) {
+        this.serverMessage = serverMessage;
+    }
+    /** 返回封装的异常类名 */
+    @ThriftField(3)
+    public String getCauseClass() {
+        return causeClass;
+    }
+    @ThriftField
+    public void setCauseClass(String causeClass) {
+        this.causeClass = causeClass;
+    }
+    /**
+     * 返回服务端异常的堆栈信息
+     * @return serverStackTraceMessage
+     */
+    @ThriftField(4)
+    public String getServerStackTraceMessage() {
+        return serverStackTraceMessage;
+    }
+    /**
+     * @param serverStackTraceMessage
+     */
+    @ThriftField
+    public void setServerStackTraceMessage(String serverStackTraceMessage) {
+        this.serverStackTraceMessage = serverStackTraceMessage;
+    }
+}

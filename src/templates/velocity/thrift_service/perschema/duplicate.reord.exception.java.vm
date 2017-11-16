@@ -1,0 +1,35 @@
+#parse( "header.include.vm" )
+#set($servicePkg = $codewriter.getProperty('swift.service.package'))
+#if(!$servicePkg)
+#set($servicePkg = $schemaPkg)
+#end
+#set ( $javaClassName = "DuplicateReordException" )
+$codewriter.setCurrentJavaFilename("${servicePkg}", "${javaClassName}.java")
+package ${servicePkg};
+
+import com.facebook.swift.codec.ThriftStruct;
+
+/**
+ * 记录已存在异常
+ * @author guyadong
+ *
+ */
+@ThriftStruct
+public final class DuplicateReordException extends Exception {
+	private static final long serialVersionUID = 5368342551644905292L;
+
+	public DuplicateReordException() {
+	}
+
+	public DuplicateReordException(String message) {
+		super(message);
+	}
+
+	public DuplicateReordException(Throwable cause) {
+		super(cause);
+	}
+
+	public DuplicateReordException(String message, Throwable cause) {
+		super(message, cause);
+	}
+}

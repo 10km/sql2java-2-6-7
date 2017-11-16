@@ -25,19 +25,19 @@ import com.google.common.base.Preconditions;
  */
 public final class ServiceRuntimeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
-    /**
-     * 服务器端错误堆栈信息
-     */
+    private final int type;    
+    private String serverMessage;    
+    private String causeClass;
     private final String serverStackTraceMessage;
-    /** 异常类型 */
-    private final int type;
     /**
      * @param cause
      */
     ServiceRuntimeException(${thriftPackage}.ServiceRuntimeException cause) {
         super(cause);
-        serverStackTraceMessage = cause.getServerStackTraceMessage();
         type = cause.getType();
+        serverMessage = cause.getServerMessage();
+        causeClass = cause.getCauseClass();
+        serverStackTraceMessage = cause.getServerStackTraceMessage();
     }
 
     @Override
@@ -75,13 +75,20 @@ public final class ServiceRuntimeException extends RuntimeException {
             s.println(serverStackTraceMessage);
         }
     }
-    
-    /** 返回服务器端异常的堆栈信息 */
-    public String getServerStackTraceMessage() {
-        return serverStackTraceMessage;
-    }
     /** 返回异常类型 */
     public int getType() {
         return type;
+    }    
+    /** 返回服务端错误信息 */
+    public String getServerMessage() {
+        return serverMessage;
+    }
+    /** 封装的异常类名 */
+    public String getCauseClass() {
+        return causeClass;
+    }
+    /** 返回服务器端异常的堆栈信息 */
+    public String getServerStackTraceMessage() {
+        return serverStackTraceMessage;
     }
 }
