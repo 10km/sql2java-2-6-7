@@ -3,7 +3,7 @@
 #if(!$servicePkg)
 #set($servicePkg = $schemaPkg)
 #end
-#set ( $javaClassName = "DuplicateReordException" )
+#set ( $javaClassName = "DuplicateRecordException" )
 $codewriter.setCurrentJavaFilename("${servicePkg}", "${javaClassName}.java")
 package ${servicePkg};
 
@@ -16,24 +16,24 @@ import com.facebook.swift.codec.ThriftField;
  *
  */
 @ThriftStruct
-public final class DuplicateReordException extends BaseServiceException {
+public final class DuplicateRecordException extends BaseServiceException {
     private static final long serialVersionUID = 1L;
     private String message;
     
-    public DuplicateReordException() {
+    public DuplicateRecordException() {
     }
 
-    public DuplicateReordException(String message) {
+    public DuplicateRecordException(String message) {
         super(message);
         this.message = super.getMessage();
     }
 
-    public DuplicateReordException(Throwable cause) {
+    public DuplicateRecordException(Throwable cause) {
         super(cause);
         this.message = super.getMessage();
     }
 
-    public DuplicateReordException(String message, Throwable cause) {
+    public DuplicateRecordException(String message, Throwable cause) {
         super(message, cause);
         this.message = super.getMessage();
     }
