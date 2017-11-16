@@ -8,7 +8,7 @@ $codewriter.setCurrentJavaFilename("${servicePkg}", "${javaClassName}.java")
 package ${servicePkg};
 
 import com.facebook.swift.codec.ThriftStruct;
-import com.facebook.swift.codec.ThriftStruct;
+import com.facebook.swift.codec.ThriftField;
 
 /**
  * duplicated record exception
@@ -16,8 +16,8 @@ import com.facebook.swift.codec.ThriftStruct;
  *
  */
 @ThriftStruct
-public final class DuplicateReordException extends Exception {
-    private static final long serialVersionUID = 5368342551644905292L;
+public final class DuplicateReordException extends BaseServiceException {
+    private static final long serialVersionUID = 1L;
     private String message;
     
     public DuplicateReordException() {
@@ -39,7 +39,7 @@ public final class DuplicateReordException extends Exception {
     }
 
     @Override
-    @ThriftField(1)
+    @ThriftField(4)
     public String getMessage() {
         return message;
     }

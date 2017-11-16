@@ -7,13 +7,8 @@
 $codewriter.setCurrentJavaFilename("${servicePkg}", "${javaClassName}.java")
 package ${servicePkg};
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import com.facebook.swift.codec.ThriftField;
 import com.facebook.swift.codec.ThriftStruct;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Runtime exception wrap class<br>
@@ -22,12 +17,9 @@ import com.google.common.base.Preconditions;
  *
  */
 @ThriftStruct
-public final class ServiceRuntimeException extends Exception{
+public final class ServiceRuntimeException extends BaseServiceException{
     private static final long serialVersionUID = 1L;
     private int type = 0;
-    private String serviceMessage;
-    private String causeClass;
-    private String serviceStackTraceMessage = null;
 
     public ServiceRuntimeException() {
     }
@@ -35,77 +27,23 @@ public final class ServiceRuntimeException extends Exception{
      * @param cause
      */
     public ServiceRuntimeException(Throwable cause) {
-        super(stripRuntimeShell(Preconditions.checkNotNull(cause)));
-        this.serviceMessage = getMessage();
-        this.causeClass = getCause().getClass().getName();
-        fillStackTraceMessage(getCause());
+        super(cause);
     }
     /**
      * @param cause
      */
     public ServiceRuntimeException(int type,Throwable cause) {
-        this(cause);
+        super(cause);
         this.type = type;
-    }
-    /**
-     * return cause wrapped by {@link RuntimeException}<br>
-     * @param e
-     * @return
-     */
-    private static final Throwable stripRuntimeShell(Throwable e){
-        if(null != e && null !=e.getCause() && e.getClass() == RuntimeException.class){
-            return stripRuntimeShell(e.getCause());
-        }
-        return e;
-    }
-    /**
-     * save error message to {@link #serviceStackTraceMessage} by calling {@link #printStackTrace(PrintWriter)} 
-     * @param cause
-     * @see #printStackTrace(PrintWriter)
-     */
-    private void fillStackTraceMessage(Throwable cause) {
-        if (null != cause) {
-            StringWriter write = new StringWriter(256);
-            PrintWriter pw = new PrintWriter(write);
-            cause.printStackTrace(pw);
-            serviceStackTraceMessage = write.toString();
-        }
     }
 
     /** return exception type */
-    @ThriftField(1)
+    @ThriftField(4)
     public int getType() {
         return type;
     }
     @ThriftField
     public void setType(int type) {
         this.type = type;
-    }
-    /** return error message from service */
-    @ThriftField(2)
-    public String getServiceMessage() {
-        return serviceMessage;
-    }
-    @ThriftField
-    public void setServiceMessage(String serviceMessage) {
-        this.serviceMessage = serviceMessage;
-    }
-    /** return cause exception class name */
-    @ThriftField(3)
-    public String getCauseClass() {
-        return causeClass;
-    }
-    @ThriftField
-    public void setCauseClass(String causeClass) {
-        this.causeClass = causeClass;
-    }
-    /** return stack trace message from service */
-    @ThriftField(4)
-    public String getServiceStackTraceMessage() {
-        return serviceStackTraceMessage;
-    }
-    @ThriftField
-    public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
-        this.serviceStackTraceMessage = serviceStackTraceMessage;
     }
 }
