@@ -32,8 +32,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return a unique $beanClass or {@code null} if not found
+     * @throws RuntimeDaoException
      */
-    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+    public $beanClass loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))throws RuntimeDaoException;
 
     //1.1
     /**
@@ -44,8 +45,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end     
      * @return a unique $beanClass
      * @throws ObjectRetrievalException if not found
+     * @throws RuntimeDaoException
      */
-    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws ObjectRetrievalException;
+    public $beanClass loadByPrimaryKeyChecked(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws RuntimeDaoException,ObjectRetrievalException;
     
     //1.4
     /**
@@ -55,8 +57,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end
      * @see #loadByPrimaryKey($keys)
      * @return
+     * @throws RuntimeDaoException
      */
-    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+    public boolean existsPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))throws RuntimeDaoException;
 #if ( 1 == $table.countPrimaryKeys() )
 #set ($pk = $table.getPrimaryKey())
 #if ( $pk.hasPrimaryType() )
@@ -69,25 +72,28 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * Check duplicated row by primary keys,if row exists throw exception
      * @param $pk.getVarName() $pk.getJavaType()
      * @return 
+     * @throws RuntimeDaoException
      * @throws ObjectRetrievalException
      */
-    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException;
+    public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws RuntimeDaoException,ObjectRetrievalException;
     //1.8
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *
      * @param keys primary keys array
      * @return list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys);
+    public java.util.List<$beanClass> loadByPrimaryKey($pkType... keys)throws RuntimeDaoException;
     //1.9
     /**
      * Loads {@link $beanClass} from the $tablename using primary key fields.
      *
      * @param keys primary keys collection
      * @return list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
+    public java.util.List<$beanClass> loadByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys)throws RuntimeDaoException;
 #end##1 == $table.countPrimaryKeys()   
     //2
     /**
@@ -98,8 +104,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','));
+    public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))throws RuntimeDaoException;
 #if ( 1 == $table.countPrimaryKeys() )
 #set ($pk = $table.getPrimaryKey())
 #if ( $pk.hasPrimaryType() )
@@ -113,16 +120,18 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *
      * @param keys primary keys array
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int deleteByPrimaryKey($pkType... keys);
+    public int deleteByPrimaryKey($pkType... keys)throws RuntimeDaoException;
     //2.3
     /**
      * Delete rows according to primary key.<br>
      *
      * @param keys primary keys collection
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys);
+    public int deleteByPrimaryKey(java.util.Collection<$pk.getJavaType()> keys)throws RuntimeDaoException;
 #end##1 == $table.countPrimaryKeys()  
     //2.4
     /**
@@ -130,16 +139,18 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *
      * @param beans $beanClass collection wille be deleted
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int delete($beanClass... beans);
+    public int delete($beanClass... beans)throws RuntimeDaoException;
     //2.5
     /**
      * Delete beans.<br>
      *
      * @param beans $beanClass collection wille be deleted
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int delete(java.util.Collection<$beanClass> beans);
+    public int delete(java.util.Collection<$beanClass> beans)throws RuntimeDaoException;
 #end ## $table.countPrimaryKeys() > 0
 ## ======================================================
 ## xImportedKeys template
@@ -163,8 +174,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * FK_NAME : $fkName 
      * @param bean the {@link $beanClass}
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
+     * @throws RuntimeDaoException
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean);
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}($beanClass bean)throws RuntimeDaoException;
     
     //3.1.2 GET IMPORTED
     /**
@@ -174,17 +186,18 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
-     * @throws DaoException
+     * @throws RuntimeDaoException
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    public ${importedClass}[] ${importedTable.getImportedBeansGetMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))throws RuntimeDaoException;
     
     //3.2 GET IMPORTED
     /**
      * see also ${esc.hash}${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass,int,int)
      * @param bean
      * @return
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean);
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean)throws RuntimeDaoException;
 
     //3.2.2 GET IMPORTED
     /**
@@ -194,9 +207,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans 
-     * @throws DaoException
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))throws RuntimeDaoException;
     //3.2.3 DELETE IMPORTED
     /**
      * delete the associated {@link $importedClass} objects from #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -205,8 +218,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','));
+    public int ${importedTable.getImportedBeansDelMethod($fkName)}(#join($primaryKeys "$e.getJavaType() $e.getFullVarName()" ','))throws RuntimeDaoException;
     //3.2.4 GET IMPORTED
     /**
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -215,8 +229,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param startRow the start row to be used (first row = 1, last row=-1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return the associated {@link $importedClass} beans or empty list if {@code bean} is {@code null}
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow,int numRows);    
+    public java.util.List<$importedClass> ${importedTable.getImportedBeansGetMethod($fkName)}AsList($beanClass bean,int startRow,int numRows)throws RuntimeDaoException;    
     //3.3 SET IMPORTED
     /**
      * set  the {@link $importedClass} object array associate to $beanClass by the #join($columnsOfFk "$e.fullName" ",") field.<BR>
@@ -225,8 +240,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param importedBeans imported beans from $importedTable.name
      * @return importedBeans always
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @throws RuntimeDaoException
      */
-    public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans);
+    public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans)throws RuntimeDaoException;
 
     //3.4 SET IMPORTED
     /**
@@ -236,8 +252,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param importedBeans imported beans from $importedTable.name 
      * @return importedBeans always
      * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @throws RuntimeDaoException
      */
-    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans);
+    public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans)throws RuntimeDaoException;
 
 #end
 #end
@@ -253,11 +270,12 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
+     * @throws RuntimeDaoException
      */
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ", ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''))throws RuntimeDaoException;
     //3.6 SYNC SAVE AS TRANSACTION
     /**
      * Transaction version for sync save<br>
@@ -266,11 +284,12 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
+     * @throws RuntimeDaoException
      */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ",final ${m_importedClass}[] $m_importedTable.asImpArg($m_fkName) " '' ''))throws RuntimeDaoException;
 #if( $table.hasImportedTables() )
     //3.7 SYNC SAVE 
     /**
@@ -280,11 +299,12 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
+     * @throws RuntimeDaoException
      */
     public $beanClass save($beanClass bean
         #foreachForeignTables('native' $table  ", $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ", java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))throws RuntimeDaoException;
     //3.8 SYNC SAVE AS TRANSACTION
     /**
      * Transaction version for sync save<br>
@@ -293,11 +313,12 @@ public interface ${javaClassName} extends TableManager<$beanClass>
     #foreachForeignTables('native' $table " * @param $table.asRefArg($m_fkName) the {@link $m_foreignClass} bean referenced by {@link $beanClass} " '    ' 'true')
     #foreachImportedTables('native' $table " * @param $m_importedTable.asImpArg($m_fkName) the {@link $m_importedClass} bean refer to {@link $beanClass} " '    ' 'true' )
      * @return the inserted or updated {@link $beanClass} bean
+     * @throws RuntimeDaoException
      */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('native' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
 
-        #foreachImportedTables('native' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''));
+        #foreachImportedTables('native' $table  ",final  java.util.Collection<$m_importedClass> $m_importedTable.asImpArg($m_fkName) " '' ''))throws RuntimeDaoException;
 #end ## $table.hasImportedTables()
 #end ## $table.hasForeignTables() || $table.hasImportedTables()
 ## ======================================================
@@ -320,8 +341,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * FK_NAME : $fkName
      * @param bean the {@link $beanClass}
      * @return the associated {@link $foreignClass} bean or {@code null} if {@code bean} is {@code null}
+     * @throws RuntimeDaoException
      */
-    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean);
+    public $foreignClass $table.getReferencedVarGetMethod($fkName)($beanClass bean)throws RuntimeDaoException;
 
     //5.2 SET REFERENCED 
     /**
@@ -332,7 +354,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return always beanToSet saved
      * @throws RuntimeDaoException
      */
-    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet);
+    public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet)throws RuntimeDaoException;
 #end
 #end
 #if ($table.countIndices() > 0)
@@ -353,7 +375,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return an $beanClass,otherwise null if not found or exists null in input arguments
      * @throws RuntimeDaoException
      */
-    public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','));
+    public $beanClass loadBy${index.asCamelCaseName()}(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws RuntimeDaoException;
     /**
      * Retrieves an unique $beanClass using the ${index.getName()} index.
      * #join($indexColumns "
@@ -364,7 +386,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws ObjectRetrievalException if not found
      * @throws RuntimeDaoException
      */
-    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws ObjectRetrievalException;
+    public $beanClass loadBy${index.asCamelCaseName()}Checked(#join( $indexColumns "$e.getJavaType() ${e.getVarName()}" ','))throws RuntimeDaoException,ObjectRetrievalException;
 #if( 1 == $indexColumns.size())
 #set ($indexColumn = $indexColumns.get(0))
 #if ( $indexColumn.hasPrimaryType() )
@@ -377,29 +399,33 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *
      * @param indexs index array
      * @return an list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs);
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}($columnType... indexs)throws RuntimeDaoException;
     /**
      * Retrieves an unique $beanClass for each ${index.getName()} index.
      *
      * @param indexs index collection
      * @return an list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs);
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws RuntimeDaoException;
     /**
      * Deletes rows for each ${index.getName()} index.
      *
      * @param indexs index array
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int deleteBy${index.asCamelCaseName()}($columnType... indexs);
+    public int deleteBy${index.asCamelCaseName()}($columnType... indexs)throws RuntimeDaoException;
     /**
      * Deletes rows for each ${index.getName()} index.
      *
      * @param indexs index collection
      * @return the number of deleted rows
+     * @throws RuntimeDaoException
      */
-    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs);
+    public int deleteBy${index.asCamelCaseName()}(java.util.Collection<$indexColumn.getJavaType()> indexs)throws RuntimeDaoException;
 #end##1 == $indexColumns.size()
 #else ## $index.isUnique()
     /**
@@ -409,8 +435,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return an array of $beanClass
+     * @throws RuntimeDaoException
      */
-    public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    public ${beanClass}[] loadBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))throws RuntimeDaoException;
     
     /**
      * Retrieves a list of $beanClass using the ${index.getName()} index.
@@ -419,8 +446,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return a list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    public java.util.List<$beanClass> loadBy${index.asCamelCaseName()}AsList(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))throws RuntimeDaoException;
 #end## $index.isUnique()
 
     /**
@@ -430,8 +458,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param ${column.getVarName()} the ${column.getName()} column's value filter.
 #end
      * @return the number of deleted objects
+     * @throws RuntimeDaoException
      */
-    public int deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','));
+    public int deleteBy${index.asCamelCaseName()}(#join( $index.getIndexColumnsList() "$e.getJavaType() ${e.getVarName()}" ','))throws RuntimeDaoException;
     
 #end    
 #end##($table.countIndices() > 0)
@@ -479,8 +508,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * see also ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
      * @param bean
      * @return
+     * @throws RuntimeDaoException
      */
-    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean);
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean)throws RuntimeDaoException;
 
     //23 MANY TO MANY
     /**
@@ -491,8 +521,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param startRow the start row to be used (first row = 1, last row = -1)
      * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @return a list of $beanClass
+     * @throws RuntimeDaoException
      */
-    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows);
+    public java.util.List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean, int startRow, int numRows)throws RuntimeDaoException;
 #define($junctionParam)
 #join($jTable.primaryKeys '#set( $fColumn = $e.foreignColumn)#if($fColumn.table == $table)bean#{else}linked#{end}.$fColumn.getGetMethod()()' ',')
 #end
@@ -501,46 +532,52 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * add junction between {@link $beanClass} and {@link $linkedBean} if junction not exists
      * @param bean
      * @param linked
+     * @throws RuntimeDaoException
      */
-    public void addJunction($beanClass bean,$linkedBean linked);
+    public void addJunction($beanClass bean,$linkedBean linked)throws RuntimeDaoException;
     //23.3 MANY TO MANY
     /**
      * remove junction between {@link $beanClass} and {@link $linkedBean}
      * @param bean
      * @param linked
      * @return deleted rows count
+     * @throws RuntimeDaoException
      */
-    public int deleteJunction($beanClass bean,$linkedBean linked);
+    public int deleteJunction($beanClass bean,$linkedBean linked)throws RuntimeDaoException;
     //23.4 MANY TO MANY
     /** 
      * see also {@link ${esc.hash}addJunction($beanClass,$linkedBean)}
      * @param bean
      * @param linkedBeans
+     * @throws RuntimeDaoException
      */
-    public void addJunction($beanClass bean,$linkedBean... linkedBeans);
+    public void addJunction($beanClass bean,$linkedBean... linkedBeans)throws RuntimeDaoException;
     //23.5 MANY TO MANY
     /** 
      * see also {@link ${esc.hash}addJunction($beanClass,$linkedBean)}
      * @param bean
      * @param linkedBeans
+     * @throws RuntimeDaoException
      */
-    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
+    public void addJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans)throws RuntimeDaoException;
     //23.6 MANY TO MANY
     /** 
      * see also {@link ${esc.hash}deleteJunction($beanClass,$linkedBean)}
      * @param bean
      * @param linkedBeans
      * @return
+     * @throws RuntimeDaoException
      */
-    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans);
+    public int deleteJunction($beanClass bean,$linkedBean... linkedBeans)throws RuntimeDaoException;
     //23.7 MANY TO MANY
     /** 
      * see also {@link ${esc.hash}deleteJunction($beanClass,$linkedBean)} 
      * @param bean
      * @param linkedBeans
      * @return
+     * @throws RuntimeDaoException
      */
-    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans);
+    public int deleteJunction($beanClass bean,java.util.Collection<$linkedBean> linkedBeans)throws RuntimeDaoException;
 #end
 ################### method for self-reference field#################
 #foreach($selfFk in $table.selfRefKeys)
@@ -562,14 +599,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *         first element equal last if self-reference field is cycle
      * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
     //48
     /**
      * see also {@link ${esc.hash}$table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      * @param bean
      * @return
+     * @throws RuntimeDaoException
      */
-    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean);
+    public java.util.List<$beanClass> $table.getListMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
     //49
     /**
      * get level count on the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
@@ -580,14 +618,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      *         -1 if self-reference field is cycle
      * @throws RuntimeDaoException
      */
-    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
     //50
     /**
      * see also {@link ${esc.hash}$table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      * @param bean
-     * @return 
+     * @return
+     * @throws RuntimeDaoException
      */
-    public int $table.getLevelMethod($selfFk)($beanClass bean);
+    public int $table.getLevelMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
     //51
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
@@ -597,8 +636,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      * @return
+     * @throws RuntimeDaoException
      */
-    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    public boolean $table.getCyeleTestMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
     //52
     /**
      * test whether the self-reference field is cycle : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
@@ -607,7 +647,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getLevelMethod($selfFk)($beanClass)
      */
-    public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean);
+    public boolean $table.getCyeleTestMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
     //53
     /**
      * return top bean that with {@code null} self-reference field  : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }
@@ -619,14 +659,15 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws IllegalStateException if self-reference field is cycle
      * @throws RuntimeDaoException
      */
-    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','));
+    public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
     //54
     /**
      * see also {@link ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      * @param bean
      * @return
+     * @throws RuntimeDaoException
      */
-    public $beanClass $table.getTopMethod($selfFk)($beanClass bean);
+    public $beanClass $table.getTopMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
 #if($table.countPrimaryKeys() == 1)
     //55
     /**
@@ -637,7 +678,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($table.primaryKey.getJavaType())
      */
-    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName());
+    public $table.primaryKey.getJavaType() $table.getCheckNotCycleMethod($selfFk)($table.primaryKey.getJavaType() $table.primaryKey.getVarName())throws RuntimeDaoException;
 #end
     //56
     /**
@@ -648,6 +689,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @throws RuntimeDaoException
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
      */
-    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean);
+    public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
 #end
 }
