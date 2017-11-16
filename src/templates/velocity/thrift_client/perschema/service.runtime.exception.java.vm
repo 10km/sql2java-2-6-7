@@ -15,80 +15,80 @@ import java.io.PrintWriter;
 import com.google.common.base.Preconditions;
 
 /**
- * 封装服务端调用产生的运行时异常<br>
- * 调用service端方法时产生的所有{@link RuntimeException}在抛出到客户端时被封装在{@link ${thriftPackage}.ServiceRuntimeException}中,
- * 捕获此异常可以获取服务端抛出的{@link RuntimeException}的详细信息<br>
- * 调用{@link #getServerStackTraceMessage()}可以获取服务器端的堆栈错误信息<br>
- * 调用{@link #printServerStackTrace()}控制台输出服务器端的堆栈错误信息<br>
+ * Runtime exception wrap class<br>
+ * all {@link RuntimeException} threw from service was wrapped to the exception<br>
+ * catch the exception to retrieve detail error message from service<br>
+ * retrieve service stack trace message by call {@link #getServiceStackTraceMessage()}<br>
+ * get exception type by call {@link getType()}
  * @author guyadong
  *
  */
 public final class ServiceRuntimeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private final int type;    
-    private String serverMessage;    
+    private String serviceMessage;    
     private String causeClass;
-    private final String serverStackTraceMessage;
+    private final String serviceStackTraceMessage;
     /**
      * @param cause
      */
     ServiceRuntimeException(${thriftPackage}.ServiceRuntimeException cause) {
         super(cause);
         type = cause.getType();
-        serverMessage = cause.getServerMessage();
+        serviceMessage = cause.getServiceMessage();
         causeClass = cause.getCauseClass();
-        serverStackTraceMessage = cause.getServerStackTraceMessage();
+        serviceStackTraceMessage = cause.getServiceStackTraceMessage();
     }
 
     @Override
     public String getMessage() {
-        return getServerStackTraceMessage();
+        return getServiceStackTraceMessage();
     }
     /**
-     * 输出服务器端堆栈错误信息到{@link System#err}
+     * print stack trace message from service to {@link System#err}
      * @see ${esc.hash}printStackTrace()
      */
-    public void printServerStackTrace() {
-        printServerStackTrace(System.err);
+    public void printServiceStackTrace() {
+        printServiceStackTrace(System.err);
     }
 
     /**
      * @param s
-     * @see ${esc.hash}printServerStackTrace()
+     * @see ${esc.hash}printServiceStackTrace()
      * @see ${esc.hash}printStackTrace(PrintStream)
      * @throws NullPointerException s is {@code null}
      */
-    public void printServerStackTrace(PrintStream s) {
+    public void printServiceStackTrace(PrintStream s) {
         synchronized (Preconditions.checkNotNull(s)) {
-            s.println(serverStackTraceMessage);
+            s.println(serviceStackTraceMessage);
         }
     }
 
     /**
      * @param s
-     * @see ${esc.hash}printServerStackTrace()
+     * @see ${esc.hash}printServiceStackTrace()
      * @see ${esc.hash}printStackTrace(PrintWriter)
      * @throws NullPointerException s is {@code null}
      */
-    public void printServerStackTrace(PrintWriter s) {
+    public void printServiceStackTrace(PrintWriter s) {
         synchronized (Preconditions.checkNotNull(s)) {
-            s.println(serverStackTraceMessage);
+            s.println(serviceStackTraceMessage);
         }
     }
-    /** 返回异常类型 */
+    /** return exception type */
     public int getType() {
         return type;
     }    
-    /** 返回服务端错误信息 */
-    public String getServerMessage() {
-        return serverMessage;
+    /** return error message from service */
+    public String getServiceMessage() {
+        return serviceMessage;
     }
-    /** 封装的异常类名 */
+    /** return cause exception class name */
     public String getCauseClass() {
         return causeClass;
     }
-    /** 返回服务器端异常的堆栈信息 */
-    public String getServerStackTraceMessage() {
-        return serverStackTraceMessage;
+    /** return stack trace message from service */
+    public String getServiceStackTraceMessage() {
+        return serviceStackTraceMessage;
     }
 }

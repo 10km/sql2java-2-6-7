@@ -16,8 +16,8 @@ import com.facebook.swift.codec.ThriftStruct;
 import com.google.common.base.Preconditions;
 
 /**
- * 服务调用产生的运行时异常<br>
- * 调用service端方法时产生的所有{@link RuntimeException}在抛出到客户端时被封装在{@link ServiceRuntimeException}中<br>
+ * Runtime exception wrap class<br>
+ * all {@link RuntimeException} threw from service was wrapped to the object<br>
  * @author guyadong
  *
  */
@@ -25,9 +25,9 @@ import com.google.common.base.Preconditions;
 public final class ServiceRuntimeException extends Exception{
     private static final long serialVersionUID = 1L;
     private int type = 0;
-    private String serverMessage;
+    private String serviceMessage;
     private String causeClass;
-    private String serverStackTraceMessage = null;
+    private String serviceStackTraceMessage = null;
 
     public ServiceRuntimeException() {
     }
@@ -36,7 +36,7 @@ public final class ServiceRuntimeException extends Exception{
      */
     public ServiceRuntimeException(Throwable cause) {
         super(stripRuntimeShell(Preconditions.checkNotNull(cause)));
-        this.serverMessage = getMessage();
+        this.serviceMessage = getMessage();
         this.causeClass = getCause().getClass().getName();
         fillStackTraceMessage(getCause());
     }
@@ -48,7 +48,7 @@ public final class ServiceRuntimeException extends Exception{
         this.type = type;
     }
     /**
-     * 以递归方式返回被{@link RuntimeException}多层封装的异常<br>
+     * return cause wrapped by {@link RuntimeException}<br>
      * @param e
      * @return
      */
@@ -59,8 +59,7 @@ public final class ServiceRuntimeException extends Exception{
         return e;
     }
     /**
-     * 调用{@link #printStackTrace(PrintWriter)}将错误堆栈信息存入 {@link #serverStackTraceMessage}
-     * 
+     * save error message to {@link #serviceStackTraceMessage} by calling {@link #printStackTrace(PrintWriter)} 
      * @param cause
      * @see #printStackTrace(PrintWriter)
      */
@@ -69,11 +68,11 @@ public final class ServiceRuntimeException extends Exception{
             StringWriter write = new StringWriter(256);
             PrintWriter pw = new PrintWriter(write);
             cause.printStackTrace(pw);
-            serverStackTraceMessage = write.toString();
+            serviceStackTraceMessage = write.toString();
         }
     }
 
-    /** 返回异常类型 */
+    /** return exception type */
     @ThriftField(1)
     public int getType() {
         return type;
@@ -82,16 +81,16 @@ public final class ServiceRuntimeException extends Exception{
     public void setType(int type) {
         this.type = type;
     }
-    /** 返回服务端错误信息 */
+    /** return error message from service */
     @ThriftField(2)
-    public String getServerMessage() {
-        return serverMessage;
+    public String getServiceMessage() {
+        return serviceMessage;
     }
     @ThriftField
-    public void setServerMessage(String serverMessage) {
-        this.serverMessage = serverMessage;
+    public void setServiceMessage(String serviceMessage) {
+        this.serviceMessage = serviceMessage;
     }
-    /** 返回封装的异常类名 */
+    /** return cause exception class name */
     @ThriftField(3)
     public String getCauseClass() {
         return causeClass;
@@ -100,19 +99,13 @@ public final class ServiceRuntimeException extends Exception{
     public void setCauseClass(String causeClass) {
         this.causeClass = causeClass;
     }
-    /**
-     * 返回服务端异常的堆栈信息
-     * @return serverStackTraceMessage
-     */
+    /** return stack trace message from service */
     @ThriftField(4)
-    public String getServerStackTraceMessage() {
-        return serverStackTraceMessage;
+    public String getServiceStackTraceMessage() {
+        return serviceStackTraceMessage;
     }
-    /**
-     * @param serverStackTraceMessage
-     */
     @ThriftField
-    public void setServerStackTraceMessage(String serverStackTraceMessage) {
-        this.serverStackTraceMessage = serverStackTraceMessage;
+    public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
+        this.serviceStackTraceMessage = serviceStackTraceMessage;
     }
 }
