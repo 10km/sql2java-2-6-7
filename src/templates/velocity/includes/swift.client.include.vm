@@ -48,6 +48,7 @@ all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}
 #set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
+
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -80,19 +81,17 @@ class $javaClassName implements Constant{
 #if(!$converterInit)
 #eachDepencyTable('
     /** 
-     * @return converter of $leftClass 
+     * @return converter of {@link $leftClass}
      */
     public IBeanConverter<$leftClass,$rightClass> get${leftClass}Converter(){
         return ${table.asConverterVar()};
     }
     /** 
-     * setup converter of $leftClass 
+     * setup converter of {@link $leftClass}
      * @param ${table.asConverterVar()} must not be null. 
      */
     public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()}){
-        if(null == ${table.asConverterVar()})
-            throw new NullPointerException();
-        this.${table.asConverterVar()} = ${table.asConverterVar()};
+        this.${table.asConverterVar()} = checkNotNull(${table.asConverterVar()});
     }' $null)
 #end##(!$converterInit)
 
@@ -103,8 +102,7 @@ class $javaClassName implements Constant{
      * @param service a instance of ${interfaceClass} created by Swift, must not be null
      */
     $javaClassName(${interfaceClass} service){
-        checkNotNull(service,"service is null");
-        this.service = service;
+        this.service = checkNotNull(service,"service is null");
     }
 ## 
 ## 生成方法参数列表
