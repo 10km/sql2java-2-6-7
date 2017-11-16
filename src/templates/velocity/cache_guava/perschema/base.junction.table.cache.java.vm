@@ -4,13 +4,13 @@ $codewriter.setCurrentJavaFilename($schemaPkg, "${javaClassName}.java")
 package $schemaPkg;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -62,7 +62,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
             }
             @SuppressWarnings("unchecked")
             Key other = (Key) obj;
-            return (Objects.equal(k1, other.k1) && Objects.equal(k2, other.k2));
+            return (Objects.equals(k1, other.k1) && Objects.equals(k2, other.k2));
         }
     }
     /** 返回一个用于查询的临时对象 */
@@ -193,7 +193,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
                 : Sets.newHashSet(Collections2.filter(cacheMap.values(), new Predicate<B>(){
                     @Override
                     public boolean apply(B input) {
-                        return Objects.equal(k, fun.apply(input));
+                        return Objects.equals(k, fun.apply(input));
                     }}));
     }
     /** 

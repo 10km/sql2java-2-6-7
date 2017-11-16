@@ -8,6 +8,8 @@ $codewriter.setCurrentJavaFilename($table.getPackage(true), "${beanClass}.java")
 package $table.getPackage(true);
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
+
 #if(!$isGeneral)
 import ${schemaPkg}.Constant;
 import ${schemaPkg}.BaseBean;
@@ -176,10 +178,7 @@ public $!{final} class ${beanClass}
         $table.stateVarAssignStatement("initialized","this.initialized");
     }
 #end
-    public static final boolean equal(Object a, Object b) {
-        return a == b || (a != null && a.equals(b));
-    }
-    public static final <T extends Comparable<T>>boolean compare(T a, T b) {
+    protected static final <T extends Comparable<T>>boolean equals(T a, T b) {
         return a == b || (a != null && 0==a.compareTo(b));
     }
     public ${beanClass}(){
@@ -250,7 +249,11 @@ public $!{final} class ${beanClass}
 #end
     /**
      * Setter method for {@link #$column.getVarName()}.<br>
-#if ( $column.hasCompareTo() )
+#if ( $column.useEqualsInSetter() )
+     * The new value is set only if equals() says it is different,
+     * or if one of either the new value or the current value is null.
+     * In case the new value is different, it is set and the field is marked as 'modified'.
+#elseif ($column.hasCompareTo())
      * The new value is set only if compareTo() says it is different,
      * or if one of either the new value or the current value is null.
      * In case the new value is different, it is set and the field is marked as 'modified'.
@@ -265,11 +268,11 @@ public $!{final} class ${beanClass}
     {
         checkMutable();
 #if ($column.useEqualsInSetter())
-        if (equal(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
+        if (Objects.equals(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
             return;
         }
 #elseif ($column.hasCompareTo())
-        if (compare(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
+        if (equals(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
             return;
         }
 #end
