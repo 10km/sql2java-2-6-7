@@ -23,7 +23,7 @@ import com.google.common.base.Preconditions;
 @ThriftStruct
 public abstract class BaseServiceException extends Exception{
     private static final long serialVersionUID = 1L;
-    private String serviceMessage;
+    private String message;
     private String causeClass;
     private String serviceStackTraceMessage;
 
@@ -43,7 +43,7 @@ public abstract class BaseServiceException extends Exception{
         init();
     }
     private void init(){
-        this.serviceMessage = getMessage();
+        this.message = getMessage();
         this.causeClass = getCause().getClass().getName();
         fillStackTraceMessage(getCause());
     }
@@ -73,13 +73,14 @@ public abstract class BaseServiceException extends Exception{
     }
 
     /** return error message from service */
+    @Override
     @ThriftField(1)
-    public String getServiceMessage() {
-        return serviceMessage;
+    public String getMessage() {
+        return message;
     }
     @ThriftField
-    public void setServiceMessage(String serviceMessage) {
-        this.serviceMessage = serviceMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
     /** return cause exception class name */
     @ThriftField(2)

@@ -25,25 +25,21 @@ import com.google.common.base.Preconditions;
  */
 public final class ServiceRuntimeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
-    private final int type;    
-    private String serviceMessage;    
+    private String message;    
     private String causeClass;
     private final String serviceStackTraceMessage;
+    private final int type;    
     /**
      * @param cause
      */
     ServiceRuntimeException(${thriftPackage}.ServiceRuntimeException cause) {
         super(cause);
         type = cause.getType();
-        serviceMessage = cause.getServiceMessage();
+        message = cause.getMessage();
         causeClass = cause.getCauseClass();
         serviceStackTraceMessage = cause.getServiceStackTraceMessage();
     }
 
-    @Override
-    public String getMessage() {
-        return getServiceStackTraceMessage();
-    }
     /**
      * print stack trace message from service to {@link System#err}
      * @see ${esc.hash}printStackTrace()
@@ -75,13 +71,10 @@ public final class ServiceRuntimeException extends RuntimeException {
             s.println(serviceStackTraceMessage);
         }
     }
-    /** return exception type */
-    public int getType() {
-        return type;
-    }    
     /** return error message from service */
-    public String getServiceMessage() {
-        return serviceMessage;
+    @Override
+    public String getMessage() {
+        return message;
     }
     /** return cause exception class name */
     public String getCauseClass() {
@@ -90,5 +83,9 @@ public final class ServiceRuntimeException extends RuntimeException {
     /** return stack trace message from service */
     public String getServiceStackTraceMessage() {
         return serviceStackTraceMessage;
+    }
+    /** return exception type */
+    public int getType() {
+        return type;
     }
 }
