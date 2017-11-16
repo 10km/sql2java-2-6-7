@@ -30,6 +30,7 @@ public final class ServiceRuntimeException extends BaseServiceException{
         super(cause);
     }
     /**
+     * @param type exception type
      * @param cause
      */
     public ServiceRuntimeException(int type,Throwable cause) {
