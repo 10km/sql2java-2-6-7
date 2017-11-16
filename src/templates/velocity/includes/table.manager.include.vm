@@ -7,7 +7,15 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-$!importThrows
+#if($isGeneral)
+import ${schemaPkg}.exception.RuntimeDaoException;
+import ${schemaPkg}.exception.ObjectRetrievalException;
+#set ( $throwsString = "throws RuntimeDaoException" )
+#else
+import ${exceptionPkg}.DaoException;
+import ${exceptionPkg}.ObjectRetrievalException;
+#set ( $throwsString = "throws DaoException" )
+#end
 /**
  * Interface to handle database calls (save, load, count, etc...) for table.
  * @author guyadong

@@ -8,6 +8,9 @@ import java.util.LinkedHashSet;
 #if(!$isGeneral)
 import ${schemaPkg}.exception.DaoException;
 #set ( $throwsString = "throws DaoException" )
+#else
+import ${schemaPkg}.exception.RuntimeDaoException;
+#set ( $throwsString = "throws RuntimeDaoException" )
 #end
 
 /**

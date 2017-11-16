@@ -1,7 +1,4 @@
-#set ( $importThrows = "import ${exceptionPkg}.DaoException;
-import ${exceptionPkg}.ObjectRetrievalException;" )
 #set ( $B_parentClass = "BaseBean<B>")
-#set ( $throwsString = "throws DaoException" )
 #set ( $B_extends = " extends BaseBean<B>" )
 #set ( $T_extends = " extends BaseBean<T>" )
 ###set ( $M_native = '' )

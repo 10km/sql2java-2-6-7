@@ -1,6 +1,4 @@
-#set ( $importThrows = "import ${schemaPkg}.exception.ObjectRetrievalException;" )
 #set ( $B_parentClass = "BaseBean<?>")
-###set ( $throwsString = "" )
 #set ( $B_extends = " extends BaseBean<B>" )
 #set ( $T_extends = " extends BaseBean<T>" )
 #set ( $M_native = 'native' )
