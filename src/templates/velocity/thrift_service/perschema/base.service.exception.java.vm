@@ -44,6 +44,7 @@ public abstract class BaseServiceException extends Exception{
     private void init(){
         this.message = getMessage();
         this.causeClass = null == getCause()? null : getCause().getClass().getName();
+        this.causeField = null == getCause()? null : getCause().toString();
         fillStackTraceMessage(getCause());
     }
     /**
