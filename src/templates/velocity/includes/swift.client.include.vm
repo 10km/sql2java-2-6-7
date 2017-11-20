@@ -11,11 +11,13 @@
 $codewriter.setSaveCurrentFile(false);
 #stop
 #end
+#set ($thriftPackage = ${codewriter.getDependencyPackage()})
 #set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
 #set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
 #set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
 #set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
-#set ($nothing = $typeUtils.setPackagePrefix("net.gdface.facelog.db"))
+#set ($typeUtils.packagePrefixOfDao = $codewriter.getProperty('dao.package.prefix'))
+#set ($typeUtils.packagePrefixOfThrift = $thriftPackage)
 ## $bean$用于替换beanClass
 #set ($typeUtils.convertVar = 'converter$bean$')
 #set ($typeUtils.toBytesMethodPrefix = 'GenericUtils.toBytes')
@@ -28,7 +30,6 @@ $codewriter.setSaveCurrentFile(false);
 #set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
 #set ($serviceComment    = $javadocReader.read($serviceSourceFile))
 #set ( $thriftSrc = $codewriter.getDependencySrc())
-#set ( $thriftPackage = ${codewriter.getDependencyPackage()})
 ## 服务端运行时异常类名
 #set ( $runtimeErrorName = $codewriter.getProperty('swift.service.exception.runtime','ServiceRuntimeException'))
 #set ($nothing = $swiftParser.setRuntimeErrorName($runtimeErrorName))
