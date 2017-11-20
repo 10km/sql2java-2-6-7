@@ -100,7 +100,7 @@ public abstract class BaseServiceException extends Exception{
     public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
         this.serviceStackTraceMessage = serviceStackTraceMessage;
     }
-    /** return field value of cause {@link Throwable#toString()},as JSON string*/
+    /** return field value of cause {@link Throwable${esc.hash}toString()},as JSON string */
     @ThriftField(4)
     public String getCauseField() {
         return causeField;
