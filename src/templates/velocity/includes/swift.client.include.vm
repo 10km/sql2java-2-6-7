@@ -178,8 +178,12 @@ $!{serviceComment.getMethodComment($method.method)}
 #end###if($isAsync && $typeUtils.needFromRight($returnType))
     }
 #end###macro(defineMethod)
+## 将所有方法按方法名字排序
+##set($thriftMethods = $sorter.sort($metadata.methods.values(),"name"))
+## 将所有方法按源码中定义的顺序排序
+#set($thriftMethods = $swiftParser.sortByDefined($metadata,$serviceComment.indexOf($swiftParser.methodsOf($metadata))))
 ## 遍历所有方法输出
-#foreach($method in $sorter.sort($metadata.methods.values(),"name"))
+#foreach($method in $thriftMethods)
 #defineMethod(false)
 ## 生成泛型方法
 #if($typeUtils.existsBinaryParam($method.method))
