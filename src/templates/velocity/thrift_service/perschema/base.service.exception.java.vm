@@ -13,8 +13,6 @@ import java.io.StringWriter;
 import com.facebook.swift.codec.ThriftField;
 import com.facebook.swift.codec.ThriftStruct;
 
-import com.google.common.base.Preconditions;
-
 /**
  * service exception abstract class<br>
  * @author guyadong
@@ -26,6 +24,7 @@ public abstract class BaseServiceException extends Exception{
     private String message;
     private String causeClass;
     private String serviceStackTraceMessage;
+    private String causeField;
 
     public BaseServiceException() {
         init();
@@ -35,16 +34,16 @@ public abstract class BaseServiceException extends Exception{
         init();
     }
     public BaseServiceException(String message, Throwable cause) {
-        super(message,stripRuntimeShell(Preconditions.checkNotNull(cause)));
+        super(message,stripRuntimeShell(cause));
         init();
     }
     public BaseServiceException(Throwable cause) {
-        super(stripRuntimeShell(Preconditions.checkNotNull(cause)));
+        super(stripRuntimeShell(cause));
         init();
     }
     private void init(){
         this.message = getMessage();
-        this.causeClass = getCause().getClass().getName();
+        this.causeClass = null == getCause()? null : getCause().getClass().getName();
         fillStackTraceMessage(getCause());
     }
     /**
@@ -99,5 +98,14 @@ public abstract class BaseServiceException extends Exception{
     @ThriftField
     public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
         this.serviceStackTraceMessage = serviceStackTraceMessage;
+    }
+    /** return field value of cause {@link Throwable#toString()},as JSON string*/
+    @ThriftField(4)
+    public String getCauseField() {
+        return causeField;
+    }
+    @ThriftField
+    public void setCauseField(String causeField) {
+        this.causeField = causeField;
     }
 }

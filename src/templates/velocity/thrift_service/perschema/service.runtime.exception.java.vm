@@ -39,7 +39,7 @@ public final class ServiceRuntimeException extends BaseServiceException{
     }
 
     /** return exception type */
-    @ThriftField(4)
+    @ThriftField(5)
     public int getType() {
         return type;
     }
