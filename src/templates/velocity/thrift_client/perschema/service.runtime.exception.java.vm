@@ -92,8 +92,21 @@ public final class ServiceRuntimeException extends RuntimeException {
         return type;
     }
     /** 
-     * return cause field value string<br>
-     * format be dependent on the {@code toString()} method of cause 
+     * return declared field values JSON string of cause <br>
+     * user JSON parser deserialize to exception instance<br>
+     * Example:
+     * <pre>
+     *   public Exception causeOf(ServiceRuntimeException exp) throws ClassNotFoundException{
+     *       // user fastjson cat JSON string to target exception
+     *       if(exp.getCauseFields().isEmpty()){
+     *           return null;
+     *       }
+     *       JSONObject jsonObject = JSON.parseObject(exp.getCauseFields());
+     *       // use simple name from getCauseClass()
+     *       Class&lt;?&gt; targetClass = Class.forName(exp.getCauseClass().substring(exp.getCauseClass().lastIndexOf(&quot;.&quot;) + 1));
+     *       return (Exception)TypeUtils.castToJavaBean(jsonObject, targetClass);
+     *   }
+     * </pre>
      */
     public String getCauseFields() {
         return causeFields;
