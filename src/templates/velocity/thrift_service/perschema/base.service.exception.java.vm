@@ -24,7 +24,7 @@ public abstract class BaseServiceException extends Exception{
     private String message;
     private String causeClass;
     private String serviceStackTraceMessage;
-    private String causeField;
+    private String causeFields;
 
     public BaseServiceException() {
         init();
@@ -44,7 +44,7 @@ public abstract class BaseServiceException extends Exception{
     private void init(){
         this.message = getMessage();
         this.causeClass = null == getCause()? null : getCause().getClass().getName();
-        this.causeField = null == getCause()? null : getCause().toString();
+        this.causeFields = null == getCause()? null : getCause().toString();
         fillStackTraceMessage(getCause());
     }
     /**
@@ -102,11 +102,11 @@ public abstract class BaseServiceException extends Exception{
     }
     /** return field value of cause {@link Throwable${esc.hash}toString()},as JSON string */
     @ThriftField(4)
-    public String getCauseField() {
-        return causeField;
+    public String getCauseFields() {
+        return causeFields;
     }
     @ThriftField
-    public void setCauseField(String causeField) {
-        this.causeField = causeField;
+    public void setCauseFields(String causeFields) {
+        this.causeFields = causeFields;
     }
 }
