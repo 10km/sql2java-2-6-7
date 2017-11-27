@@ -89,13 +89,9 @@ public final class StringUtilities {
 	 */
 	public static String firstUpperCase(String name){
 		if(Strings.isNullOrEmpty(name))return name;
-		StringBuffer buffer = new StringBuffer(name.length());
-		char[] list = name.toLowerCase().toCharArray();
-		buffer.append(Character.toUpperCase(list[0]));
-		if(list.length >1){
-			buffer.append(list,1,list.length-1);
-		}
-		return buffer.toString();
+		char[] list = name.toCharArray();
+		list[0] = Character.toUpperCase(list[0]);
+		return new String(list);
 	}
 	public static String escape(String s) {
 		return StringUtilities.isReserved(s) ? "my_" + s : s;
