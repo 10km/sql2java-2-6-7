@@ -1,0 +1,23 @@
+#parse( "schema.include.vm" )
+#parse( "header.include.vm" )
+#set( $subpkg=$db.engineAsSubPackage() )
+$codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "ManagerUtil.java")
+package ${gpkg}.${subpkg};
+
+import java.util.Map;
+
+import ${pkg}.Manager;
+/**
+ * static method delegation of native manager {@link Manager}
+ * @author guyadong
+ *
+ */
+public class ManagerUtil {
+    /**
+     * inject properties to  {@link Manager${esc.hash}databaseProperties}
+     * @param properties
+     */
+    public static final void injectProperties(Map<String,String> properties){
+        Manager.injectProperties(properties);
+    }
+}
