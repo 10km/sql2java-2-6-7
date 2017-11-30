@@ -57,7 +57,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.thrift.TApplicationException;
 import com.facebook.swift.service.RuntimeTApplicationException;
 #end
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Preconditions;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -92,7 +92,7 @@ class $javaClassName implements Constant{
      * @param ${table.asConverterVar()} must not be null. 
      */
     public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()}){
-        this.${table.asConverterVar()} = checkNotNull(${table.asConverterVar()});
+        this.${table.asConverterVar()} = Preconditions.checkNotNull(${table.asConverterVar()});
     }' $null)
 #end##(!$converterInit)
 
@@ -103,7 +103,7 @@ class $javaClassName implements Constant{
      * @param service a instance of ${interfaceClass} created by Swift, must not be null
      */
     $javaClassName(${interfaceClass} service){
-        this.service = checkNotNull(service,"service is null");
+        this.service = Preconditions.checkNotNull(service,"service is null");
     }
 ## 
 ## 生成方法参数列表
@@ -190,4 +190,11 @@ $!{serviceComment.getMethodComment($method.method)}
 #defineMethod(true)
 #end
 #end
+## 导入扩展模板
+#if($swfitExtensiveTemplate)
+    ///////////////// CLIENT EXTENSIVE /////////////
+    
+#parse($swfitExtensiveTemplate)
+#end
+
 }
