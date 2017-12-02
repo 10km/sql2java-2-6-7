@@ -192,8 +192,6 @@ $!{serviceComment.getMethodComment($method.method)}
 #end
 ## 导入扩展模板
 #if($swfitExtensiveTemplate)
-    ///////////////// CLIENT EXTENSIVE /////////////
-    
 #parse($swfitExtensiveTemplate)
 #end
 
