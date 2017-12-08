@@ -4,7 +4,10 @@
 $codewriter.setCurrentJavaFilename($schemaPkg, "TableListener.java")
 package $schemaPkg;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Set;
+
 #if(!$isGeneral)
 import ${schemaPkg}.exception.DaoException;
 #set ( $throwsString = "throws DaoException" )
@@ -43,6 +46,9 @@ public interface TableListener<B>{
 
         @Override
         public void afterDelete(B bean)$!throwsString {}
+        
+        @Override
+        public void done()$!throwsString {}
     }
     /**
      * Invoked just before inserting a B record into the database.
@@ -110,6 +116,15 @@ public interface TableListener<B>{
     public void afterDelete(B bean)$!throwsString;
 
     /**
+     * Invoked in finally block, just after insert,update,delete.
+     *
+#if($throwsString)
+     * @$!throwsString
+#end  
+     */
+    public void done()$!throwsString;
+
+    /**
      * listener event
      * {@code INSERT} insert a bean<br>
      * {@code UPDATE} update a bean<br>
@@ -155,7 +170,7 @@ public interface TableListener<B>{
     }
     /** container for manager multiple listener */
     public static class ListenerContainer <B> implements TableListener<B> {
-        private final LinkedHashSet<TableListener<B>> listeners = new LinkedHashSet<TableListener<B>>();
+        private final Set<TableListener<B>> listeners = Collections.synchronizedSet(new LinkedHashSet<TableListener<B>>(16));
         public ListenerContainer() {
         }
     
@@ -198,6 +213,13 @@ public interface TableListener<B>{
         public void afterDelete(B bean)$!throwsString{
             for(TableListener<B> listener:listeners){
                 listener.afterDelete(bean);
+            }
+        }
+
+        @Override
+        public void done()$!throwsString{
+            for(TableListener<B> listener:listeners){
+                listener.done();
             }
         }
     

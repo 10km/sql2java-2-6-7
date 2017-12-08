@@ -378,6 +378,8 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         }
         finally
         {
+            // listener callback
+            this.listenerContainer.done();
             this.getManager().close(ps);
             this.freeConnection(c);
         }
@@ -1211,6 +1213,8 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
         }
         finally
         {
+            // listener callback
+            this.listenerContainer.done();
             sql = null;
             this.getManager().close(ps);
             this.freeConnection(c);
@@ -1316,6 +1320,8 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
         finally
         {
+            // listener callback
+            this.listenerContainer.done();
             sql = null;
             this.getManager().close(ps);
             this.freeConnection(c);

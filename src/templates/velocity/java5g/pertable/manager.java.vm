@@ -1443,6 +1443,11 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
                 @Override
                 public void afterDelete($nativeClass bean) throws DaoException {
                     listener.afterDelete(${managerClassNSP}.this.beanConverter.fromRight(bean));
+                }
+                
+                @Override
+                public void done() throws DaoException {
+                    listener.done();
                 }};
         }
 
@@ -1475,6 +1480,11 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         public void afterDelete($beanClass bean) {
             listener.afterDelete(bean);
         }        
+        
+        @Override
+        public void done() {
+            listener.done();
+        }
     }
 
     //_____________________________________________________________________
