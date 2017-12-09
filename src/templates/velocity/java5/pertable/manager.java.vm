@@ -1308,9 +1308,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #else
             ps.executeUpdate();
 #end
-            bean.resetIsModified();
             // listener callback
             this.listenerContainer.afterUpdate(bean); 
+            bean.resetIsModified();
 
             return bean;
         }
@@ -2475,8 +2475,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
                         bean.${e.getSetMethod()}($e.getDefaultValue(true));' '')
 
+#else
+## CASCADE DO NOTHING
 #end
                         Event.${fkObj.deleteRule.eventOfDeleteRule}.fire(listenerContainer, bean);
+#if($fkObj.deleteRule.equals("SET_NULL") || $fkObj.deleteRule.equals("SET_DEFAULT"))
+                        bean.resetIsModified();
+#end
                     }
                 }};
 
