@@ -7,6 +7,7 @@ package $schemaPkg;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 #if(!$isGeneral)
 import ${schemaPkg}.exception.DaoException;
@@ -258,6 +259,127 @@ public interface TableListener<B>{
         /** remove all listeners in container */
         public void clear() {
             listeners.clear();
+        }
+    }
+    /**
+     * decorator of a {@link TableListener}<br>
+     * run {@code delegate} in {@link Executor}
+     * @author guyadong
+     *
+     * @param <B>
+     */
+    public static class DecoratorExecutorListener<B> implements TableListener<B>{
+        private final TableListener<B> delegate;
+        private static final Executor DIRECT_EXECUTOR= new Executor(){
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }};
+        public DecoratorExecutorListener(TableListener<B> delegate) {
+            if(null == delegate){
+                throw new NullPointerException();
+            }
+            this.delegate = delegate;
+        }
+        /** return a {@link Executor} instance for execute task */
+        protected  Executor getExecutor() {
+            return DIRECT_EXECUTOR;
+        }
+        public TableListener<B> delegate(){
+            return delegate;
+        }
+        protected void onException(Exception e){
+            e.printStackTrace();
+        }
+        @Override
+        public void beforeInsert(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.beforeDelete(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void afterInsert(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.afterInsert(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void beforeUpdate(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.beforeUpdate(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void afterUpdate(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.afterUpdate(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void beforeDelete(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.beforeDelete(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void afterDelete(final B bean) $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.afterDelete(bean);
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
+        }
+
+        @Override
+        public void done() $!throwsString {
+            getExecutor().execute(new Runnable(){
+                @Override
+                public void run() {
+                    try{
+                        delegate.done();
+                    }catch(Exception e){
+                        onException(e);
+                    }
+                }});
         }
     }
 }
