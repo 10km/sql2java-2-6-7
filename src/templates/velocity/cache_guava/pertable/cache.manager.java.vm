@@ -54,9 +54,9 @@ public class $cacheManagerClass extends $managerClass
      * otherwise return {@code instance}.
      * @see {@link $cacheManagerClass#$cacheManagerClass(UpdateStrategy ,long , long , TimeUnit )}
      */
-    public static synchronized final $cacheManagerClass makeInstance(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit){
+    public static synchronized final $cacheManagerClass makeInstance(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit){
         if(null == instance){
-            instance = new $cacheManagerClass(updateStragey,maximumSize,duration,unit);
+            instance = new $cacheManagerClass(updateStrategy,maximumSize,duration,unit);
         }
         return instance;
     }
@@ -77,8 +77,8 @@ public class $cacheManagerClass extends $managerClass
     /** constructor<br>
      * @see {@link ${cacheClass}#${cacheClass}(UpdateStrategy ,long , long , TimeUnit )}
      */
-    protected $cacheManagerClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
-        cache = new ${cacheClass}(updateStragey,maximumSize,duration,unit);
+    protected $cacheManagerClass(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit) {
+        cache = new ${cacheClass}(updateStrategy,maximumSize,duration,unit);
         cache.registerListener();
     }
     #defineInstanceMehod($table $cacheManagerClass true)

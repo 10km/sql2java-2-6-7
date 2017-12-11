@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.gdface.facelog.db.ITableCache.ImmutableEntry;
 import net.gdface.facelog.db.ITableCache.UpdateStrategy;
 import net.gdface.facelog.db.exception.ObjectRetrievalException;
 
@@ -73,7 +74,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
     private final ConcurrentMap<Key, B> cacheMap;
     protected final  TableListener.Adapter<B> tableListener;
     /** 当前更新策略 */
-    private final UpdateStrategy updateStragey;
+    private final UpdateStrategy updateStrategy;
     private final Function<B, K1> funReturnK1 =new Function<B,K1>(){
         @Override
         public K1 apply(B input) {
@@ -128,14 +129,14 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
     }
     /**
      * 构造函数
-     * @param updateStragey 缓存更新策略
+     * @param updateStrategy 缓存更新策略
      * @param maximumSize 最大缓存容量,参见 {@link CacheBuilder#maximumSize(long)}
      * @param duration 失效时间,参见 {@link CacheBuilder#expireAfterWrite(long, TimeUnit)}
      * @param unit {@code duration}的时间单位
      */
-    public BaseJunctionTableCache(UpdateStrategy updateStragey,long maximumSize,long duration, TimeUnit unit) {        
-        if(null == updateStragey ){
-            updateStragey = ITableCache.DEFAULT_STRATEGY;
+    public BaseJunctionTableCache(UpdateStrategy updateStrategy,long maximumSize,long duration, TimeUnit unit) {        
+        if(null == updateStrategy ){
+            updateStrategy = ITableCache.DEFAULT_STRATEGY;
         }
         if(0 >= maximumSize){
             maximumSize = ITableCache.DEFAULT_CACHE_MAXIMUMSIZE;
@@ -146,7 +147,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
         if(null == unit){
             unit = ITableCache.DEFAULT_TIME_UNIT;
         }
-        this.updateStragey = updateStragey;
+        this.updateStrategy = updateStrategy;
         cache = CacheBuilder.newBuilder()
             .maximumSize(maximumSize)
             .expireAfterWrite(duration, unit)
@@ -320,7 +321,22 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
         K1 k1 = returnK1(bean);
         K2 k2 = returnK2(bean);
         if(null !=k1 && null != k2){
-            this.updateStragey.update(cacheMap, new Key(k1,k2), bean);
+            if(UpdateStrategy.refresh == updateStrategy){
+                updateStrategy.update(cacheMap, new ReloadEntry(new Key(k1,k2)));
+            }else{
+                updateStrategy.update(cacheMap, new ImmutableEntry<Key,B>(new Key(k1,k2),bean));
+            }
         }
+    }
+    private class ReloadEntry extends ImmutableEntry<Key,B>{
+        public ReloadEntry(Key key) {
+            super(key);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public B reload()throws Exception {
+            return (B) loadfromDatabase(getKey());
+        }        
     }
 }

@@ -39,8 +39,8 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
     /** constructor<br>
      * @see {@link BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
      */
-    public $cacheClass(UpdateStrategy updateStragey,long maximumSize, long duration, TimeUnit unit) {
-        super(updateStragey,maximumSize, duration, unit);
+    public $cacheClass(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit) {
+        super(updateStrategy,maximumSize, duration, unit);
         manager.bindForeignKeyListenerForDeleteRule();
 ############ FOR INDICES ############
 #foreach ( $index in $table.getIndices() )
@@ -48,7 +48,7 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
 #set ($indexColumn = $index.getIndexColumn())
 #set ($columnType = $indexColumn.getJavaType())
 
-        ${indexColumn.getCacheVarName()} = new BaseTableLoadCaching<$columnType, $beanClass>(updateStragey, maximumSize, duration, unit){
+        ${indexColumn.getCacheVarName()} = new BaseTableLoadCaching<$columnType, $beanClass>(updateStrategy, maximumSize, duration, unit){
             @Override
             public void registerListener() {
                 manager.registerListener(this.tableListener);
