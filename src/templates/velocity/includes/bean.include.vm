@@ -519,25 +519,32 @@ public $!{final} class ${beanClass}
 
     @Override
     public String toString() {
+        return toString(false);
+    }
+    /**
+     * @param notNull output not null field only if {@code true}
+     */
+    public String toString(boolean notNull) {
         // only output initialized field
         StringBuilder builder = new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[");
         int count = 0;        
 #foreach ( $column in $columns )
         if(${column.getInitializedMethod()}()){
-            if(count++ >0){
-                builder.append(",");
-            }
+            if(!notNull || null != ${column.getGetMethod()}()){
+                if(count++ >0){
+                    builder.append(",");
+                }            
 #if($column.getJavaType().equals('byte[]'))            
-            builder.append("$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes");
+                builder.append("$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes");
 #else
-            builder.append("$column.getName()=").append(${column.getGetMethod()}());
+                builder.append("$column.getName()=").append(${column.getGetMethod()}());
 #end
+            }
         }
 #end
         builder.append("]");
         return builder.toString();
     }
-
     @Override
     public int compareTo($beanClass object){
         return new CompareToBuilder()
