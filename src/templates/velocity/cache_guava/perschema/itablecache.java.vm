@@ -19,16 +19,10 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
         private K key;
         private V value;
         public ImmutableEntry(K key) {
-            if(null == key){
-                throw new IllegalStateException("key is null");
-            }
             this.key = key;
         }
         public ImmutableEntry(K key, V value) {
             this(key);
-            if(null == value){
-                throw new IllegalStateException("value is null");
-            }
             this.value = value;
         }
         @Override
@@ -47,7 +41,7 @@ public interface $javaClassName<K, B extends BaseBean<B>> {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        } 
+        }
         @Override
         public final V setValue(V value) {
             throw new UnsupportedOperationException();

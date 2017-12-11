@@ -162,5 +162,8 @@ public abstract class BaseTableLoadCaching<K ,B extends BaseBean<B>> implements 
             return loadfromDatabase(getKey());
         }        
     }
+    public UpdateStrategy getUpdateStrategy() {
+        return updateStrategy;
+    }
 }
 

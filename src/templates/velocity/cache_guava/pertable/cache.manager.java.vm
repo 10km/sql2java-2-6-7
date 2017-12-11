@@ -204,23 +204,27 @@ public class $cacheManagerClass extends $managerClass
 #end
 #end##($table.countIndices() > 0)
 ################### CHECK CYCLE BEFORE SAVE FOR SELF-REFERENCE FIELD#################
-#if(!$table.selfRefKeys.empty)
     //_____________________________________________________________________
     //
     // SAVE
     //_____________________________________________________________________
     //12
-    /**
-     * check cycle for the self-reference field before save
-     */
+
     @Override
     public $beanClass save($beanClass bean){
+#if(!$table.selfRefKeys.empty)
+        // check cycle for the self-reference field before save
 #foreach($selfFk in $table.selfRefKeys)
         $table.getCheckNotCycleMethod($selfFk)(bean);
 #end
-        return super.save(bean);
-    }
 #end
+        boolean modified = bean.isModified();
+        super.save(bean);
+        if( modified && UpdateStrategy.refresh == cache.getUpdateStrategy() ){
+            bean.copy(cache.getBeanUnchecked(#join($primaryKeys 'bean.$e.getGetMethod()()' ','))).resetIsModified();
+        }
+        return bean;
+    }
 
 #set ( $jTables = $table.getJunctionTables() )
 #foreach ( $jTable in $jTables )

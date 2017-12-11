@@ -339,4 +339,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
             return (B) loadfromDatabase(getKey());
         }        
     }
+    public UpdateStrategy getUpdateStrategy() {
+        return updateStrategy;
+    }
 }
