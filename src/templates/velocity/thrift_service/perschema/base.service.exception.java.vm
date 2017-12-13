@@ -23,7 +23,8 @@ public abstract class BaseServiceException extends Exception{
     private static final long serialVersionUID = 1L;
     private String message;
     private String causeClass;
-    private String serviceStackTraceMessage;
+    /** Lazy Initialization field */
+    private volatile String serviceStackTraceMessage;
     private String causeFields;
 
     public BaseServiceException() {
@@ -31,10 +32,12 @@ public abstract class BaseServiceException extends Exception{
     }
     public BaseServiceException(String message) {
         super(message);
+        this.message = message;
         init();
     }
     public BaseServiceException(String message, Throwable cause) {
         super(message,stripRuntimeShell(cause));
+        this.message = message;
         init();
     }
     public BaseServiceException(Throwable cause) {
@@ -48,7 +51,6 @@ public abstract class BaseServiceException extends Exception{
         if(getCause() instanceof BaseServiceException){
             this.causeFields = ((BaseServiceException)getCause()).jsonOfDeclaredFields();    
         }
-        fillStackTraceMessage(getCause());
     }
     /** return a JSON string of declared fields,subclass override it */
     protected String jsonOfDeclaredFields(){
@@ -105,6 +107,14 @@ public abstract class BaseServiceException extends Exception{
     }
     @ThriftField
     public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
+        // Double-checked locking
+        if(null == serviceStackTraceMessage){
+            synchronized(this){
+                if(null == serviceStackTraceMessage){
+                    fillStackTraceMessage(null == getCause()? this : getCause());
+                }
+            }
+        }
         this.serviceStackTraceMessage = serviceStackTraceMessage;
     }
     /** 
