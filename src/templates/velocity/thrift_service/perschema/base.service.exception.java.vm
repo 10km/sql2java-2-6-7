@@ -28,24 +28,24 @@ public abstract class BaseServiceException extends Exception{
     private String causeFields;
 
     public BaseServiceException() {
-        init();
+        this(null,null);
     }
     public BaseServiceException(String message) {
-        super(message);
-        this.message = message;
-        init();
+        this(message,null);
+    }
+    public BaseServiceException(Throwable cause) {
+        this(null,cause);
     }
     public BaseServiceException(String message, Throwable cause) {
         super(message,stripRuntimeShell(cause));
-        this.message = message;
-        init();
-    }
-    public BaseServiceException(Throwable cause) {
-        super(stripRuntimeShell(cause));
-        init();
-    }
-    private void init(){
-        this.message = getMessage();
+        if(null != message){
+            this.message = message;
+        }else if(null != getCause()){
+            this.message = getCause().getMessage();
+            if(null == this.message){
+                this.message = getCause().toString();
+            }
+        }
         this.causeClass = null == getCause()? null : getCause().getClass().getName();
         this.causeFields = null == getCause()? null : getCause().toString();
         if(getCause() instanceof BaseServiceException){
@@ -103,10 +103,6 @@ public abstract class BaseServiceException extends Exception{
     /** return stack trace message from service */
     @ThriftField(3)
     public String getServiceStackTraceMessage() {
-        return serviceStackTraceMessage;
-    }
-    @ThriftField
-    public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
         // Double-checked locking
         if(null == serviceStackTraceMessage){
             synchronized(this){
@@ -115,6 +111,10 @@ public abstract class BaseServiceException extends Exception{
                 }
             }
         }
+        return serviceStackTraceMessage;
+    }
+    @ThriftField
+    public void setServiceStackTraceMessage(String serviceStackTraceMessage) {
         this.serviceStackTraceMessage = serviceStackTraceMessage;
     }
     /** 
