@@ -519,10 +519,34 @@ public $!{final} class ${beanClass}
 
     @Override
     public String toString() {
-        return toString(false);
+        return toString(false,false);
+    }
+    protected static final StringBuilder append(StringBuilder buffer,boolean full,byte[] value){
+        if(full){
+            buffer.append(value);
+        }else{
+            buffer.append(value.length).append(" bytes");
+        }
+        return buffer;
+    }
+    private static final int STRING_LIMIT = 64;
+    protected static final StringBuilder append(StringBuilder buffer,boolean full,String value){
+        if(full){
+            buffer.append(value);
+        }else{
+            if(value.length() > STRING_LIMIT ){
+                buffer.append(value.substring(0,STRING_LIMIT - 8)).append(" ...").append(value.substring(STRING_LIMIT-4,STRING_LIMIT));
+            }else{
+                buffer.append(value);
+            }            
+        }
+        return buffer;
+    }
+    protected static final <T>StringBuilder append(StringBuilder buffer,boolean full,T value){
+        return buffer.append(value);
     }
     @Override
-    public String toString(boolean notNull) {
+    public String toString(boolean notNull, boolean fullIfStringOrBytes) {
         // only output initialized field
         StringBuilder builder = new StringBuilder(this.getClass().getName()).append("@").append(Integer.toHexString(this.hashCode())).append("[");
         int count = 0;        
@@ -531,12 +555,9 @@ public $!{final} class ${beanClass}
             if(!notNull || null != ${column.getGetMethod()}()){
                 if(count++ >0){
                     builder.append(",");
-                }            
-#if($column.getJavaType().equals('byte[]'))            
-                builder.append("$column.getName()=").append(${column.getGetMethod()}().length).append(" bytes");
-#else
-                builder.append("$column.getName()=").append(${column.getGetMethod()}());
-#end
+                }
+                builder.append("$column.getName()=");
+                append(builder,fullIfStringOrBytes,${column.getGetMethod()}());
             }
         }
 #end
