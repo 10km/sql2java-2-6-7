@@ -529,17 +529,24 @@ public $!{final} class ${beanClass}
         }
         return buffer;
     }
-    private static final int STRING_LIMIT = 64;
+    private static int stringLimit = 64;
+    private static final int MINIMUM_LIMIT = 16;
     protected static final StringBuilder append(StringBuilder buffer,boolean full,String value){
-        if(full || null == value || value.length() <= STRING_LIMIT){
+        if(full || null == value || value.length() <= stringLimit){
             buffer.append(value);
         }else{
-            buffer.append(value.substring(0,STRING_LIMIT - 8)).append(" ...").append(value.substring(STRING_LIMIT-4,STRING_LIMIT));
+            buffer.append(value.substring(0,stringLimit - 8)).append(" ...").append(value.substring(stringLimit-4,stringLimit));
         }
         return buffer;
     }
     protected static final <T>StringBuilder append(StringBuilder buffer,boolean full,T value){
         return buffer.append(value);
+    }
+    public static final void setStringLimit(int limit){
+        if(limit < MINIMUM_LIMIT){
+            throw new IllegalArgumentException(String.format("INVALID limit %d,minimum value %d",limit,MINIMUM_LIMIT));
+        }
+        stringLimit = limit;
     }
     @Override
     public String toString(boolean notNull, boolean fullIfStringOrBytes) {
