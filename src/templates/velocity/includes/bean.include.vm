@@ -268,11 +268,11 @@ public $!{final} class ${beanClass}
     {
         checkMutable();
 #if ($column.useEqualsInSetter())
-        if (Objects.equals(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
+        if (Objects.equals(newVal, $column.getVarName())) {
             return;
         }
 #elseif ($column.hasCompareTo())
-        if (equals(newVal, $column.getVarName()) && ${column.getInitializedMethod()}()) {
+        if (equals(newVal, $column.getVarName())) {
             return;
         }
 #end
