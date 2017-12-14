@@ -522,7 +522,7 @@ public $!{final} class ${beanClass}
         return toString(false,false);
     }
     protected static final StringBuilder append(StringBuilder buffer,boolean full,byte[] value){
-        if(full){
+        if(full || null == value){
             buffer.append(value);
         }else{
             buffer.append(value.length).append(" bytes");
@@ -531,14 +531,10 @@ public $!{final} class ${beanClass}
     }
     private static final int STRING_LIMIT = 64;
     protected static final StringBuilder append(StringBuilder buffer,boolean full,String value){
-        if(full){
+        if(full || null == value || value.length() <= STRING_LIMIT){
             buffer.append(value);
         }else{
-            if(value.length() > STRING_LIMIT ){
-                buffer.append(value.substring(0,STRING_LIMIT - 8)).append(" ...").append(value.substring(STRING_LIMIT-4,STRING_LIMIT));
-            }else{
-                buffer.append(value);
-            }            
+            buffer.append(value.substring(0,STRING_LIMIT - 8)).append(" ...").append(value.substring(STRING_LIMIT-4,STRING_LIMIT));
         }
         return buffer;
     }
