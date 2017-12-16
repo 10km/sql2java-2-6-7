@@ -218,7 +218,7 @@ public class $cacheManagerClass extends $managerClass
         $table.getCheckNotCycleMethod($selfFk)(bean);
 #end
 #end
-        boolean modified = bean.isModified();
+        boolean modified = null == bean ? false : bean.isModified();
         super.save(bean);
         if( modified && UpdateStrategy.refresh == cache.getUpdateStrategy() ){
             bean.copy(cache.getBeanUnchecked(#join($primaryKeys 'bean.$e.getGetMethod()()' ','))).resetIsModified();
