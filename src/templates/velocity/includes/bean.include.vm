@@ -356,10 +356,8 @@ public $!{final} class ${beanClass}
     }
 #if($column.isDate())
     /**
-     * Setter method for {@link #$column.getVarName()}.<br>
-     * Convenient for those who do not want to deal with Objects for primary types.
-     *
-     * @param newVal the new value to be assigned to $column.getVarName()
+     * Setter method for {@link ${esc.hash}$column.getVarName()}.<br>
+     * @param newVal the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object.
      */
     public void $column.getSetMethod()(Long newVal)
     {
