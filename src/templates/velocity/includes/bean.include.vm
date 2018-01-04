@@ -43,7 +43,7 @@ public $!{final} class ${beanClass}
 {
     private static final long serialVersionUID = ${table.getSerialVersionUID($beanClassFullName)}L;
     /** NULL {@link $beanClass} bean , IMMUTABLE instance */
-    public static final $beanClass NULL = new ${beanClass}().asNULL().immutable(Boolean.TRUE);
+    public static final $beanClass NULL = new ${beanClass}().asNULL().asImmutable();
 #foreach ( $column in $columns )
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
@@ -79,31 +79,42 @@ public $!{final} class ${beanClass}
 #end
 ################## IMMUTABLE STATUS ###########
     /** 
+     * set immutable status
+     * @return {@code this} 
+     */
+    private $beanClass immutable(Boolean immutable) {
+        this.immutable = immutable;
+        return this;
+    }
+    /** 
      * set {@code this} as immutable object
      * @return {@code this} 
      */
-    public synchronized $beanClass immutable(Boolean immutable) {
-        if(this.immutable != immutable){
-            checkMutable();
-            this.immutable = immutable;
-        }
-        return this;
+    public $beanClass asImmutable() {
+        return immutable(Boolean.TRUE);
     }
     /**
      * @return {@code true} if {@code this} is a mutable object  
      */
     public boolean mutable(){
-        return Boolean.TRUE != this.immutable;
+        return !Boolean.TRUE.equals(this.immutable);
     }
     /**
      * @return {@code this}
      * @throws IllegalStateException if {@code this} is a immutable object 
      */
     private $beanClass checkMutable(){
-        if(Boolean.TRUE == this.immutable){
+        if(!mutable()){
             throw new IllegalStateException("this is a immutable object");
         }
         return this;
+    }
+    /**
+     * return a new mutable copy of this object.
+     * @return 
+     */
+    public $beanClass cloneMutable(){
+        return clone().immutable(null);
     }
 #swiftThriftField( $fieldIndex 'Requiredness.REQUIRED' '_new')
     @Override
@@ -343,6 +354,18 @@ public $!{final} class ${beanClass}
     {
         $column.getSetMethod()(new $column.getJavaType()(newVal));
     }
+#if($column.isDate())
+    /**
+     * Setter method for {@link #$column.getVarName()}.<br>
+     * Convenient for those who do not want to deal with Objects for primary types.
+     *
+     * @param newVal the new value to be assigned to $column.getVarName()
+     */
+    public void $column.getSetMethod()(Long newVal)
+    {
+        $column.getSetMethod()(null == newVal ? null : new $column.getJavaType()(newVal));
+    }
+#end
 #end
     /**
      * Determines if the $column.getVarName() has been modified.
@@ -594,7 +617,7 @@ public $!{final} class ${beanClass}
     {   
         checkMutable();
         #join($columns '
-        $e.getSetMethod()(null);' '')
+        $e.getSetMethod()(($e.javaType)null);' '')
 
         isNew(true);
         resetInitialized();
@@ -758,14 +781,6 @@ public $!{final} class ${beanClass}
          */
         public Builder reset(){
             TEMPLATE.get().reset();
-            return this;
-        }
-        /** 
-         * set as a immutable object
-         * @see ${beanClass}${esc.hash}immutable(Boolean)
-         */
-        public Builder immutable(){
-            TEMPLATE.get().immutable(Boolean.TRUE);
             return this;
         }
         /** set a bean as template,must not be {@code null} */
