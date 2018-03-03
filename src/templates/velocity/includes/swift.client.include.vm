@@ -97,13 +97,17 @@ public class $javaClassName implements Constant{
 #end##(!$converterInit)
 
 
-    private final $interfaceClass service;
+    private final ClientFactory factory;
     /**
      * constructor 
      * @param service a instance of ${interfaceClass} created by Swift, must not be null
      */
-    $javaClassName(${interfaceClass} service){
-        this.service = checkNotNull(service,"service is null");
+    $javaClassName(ClientFactory factory){
+        this.factory = checkNotNull(factory,"factory is null");
+    }
+    
+    private ${interfaceClass} delegate(){
+    	return factory.applyInstance(${interfaceClass}.class);
     }
 ## 
 ## 生成方法参数列表
@@ -139,6 +143,7 @@ $!{serviceComment.getMethodComment($method.method)}
 #end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
             '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
+        final ${interfaceClass} service = delegate();
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
@@ -149,11 +154,21 @@ $!{serviceComment.getMethodComment($method.method)}
                 new com.google.common.base.Function<$fromType,$toType>(){
                     @Override
                     public $toType apply($fromType input) {
+                        factory.releaseInstance(service);
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
 #elseif($isAsync)
-        $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+#set ( $toType = $typeUtils.asReturnType($returnType,true))
+        return Futures.transform(
+                $callThrift, 
+                new com.google.common.base.Function<$toType,$toType>(){
+                    @Override
+                    public $toType apply($toType input) {
+                        factory.releaseInstance(service);
+                        return $typeUtils.fromRight($returnType,"input");
+                    }
+                });
 #else
 ## 抛出本地的基于RuntimeException的 ServiceRuntimeException
         try{
@@ -175,7 +190,11 @@ $!{serviceComment.getMethodComment($method.method)}
             throw new ${runtimeErrorName}(e);
         }
 #end
+        finally{
+            factory.releaseInstance(service);
+        }
 #end###if($isAsync && $typeUtils.needFromRight($returnType))
+
     }
 #end###macro(defineMethod)
 ## 将所有方法按方法名字排序

@@ -13,8 +13,14 @@ $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import com.facebook.nifty.client.FramedClientConnector;
 import com.facebook.nifty.client.NiftyClientChannel;
@@ -22,6 +28,7 @@ import com.facebook.nifty.client.NiftyClientConnector;
 import com.facebook.swift.service.ThriftClient;
 import com.facebook.swift.service.ThriftClientConfig;
 import com.facebook.swift.service.ThriftClientManager;
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.net.HostAndPort;
@@ -44,6 +51,8 @@ import io.airlift.units.Duration;
  *
  */
 public class ClientFactory {
+    private static final Logger logger = Logger.getLogger(ClientFactory.class.getSimpleName());
+    
     private static class Singleton{
         private static final ThriftClientManager CLIENT_MANAGER = new ThriftClientManager();    
         static{
@@ -54,62 +63,19 @@ public class ClientFactory {
                 }});
         }
     }    
-    private class HostPortClass{
-        final Class<?> clazz;
-        final HostAndPort hostAndPort;
-        HostPortClass(HostAndPort hostAndPort,Class<?> clazz){
-            this.hostAndPort = checkNotNull(hostAndPort, "hostAndPort is null");
-            this.clazz = checkNotNull(clazz, "clazz is null");
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            HostPortClass that = (HostPortClass) o;
-
-            if (!hostAndPort.equals(that.hostAndPort)) {
-                return false;
-            }
-            if (!clazz.equals(that.clazz)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = clazz.hashCode();
-            result = 31 * result + hostAndPort.hashCode();
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("HostPortClass");
-            sb.append("{host='").append(hostAndPort).append('\'');
-            sb.append(", class='").append(clazz.getName()).append('\'');
-            sb.append('}');
-            return sb.toString();
-        }
-    }
-    private static final Cache<HostPortClass, Object> CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
+    private static final Cache<Class<?>, ThriftClient<?>> THRIFT_CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
+    private static final Cache<Class<?>, Object> CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
     private ThriftClientManager clientManager; 
     private ThriftClientConfig thriftClientConfig = new ThriftClientConfig();
     private HostAndPort hostAndPort;
-    private NiftyClientConnector<? extends NiftyClientChannel> connector;
+    private volatile NiftyClientConnector<? extends NiftyClientChannel> connector;
     private String clientName = ThriftClientManager.DEFAULT_NAME;
-    private ClientFactory() {
+    private volatile GenericObjectPoolConfig channelPoolConfig = new GenericObjectPoolConfig();
+    private volatile GenericObjectPool<NiftyClientChannel> channelPool;
+
+    protected ClientFactory() {
     }
-    public static final ClientFactory builder(){
-        return new ClientFactory();
-    }
+
     public ClientFactory setManager(ThriftClientManager clientManager){
         this.clientManager = clientManager;
         return this;
@@ -163,7 +129,15 @@ public class ClientFactory {
         return this;
     }
     public ClientFactory setHostAndPort(HostAndPort hostAndPort) {
-        this.hostAndPort = hostAndPort;
+        if(null == this.hostAndPort){
+            synchronized(this){
+                if(null == this.hostAndPort){
+                    this.hostAndPort = checkNotNull(hostAndPort,"hostAndPort must not be null");
+                }
+            }
+        }else{
+            throw new IllegalStateException("the memeber hostAndPort be initialized always");
+        }
         return this;
     }
     public ClientFactory setHostAndPort(String host,int port) {
@@ -180,37 +154,129 @@ public class ClientFactory {
         this.clientName = clientName;
         return this;
     }
+    /**
+     * 设置channel pool 配置参数
+     * @param channelPoolConfig
+     * @return
+     */
+    public ClientFactory setChannelPoolConfig(GenericObjectPoolConfig channelPoolConfig) {
+        if(null != channelPoolConfig){
+            this.channelPoolConfig = channelPoolConfig;
+        }
+        return this;
+    }
+
     private HostAndPort getHostAndPort(){
         return checkNotNull(this.hostAndPort,"hostAndPort is null");
     }
     private NiftyClientConnector<? extends NiftyClientChannel> getConnector(){
         if(null == this.connector){
-            this.connector = new FramedClientConnector(this.getHostAndPort());
+            synchronized(this){
+                if(null == this.connector){
+                    this.connector = new FramedClientConnector(this.getHostAndPort());
+                }                
+            }
         }
         return this.connector;
     }
     private ThriftClientManager getClientManager(){
         if(null == this.clientManager){
-            this.clientManager = Singleton.CLIENT_MANAGER;
+            synchronized(this){
+                if(null == this.clientManager){
+                    this.clientManager = Singleton.CLIENT_MANAGER;
+                }
+            }
         }
         return this.clientManager;
     }
 
-    private <T>T getThriftClient(Class<T> interfaceClass) throws InterruptedException, ExecutionException{
-        return new ThriftClient<T>(
-                getClientManager(),
-                interfaceClass,
-                this.thriftClientConfig,
-                this.clientName).open(getConnector()).get();
+    private GenericObjectPool<NiftyClientChannel> getChannelPool() {
+        if(null == channelPool){
+            synchronized(this){
+                if(null == channelPool){
+                    channelPool = new GenericObjectPool<NiftyClientChannel>(new ThriftClientPoolFactory(),channelPoolConfig);
+                }
+            }
+        }
+        return channelPool;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T>ThriftClient<T> getThriftClient(final Class<T> interfaceClass) {
+        try {
+                return (ThriftClient<T>) THRIFT_CLIENT_CACHE.get(interfaceClass, new Callable<ThriftClient<?>>(){
+                    @Override
+                    public ThriftClient<?> call() throws Exception {
+                        return new ThriftClient<T>(
+                                getClientManager(),
+                                interfaceClass,
+                                thriftClientConfig,
+                                clientName);
+                    }});
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * 返回{@code interfaceClass}的实例
+     * @param interfaceClass
+     * @return
+     */
+    public <T>T applyInstance(Class<T> interfaceClass) {
+        try {
+            return getThriftClient(interfaceClass).open(getChannelPool().borrowObject());
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * 释放{@code instance}实例,必须于{@link ${esc.hash}applyInstance(Class)}配对使用
+     * 向资源池归还{@link NiftyClientChannel}
+     * @param instance
+     */
+    public <T>void releaseInstance(T instance){
+        NiftyClientChannel channel = (NiftyClientChannel) getClientManager().getRequestChannel(instance);
+           getChannelPool().returnObject(channel);
+    }
+    private class ThriftClientPoolFactory implements PooledObjectFactory<NiftyClientChannel> {
+
+        @Override
+        public PooledObject<NiftyClientChannel> makeObject() throws Exception {
+            return new DefaultPooledObject<NiftyClientChannel>(getClientManager().createChannel(getConnector()).get());
+        }
+
+        @Override
+        public void destroyObject(PooledObject<NiftyClientChannel> p) throws Exception {
+            logger.info("destroyObject");
+            p.getObject().close();
+        }
+
+        @Override
+        public boolean validateObject(PooledObject<NiftyClientChannel> p) {
+            
+            return p.getObject().getNettyChannel().isOpen();
+        }
+
+        @Override
+        public void activateObject(PooledObject<NiftyClientChannel> p) throws Exception {
+        }
+
+        @Override
+        public void passivateObject(PooledObject<NiftyClientChannel> p) throws Exception {
+        }
+    }
+    public static ClientFactory builder() {
+        return new ClientFactory();
     }
     @SuppressWarnings("unchecked")
     protected<I,O> O  build(Class<I> interfaceClass,final Class<O> destClass){
         try {
-            final HostPortClass key = new HostPortClass(getHostAndPort(),interfaceClass);
-            return (O) CLIENT_CACHE.get(key, new Callable<Object>(){
+            return (O) CLIENT_CACHE.get(interfaceClass, new Callable<Object>(){
                 @Override
                 public Object call() throws Exception {
-                    return destClass.getDeclaredConstructor(key.clazz).newInstance(getThriftClient(key.clazz));
+                    return destClass.getDeclaredConstructor(ClientFactory.class).newInstance(ClientFactory.this);
                 }});
         } catch (Exception e) {
             throw new RuntimeException(e);
