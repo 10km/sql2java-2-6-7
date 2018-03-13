@@ -207,7 +207,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     public $pk.getJavaType() checkDuplicate($pk.getJavaType() $pk.getVarName())throws ObjectRetrievalException{
         try{
             return this.nativeManager.checkDuplicate($pk.getVarName());
-        }catch(net.gdface.facelog.dborm.exception.ObjectRetrievalException e){
+        }catch(${exceptionPkg}.ObjectRetrievalException e){
         	throw new ObjectRetrievalException(e);
         }catch(DaoException e){
             throw new RuntimeDaoException(e);
@@ -1407,13 +1407,13 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      */
     public class WrapListener implements TableListener<$beanClass>{
         private final TableListener<$beanClass> listener;
-        private final net.gdface.facelog.dborm.TableListener<$nativeClass> nativeListener;
+        private final ${pkg}.TableListener<$nativeClass> nativeListener;
         private WrapListener(final TableListener<$beanClass> listener) {
             if(null == listener){
                 throw new NullPointerException();
             }
             this.listener = listener;
-            this.nativeListener = new net.gdface.facelog.dborm.TableListener<$nativeClass> (){
+            this.nativeListener = new ${pkg}.TableListener<$nativeClass> (){
 
                 @Override
                 public void beforeInsert($nativeClass bean) throws DaoException {

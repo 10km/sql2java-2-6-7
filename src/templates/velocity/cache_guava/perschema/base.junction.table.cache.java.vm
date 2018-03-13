@@ -21,9 +21,9 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.gdface.facelog.db.ITableCache.ImmutableEntry;
-import net.gdface.facelog.db.ITableCache.UpdateStrategy;
-import net.gdface.facelog.db.exception.ObjectRetrievalException;
+import ${schemaPkg}.ITableCache.ImmutableEntry;
+import ${schemaPkg}.ITableCache.UpdateStrategy;
+import ${schemaPkg}.exception.ObjectRetrievalException;
 
 /**
  * 
