@@ -19,8 +19,8 @@ import ${pkg}.TableListener;
 import ${pkg}.TableManager;
 import ${pkg}.exception.DaoException;
 import ${pkg}.exception.DataAccessException;
-import net.gdface.facelog.dborm.exception.DataRetrievalException;
-import ${pkg}.exception.ObjectRetrievalException;
+import ${exceptionPkg}.DataRetrievalException;
+import ${exceptionPkg}.ObjectRetrievalException;
 #if ( $table.hasVersionColumn() )
 import ${pkg}.exception.OptimisticLockingException;
 #end
