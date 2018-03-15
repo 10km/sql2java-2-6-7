@@ -5,8 +5,12 @@ $codewriter.setCurrentJavaFilename("${gpkg}.${subpkg}", "ManagerUtil.java")
 package ${gpkg}.${subpkg};
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import ${pkg}.Manager;
+import ${schemaPkg}.exception.RuntimeDaoException;
+import ${exceptionPkg}.DaoException;
+
 /**
  * static method delegation of native manager {@link Manager}
  * @author guyadong
@@ -19,5 +23,19 @@ public class ManagerUtil {
      */
     public static final void injectProperties(Map<String,String> properties){
         Manager.injectProperties(properties);
+    }
+    public static void runAsTransaction(Runnable fun)throws RuntimeDaoException{
+        try {
+            Manager.getInstance().runAsTransaction(fun);
+        } catch (DaoException e){ 
+            throw new RuntimeDaoException(e);
+        }
+    }
+    public static <T>T runAsTransaction(Callable<T> fun)throws RuntimeDaoException{
+        try {
+            return Manager.getInstance().runAsTransaction(fun);
+        } catch (DaoException e){ 
+            throw new RuntimeDaoException(e);
+        }
     }
 }
