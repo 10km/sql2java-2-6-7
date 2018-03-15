@@ -149,26 +149,26 @@ $!{serviceComment.getMethodComment($method.method)}
 #if($isAsync && $typeUtils.needFromRight($returnType))
 #set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
-        return Futures.transform(
+        $returnTypeStr future = Futures.transform(
                 $callThrift, 
                 new com.google.common.base.Function<$fromType,$toType>(){
                     @Override
                     public $toType apply($fromType input) {
-                        factory.releaseInstance(service);
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
+        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
 #elseif($isAsync)
 #set ( $toType = $typeUtils.asReturnType($returnType,true))
-        return Futures.transform(
+        $returnTypeStr future = Futures.transform(
                 $callThrift, 
                 new com.google.common.base.Function<$toType,$toType>(){
                     @Override
                     public $toType apply($toType input) {
-                        factory.releaseInstance(service);
                         return $typeUtils.fromRight($returnType,"input");
                     }
                 });
+        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
 #else
 ## 抛出本地的基于RuntimeException的 ServiceRuntimeException
         try{
