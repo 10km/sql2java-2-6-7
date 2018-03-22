@@ -244,7 +244,7 @@ public $!{final} class ${beanClass}
      *
      * @return the value of $column.getVarName()
      */
-#if(!$column.isDate())#swiftThriftField( $fieldIndex $null)#end
+#if(!$column.isDate() && !$column.isFloat())#swiftThriftField( $fieldIndex $null)#end
     public $column.getJavaType() ${column.getGetMethod()}(){
         return $column.getVarName();
     }
@@ -256,6 +256,16 @@ public $!{final} class ${beanClass}
     @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
     public Long ${column.getReadMethod()}(){
         return null == $column.getVarName() ? null:${column.getVarName()}.getTime();
+    }
+#end
+#if($swiftBeanSupport && $column.isFloat())
+    /** 
+     * use Double to represent Float type for thrift:swift support 
+     * @see #${column.getGetMethod()}()
+     */
+    @ThriftField(name = "$column.getVarName()",value = $fieldIndex)
+    public Double ${column.getReadMethod()}(){
+        return null == $column.getVarName() ? null:${column.getVarName()}.doubleValue();
     }
 #end
     /**
@@ -334,6 +344,12 @@ public $!{final} class ${beanClass}
     public void ${column.getWriteMethod()}(Long newVal){
         checkMutable();
         $column.getVarName() = null == newVal?null:new ${column.getJavaType()}(newVal);
+    }
+#elseif($column.isFloat())
+    @ThriftField(name = "$column.getVarName()")
+    public void ${column.getWriteMethod()}(Double newVal){
+        checkMutable();
+        $column.getVarName() = null == newVal?null:newVal.floatValue();
     }
 #else
     @ThriftField(name = "$column.getVarName()")
