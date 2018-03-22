@@ -741,7 +741,9 @@ public class Column implements Cloneable, Comparable<Column> {
 	public boolean isString() {
 		return M_STRING == this.getMappedType();
 	}
-
+	public boolean isFloat() {
+		return M_FLOAT == this.getMappedType();
+	}
 	public boolean isDate() {
 		switch (this.getMappedType()) {
 		case M_SQLDATE: 
