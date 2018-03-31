@@ -640,10 +640,11 @@ public final class Manager implements Constant
      */
     public static $codewriter.binaryClassName getBytes(ResultSet rs, int pos) throws SQLException
     {
+        byte[] bytes = rs.getBytes(pos);
 #if($codewriter.binaryIsByteBuffer())
-        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(rs.getBytes(pos));
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(bytes);
 #else
-        return rs.wasNull()?($codewriter.binaryClassName)null:rs.getBytes(pos);
+        return rs.wasNull()?($codewriter.binaryClassName)null:bytes;
 #end
     }
 
@@ -652,10 +653,11 @@ public final class Manager implements Constant
      */
     public static $codewriter.binaryClassName getBytes(ResultSet rs, String column) throws SQLException
     {
+        byte[] bytes = rs.getBytes(column);
 #if($codewriter.binaryIsByteBuffer())
-        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(rs.getBytes(column));
+        return rs.wasNull()?($codewriter.binaryClassName)null:${codewriter.binaryClassName}.wrap(bytes);
 #else
-        return rs.wasNull()?($codewriter.binaryClassName)null:rs.getBytes(column);
+        return rs.wasNull()?($codewriter.binaryClassName)null:bytes;
 #end    }
 
     /**
