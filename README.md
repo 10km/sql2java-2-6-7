@@ -1,4 +1,4 @@
-# sql2java-2-6-7改进版
+# sql2java-2-6-7 改进版
 
 [master](../../tree/master)分支与原版的[sql2java 2.6.7][1]保持接口一致.
 
@@ -42,6 +42,14 @@ sql2java-config指定的properties文件可以在任何位置,但是properties�
 	# 指定为 sql2java 同级的src/main为生成代码的路径
 	# 实际生成的代码在 ../src/main/java
 	# 这里的值应该与-Dgenerated-src中指定的值保持同步(少java)
+
+## 应用示例
+
+参见应用sql2java-custom生成ORM代码的项目：
+
+facelog :[https://gitee.com/l0km/facelog/tree/master/db](https://gitee.com/l0km/facelog/tree/master/db)
+
+facedb :[https://gitee.com/l0km/facedb/tree/master/db](https://gitee.com/l0km/facedb/tree/master/db)
 
 ## author
 	GuYaDong 10km0811@sohu.com
