@@ -53,6 +53,7 @@ package ${gpkg};
 #if($isAsync)
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 #else
 import org.apache.thrift.TApplicationException;
 import com.facebook.swift.service.RuntimeTApplicationException;
@@ -156,7 +157,7 @@ $!{serviceComment.getMethodComment($method.method)}
                     public $toType apply($fromType input) {
                         return $typeUtils.fromRight($returnType,"input");
                     }
-                });
+                },MoreExecutors.directExecutor());
         return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
 #elseif($isAsync)
 #set ( $toType = $typeUtils.asReturnType($returnType,true))
@@ -167,7 +168,7 @@ $!{serviceComment.getMethodComment($method.method)}
                     public $toType apply($toType input) {
                         return $typeUtils.fromRight($returnType,"input");
                     }
-                });
+                },MoreExecutors.directExecutor());
         return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
 #else
 ## 抛出本地的基于RuntimeException的 ServiceRuntimeException
