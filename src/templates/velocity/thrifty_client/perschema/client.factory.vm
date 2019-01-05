@@ -1,0 +1,362 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
+#set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
+#set ($serviceClassName = $codewriter.getProperty("swift.service.classname"))
+#set ($metadata = $swiftParser.parse($serviceClassName,$classpath))
+#set ( $thriftPackage = $codewriter.getProperty("dependency.package"))
+#set ( $serviceName = ${metadata.name} )
+#set ( $javaClassName = "ClientFactory" )
+$codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
+#macro(clientClass $isAsync)${serviceName}Client#if($isAsync)Async#end#end
+#macro(interfaceClass $isAsync)${thriftPackage}.${serviceName}#if($isAsync).Async#end#end
+package ${gpkg};
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
+
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+
+import com.facebook.nifty.client.FramedClientConnector;
+import com.facebook.nifty.client.NiftyClientChannel;
+import com.facebook.nifty.client.NiftyClientConnector;
+import com.facebook.swift.service.ThriftClient;
+import com.facebook.swift.service.ThriftClientConfig;
+import com.facebook.swift.service.ThriftClientManager;
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.net.HostAndPort;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import static com.google.common.net.HostAndPort.fromParts;
+import static com.google.common.net.HostAndPort.fromString;
+import static com.google.common.base.Preconditions.*;
+
+import io.airlift.units.Duration;
+/**
+ * Factory class for creating client instance of IFaceLog<br>
+ * Example:<br>
+ * <pre>
+ * // get a asynchronous instance
+ * #clientClass(true) client = ClientFactory.builder()
+ * .setHostAndPort("127.0.0.1",9090)
+ * .setTimeout(10,TimeUnit.SECONDS)
+ * .buildAsync();
+ * </pre>
+ * @author guyadong
+ *
+ */
+public class ClientFactory {
+    private static final Logger logger = Logger.getLogger(ClientFactory.class.getSimpleName());
+    
+    private static class Singleton{
+        private static final ThriftClientManager CLIENT_MANAGER = new ThriftClientManager();    
+        static{
+            Runtime.getRuntime().addShutdownHook(new Thread(){
+                @Override
+                public void run() {
+                    CLIENT_MANAGER.close();
+                }});
+        }
+    }    
+    private static final Cache<Class<?>, ThriftClient<?>> THRIFT_CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
+    private static final Cache<Class<?>, Object> CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
+    private static final boolean jmxEnable = isJmxEnable();
+    private ThriftClientManager clientManager; 
+    private ThriftClientConfig thriftClientConfig = new ThriftClientConfig();
+    private HostAndPort hostAndPort;
+    private volatile NiftyClientConnector<? extends NiftyClientChannel> connector;
+    private String clientName = ThriftClientManager.DEFAULT_NAME;
+    private volatile GenericObjectPoolConfig channelPoolConfig = new GenericObjectPoolConfig();
+    private volatile GenericObjectPool<NiftyClientChannel> channelPool;
+
+    /**
+     * determines if JMX be supported by JVM,return {@code false} on Android
+     * @return 
+     */
+    private static boolean isJmxEnable(){
+        try{
+            Class.forName("java.lang.management.ManagementFactory");
+            return true;
+        }catch(ClassNotFoundException e){
+            return false;
+        }
+    }
+
+    protected ClientFactory() {
+    }
+
+    public ClientFactory setManager(ThriftClientManager clientManager){
+        this.clientManager = clientManager;
+        return this;
+    }
+    public ClientFactory setThriftClientConfig(ThriftClientConfig thriftClientConfig) {
+        this.thriftClientConfig = thriftClientConfig;
+        return this;
+    }
+    /**
+     * set all timeout arguments
+     * @param time
+     * @param unit
+     * @return
+     * @see ${esc.hash}setConnectTimeout(Duration)
+     * @see ${esc.hash}setReceiveTimeout(Duration)
+     * @see ${esc.hash}setReadTimeout(Duration)
+     * @see ${esc.hash}setWriteTimeout(Duration)
+     */
+    public ClientFactory setTimeout(Duration timeout){
+        setConnectTimeout(timeout);
+        setReceiveTimeout(timeout);
+        setReadTimeout(timeout);
+        setWriteTimeout(timeout);
+        return this;
+    }
+    public ClientFactory setTimeout(long time,TimeUnit unit){
+        return setTimeout(new Duration(time,unit));
+    }
+    public ClientFactory setConnectTimeout(Duration connectTimeout) {
+        thriftClientConfig.setConnectTimeout(connectTimeout);
+        return this;
+    }
+    public ClientFactory setReceiveTimeout(Duration receiveTimeout) {
+        thriftClientConfig.setReceiveTimeout(receiveTimeout);
+        return this;
+    }
+    public ClientFactory setReadTimeout(Duration readTimeout) {
+        thriftClientConfig.setReadTimeout(readTimeout);
+        return this;
+    }
+    public ClientFactory setWriteTimeout(Duration writeTimeout) {
+        thriftClientConfig.setWriteTimeout(writeTimeout);
+        return this;
+    }
+    public ClientFactory setSocksProxy(HostAndPort socksProxy) {
+        thriftClientConfig.setSocksProxy(socksProxy);
+        return this;
+    }
+    public ClientFactory setMaxFrameSize(int maxFrameSize) {
+        thriftClientConfig.setMaxFrameSize(maxFrameSize);
+        return this;
+    }
+    public ClientFactory setHostAndPort(HostAndPort hostAndPort) {
+        if(null == this.hostAndPort){
+            synchronized(this){
+                if(null == this.hostAndPort){
+                    this.hostAndPort = checkNotNull(hostAndPort,"hostAndPort must not be null");
+                }
+            }
+        }else{
+            throw new IllegalStateException("the memeber hostAndPort be initialized always");
+        }
+        return this;
+    }
+    public ClientFactory setHostAndPort(String host,int port) {
+        return setHostAndPort(fromParts(host, port));
+    }
+    public ClientFactory setHostAndPort(String host) {
+        return setHostAndPort(fromString(host));
+    }
+    public ClientFactory setConnector(NiftyClientConnector<? extends NiftyClientChannel> connector) {
+        this.connector = connector;
+        return this;
+    }
+    public ClientFactory setClientName(String clientName) {
+        this.clientName = clientName;
+        return this;
+    }
+    public ClientFactory setChannelPoolConfig(GenericObjectPoolConfig channelPoolConfig) {
+        if(null != channelPoolConfig){
+            this.channelPoolConfig = channelPoolConfig;
+        }
+        return this;
+    }
+
+    private HostAndPort getHostAndPort(){
+        return checkNotNull(this.hostAndPort,"hostAndPort is null");
+    }
+    private NiftyClientConnector<? extends NiftyClientChannel> getConnector(){
+        if(null == this.connector){
+            synchronized(this){
+                if(null == this.connector){
+                    this.connector = new FramedClientConnector(this.getHostAndPort());
+                }                
+            }
+        }
+        return this.connector;
+    }
+    private ThriftClientManager getClientManager(){
+        if(null == this.clientManager){
+            synchronized(this){
+                if(null == this.clientManager){
+                    this.clientManager = Singleton.CLIENT_MANAGER;
+                }
+            }
+        }
+        return this.clientManager;
+    }
+
+    private GenericObjectPool<NiftyClientChannel> getChannelPool() {
+        if(null == channelPool){
+            synchronized(this){
+                if(null == channelPool){
+                    channelPoolConfig.setJmxEnabled(jmxEnable);
+                    channelPool = new GenericObjectPool<NiftyClientChannel>(new ThriftClientPoolFactory(),channelPoolConfig);
+                }
+            }
+        }
+        return channelPool;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T>ThriftClient<T> getThriftClient(final Class<T> interfaceClass) {
+        try {
+                return (ThriftClient<T>) THRIFT_CLIENT_CACHE.get(interfaceClass, new Callable<ThriftClient<?>>(){
+                    @Override
+                    public ThriftClient<?> call() throws Exception {
+                        return new ThriftClient<T>(
+                                getClientManager(),
+                                interfaceClass,
+                                thriftClientConfig,
+                                clientName);
+                    }});
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * return instance of {@code interfaceClass}
+     * @param interfaceClass
+     * @return
+     */
+    public <T>T applyInstance(Class<T> interfaceClass) {
+        try {
+            return getThriftClient(interfaceClass).open(getChannelPool().borrowObject());
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * release instance of {@code instance} that be applied by {@link ${esc.hash}applyInstance(Class)}
+     * @param instance
+     */
+    public <T>void releaseInstance(T instance){
+        NiftyClientChannel channel = (NiftyClientChannel) getClientManager().getRequestChannel(instance);
+           getChannelPool().returnObject(channel);
+    }
+    private class ThriftClientPoolFactory implements PooledObjectFactory<NiftyClientChannel> {
+
+        @Override
+        public PooledObject<NiftyClientChannel> makeObject() throws Exception {
+            return new DefaultPooledObject<NiftyClientChannel>(getClientManager().createChannel(getConnector()).get());
+        }
+
+        @Override
+        public void destroyObject(PooledObject<NiftyClientChannel> p) throws Exception {
+            logger.info("destroyObject");
+            p.getObject().close();
+        }
+
+        @Override
+        public boolean validateObject(PooledObject<NiftyClientChannel> p) {
+            
+            return p.getObject().getNettyChannel().isOpen();
+        }
+
+        @Override
+        public void activateObject(PooledObject<NiftyClientChannel> p) throws Exception {
+        }
+
+        @Override
+        public void passivateObject(PooledObject<NiftyClientChannel> p) throws Exception {
+        }
+    }
+    public static ClientFactory builder() {
+        return new ClientFactory();
+    }
+    @SuppressWarnings("unchecked")
+    protected<I,O> O  build(Class<I> interfaceClass,final Class<O> destClass){
+        try {
+            return (O) CLIENT_CACHE.get(interfaceClass, new Callable<Object>(){
+                @Override
+                public Object call() throws Exception {
+                    return destClass.getDeclaredConstructor(ClientFactory.class).newInstance(ClientFactory.this);
+                }});
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /** get asynchronous instance of $serviceName */ 
+    public #clientClass(true)  buildAsync(){
+        return build(
+                #interfaceClass(true).class,
+                #clientClass(true).class);
+    }
+    /** get synchronized instance of $serviceName */ 
+    public #clientClass(false) build(){
+        return build(
+                #interfaceClass(false).class,
+                #clientClass(false).class);
+    }
+    public class ListenableFutureDecorator<A,V> implements ListenableFuture<V>{
+        private final A async;
+        private final ListenableFuture<V> future;
+        private final AtomicBoolean released = new AtomicBoolean(false);
+        public ListenableFutureDecorator(A async, ListenableFuture<V> future) {
+            this.async = checkNotNull(async,"async is null");
+            this.future = checkNotNull(future,"future is null");
+        }
+        private void releaseAsync(){
+            if(released.compareAndSet(false, true)){
+                releaseInstance(async);    
+            }
+        }
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return future.cancel(mayInterruptIfRunning);
+        }
+
+        @Override
+        public V get() throws InterruptedException, ExecutionException {
+            try{
+                return future.get();
+            }finally{
+                releaseAsync();                
+            }
+        }
+
+        @Override
+        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            try{
+                return future.get(timeout, unit);
+            }finally{
+                releaseAsync();
+            }
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return future.isCancelled();
+        }
+
+        @Override
+        public boolean isDone() {
+            return future.isDone();
+        }
+
+        @Override
+        public void addListener(Runnable listener, Executor executor) {
+            future.addListener(listener, executor);            
+        }        
+    }}

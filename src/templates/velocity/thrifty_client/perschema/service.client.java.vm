@@ -1,0 +1,3 @@
+#set ($isAsync = false)
+#set ($swfitExtensiveTemplate = "swift_client_util_ext.vm")
+#parse( "swift.client.include.vm" )
