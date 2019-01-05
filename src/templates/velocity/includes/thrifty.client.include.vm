@@ -1,0 +1,218 @@
+#parse( "header.include.vm" )
+#parse( "schema.include.vm" )
+#if($isAsync)
+#set ($asyncSuffix = 'Async')
+#set ($asyncComment = '(asynchronous implementation)')
+#else
+#set ($asyncSuffix = $null)
+#set ($asyncComment = $null)
+#end
+#if(!$codewriter.existsDependencyPackage() || !$codewriter.existsDependencySrc())
+$codewriter.setSaveCurrentFile(false);
+#stop
+#end
+#set ($thriftPackage = ${codewriter.getDependencyPackage()})
+#set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
+#set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
+#set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
+#set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
+#set ($typeUtils.packagePrefixOfDao = $codewriter.getProperty('dao.package.prefix'))
+#set ($typeUtils.packagePrefixOfThrift = $thriftPackage)
+## $bean$用于替换beanClass
+#set ($typeUtils.convertVar = 'converter$bean$')
+#set ($typeUtils.toBytesMethodPrefix = 'GenericUtils.toBytes')
+#set ($typeUtils.toLongMethodPrefix  = 'GenericUtils.toLong')
+#set ($typeUtils.toDateMethodPrefix  = 'GenericUtils.toDate')
+#set ($typeUtils.checkNotNullElementPrefix = 'CollectionUtils.checkNotNullElement')
+#set ($classpath = $codewriter.getPropertyExploded("swift.service.classpath"))
+#set ($serviceClassName = $codewriter.getProperty("swift.service.classname"))
+#set ($metadata = $swiftParser.parse($serviceClassName,$classpath))
+#set ($serviceSourceFile = $codewriter.getSourceFile($serviceSrcDir,$swiftParser.serviceClass))
+#set ($serviceComment    = $javadocReader.read($serviceSourceFile))
+#set ( $thriftSrc = $codewriter.getDependencySrc())
+## 服务端运行时异常类名
+#set ( $runtimeErrorName = $codewriter.getProperty('swift.service.exception.runtime','ServiceRuntimeException'))
+#set ($nothing = $swiftParser.setRuntimeErrorName($runtimeErrorName))
+#set ( $serviceName = ${metadata.name} )
+## 删除原注释中的 @throws 标记
+#if($isAsync)
+#set ($nothing = $serviceComment.addExcludeTag("@throws"))
+#else
+#set ($nothing = $serviceComment.removeExcludeTag("@throws"))
+#end
+## 修改注释
+#set ($nothing = $serviceComment.additionalText("remote implementation of the service $serviceName$!asyncComment<br>
+all method comments be copied from {@code ${swiftParser.serviceClass.name}.java}<br>
+<b>NOTE 1:</b>methods with 'Generic' suffix support generic type argument for {@code byte[]}.See also {@link GenericUtils${esc.hash}toBytes(Object)}<br>
+<b>NOTE 2:</b>for each method,{@link List} type input argument must not have {@code null} element.<br>
+","APPEND","CLASS"))
+#set ( $javaClassName = "${serviceName}Client$!asyncSuffix" )
+$codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
+package ${gpkg};
+
+#if($isAsync)
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+#else
+import org.apache.thrift.TApplicationException;
+import com.facebook.swift.service.RuntimeTApplicationException;
+#end
+import static com.google.common.base.Preconditions.*;
+import java.nio.ByteBuffer;
+import java.util.*;
+
+#macro( eachDepencyTable $do $separator)
+#set ( $m_count = 0 )
+#foreach($table in $tables)
+#set ( $leftClass  = "${table.asBeanClassNSP()}" )
+#if($codewriter.existsInDependencyPackage($leftClass))
+#set ( $m_count = $m_count + 1 )
+#set ( $rightClass = "${thriftPackage}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
+#end
+#end
+#define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
+$!{serviceComment.getClassComment()}
+public class $javaClassName implements Constant{
+## 从properties 文件中读取converter的初始化代码
+#set ( $converterInit = $codewriter.getProperty('swift.service.converter.init'))
+    #eachDepencyTable("
+    /** bean converter between {@link $leftClass} and corresponding thrift bean */
+    private IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()} $!converterInit;" $null)
+## 如果properties 文件中没有指定初始化代码,就生成getter/setter方法
+#if(!$converterInit)
+#eachDepencyTable('
+    /** 
+     * @return converter of {@link $leftClass}
+     */
+    public IBeanConverter<$leftClass,$rightClass> get${leftClass}Converter(){
+        return ${table.asConverterVar()};
+    }
+    /** 
+     * setup converter of {@link $leftClass}
+     * @param ${table.asConverterVar()} must not be null. 
+     */
+    public void set${leftClass}Converter(IBeanConverter<$leftClass,$rightClass> ${table.asConverterVar()}){
+        this.${table.asConverterVar()} = checkNotNull(${table.asConverterVar()});
+    }' $null)
+#end##(!$converterInit)
+
+
+    private final ClientFactory factory;
+    /**
+     * constructor 
+     * @param service a instance of ${interfaceClass} created by Swift, must not be null
+     */
+    $javaClassName(ClientFactory factory){
+        this.factory = checkNotNull(factory,"factory is null");
+    }
+    
+    private ${interfaceClass} delegate(){
+    	return factory.applyInstance();
+    }
+## 
+## 生成方法参数列表
+#macro(eachparam $method $params)
+#set ($thriftSignture = $swiftParser.signtureOfMethod($method))
+$typeUtils.formateParam($method.method,$thriftSignture,$params)#end##macro(signture)
+#########################
+#macro(defineMethod $isGeneric)
+#set ($thriftReturnType = $method.returnType.javaType)
+#### 计算方法的返回值类型
+#set ($returnType = $typeUtils.returnTypeOfMethod($method.method,$thriftReturnType))
+#if(!$typeUtils.isVoid($returnType) || $isAsync)
+#set ( $thriftReturn = "return ")
+#else
+#set ( $thriftReturn = $null)
+#end
+############## 定义返回类型输出字符串#######
+#define($returnTypeStr)
+#set ($tmp = $typeUtils.asReturnType($returnType,$isAsync))
+#if($isAsync)ListenableFuture<$tmp>#else$tmp#end#end####define($returnTypeStr)
+###################
+#if($isGeneric)
+    // $velocityCount GENERIC
+    /** 
+     * Generic version of {@link ${esc.hash}${method.method.name}(#eachparam($method {'withType':true,'rawTypeOnly':true}))}<br>
+     * {@code Object} type instead of all argument with {@code byte[]} type,which can read binary data,
+     * such as {@code InputStream,URL,URI,File,ByteBuffer},supported type depend on {@link GenericUtils#toBytes(Object)} <br>
+     * @see {@link GenericUtils#toBytes(Object)}
+     */
+#else
+    // $velocityCount SERIVCE PORT : $method.name
+$!{serviceComment.getMethodComment($method.method)}
+#end
+    public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
+            '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
+        final ${interfaceClass} service = delegate();
+#define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
+                    '}))#end
+#if($isAsync && $typeUtils.needFromRight($returnType))
+#set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
+#set ( $toType = $typeUtils.asJavaType($returnType))
+        $returnTypeStr future = Futures.transform(
+                $callThrift, 
+                new com.google.common.base.Function<$fromType,$toType>(){
+                    @Override
+                    public $toType apply($fromType input) {
+                        return $typeUtils.fromRight($returnType,"input");
+                    }
+                },MoreExecutors.directExecutor());
+        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
+#elseif($isAsync)
+#set ( $toType = $typeUtils.asReturnType($returnType,true))
+        $returnTypeStr future = Futures.transform(
+                $callThrift, 
+                new com.google.common.base.Function<$toType,$toType>(){
+                    @Override
+                    public $toType apply($toType input) {
+                        return $typeUtils.fromRight($returnType,"input");
+                    }
+                },MoreExecutors.directExecutor());
+        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
+#else
+## 抛出本地的基于RuntimeException的 ServiceRuntimeException
+        try{
+            $!{thriftReturn}$typeUtils.fromRight($returnType,"$callThrift");
+        }
+## thrift不允许返回null,这里通过判断异常类型返回null
+#if($thriftReturn && !$returnType.isPrimitive())
+        catch(RuntimeTApplicationException e){
+            Throwable cause = e.getCause();
+            if (cause instanceof TApplicationException  
+                && ((TApplicationException) cause).getType() == TApplicationException.MISSING_RESULT){
+                return null;
+            }
+            throw e;
+        }
+#end
+#if($swiftParser.throwRuntimeError($method))
+        catch(${thriftPackage}.${runtimeErrorName} e){
+            throw new ${runtimeErrorName}(e);
+        }
+#end
+        finally{
+            factory.releaseInstance(service);
+        }
+#end###if($isAsync && $typeUtils.needFromRight($returnType))
+
+    }
+#end###macro(defineMethod)
+## 将所有方法按方法名字排序
+##set($thriftMethods = $sorter.sort($metadata.methods.values(),"name"))
+## 将所有方法按源码中定义的顺序排序
+#set($thriftMethods = $swiftParser.sortByDefined($metadata,$serviceComment.indexOf($swiftParser.methodsOf($metadata))))
+## 遍历所有方法输出
+#foreach($method in $thriftMethods)
+#defineMethod(false)
+## 生成泛型方法
+#if($typeUtils.existsBinaryParam($method.method))
+#defineMethod(true)
+#end
+#end
+## 导入扩展模板
+#if($swfitExtensiveTemplate)
+#parse($swfitExtensiveTemplate)
+#end
+
+}
