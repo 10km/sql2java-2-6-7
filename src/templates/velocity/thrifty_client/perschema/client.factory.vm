@@ -18,14 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
-
-import org.apache.commons.pool2.PooledObject;
-import org.apache.commons.pool2.PooledObjectFactory;
-import org.apache.commons.pool2.impl.DefaultPooledObject;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
@@ -55,21 +48,23 @@ import com.microsoft.thrifty.transport.SocketTransport;
  *
  */
 public class ClientFactory {
-    private static final Logger logger = Logger.getLogger(ClientFactory.class.getSimpleName());
-    
-    private static final Cache<Class<?>, Object> CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
-    private static final AsyncClientBase.Listener DEFAULT_LISTENER = new AsyncClientBase.Listener(){
+    //private static final Logger logger = Logger.getLogger(ClientFactory.class.getSimpleName());
+    private static final Cache<HostAndPort, ${thriftyClientClass}> THRIFTY_CLIENT_CACHE = CacheBuilder.newBuilder().softValues().build();
+    private final AsyncClientBase.Listener DEFAULT_CLOSE_LISTENER = new AsyncClientBase.Listener(){
         @Override
-        public void onTransportClosed() {}
+        public void onTransportClosed() {
+            THRIFTY_CLIENT_CACHE.asMap().remove(hostAndPort);
+        }
         @Override
-        public void onError(Throwable error) {}
+        public void onError(Throwable error) {
+            THRIFTY_CLIENT_CACHE.asMap().remove(hostAndPort);
+        }
     };
-    private volatile GenericObjectPoolConfig channelPoolConfig = new GenericObjectPoolConfig();
-    private volatile GenericObjectPool<${thriftyClientClass}> channelPool;
     private HostAndPort hostAndPort;
     private long readTimeout;
     private long connectTimeout;
-    private AsyncClientBase.Listener listener = DEFAULT_LISTENER;
+    private volatile #clientClass(true) asyncClientInstance;
+    private volatile #clientClass(false) clientInstance;
     protected ClientFactory() {
     }
 
@@ -112,116 +107,57 @@ public class ClientFactory {
     public ClientFactory setHostAndPort(String host) {
         return setHostAndPort(fromString(host));
     }
-    public ClientFactory setListener(AsyncClientBase.Listener listener) {
-          if(null != listener){
-                this.listener = listener;
-          }
-          return this;
-    }    
-
-    private GenericObjectPool<${thriftyClientClass}> getChannelPool() {
-        if(null == channelPool){
-            synchronized(this){
-                if(null == channelPool){
-                    channelPool = new GenericObjectPool<${thriftyClientClass}>(new ThriftClientPoolFactory(),channelPoolConfig);
-                }
-            }
-        }
-        return channelPool;
-    }
     /**
      * return instance of {@link ${thriftyClientClass}}
      * @return
      */
     public ${thriftyClientClass} applyInstance() {
         try {
-            return getChannelPool().borrowObject();
+            return THRIFTY_CLIENT_CACHE.get(hostAndPort, new Callable<${thriftyClientClass}>(){
+                @Override
+                public ${thriftyClientClass} call() throws Exception {
+				            SocketTransport transport = 
+				                    new SocketTransport.Builder(hostAndPort.getHost(),hostAndPort.getPort())
+				                        .connectTimeout((int) connectTimeout)
+				                        .readTimeout((int) readTimeout).build();
+				            transport.connect();
+				            Protocol protocol = new BinaryProtocol(transport);
+                    return new ${thriftPackage}.${serviceName}Client(protocol,DEFAULT_CLOSE_LISTENER);
+                }});
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new RuntimeException(e);
         }
     }
-    /**
-     * release instance of {@code instance} that be applied by {@link ${esc.hash}applyInstance(Class)}
-     * @param instance
-     */
-    public void releaseInstance(${interfaceClass} instance){
-        if(instance instanceof ${thriftyClientClass}){
-            getChannelPool().returnObject((${thriftyClientClass})instance);
-        }
-    }
-    private class ThriftClientPoolFactory implements PooledObjectFactory<${thriftyClientClass}> {
-
-        @Override
-        public PooledObject<${thriftyClientClass}> makeObject() throws Exception {
-            SocketTransport transport = 
-                    new SocketTransport.Builder(hostAndPort.getHost(),hostAndPort.getPort())
-                        .connectTimeout((int) connectTimeout)
-                        .readTimeout((int) readTimeout).build();
-            transport.connect();
-            Protocol protocol = new BinaryProtocol(transport);
-            return new DefaultPooledObject<${thriftyClientClass}>(new ${thriftPackage}.${serviceName}Client(protocol,listener));
-        }
-
-        @Override
-        public void destroyObject(PooledObject<${thriftyClientClass}> p) throws Exception {
-            logger.info("destroyObject");
-            p.getObject().close();
-        }
-
-        @Override
-        public boolean validateObject(PooledObject<${thriftyClientClass}> p) {
-           
-            return true;
-        }
-
-        @Override
-        public void activateObject(PooledObject<${thriftyClientClass}> p) throws Exception {
-        }
-
-        @Override
-        public void passivateObject(PooledObject<${thriftyClientClass}> p) throws Exception {
-        }
-    }
     public static ClientFactory builder() {
         return new ClientFactory();
     }
-    @SuppressWarnings("unchecked")
-    protected<I,O> O  build(Class<I> interfaceClass,final Class<O> destClass){
-        try {
-            return (O) CLIENT_CACHE.get(interfaceClass, new Callable<Object>(){
-                @Override
-                public Object call() throws Exception {
-                    return destClass.getDeclaredConstructor(ClientFactory.class).newInstance(ClientFactory.this);
-                }});
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
     /** get asynchronous instance of $serviceName */ 
     public #clientClass(true)  buildAsync(){
-        return build(
-                ${interfaceClass}.class,
-                #clientClass(true).class);
+        if(null == asyncClientInstance){
+            synchronized(this){
+                if(null == asyncClientInstance){
+                    asyncClientInstance = new #clientClass(true)(this);
+                }
+            }
+        }
+        return asyncClientInstance;
     }
     /** get synchronized instance of $serviceName */ 
     public #clientClass(false) build(){
-        return build(
-                ${interfaceClass}.class,
-                #clientClass(false).class);
+        if(null == clientInstance){
+            synchronized(this){
+                if(null == clientInstance){
+                    clientInstance = new #clientClass(false)(this);
+                }
+            }
+        }
+        return clientInstance;
     }
     public class ListenableFutureDecorator<A,V> implements ListenableFuture<V>{
-        private final ${thriftyClientClass} async;
         private final ListenableFuture<V> future;
-        private final AtomicBoolean released = new AtomicBoolean(false);
         public ListenableFutureDecorator(${thriftyClientClass} async, ListenableFuture<V> future) {
-            this.async = checkNotNull(async,"async is null");
             this.future = checkNotNull(future,"future is null");
-        }
-        private void releaseAsync(){
-            if(released.compareAndSet(false, true)){
-                releaseInstance(async);    
-            }
         }
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
@@ -230,20 +166,12 @@ public class ClientFactory {
 
         @Override
         public V get() throws InterruptedException, ExecutionException {
-            try{
-                return future.get();
-            }finally{
-                releaseAsync();                
-            }
+            return future.get();
         }
 
         @Override
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            try{
-                return future.get(timeout, unit);
-            }finally{
-                releaseAsync();
-            }
+            return future.get(timeout, unit);
         }
 
         @Override

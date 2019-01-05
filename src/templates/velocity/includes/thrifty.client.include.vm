@@ -71,7 +71,7 @@ import java.util.*;
 #set ( $rightClass = "${thriftPackage}.${leftClass}" )#if( $m_count > 1 )$!separator#end#evaluate($do)#end
 #end
 #end
-#define($interfaceClass)${thriftPackage}.${serviceName}#if($isAsync).$asyncSuffix#end#end
+#define($interfaceClass)${thriftPackage}.${serviceName}#end
 $!{serviceComment.getClassComment()}
 public class $javaClassName implements Constant{
 ## 从properties 文件中读取converter的初始化代码
@@ -107,9 +107,6 @@ public class $javaClassName implements Constant{
         this.factory = checkNotNull(factory,"factory is null");
     }
     
-    private ${interfaceClass} delegate(){
-    	return factory.applyInstance();
-    }
 ## 
 ## 生成方法参数列表
 #macro(eachparam $method $params)
@@ -144,7 +141,7 @@ $!{serviceComment.getMethodComment($method.method)}
 #end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withType':true,'withName':true, 'indent':'
             '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
-        final ${interfaceClass} service = delegate();
+        final ${interfaceClass} service = factory.applyInstance();
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '}))#end
 #if($isAsync && $typeUtils.needFromRight($returnType))
@@ -191,9 +188,6 @@ $!{serviceComment.getMethodComment($method.method)}
             throw new ${runtimeErrorName}(e);
         }
 #end
-        finally{
-            factory.releaseInstance(service);
-        }
 #end###if($isAsync && $typeUtils.needFromRight($returnType))
 
     }
@@ -216,3 +210,50 @@ $!{serviceComment.getMethodComment($method.method)}
 #end
 
 }
+
+/*
+    public PersonBean getPerson(int personId){
+    	final net.gdface.facelog.client.thrift.IFaceLog service = factory.applyInstance();
+    	final AtomicReference<PersonBean> res = new AtomicReference<PersonBean>();
+    	final AtomicReference<Throwable> err = new AtomicReference<Throwable>(null);
+    	final Object lock = new Object();
+    	final ServiceMethodCallback<net.gdface.facelog.client.thrift.PersonBean> callback = new ServiceMethodCallback<net.gdface.facelog.client.thrift.PersonBean>() {
+
+    		@Override
+    		public void onSuccess(net.gdface.facelog.client.thrift.PersonBean result) {
+    			res.set(converterPersonBean.fromRight(result));
+    			synchronized(lock){
+    				lock.notifyAll();
+    			}
+    		}
+
+    		@Override
+    		public void onError(Throwable error) {
+    			err.set(error);
+    			synchronized(lock){
+    				lock.notifyAll();
+    			}
+    		}
+    	};
+    	synchronized(callback){
+    		try {
+        		service.getPerson(personId, callback);
+    			lock.wait();
+    		} catch (InterruptedException e) {
+    			err.set(e);
+    		}
+    	}
+    	if(null != err.get()){
+    		try{
+    			throw err.get();
+    		}catch(net.gdface.facelog.client.thrift.ServiceRuntimeException e){
+    			throw new ServiceRuntimeException(e);
+    		}catch (Throwable e) {
+    			Throwables.throwIfUnchecked(e);
+    			throw new RuntimeException(e);				
+    		}
+    	}
+    	return res.get();
+
+    }
+*/
