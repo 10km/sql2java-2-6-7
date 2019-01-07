@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
 import net.gdface.facelog.client.CollectionUtils.DualTransformer;
+import okio.ByteString;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -39,22 +40,15 @@ import static com.google.common.base.Preconditions.*;
  */
 public class GenericUtils {
     /**
-     * 返回buffer中所有字节(position~limit),不改变buffer状态
+     * 返回buffer中字节数组
      * @param buffer
      * @return buffer 为 null 时返回 null 
      */
-    public static final byte[] toBytes(ByteBuffer buffer){
+    public static final byte[] toBytes(ByteString buffer){
         if(null == buffer){
             return null;
         }
-        int pos = buffer.position();
-        try{
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            return bytes;
-        }finally{
-            buffer.position(pos);
-        }
+        return buffer.toByteArray();
     }
     /**
      * 从{@link InputStream}读取字节数组<br>
@@ -112,7 +106,7 @@ public class GenericUtils {
     }
     /**
      * 将对象转换为InputStream<br>
-     * 类型可以是byte[],{@link ByteBuffer},{@link InputStream},{@link String}(base64编码),{@link File},{@link URL},{@link URI},否则抛出RuntimeException<br>
+     * 类型可以是byte[],{@link ByteBuffer},{@link ByteString},{@link InputStream},{@link String}(base64编码),{@link File},{@link URL},{@link URI},否则抛出RuntimeException<br>
      * 
      * @param src
      *            获取InputStream的源对象
@@ -129,6 +123,8 @@ public class GenericUtils {
             return new ByteArrayInputStream(Base64Utils.decode(((String) src)));
         } else if (src instanceof byte[]) {
             return new ByteArrayInputStream((byte[]) src);
+        } else if (src instanceof ByteString) {
+            return new ByteArrayInputStream(toBytes((ByteString) src));
         } else if (src instanceof ByteBuffer) {
             return new ByteArrayInputStream(toBytes((ByteBuffer) src));
         } else if (src instanceof File) {
@@ -145,7 +141,7 @@ public class GenericUtils {
 
     /**
      * 从数据对象{@code src}读取二进制数据(byte[])<br>
-     * {@code src}的数据类型可以是{@code byte[]},{@link InputStream},{@link ByteBuffer},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
+     * {@code src}的数据类型可以是{@code byte[]},{@link InputStream},{@link ByteBuffer},{@link ByteString},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
      * 否则抛出{@link IllegalArgumentException}<br>
      * 对象转换为{@code InputStream}或{@code byte[]}时,可能会抛出{@link IOException}(封装成{@link RuntimeException}抛出)<br>
      * 
@@ -166,6 +162,8 @@ public class GenericUtils {
                 return (byte[]) src;
             } else if (src instanceof String) {
                 return Base64Utils.decode(((String) src));
+            } else if (src instanceof ByteString) {
+                return toBytes((ByteString)src);
             } else if (src instanceof ByteBuffer) {
                 return toBytes((ByteBuffer)src);
             } else if (src instanceof FileInputStream){
@@ -179,48 +177,48 @@ public class GenericUtils {
             throw new RuntimeException(e);
         }
     }
-    private static final CollectionUtils.DualTransformer<ByteBuffer,byte[]> BYTE_BUFFER_DUAL_TRANSFORMER = new CollectionUtils.DualTransformer<ByteBuffer,byte[]>(){
+    private static final CollectionUtils.DualTransformer<ByteString,byte[]> BYTE_BUFFER_DUAL_TRANSFORMER = new CollectionUtils.DualTransformer<ByteString,byte[]>(){
         @Override
-        public byte[] toRight(ByteBuffer input) {
+        public byte[] toRight(ByteString input) {
             return toBytes(input);
         }
         @Override
-        public ByteBuffer fromRight(byte[] input) {
-            return null == input ? null : ByteBuffer.wrap(input);
+        public ByteString fromRight(byte[] input) {
+            return null == input ? null : ByteString.of(input);
         }};
-    /** get a view of {@code Map<ByteBuffer,V>} with {@code byte[]} key type */
-    public static final<V>Map<byte[],V> toBytesKey(Map<ByteBuffer,V> source){
+    /** get a view of {@code Map<ByteString,V>} with {@code byte[]} key type */
+    public static final<V>Map<byte[],V> toBytesKey(Map<ByteString,V> source){
         if(null == source){
             return null;
         }
         return CollectionUtils.tranformKeys(source, BYTE_BUFFER_DUAL_TRANSFORMER);
     }
-    private static final EntryTransformer<Object,ByteBuffer,byte[]> BYTE_BUFFER_TRANSFORMER = new EntryTransformer<Object,ByteBuffer,byte[]>(){
+    private static final EntryTransformer<Object,ByteString,byte[]> BYTE_BUFFER_TRANSFORMER = new EntryTransformer<Object,ByteString,byte[]>(){
         @Override
-        public byte[] transformEntry(Object key, ByteBuffer value) {
+        public byte[] transformEntry(Object key, ByteString value) {
              return BYTE_BUFFER_DUAL_TRANSFORMER.toRight(value);
         }};
-    /** get a view of {@code Map<K,ByteBuffer>} with {@code byte[]} value type */
-    public static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteBuffer> source){
+    /** get a view of {@code Map<K,ByteString>} with {@code byte[]} value type */
+    public static final<K> Map<K,byte[]> toBytesValue(Map<K,ByteString> source){
         if(null == source){
             return null;
         }
         return Maps.transformEntries(source, BYTE_BUFFER_TRANSFORMER);
     }
-    private static final Function<ByteBuffer,byte[]> TO_RIGHT_BYTE_BUFFER = new Function<ByteBuffer,byte[]>(){
+    private static final Function<ByteString,byte[]> TO_RIGHT_BYTE_BUFFER = new Function<ByteString,byte[]>(){
         @Override
-        public byte[] apply(ByteBuffer input) {
+        public byte[] apply(ByteString input) {
             return BYTE_BUFFER_DUAL_TRANSFORMER.toRight(input);
         }};
-    /** get a view of {@code List<ByteBuffer>} with {@code byte[]} type */
-    public static final List<byte[]> toBytes(List<ByteBuffer>source){
+    /** get a view of {@code List<ByteString>} with {@code byte[]} type */
+    public static final List<byte[]> toBytes(List<ByteString>source){
         if(null == source){
             return null;
         }
         return Lists.transform(source, TO_RIGHT_BYTE_BUFFER);
     }
-    /** get a view of {@code Collection<ByteBuffer>} with {@code byte[]} type */
-    public static final Collection<byte[]> toBytes(Collection<ByteBuffer>source){
+    /** get a view of {@code Collection<ByteString>} with {@code byte[]} type */
+    public static final Collection<byte[]> toBytes(Collection<ByteString>source){
         if(null == source){
             return null;
         }

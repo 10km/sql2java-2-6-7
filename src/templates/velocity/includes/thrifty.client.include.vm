@@ -51,9 +51,12 @@ $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 
 #if($isAsync)
+import com.microsoft.thrifty.service.ServiceMethodCallback;
+import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 #else
 import org.apache.thrift.TApplicationException;
 import com.facebook.swift.service.RuntimeTApplicationException;
@@ -106,7 +109,25 @@ public class $javaClassName implements Constant{
     $javaClassName(ClientFactory factory){
         this.factory = checkNotNull(factory,"factory is null");
     }
-    
+    private class MethodCallback<L,R> implements ServiceMethodCallback<R>{
+    	final SettableFuture<L> feature = SettableFuture.create();
+    	final Function<R,L> transformer;
+
+    	MethodCallback(Function<R, L> transformer) {
+    		this.transformer = transformer;
+    	}
+
+    	@Override
+    	public void onSuccess(R result) {
+    		feature.set(transformer.apply(result));
+    	}
+
+    	@Override 
+    	public void onError(Throwable error) {
+    		feature.setException(error);
+    	}
+
+    }
 ## 
 ## 生成方法参数列表
 #macro(eachparam $method $params)
@@ -143,30 +164,24 @@ $!{serviceComment.getMethodComment($method.method)}
             '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
         final ${interfaceClass} service = factory.applyInstance();
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
-                    '}))#end
-#if($isAsync && $typeUtils.needFromRight($returnType))
+                    '})#if($isAsync)#if(${method.parameters.empty})#else,#{end}nativeCallback#end)#end
+#if($isAsync)
+#if($typeUtils.needFromRight($returnType))
 #set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
-        $returnTypeStr future = Futures.transform(
-                $callThrift, 
-                new com.google.common.base.Function<$fromType,$toType>(){
-                    @Override
-                    public $toType apply($fromType input) {
-                        return $typeUtils.fromRight($returnType,"input");
-                    }
-                },MoreExecutors.directExecutor());
-        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
-#elseif($isAsync)
-#set ( $toType = $typeUtils.asReturnType($returnType,true))
-        $returnTypeStr future = Futures.transform(
-                $callThrift, 
-                new com.google.common.base.Function<$toType,$toType>(){
-                    @Override
-                    public $toType apply($toType input) {
-                        return $typeUtils.fromRight($returnType,"input");
-                    }
-                },MoreExecutors.directExecutor());
-        return factory.new ListenableFutureDecorator<${interfaceClass},$typeUtils.asReturnType($returnType,$isAsync)>(service,future);
+#else
+#set ( $fromType = $typeUtils.asReturnType($returnType,true))
+#set ( $toType = $fromType)
+#end
+        MethodCallback<$toType,$fromType> nativeCallback = 
+            new MethodCallback<$toType,$fromType>(
+                new Function<$fromType,$toType>() {
+				        @Override
+				        public $toType apply($fromType input) {
+				            return $typeUtils.fromRight($returnType,"input");
+                }});
+        $callThrift;
+        return nativeCallback.feature;
 #else
 ## 抛出本地的基于RuntimeException的 ServiceRuntimeException
         try{
