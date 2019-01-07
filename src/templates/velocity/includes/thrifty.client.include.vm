@@ -13,7 +13,7 @@ $codewriter.setSaveCurrentFile(false);
 #end
 #set ($thriftPackage = ${codewriter.getDependencyPackage()})
 #set ($swiftParser = $codewriter.loadExtensionClass("gu.rpc.thrift.SwiftServiceParser").newInstance())
-#set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.TypeUtils").newInstance())
+#set ($typeUtils = $codewriter.loadExtensionClass("gu.rpc.thrift.ThriftyTypeUtils").newInstance())
 #set ($javadocReader = $codewriter.loadExtensionClass("gu.doc.JavadocReader").newInstance())
 #set ($serviceSrcDir = $codewriter.getProperty("swift.service.source"))
 #set ($typeUtils.packagePrefixOfDao = $codewriter.getProperty('dao.package.prefix'))
@@ -109,6 +109,7 @@ public class $javaClassName implements Constant{
     $javaClassName(ClientFactory factory){
         this.factory = checkNotNull(factory,"factory is null");
     }
+#if($isAsync)    
     private class MethodCallback<L,R> implements ServiceMethodCallback<R>{
     	final SettableFuture<L> feature = SettableFuture.create();
     	final Function<R,L> transformer;
@@ -126,8 +127,8 @@ public class $javaClassName implements Constant{
     	public void onError(Throwable error) {
     		feature.setException(error);
     	}
-
     }
+#end    
 ## 
 ## 生成方法参数列表
 #macro(eachparam $method $params)
@@ -167,11 +168,13 @@ $!{serviceComment.getMethodComment($method.method)}
                     '})#if($isAsync)#if(${method.parameters.empty})#else,#{end}nativeCallback#end)#end
 #if($isAsync)
 #if($typeUtils.needFromRight($returnType))
+// needFromRight=true
 #set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
 #else
 #set ( $fromType = $typeUtils.asReturnType($returnType,true))
 #set ( $toType = $fromType)
+// needFromRight=false
 #end
         MethodCallback<$toType,$fromType> nativeCallback = 
             new MethodCallback<$toType,$fromType>(
