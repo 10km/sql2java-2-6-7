@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.*;
  */
 public class GenericUtils {
     /**
-     * 从{@link InputStream}读取字节数组<br>
+     * 从{@link InputStream}返回{@link ByteString}<br>
      * 当{@code in}为{@link FileInputStream}时，调用{@link #toBytes(FileInputStream)}(NIO方式)读取<br>
      *  结束时会关闭{@link InputStream}
      * @param in
@@ -68,14 +68,19 @@ public class GenericUtils {
             in.close();
         }
     }
+	/**
+	 * 返回{@link ByteBuffer}
+	 * @param input
+	 * @return {@code input}null时返回null
+	 */
 	public static ByteBuffer toBuffer(ByteString input){
 		return null == input ? null : input.asByteBuffer();
 	}
     /**
-     * NIO方式从{@link FileInputStream}读取字节数组<br>
+     * NIO方式从{@link FileInputStream}返回{@link ByteString}<br>
      *  结束时会关闭{@link InputStream}
      * @param fin {@link FileInputStream}
-     * @return 返回读取的字节数 当{@code fin}为null时返回null;
+     * @return 返回{@link ByteString} 当{@code fin}为null时返回null;
      * @throws IOException
      */
     private static ByteString toBytes(FileInputStream fin) throws IOException {
@@ -127,7 +132,7 @@ public class GenericUtils {
     }
 
     /**
-     * 从数据对象{@code src}读取二进制数据(byte[])<br>
+     * 从数据对象{@code src}返回{@link ByteString}<br>
      * {@code src}的数据类型可以是{@code byte[]},{@link InputStream},{@link ByteBuffer},{@link ByteString},{@link String}(base64编码),{@link File},{@link URL},{@link URI}
      * 否则抛出{@link IllegalArgumentException}<br>
      * 对象转换为{@code InputStream}或{@code byte[]}时,可能会抛出{@link IOException}(封装成{@link RuntimeException}抛出)<br>
@@ -173,7 +178,7 @@ public class GenericUtils {
         public ByteBuffer fromRight(ByteString input) {
             return null == input ? null : input.asByteBuffer();
         }};
-    /** get a view of {@code Map<ByteString,V>} with {@code byte[]} key type */
+    /** get a view of {@code Map<ByteString,V>} with {@code ByteBuffer} key type */
     public static final<V>Map<ByteString,V> toBytesKey(Map<ByteBuffer,V> source){
         if(null == source){
             return null;
@@ -185,7 +190,7 @@ public class GenericUtils {
         public ByteString transformEntry(Object key, ByteBuffer value) {
              return BYTE_BUFFER_DUAL_TRANSFORMER.toRight(value);
         }};
-    /** get a view of {@code Map<K,ByteString>} with {@code byte[]} value type */
+    /** get a view of {@code Map<K,ByteString>} with {@codeByteBuffer} value type */
     public static final<K> Map<K,ByteString> toBytesValue(Map<K,ByteBuffer> source){
         if(null == source){
             return null;
@@ -197,14 +202,14 @@ public class GenericUtils {
         public ByteString apply(ByteBuffer input) {
             return BYTE_BUFFER_DUAL_TRANSFORMER.toRight(input);
         }};
-    /** get a view of {@code List<ByteString>} with {@code byte[]} type */
+    /** get a view of {@code List<ByteString>} with {@code ByteBuffer} type */
     public static final List<ByteString> toBytes(List<ByteBuffer>source){
         if(null == source){
             return null;
         }
         return Lists.transform(source, TO_RIGHT_BYTE_BUFFER);
     }
-    /** get a view of {@code Collection<ByteString>} with {@code byte[]} type */
+    /** get a view of {@code Collection<ByteString>} with {@code ByteBuffer} type */
     public static final Collection<ByteString> toBytes(Collection<ByteBuffer>source){
         if(null == source){
             return null;
