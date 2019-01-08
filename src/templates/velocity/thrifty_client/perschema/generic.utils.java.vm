@@ -68,7 +68,9 @@ public class GenericUtils {
             in.close();
         }
     }
-    
+	public static ByteBuffer toBuffer(ByteString input){
+		return null == input ? null : input.asByteBuffer();
+	}
     /**
      * NIO方式从{@link FileInputStream}读取字节数组<br>
      *  结束时会关闭{@link InputStream}
@@ -169,7 +171,7 @@ public class GenericUtils {
         }
         @Override
         public ByteBuffer fromRight(ByteString input) {
-            return null == input ? null : ByteBuffer.wrap(input.toByteArray());
+            return null == input ? null : input.asByteBuffer();
         }};
     /** get a view of {@code Map<ByteString,V>} with {@code byte[]} key type */
     public static final<V>Map<ByteString,V> toBytesKey(Map<ByteBuffer,V> source){

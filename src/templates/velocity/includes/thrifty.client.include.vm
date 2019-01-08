@@ -21,6 +21,7 @@ $codewriter.setSaveCurrentFile(false);
 ## $bean$用于替换beanClass
 #set ($typeUtils.convertVar = 'converter$bean$')
 #set ($typeUtils.toBytesMethodPrefix = 'GenericUtils.toBytes')
+#set ($typeUtils.toBufferMethodPrefix = 'GenericUtils.toBuffer')
 #set ($typeUtils.toLongMethodPrefix  = 'GenericUtils.toLong')
 #set ($typeUtils.toDateMethodPrefix  = 'GenericUtils.toDate')
 #set ($typeUtils.checkNotNullElementPrefix = 'CollectionUtils.checkNotNullElement')
@@ -53,9 +54,7 @@ package ${gpkg};
 #if($isAsync)
 import com.microsoft.thrifty.service.ServiceMethodCallback;
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 #else
 import org.apache.thrift.TApplicationException;
@@ -168,13 +167,11 @@ $!{serviceComment.getMethodComment($method.method)}
                     '})#if($isAsync)#if(${method.parameters.empty})#else,#{end}nativeCallback#end)#end
 #if($isAsync)
 #if($typeUtils.needFromRight($returnType))
-// needFromRight=true
 #set ( $fromType = $typeUtils.asSwiftType($thriftReturnType,$thriftPackage))
 #set ( $toType = $typeUtils.asJavaType($returnType))
 #else
 #set ( $fromType = $typeUtils.asReturnType($returnType,true))
 #set ( $toType = $fromType)
-// needFromRight=false
 #end
         MethodCallback<$toType,$fromType> nativeCallback = 
             new MethodCallback<$toType,$fromType>(
