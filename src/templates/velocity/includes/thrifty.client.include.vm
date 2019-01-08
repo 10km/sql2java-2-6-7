@@ -160,7 +160,7 @@ public class $javaClassName implements Constant{
                 }
             }
         };
-        synchronized(callback){
+        synchronized(lock){
             try {
                 serviceCall.call(callback);
                 lock.wait();
