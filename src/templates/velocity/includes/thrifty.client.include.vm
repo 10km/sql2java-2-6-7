@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 #end
+import com.microsoft.thrifty.ThriftException;
 import com.microsoft.thrifty.service.ServiceMethodCallback;
 import static com.google.common.base.Preconditions.*;
 import java.nio.ByteBuffer;
@@ -173,7 +174,16 @@ public class $javaClassName implements Constant{
                 throw err.get();
             }catch(net.gdface.facelog.client.thrift.ServiceRuntimeException e){
                 throw new ServiceRuntimeException(e);
-            }catch (Throwable e) {
+            }
+## thrift不允许返回null,这里通过判断异常类型返回null
+#if($thriftReturn && !$returnType.isPrimitive())
+            catch(ThriftException e){
+                if(e.kind == ThriftException.Kind.MISSING_RESULT  ){
+                    return null;
+                }
+            }
+#end   
+            catch (Throwable e) {
                 Throwables.throwIfUnchecked(e);
                 throw new RuntimeException(e);                
             }
