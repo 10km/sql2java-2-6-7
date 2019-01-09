@@ -87,48 +87,6 @@ public interface IBeanConverter<L,R> {
                 throw new RuntimeException(e);
             }
         }
-        private R[] makeRights(L[] lefts){
-            if(null == lefts){
-                return null;
-            }
-            @SuppressWarnings("unchecked")
-            R[] rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;
-            for(int i=0;i<lefts.length;++i){
-                rights[i]=null == lefts[i]?null:newInstanceR();
-            }
-            return rights;
-        }
-        private L[] makeLefts(R[] rights){
-            if(null == rights){
-                return null;
-            }
-            @SuppressWarnings("unchecked")
-            L[] lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;
-            for(int i=0;i<rights.length;++i){
-                lefts[i]=null == rights[i]?null:newInstanceL();
-            }
-            return lefts;
-        }
-        private List<R> makeRights(List<L> lefts){
-            if(null == lefts){
-                return null;
-            }
-            ArrayList<R> rights = new ArrayList<R>(lefts.size());
-            for(int i=0;i<lefts.size();++i){
-                rights.add (null == lefts.get(i)?null:newInstanceR());
-            }
-            return rights;
-        }
-        private List<L> makeLefts(List<R> rights){
-            if(null == rights){
-                return null;
-            }
-            ArrayList<L> lefts = new ArrayList<L>(rights.size());
-            for(int i=0;i<rights.size();++i){
-                lefts.add (null == rights.get(i)?null:newInstanceL());
-            }
-            return lefts;
-        }
         @Override
         public L fromRight(L left, R right) {
             if(null != right && null != left){
@@ -181,14 +139,30 @@ public interface IBeanConverter<L,R> {
             return lefts;
         }
         
-        @Override
-        public R[] toRight(L[] beans) {
-            return this.toRight(beans,makeRights(beans));
+        @SuppressWarnings("unchecked")
+		@Override
+        public R[] toRight(L[] lefts) {
+        	R[] rights = null;
+            if(null != lefts){
+                rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;            	
+                for(int i=0;i<lefts.length;++i){
+                	rights[i] = toRight(lefts[i]);
+                }
+            }
+            return rights;
         }
 
-        @Override
-        public L[] fromRight(R[] beans) {
-            return this.fromRight( makeLefts(beans),beans);
+        @SuppressWarnings("unchecked")
+		@Override
+        public L[] fromRight(R[] rights) {
+        	L[] lefts = null;
+            if(null != rights){
+            	lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;            	
+                for(int i=0;i<rights.length;++i){
+                	lefts[i] = fromRight(rights[i]);
+                }
+            }
+            return lefts;
         }
 
         @Override
@@ -242,13 +216,27 @@ public interface IBeanConverter<L,R> {
         }
 
         @Override
-        public List<R> toRight(List<L> beans) {
-            return this.toRight(beans,makeRights(beans));
+        public List<R> toRight(List<L> lefts) {
+        	List<R> rights = null;
+            if(null != lefts ){
+            	rights  = new ArrayList<>();
+            	for(L l:lefts){
+            		rights.add(toRight(l));
+            	}
+            }
+            return rights;    
         }
 
         @Override
-        public List<L> fromRight(List<R> beans) {
-            return this.fromRight(makeLefts(beans),beans);
+        public List<L> fromRight(List<R> rights) {
+        	List<L> lefts = null;
+            if(null != rights ){
+            	lefts  = new ArrayList<>();
+            	for(R r:rights){
+            		lefts.add(fromRight(r));
+            	}
+            }
+            return lefts;            
         }
         @Override
         public<V> Map<R,V> toRightKey(Map<L,V> lmap) {

@@ -11,7 +11,6 @@ $codewriter.setSaveCurrentFile(false);
 $codewriter.setCurrentJavaFilename("${gpkg}", "${javaClassName}.java")
 package ${gpkg};
 
-import java.lang.reflect.Field;
 import okio.ByteString;
 
 /**
@@ -20,25 +19,28 @@ import okio.ByteString;
  *
  */
 public class $javaClassName implements Constant{
-        private static void setField(Object obj,String name,Object value)
-        {
-            try {
-                Field field = obj.getClass().getField(name);
-                field.setAccessible(true);
-                field.set(obj, value);
-            } catch ( IllegalAccessException | NoSuchFieldException  e) {
-                throw new RuntimeException(e);
-            }
+    private static class ThriftyBaseHandle <L,R> extends IBeanConverter.AbstractHandle <L,R>{
+
+        @Override
+        protected void doFromRight(L left, R right) {
+            throw new UnsupportedOperationException();            
         }
+
+        @Override
+        protected void doToRight(L left, R right) {
+            throw new UnsupportedOperationException();            
+        }        
+    }
 #foreach ( $table in $tables )
 #set ( $leftClass  = "${table.asBeanClassNSP()}" )
 #if($codewriter.existsInDependencyPackage($leftClass))
 #set ( $rightClass = "${codewriter.getDependencyPackage()}.${leftClass}" )
     /** {@link IBeanConverter} implementation for convert between {@link ${leftClass}} and thrift beans {@link ${rightClass}} */
     public static final IBeanConverter<${leftClass},${rightClass}> ${table.asConverterConstVar()}
-            = new IBeanConverter.AbstractHandle<${leftClass},${rightClass}>(){
+            = new ThriftyBaseHandle<${leftClass},${rightClass}>(){
         @Override
-        protected void doFromRight(${leftClass} left, ${rightClass} right) {
+        public ${leftClass} fromRight(${rightClass} right) {
+            ${leftClass} left = newInstanceL();
             $table.stateVarType() initialized = right.initialized;
 #foreach ( $column in $table.columns )
             if(0L !=  $column.bitAndExpression("initialized")){
@@ -51,10 +53,13 @@ public class $javaClassName implements Constant{
 #end
             left.setNew(right._new);
             left.setModified(right.modified);
+            return left;
         }
 
         @Override
-        protected void doToRight(${leftClass} left, ${rightClass} right) {
+        public ${rightClass} toRight(${leftClass} left) {
+           	${rightClass}.Builder builder = new ${rightClass}.Builder();
+
 #foreach ( $column in $table.columns )
 #set($isIgnore = $ignorefields.contains($column.name))
 #if( $isIgnore )// IGNORE field $column.fullName , controlled by 'general.beanconverter.tonative.ignore' in properties file
@@ -62,20 +67,20 @@ public class $javaClassName implements Constant{
 #end
             if(left.${column.getInitializedMethod()}() ){
 #if($column.isDate())
-                setField(right, "$column.varName", left.${column.getGetMethod()}().getTime());
+                builder.${column.varName}(left.${column.getGetMethod()}().getTime());
 #elseif($column.isBinary())
-                setField(right, "$column.varName", ByteString.of(left.${column.getGetMethod()}()));
+                builder.${column.varName}(ByteString.of(left.${column.getGetMethod()}()));
 #else
-                setField(right, "$column.varName", left.${column.getGetMethod()}());                
+                builder.${column.varName}(left.${column.getGetMethod()}());
 #end
             }
 #if( $isIgnore )*/
 #end
 #end
-            setField(right,"_new",left.isNew());
-            setField(right,"modified",left.getModified());
-            setField(right,"initialized",left.getInitialized());
-
+            builder._new(left.isNew());
+            builder.modified(left.getModified());
+            builder.initialized(left.getInitialized());
+            return builder.build();
         }};
 #end###if($codewriter.existsInDependencyPackage())
 #end
