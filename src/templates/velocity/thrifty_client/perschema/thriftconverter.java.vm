@@ -40,6 +40,7 @@ public class $javaClassName implements Constant{
             = new ThriftyBaseHandle<${leftClass},${rightClass}>(){
         @Override
         public ${leftClass} fromRight(${rightClass} right) {
+            if(null == right){return null;}
             ${leftClass} left = newInstanceL();
             $table.stateVarType() initialized = right.initialized;
 #foreach ( $column in $table.columns )
@@ -58,6 +59,7 @@ public class $javaClassName implements Constant{
 
         @Override
         public ${rightClass} toRight(${leftClass} left) {
+            if(null == left){return null;}
            	${rightClass}.Builder builder = new ${rightClass}.Builder();
 
 #foreach ( $column in $table.columns )
