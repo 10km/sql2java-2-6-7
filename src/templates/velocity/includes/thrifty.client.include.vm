@@ -56,14 +56,16 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 #else
-import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 #end
+import java.util.concurrent.atomic.AtomicReference;
 import com.microsoft.thrifty.ThriftException;
 import com.microsoft.thrifty.service.ServiceMethodCallback;
+import com.microsoft.thrifty.service.AsyncClientBase;
 import static com.google.common.base.Preconditions.*;
 import java.nio.ByteBuffer;
+import java.io.IOException;
 import java.util.*;
 
 #macro( eachDepencyTable $do $separator)
@@ -110,24 +112,53 @@ public class $javaClassName implements Constant{
     $javaClassName(ClientFactory factory){
         this.factory = checkNotNull(factory,"factory is null");
     }
+    /**
+     * 当前调用的回调函数，由当前接口方法设置
+     */
+    private final AtomicReference<ServiceMethodCallback<?>> currentCallback = new AtomicReference<ServiceMethodCallback<?>>();
+    private final AsyncClientBase.Listener closeListener = new AsyncClientBase.Listener(){
+        @Override
+        public void onTransportClosed() {
+        }
+
+        @Override
+        public void onError(Throwable error) {
+            currentCallback.get().onError(error);
+        }        
+    };
 #if($isAsync)    
     private class MethodCallback<L,R> implements ServiceMethodCallback<R>{
-    	final SettableFuture<L> feature = SettableFuture.create();
-    	final Function<R,L> transformer;
+        final net.gdface.facelog.client.thrift.IFaceLogClient service = factory.applyInstance(closeListener);
+        final SettableFuture<L> feature = SettableFuture.create();
+        final Function<R,L> transformer;
 
-    	MethodCallback(Function<R, L> transformer) {
-    		this.transformer = transformer;
-    	}
+        MethodCallback(Function<R, L> transformer) {
+            this.transformer = transformer;
+            currentCallback.set(this);
+        }
 
-    	@Override
-    	public void onSuccess(R result) {
-    		feature.set(transformer.apply(result));
-    	}
+        @Override
+        public void onSuccess(R result) {
+            feature.set(transformer.apply(result));            
+            try {
+                service.close();
+            } catch (IOException e) {
+            }
+        }
 
-    	@Override 
-    	public void onError(Throwable error) {
-    		feature.setException(error);
-    	}
+        @Override 
+        public void onError(Throwable error) {            
+            if(error instanceof ThriftException ){
+                if(((ThriftException)error).kind == ThriftException.Kind.MISSING_RESULT  ){
+                    this.onSuccess(null);
+                }
+            }
+            feature.setException(error);
+            try {
+                service.close();
+            } catch (IOException e) {
+            }
+        }
     }
 #else
     private interface ServiceCall<T> {
@@ -161,6 +192,7 @@ public class $javaClassName implements Constant{
                 }
             }
         };
+        currentCallback.set(callback);
         synchronized(lock){
             try {
                 serviceCall.call(callback);
@@ -175,14 +207,11 @@ public class $javaClassName implements Constant{
             }catch(net.gdface.facelog.client.thrift.ServiceRuntimeException e){
                 throw new ServiceRuntimeException(e);
             }
-## thrift不允许返回null,这里通过判断异常类型返回null
-#if($thriftReturn && !$returnType.isPrimitive())
             catch(ThriftException e){
                 if(e.kind == ThriftException.Kind.MISSING_RESULT  ){
                     return null;
                 }
             }
-#end   
             catch (Throwable e) {
                 Throwables.throwIfUnchecked(e);
                 throw new RuntimeException(e);                
@@ -190,7 +219,7 @@ public class $javaClassName implements Constant{
         }
         return res.get();
     }    
-#end    
+#end
 ## 
 ## 生成方法参数列表
 #macro(eachparam $method $params)
@@ -225,7 +254,6 @@ $!{serviceComment.getMethodComment($method.method)}
 #end
     public $returnTypeStr ${method.method.name}#if($isGeneric)Generic#end(#eachparam($method {'isGeneric':$isGeneric,'withFinal':true,'withType':true,'withName':true, 'indent':'
             '}))$swiftParser.defineThrows($method,$isAsync,$thriftPackage){
-        final ${interfaceClass} service = factory.applyInstance();
 #define( $callThrift )service.${method.name}(#eachparam($method {'isGeneric':$isGeneric,'toRight':true,'withName':true, 'indent':'
                     '})#if(${method.parameters.empty})#else,#{end}nativeCallback)#end
 #if($isAsync)
@@ -243,7 +271,7 @@ $!{serviceComment.getMethodComment($method.method)}
                         public $toType apply($fromType input) {
                             return $typeUtils.fromRight($returnType,"input");
                 }});
-        $callThrift;
+        nativeCallback.$callThrift;
         return nativeCallback.feature;
 #else
 ## 抛出本地的基于RuntimeException的 ServiceRuntimeException
@@ -254,17 +282,25 @@ $!{serviceComment.getMethodComment($method.method)}
 #set ( $fromType = $typeUtils.asReturnType($returnType,true))
 #set ( $toType = $fromType)
 #end
-        $!{thriftReturn}syncCall(new Function<$fromType,$toType>() {
+        final ${interfaceClass}Client service = factory.applyInstance(closeListener);
+        try{
+            $!{thriftReturn}syncCall(new Function<$fromType,$toType>() {
                     @Override
                     public $toType apply($fromType input) {
                         return $typeUtils.fromRight($returnType,"input");
-                }},
-                new ServiceCall<$fromType>(){
+                    }},
+                    new ServiceCall<$fromType>(){
                     @Override
                     public void call(ServiceMethodCallback<$fromType> nativeCallback){
                         $callThrift;
                     }
                 });
+        }finally{
+            try {
+                service.close();
+            } catch (IOException e) {
+            }
+        }
 #end###if($isAsync && $typeUtils.needFromRight($returnType))
     }
 #end###macro(defineMethod)
