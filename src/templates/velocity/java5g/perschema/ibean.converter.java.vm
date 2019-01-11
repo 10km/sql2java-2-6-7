@@ -140,26 +140,26 @@ public interface IBeanConverter<L,R> {
         }
         
         @SuppressWarnings("unchecked")
-		@Override
+        @Override
         public R[] toRight(L[] lefts) {
-        	R[] rights = null;
+            R[] rights = null;
             if(null != lefts){
-                rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;            	
+                rights = (R[])java.lang.reflect.Array.newInstance(rightType,lefts.length) ;
                 for(int i=0;i<lefts.length;++i){
-                	rights[i] = toRight(lefts[i]);
+                    rights[i] = toRight(lefts[i]);
                 }
             }
             return rights;
         }
 
         @SuppressWarnings("unchecked")
-		@Override
+        @Override
         public L[] fromRight(R[] rights) {
-        	L[] lefts = null;
+            L[] lefts = null;
             if(null != rights){
-            	lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;            	
+                lefts = (L[])java.lang.reflect.Array.newInstance(leftType,rights.length) ;
                 for(int i=0;i<rights.length;++i){
-                	lefts[i] = fromRight(rights[i]);
+                    lefts[i] = fromRight(rights[i]);
                 }
             }
             return lefts;
@@ -217,24 +217,24 @@ public interface IBeanConverter<L,R> {
 
         @Override
         public List<R> toRight(List<L> lefts) {
-        	List<R> rights = null;
+            List<R> rights = null;
             if(null != lefts ){
-            	rights  = new ArrayList<>();
-            	for(L l:lefts){
-            		rights.add(toRight(l));
-            	}
+                rights  = new ArrayList<>();
+                for(L l:lefts){
+                    rights.add(toRight(l));
+                }
             }
             return rights;    
         }
 
         @Override
         public List<L> fromRight(List<R> rights) {
-        	List<L> lefts = null;
+            List<L> lefts = null;
             if(null != rights ){
-            	lefts  = new ArrayList<>();
-            	for(R r:rights){
-            		lefts.add(fromRight(r));
-            	}
+                lefts  = new ArrayList<>();
+                for(R r:rights){
+                    lefts.add(fromRight(r));
+                }
             }
             return lefts;            
         }
