@@ -1289,16 +1289,17 @@ public class Column implements Cloneable, Comparable<Column> {
 		String dateStr;
 		switch(this.getMappedType()){
 		case M_UTILDATE:{
-			String instanceMethod="";
+			String instanceName="";
 			if(parsedDate instanceof java.sql.Date){
-				instanceMethod = "getDateInstance";
+				instanceName = "new java.text.SimpleDateFormat(\"yyyy-MM-dd\")";
 			}else if(parsedDate instanceof java.sql.Time){
-				instanceMethod = "getTimeInstance";
+				instanceName = "new java.text.SimpleDateFormat(\"HH:mm:ss\")";
 			}else if(parsedDate instanceof java.sql.Timestamp){
-				instanceMethod = "getDateTimeInstance";
-			}else
+				instanceName = "new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss\")";
+			}else{
 				throw new IllegalStateException("invalid type");
-			sb.append("java.text.DateFormat.").append(instanceMethod).append("().parse(\"").append(parsedDate.toString()).append("\",new java.text.ParsePosition(0))");
+			}
+			sb.append(instanceName).append(".parse(\"").append(parsedDate.toString()).append("\",new java.text.ParsePosition(0))");
 			break;
 		}
 		case M_SQLDATE:{
