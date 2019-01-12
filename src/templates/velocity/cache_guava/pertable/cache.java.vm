@@ -37,7 +37,7 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
     private final BaseTableLoadCaching<${e.getIndexColumn().getJavaType()}, $beanClass> ${e.getIndexColumn().getCacheVarName()};' '')
 
     /** constructor<br>
-     * @see {@link BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
+     * @see BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )
      */
     public $cacheClass(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit) {
         super(updateStrategy,maximumSize, duration, unit);

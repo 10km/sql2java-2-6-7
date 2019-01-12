@@ -52,7 +52,7 @@ public class $cacheManagerClass extends $managerClass
     /**
      * create a instance of $cacheManagerClass and assign to {@link #instance} if {@code instance} is not initialized.<br>
      * otherwise return {@code instance}.
-     * @see {@link $cacheManagerClass#$cacheManagerClass(UpdateStrategy ,long , long , TimeUnit )}
+     * @see $cacheManagerClass#$cacheManagerClass(UpdateStrategy ,long , long , TimeUnit )
      */
     public static synchronized final $cacheManagerClass makeInstance(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit){
         if(null == instance){
@@ -75,7 +75,7 @@ public class $cacheManagerClass extends $managerClass
     /** instance of {@link ${cacheClass}} */
     private final ${cacheClass} cache;
     /** constructor<br>
-     * @see {@link ${cacheClass}#${cacheClass}(UpdateStrategy ,long , long , TimeUnit )}
+     * @see ${cacheClass}#${cacheClass}(UpdateStrategy ,long , long , TimeUnit )
      */
     protected $cacheManagerClass(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit) {
         cache = new ${cacheClass}(updateStrategy,maximumSize,duration,unit);

@@ -1,5 +1,8 @@
 /**
  * @author guyadong
+ *
+ * @param <B>
+ *
  */
 public interface ${javaClassName} <B> {
     /**
@@ -31,28 +34,28 @@ public interface ${javaClassName} <B> {
      */
     public void resetPrimaryKeysModified();
     /**
-     * Determines if the {@code column} has been initialized.<br>
+     * Determines if the {@code columnID} has been initialized.<br>
      * It is useful to determine if a field is null on purpose or just because it has not been initialized.
-     * @param columnID
+     * @param columnID column id
      * @return true if the field has been initialized, false otherwise
      */
     public boolean isInitialized(int columnID);
     /**
      * Determines if the {@code column} has been modified.
-     * @param columnID
+     * @param columnID column id
      * @return true if the field has been modified, false if the field has not been modified
      */
     public boolean isModified(int columnID);
     /**
      * Determines if the {@code column} has been initialized.<br>
      * It is useful to determine if a field is null on purpose or just because it has not been initialized.
-     * @param column
+     * @param column column name
      * @return true if the field has been initialized, false otherwise
      */
     public boolean isInitialized(String column);
     /**
      * Determines if the {@code column} has been modified.
-     * @param column
+     * @param column column name
      * @return true if the field has been modified, false if the field has not been modified
      */
     public boolean isModified(String column);
@@ -80,33 +83,33 @@ public interface ${javaClassName} <B> {
      */
     public B copy(B bean, String... fieldList);
     /**
-     * return a object representation of the given column id
-     * @param columnID
-     * @return 
+     * 
+     * @param columnID column id
+     * @return return a object representation of the given column id
      */
     public <T> T getValue(int columnID);
     /**
      * set a value representation of the given column id
-     * @param columnID
+     * @param columnID column id
      * @param value
      */
     public <T> void setValue(int columnID,T value);
     /**
-     * return a object representation of the given field
-     * @param column 
-     * @return
+     * 
+     * @param column column name
+     * @return return a object representation of the given field
      */
     public <T> T getValue(String column);
     /**
      * set a value representation of the given field
-     * @param column
+     * @param column column name
      * @param value
      */
     public <T> void setValue(String column,T value);
     /**
-     * Returns a string representation of the object
      * @param notNull output not null field only if {@code true}
      * @param fullIfStringOrBytes for string or bytes field,output full content if {@code true},otherwise output length.
+     * @return Returns a string representation of the object
      */
     public String toString(boolean notNull, boolean fullIfStringOrBytes);
 }

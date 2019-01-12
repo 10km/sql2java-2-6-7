@@ -65,14 +65,14 @@ public interface $javaClassName {
 #foreach($fkObj in $table.getForeignKeysAsList())
 #if($velocityCount > 1),
 #end
-            /** foreign key ${table.name}(#join($fkObj.columns "$e.name" ',')) -> $fkObj.foreignTable.name */${fkObj.asFkVar()}#end
+            /** foreign key ${table.name}(#join($fkObj.columns "$e.name" ',')) TO $fkObj.foreignTable.name */${fkObj.asFkVar()}#end
 
         }
         public static enum Ik{
 #foreach($fkObj in $table.getImportedFoeignKeysAsList())
 #if($velocityCount > 1),
 #end
-            /** imported key ${fkObj.table.name}(#join($fkObj.columns "$e.name" ',')) -> $fkObj.foreignTable.name */${fkObj.asIkVar()}#end
+            /** imported key ${fkObj.table.name}(#join($fkObj.columns "$e.name" ',')) TO $fkObj.foreignTable.name */${fkObj.asIkVar()}#end
 
         }
         public static enum Index{

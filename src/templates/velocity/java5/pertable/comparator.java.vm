@@ -29,7 +29,7 @@ public class $comparatorClass implements Comparator<$beanClass>,Constant
      * <br>
      * Example:
      * <br>
-     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));<code>
+     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));</code>
      *
      * @param iType the field from which you want to sort
      * <br>
@@ -52,7 +52,7 @@ public class $comparatorClass implements Comparator<$beanClass>,Constant
      * <br>
      * Example:
      * <br>
-     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));<code>
+     * <code>Arrays.sort(pArray, new $comparatorClass(Constant.$table.getFirstColumn().getIDConstName(), bReverse));</code>
      *
      * @param iType the field from which you want to sort.
      * <br>

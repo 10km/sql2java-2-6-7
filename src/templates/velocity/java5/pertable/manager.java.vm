@@ -199,7 +199,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Loads a {@link $beanClass} from the $tablename using primary key fields.
      * @param keys primary keys value:<br> 
      * @return a unique {@link $beanClass} or {@code null} if not found
-     * @see {@link ${esc.hash}loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))}
+     * @see ${esc.hash}loadByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ','))
      */
     @Override
     public $beanClass loadByPrimaryKey(Object ...keys) throws DaoException{
@@ -273,7 +273,6 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param bean  
      * @throws DaoException
      * @return false if primary kes has null
-     * @see ${esc.hash}countUsingTemplate($beanClass)
      */
     @Override
     public boolean existsByPrimaryKey($beanClass bean) throws DaoException
@@ -325,7 +324,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 #end     
      * @return the number of deleted rows
      * @throws DaoException
-     * @see {@link ${esc.hash}delete($beanClass)}
+     * @see ${esc.hash}delete($beanClass)
      */
     public int deleteByPrimaryKey(#join($primaryKeys "$e.getJavaType() $e.getVarName()" ',')) throws DaoException
     {
@@ -391,7 +390,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      *
      * @param keys primary keys value:<br> 
      * @return the number of deleted rows
-     * @see {@link ${esc.hash}delete($beanClass)}
+     * @see ${esc.hash}delete($beanClass)
      */   
     @Override
     public int deleteByPrimaryKey(Object ...keys) throws DaoException{
@@ -435,7 +434,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} - {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param ikIndex valid values: #foreachImportedTables('' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
@@ -491,7 +490,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Set the importedBeans associates to the bean by ikIndex<br>
      * @param <T> see also {@link ${esc.hash}getImportedBeansAsList($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
-     * @param importedBeans the <T> object to associate to the {@link $beanClass}
+     * @param importedBeans the T object to associate to the {@link $beanClass}
      * @param ikIndex valid values: see also {@link ${esc.hash}getImportedBeansAsList($beanClass,int)}
 
      * @return importedBeans always
@@ -544,7 +543,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Retrieves the {@link $importedClass} object from the #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME : $fkName 
 #foreach ( $pk in $primaryKeys )
-     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+     * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans or {@code null} if {@code bean} is {@code null}
      * @throws DaoException
@@ -574,7 +573,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Retrieves the {@link $importedClass} object from #join($columnsOfFk "$e.fullName" ",") field.<BR>
      * FK_NAME:$fkName
 #foreach ( $pk in $primaryKeys )
-     * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
+     * @param $pk.getFullVarName() $pk.getJavaType() - PK# $velocityCount
 #end     
      * @return the associated {@link $importedClass} beans 
      * @throws DaoException
@@ -617,7 +616,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param importedBeans imported beans from $importedTable.name
      * @return importedBeans always
      * @throws DaoException
-     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @see ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans) throws DaoException
     {
@@ -637,7 +636,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param importedBeans imported beans from $importedTable.name 
      * @return importedBeans always
      * @throws DaoException
-     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @see ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      */
     public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans) throws DaoException
     {
@@ -781,7 +780,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Save the $beanClass bean and referenced beans and imported beans (array) into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param inputs referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", ${m_importedClass}[] " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DaoException
@@ -835,7 +834,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Save the $beanClass bean and referenced beans and imported beans (collection) into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param inputs referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      * @throws DaoException
@@ -899,13 +898,13 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * Retrieves the bean object referenced by fkIndex.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables('' $table " *     <li> {@link Constant#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('' $table " *     <li> {@link Constant#${table.asFKConst($m_fkName)}} - {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkIndex valid values: <br>
      *        #foreachForeignTables('' $table "{@link Constant#${table.asFKConst($m_fkName)}}" ',' '')
 
-     * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
+     * @return the associated T bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      * @throws DaoException
      */
     @SuppressWarnings("unchecked")
@@ -931,7 +930,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * 
      * @param <T> see also {@link ${esc.hash}getReferencedBean($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
-     * @param beanToSet the <T> object to associate to the {@link $beanClass}
+     * @param beanToSet the T object to associate to the {@link $beanClass}
      * @param fkIndex valid values: see also {@link ${esc.hash}getReferencedBean($beanClass,int)}
      * @return always beanToSet saved
      * @throws DaoException
@@ -991,7 +990,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
      * @param bean the {@link $beanClass} object to use
      * @param beanToSet the {@link $foreignClass} object to associate to the {@link $beanClass} #if(!$table.isNullable($fkName))(NOT NULL)#end.
      * @return always beanToSet saved
-     * @throws Exception
+     * @throws DaoException
      */
     public $foreignClass $table.getReferencedVarSetMethod($fkName)($beanClass bean, $foreignClass beanToSet) throws DaoException
     {
@@ -2034,6 +2033,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @param ps the PreparedStatement that will be filled
      * @param bean the bean to use for creating the where clauses
      * @param searchType exact ?  like ? starting like ?
+     * @param fillNull wether fill null for null field
      * @return the number of clauses returned
      * @throws DaoException
      */
@@ -2491,7 +2491,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     /**
      * bind foreign key listener to foreign table: <br>
 #foreach($fkObj in $fkObjs)
-     * DELETE RULE : $fkObj.deleteRule {@code ${table.name}(#join($fkObj.columns '$e.name' ','))-> ${fkObj.foreignTable.name}(#join($fkObj.foreignTable.primaryKeys '$e.name' ','))} <br>
+     * DELETE RULE : $fkObj.deleteRule {@code ${table.name}(#join($fkObj.columns '$e.name' ','))- ${fkObj.foreignTable.name}(#join($fkObj.foreignTable.primaryKeys '$e.name' ','))} <br>
 #end
      */
     public void bindForeignKeyListenerForDeleteRule(){
@@ -2652,7 +2652,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     //46
     /**
      * return a primary key list from {@link $beanClass} collection
-     * @param array
+     * @param collection
      */
     public List<$pk.getJavaType()> toPrimaryKeyList(java.util.Collection<$beanClass> collection){        
         if(null == collection){

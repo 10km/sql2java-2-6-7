@@ -26,7 +26,7 @@ import java.util.Comparator;
 /** 
  * Assists in implementing {@link java.lang.Comparable#compareTo(Object)} methods.
  *
- * It is consistent with <code>equals(Object)</code> and
+ * <p>It is consistent with <code>equals(Object)</code> and
  * <code>hashcode()</code> built with {@link EqualsBuilder} and
  * {@link HashCodeBuilder}.</p>
  *
@@ -62,7 +62,7 @@ import java.util.Comparator;
  *
  * <p>Alternatively, there is are {@link #reflectionCompare reflectionCompare} method that uses
  * reflection to determine the fields to append. Because fields can be private,
- * <code>reflectionCompare</code> uses {@link java.lang.reflect.AccessibleObject\#setAccessible(boolean)} to
+ * <code>reflectionCompare</code> uses {@link java.lang.reflect.AccessibleObject${esc.hash}setAccessible(boolean)} to
  * bypass normal access control checks. This will fail under a security manager,
  * unless the appropriate permissions are set up correctly. It is also
  * slower than appending explicitly.</p>

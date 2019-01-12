@@ -281,8 +281,7 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
     /** 
      * 返回内存cache中与{@code k1,k2}匹配的记录<br>
      * 如果没找到记录则返回{@code null}
-     * @see {@link com.google.common.cache.LoadingCache#getIfPresent(Object)}
-     * @throws ExecutionException
+     * @see com.google.common.cache.LoadingCache#getIfPresent(Object)
      */
     public B getBeanIfPresent(K1 k1,K2 k2){
         return null ==k1 || null == k2 ? null : cache.getIfPresent(asTmpKey(k1,k2));
@@ -291,7 +290,6 @@ public abstract class BaseJunctionTableCache<K1 ,K2,B extends BaseBean<B>> {
      * 返回数据库中与{@code k1,k2}匹配的记录<br>
      * 如果没找到记录则返回{@code null}
      * @see {@link com.google.common.cache.LoadingCache#getUnchecked(Object)}
-     * @throws ExecutionException
      */
     public B getBeanUnchecked(K1 k1,K2 k2){
         try{

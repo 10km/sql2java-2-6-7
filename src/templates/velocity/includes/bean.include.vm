@@ -110,8 +110,7 @@ public $!{final} class ${beanClass}
         return this;
     }
     /**
-     * return a new mutable copy of this object.
-     * @return 
+     * @return return a new mutable copy of this object.
      */
     public $beanClass cloneMutable(){
         return clone().immutable(null);
@@ -336,7 +335,7 @@ public $!{final} class ${beanClass}
 #if($swiftBeanSupport)
     /** 
      * setter for thrift:swift support<br>
-     * without modification for {@link ${esc.hash}modified and {@link ${esc.hash}initialized}<br>
+     * without modification for {@link ${esc.hash}modified} and {@link ${esc.hash}initialized}<br>
      * <b>NOTE:</b>DO NOT use the method in your code
      */
 #if($column.isDate())
@@ -420,11 +419,17 @@ public $!{final} class ${beanClass}
      * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
     private $foreignClass $referencedBean;
-    /** Getter method for {@link #${referencedBean}}. */
+    /**
+     * Getter method for {@link #${referencedBean}}.
+     * @return $foreignClass
+     */
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
-    /** Setter method for {@link #${referencedBean}}. */
+    /**
+     * Setter method for {@link #${referencedBean}}.
+     * @param reference $foreignClass
+     */
     public void $table.getReferencedVarSetMethod($fkName)($foreignClass reference) {
         this.$referencedBean = reference;
     }
@@ -657,7 +662,7 @@ public $!{final} class ${beanClass}
     }
     /**
      * check whether this bean is a NULL bean 
-     * @return {@code true} if {@link {@link ${esc.hash}initialized} be set to zero
+     * @return {@code true} if {@link ${esc.hash}initialized} be set to zero
      * @see ${esc.hash}asNULL()
      */
     public boolean checkNULL(){
@@ -681,8 +686,9 @@ public $!{final} class ${beanClass}
         return source;
     }
     /** 
+     * @param source input list
      * @return replace null instance element with {@code null}
-     * @see {@link ${esc.hash}checkNULL()} 
+     * @see ${esc.hash}checkNULL()
      */
     public static final List<$beanClass> replaceNullInstance(List<$beanClass> source){
         if(null != source){
@@ -783,7 +789,10 @@ public $!{final} class ${beanClass}
         setValue(columnIDOf(column),value);
     }
     
-    /** return column id for the given field name or negative if {@code column} is invalid name */
+    /**
+     * @param column column name
+     * @return column id for the given field name or negative if {@code column} is invalid name 
+     */
     public static int columnIDOf(String column){
         int index = ${table.name.toUpperCase()}_FIELDS_LIST.indexOf(column);
         return  index < 0 
@@ -830,8 +839,8 @@ public $!{final} class ${beanClass}
         /** 
          * fill the field : $column.fullName
          * @param $column.varName $!{column.remarks}
-         * @see {@link $beanClass${esc.hash}${column.getGetMethod()}()}
-         * @see {@link $beanClass${esc.hash}${column.getSetMethod()}($column.javaType)}
+         * @see $beanClass${esc.hash}${column.getGetMethod()}()
+         * @see $beanClass${esc.hash}${column.getSetMethod()}($column.javaType)
          */
         public Builder ${column.varName}($column.javaType $column.varName){
             TEMPLATE.get().${column.getSetMethod()}($column.varName);

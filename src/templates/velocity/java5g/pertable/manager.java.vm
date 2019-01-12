@@ -375,7 +375,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * Retrieves imported T objects by ikIndex.<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} TO {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
@@ -404,7 +404,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * @param <T>
      * 
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} TO {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param importedBeans the ${importedClass} array to associate to the {@link $beanClass}
@@ -433,10 +433,10 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * Set the importedBeans associates to the bean by ikIndex<br>
      * @param <T>
      * <ul>
-    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_importedClass}}</li>" '    ' 'true')
+    #foreachImportedTables('native' $table " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} TO {@link ${m_importedClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
-     * @param importedBeans the <T> object to associate to the {@link $beanClass}
+     * @param importedBeans the T object to associate to the {@link $beanClass}
      * @param ikIndex valid values: #foreachImportedTables('native' $table "{@link Constant#${m_importedTable.asIKConst($m_fkName)}}" ',' '')
 
      * @return importedBeans always
@@ -671,7 +671,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * Save the {@link $beanClass} bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param inputs referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", ${m_importedClass}[] " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      */
@@ -726,7 +726,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * Save the {@link $beanClass} bean and referenced beans and imported beans into the database.
      *
      * @param bean the {@link $beanClass} bean to be saved
-     * @param args referenced beans or imported beans<br>
+     * @param inputs referenced beans or imported beans<br>
      *      see also {@link ${esc.hash}save($beanClass #foreachForeignTables('native' $table  ", $m_foreignClass " '' '')#foreachImportedTables('native' $table  ", java.util.Collection " '' ''))}
      * @return the inserted or updated {@link $beanClass} bean
      */
@@ -788,13 +788,13 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * Retrieves the bean object referenced by fkIndex.<br>
      * @param <T>
      * <ul>
-    #foreachForeignTables('native' $table " *     <li> {@link Constant#${table.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables('native' $table " *     <li> {@link Constant#${table.asFKConst($m_fkName)}} TO {@link ${m_foreignClass}}</li>" '    ' 'true')
      * </ul>
      * @param bean the {@link $beanClass} object to use
      * @param fkIndex valid values: <br>
      *        #foreachForeignTables('native' $table "{@link Constant#${table.asFKConst($m_fkName)}}" ',' '')
 
-     * @return the associated <T> bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
+     * @return the associated T bean or {@code null} if {@code bean} or {@code beanToSet} is {@code null}
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -818,7 +818,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
      * 
      * @param <T> see also {@link ${esc.hash}getReferencedBean($beanClass,int)}
      * @param bean the {@link $beanClass} object to use
-     * @param beanToSet the <T> object to associate to the {@link $beanClass}
+     * @param beanToSet the T object to associate to the {@link $beanClass}
      * @param fkIndex valid values: see also {@link ${esc.hash}getReferencedBean($beanClass,int)}
      * @return always beanToSet saved
      */

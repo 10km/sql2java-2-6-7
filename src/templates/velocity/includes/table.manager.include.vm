@@ -520,8 +520,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * count the number of elements of a specific bean given the search type
      *
      * @param bean the template to look for
-     * @param startRow the start row to be used (first row = 1, last row=-1)
-     * @param numRows the number of rows to be retrieved (all rows = a negative number)
      * @param searchType exact ?  like ? starting like ? ending link ? <br>
      *                {@value Constant#SEARCH_EXACT}   {@link Constant#SEARCH_EXACT} <br>
      *                {@value Constant#SEARCH_LIKE}   {@link Constant#SEARCH_LIKE} <br>
@@ -595,7 +593,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #end
 #end
      * @return the number of deleted rows
-     * @see #delete(B)
 #if($throwsString)
      * @$!throwsString
 #end
@@ -761,7 +758,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * when you don't know which is primary key of table,you can use the method.
      * @param bean the B bean with primary key fields
      * @return 
-     * @see {@link ${esc.hash}loadByPrimaryKey(B bean)}
+     * @see ${esc.hash}loadByPrimaryKey(B bean)
 #if($throwsString)
      * @$!throwsString
 #end
@@ -772,7 +769,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * Check duplicated row by primary keys,if row exists throw exception
      * @param bean the B bean with primary key fields
      * @return always bean
-     * @see {@link #existsPrimaryKey(B bean)}
+     * @see #existsPrimaryKey(B bean)
      * @throws ObjectRetrievalException has duplicated record
 #if($throwsString)
      * @$!throwsString
@@ -1366,7 +1363,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     /**
      * Run {@code Runnable} as a transaction.no return
      * @param fun
-     * @
      * @see #runAsTransaction(Runnable)
 #if($throwsString)
      * @$!throwsString
@@ -1381,7 +1377,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #if($t.hasForeignTables())
      * <ul>
      *     <li> for $t.name:
-    #foreachForeignTables("$M_native" $t " *     <li> {@link Constant#${t.asFKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachForeignTables("$M_native" $t " *     <li> {@link Constant#${t.asFKConst($m_fkName)}} - ${m_foreignClass}</li>" '    ' 'true')
      * </ul>
 #end
 #end
@@ -1393,7 +1389,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      *        #foreachForeignTables("$M_native" $t "{@link Constant#${t.asFKConst($m_fkName)}}" ',' '')<br>
 #end
 #end
-     * @return the associated <T> bean or {@code null} if {@code bean}  is {@code null}
+     * @return the associated T bean or {@code null} if {@code bean}  is {@code null}
 #if($throwsString)
      * @$!throwsString
 #end
@@ -1420,7 +1416,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
 #if($t.hasImportedTables())
      * <ul>
      *     <li> for $t.name table:
-    #foreachImportedTables("$M_native" $t " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} -> {@link ${m_foreignClass}}</li>" '    ' 'true')
+    #foreachImportedTables("$M_native" $t " *     <li> {@link Constant#${m_importedTable.asIKConst($m_fkName)}} - ${m_foreignClass}</li>" '    ' 'true')
      * </ul>
 #end
 #end

@@ -165,7 +165,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #end
 #set ( $importedClass = "$importedTable.asBeanClassNSP()" )
 #set ( $importedNative = "$importedTable.asBeanClass()" )
-#set ( $importedClassManager = "$importedTable.asManagerClassNSP()" )
+#set ( $importedClassManager = "$importedTable.asManagerInterfaceNSP()" )
 #foreach( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
     //3.1 GET IMPORTED
@@ -239,7 +239,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param bean the referenced {@link $beanClass}
      * @param importedBeans imported beans from $importedTable.name
      * @return importedBeans always
-     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @see ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      * @throws RuntimeDaoException
      */
     public ${importedClass}[] ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , ${importedClass}[] importedBeans)throws RuntimeDaoException;
@@ -251,7 +251,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @param bean the referenced {@link $beanClass} 
      * @param importedBeans imported beans from $importedTable.name 
      * @return importedBeans always
-     * @see {@link ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
+     * @see ${importedClassManager}#$importedTable.getReferencedVarSetMethod($fkName)($importedClass, $beanClass)
      * @throws RuntimeDaoException
      */
     public <C extends java.util.Collection<$importedClass>> C ${importedTable.getImportedBeansSetMethod($fkName)}($beanClass bean , C importedBeans)throws RuntimeDaoException;
