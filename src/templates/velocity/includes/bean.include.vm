@@ -673,6 +673,7 @@ public $!{final} class ${beanClass}
 #end
     }
     /** 
+     * @param source source list
      * @return {@code source} replace {@code null} element with null instance({@link ${esc.hash}NULL})
      */
     public static final List<$beanClass> replaceNull(List<$beanClass> source){

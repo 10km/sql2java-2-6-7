@@ -1,3 +1,4 @@
+#set ( $B_rawClass = "BaseBean")
 #set ( $B_parentClass = "BaseBean<B>")
 #set ( $B_extends = " extends BaseBean<B>" )
 #set ( $T_extends = " extends BaseBean<T>" )

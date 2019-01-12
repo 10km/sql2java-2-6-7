@@ -4,7 +4,7 @@
     /////// FOR THRIFT //////
     /** 
      * cast {@code this} to {@link $thriftClass}
-     * @see {@link ThriftConverter#converter${beanClass}}
+     * @see ThriftConverter#converter${beanClass}
      */
     public $thriftClass toThrift(){
         return ThriftConverter.${table.asConverterConstVar()}.toRight(this);
@@ -12,7 +12,7 @@
     /** 
      * copy all fields from {@link $thriftClass},do nothing if {@code thriftBean} is null
      * @return current object {@code this}
-     * @see {@link ThriftConverter#converter${beanClass}}
+     * @see ThriftConverter#converter${beanClass}
      */
     public $beanClass fromThrift($thriftClass thriftBean){
         if(null != thriftBean){
@@ -24,7 +24,7 @@
     /** 
      * construct new instance from {@link $thriftClass}
      * @param thriftBean must not be null
-     * @see {@link ThriftConverter#converter${beanClass}}
+     * @see ThriftConverter#converter${beanClass}
      */
     public $beanClass($thriftClass thriftBean){
         if(null != thriftBean){

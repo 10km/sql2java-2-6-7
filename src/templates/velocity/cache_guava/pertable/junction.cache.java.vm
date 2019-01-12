@@ -44,7 +44,7 @@ import $table.getPackage(false).$managerClass;
 public class $cacheClass extends BaseJunctionTableCache<$k1Type,$k2Type, $beanClass> {
     private final $managerClass manager = ${managerClass}.getInstance();
     /** constructor<br>
-     * @see {@link BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )}
+     * @see BaseTableLoadCaching#BaseTableLoadCaching(UpdateStrategy ,long , long , TimeUnit )
      */
     public $cacheClass(UpdateStrategy updateStrategy,long maximumSize, long duration, TimeUnit unit) {
         super(updateStrategy,maximumSize, duration, unit);
@@ -101,37 +101,37 @@ public class $cacheClass extends BaseJunctionTableCache<$k1Type,$k2Type, $beanCl
     }
     /** 
      * return all matched beans on field ${table.name}($key1.name) with $key1.getVarName() 
-     * @see BaseJunctionTableCache${esc.hash}getBeansByK1($k1Type)
+     * @see BaseJunctionTableCache${esc.hash}getBeansByK1(Object)
      */
     public Set<$beanClass> $key1.getGetCacheMethod()($k1Type $key1.getVarName()) throws ExecutionException{
         return getBeansByK1($key1.getVarName());
     }
     /** 
      * return all matched beans on field ${table.name}($key1.name) with $key1.getVarName() 
-     * @see BaseJunctionTableCache${esc.hash}getBeansByK1Unchecked($k1Type)
+     * @see BaseJunctionTableCache${esc.hash}getBeansByK1Unchecked(Object)
      */
     public Set<$beanClass> $key1.getGetCacheMethod()Unchecked($k1Type $key1.getVarName()){
         return getBeansByK1Unchecked($key1.getVarName());
     }
     /** 
      * return all matched beans on field ${table.name}($key2.name) with $key2.getVarName() 
-     * @see BaseJunctionTableCache${esc.hash}getBeansByK2($k2Type)
+     * @see BaseJunctionTableCache${esc.hash}getBeansByK2(Object)
      */
     public Set<$beanClass> $key2.getGetCacheMethod()($k2Type $key2.getVarName()) throws ExecutionException{
         return getBeansByK2($key2.getVarName());
     }
     /** 
      * return all matched beans on field ${table.name}($key2.name) with $key2.getVarName() 
-     * @see BaseJunctionTableCache${esc.hash}getBeansByK2Unchecked($k2Type)
+     * @see BaseJunctionTableCache${esc.hash}getBeansByK2Unchecked(Object)
      */
     public Set<$beanClass> $key2.getGetCacheMethod()Unchecked($k2Type $key2.getVarName()){
         return getBeansByK2Unchecked($key2.getVarName());
     }
-    /** see also {@link BaseJunctionTableCache${esc.hash}getBean($k1Type,$k1Type)} */
+    /** see also {@link BaseJunctionTableCache${esc.hash}getBean(Object,Object)} */
     public $beanClass getBeanByPrimaryKey($k1Type $key1.getVarName(),$k2Type $key2.getVarName()) throws ExecutionException{
         return getBean($key1.getVarName(),$key2.getVarName());
     }
-    /** see also {@link BaseJunctionTableCache${esc.hash}getBeanUnchecked($k1Type,$k1Type)} */
+    /** see also {@link BaseJunctionTableCache${esc.hash}getBeanUnchecked(Object,Object)} */
     public $beanClass getBeanByPrimaryKeyUnchecked($k1Type $key1.getVarName(),$k2Type $key2.getVarName()){
         return getBeanUnchecked($key1.getVarName(),$key2.getVarName());
     }

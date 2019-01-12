@@ -701,7 +701,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     //1.2.2
     /**
-     * see also {@link loadByPrimaryKey(B)}
+     * see also {@link ${esc.hash}loadByPrimaryKey(${B_rawClass})} 
      * @param bean
      * @return a unique B ,otherwise throw exception
      * @throws ObjectRetrievalException not found
@@ -758,7 +758,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * when you don't know which is primary key of table,you can use the method.
      * @param bean the B bean with primary key fields
      * @return 
-     * @see ${esc.hash}loadByPrimaryKey(B bean)
+     * @see ${esc.hash}loadByPrimaryKey(${B_rawClass})
 #if($throwsString)
      * @$!throwsString
 #end
@@ -769,7 +769,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      * Check duplicated row by primary keys,if row exists throw exception
      * @param bean the B bean with primary key fields
      * @return always bean
-     * @see #existsPrimaryKey(B bean)
+     * @see ${esc.hash}existsByPrimaryKey(${B_rawClass})
      * @throws ObjectRetrievalException has duplicated record
 #if($throwsString)
      * @$!throwsString
@@ -1226,7 +1226,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
      *
      * @param beans the B bean table to be saved
      * @return alwarys beans saved
-     * @see #save(B[])
+     * @see ${esc.hash}save(${B_rawClass}[])
 #if($throwsString)
      * @$!throwsString
 #end
@@ -1286,7 +1286,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //3.11 SYNC SAVE 
     /**
      *  Transaction version for sync save
-     * @see ${esc.hash}save(B ,Object ...)
+     * @see ${esc.hash}save(${B_rawClass} ,Object ...)
      * @param bean the B bean to be saved
      * @param args referenced beans or imported beans<br>
      * @return the inserted or updated B bean
@@ -1299,7 +1299,7 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     //3.12 SYNC SAVE 
     /**
      *  Transaction version for sync save
-     * @see ${esc.hash}saveCollection(B ,Object ...)
+     * @see ${esc.hash}saveCollection(${B_rawClass} ,Object ...)
      * @param bean the B bean to be saved
      * @param args referenced beans or imported beans<br>
      * @return the inserted or updated B bean
@@ -1398,10 +1398,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     /**
      * Associates the B object to the T object by fkName field.<br>
-     * @param <T> see also {@link #getReferencedBean(B, int)}
+     * @param <T> see also {@link ${esc.hash}getReferencedBean(${B_rawClass}, int)}
      * @param bean the B object to use
      * @param beanToSet the T object to associate to the B bean
-     * @param fkIndex see also {@link #getReferencedBean(B, int)}
+     * @param fkIndex see also {@link ${esc.hash}getReferencedBean(${B_rawClass}, int)}
      * @return always beanToSet saved
 #if($throwsString)
      * @$!throwsString
@@ -1437,9 +1437,9 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     
     /**
      * Retrieves imported T objects by ikIndex.<br>
-     * @param <T> see also {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @param bean the B object to use
-     * @param ikIndex foreign key name.see also {@link #getImportedBeans(B, int)}
+     * @param ikIndex foreign key name.see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @return the associated T beans or {@code null} if {@code bean} is {@code null}
 #if($throwsString)
      * @$!throwsString
@@ -1450,10 +1450,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     /**
      * Set the importedBeans associates to the bean by {@code ikIndex}<br>
      * 
-     * @param <T> see also {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param ikIndex foreign key name.see also {@link #getImportedBeans(B, int)}
+     * @param ikIndex foreign key name.see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString
@@ -1464,10 +1464,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
     /**
      * Set the importedBeans associates to the bean by fkIndex<br>
      * 
-     * @param <T> see also {@link #getImportedBeans(B, int)}
+     * @param <T> see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @param bean the bean object to use
      * @param importedBeans the T object to associate to bean
-     * @param ikIndex foreign key name. see also {@link #getImportedBeans(B, int)}
+     * @param ikIndex foreign key name. see also {@link ${esc.hash}getImportedBeans(${B_rawClass}, int)}
      * @return importedBeans always
 #if($throwsString)
      * @$!throwsString

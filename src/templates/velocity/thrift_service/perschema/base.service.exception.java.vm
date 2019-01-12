@@ -120,7 +120,7 @@ public abstract class BaseServiceException extends Exception{
     /** 
      * return JSON string of declared field values if cause is subclass of this class 
      * and override {@code jsonOfDeclaredFields} method, otherwise return empty string
-     * @see {@link ${esc.hash}jsonOfDeclaredFields()}
+     * @see ${esc.hash}jsonOfDeclaredFields()
      */
     @ThriftField(4)
     public String getCauseFields() {

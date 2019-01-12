@@ -55,7 +55,6 @@ public interface ${javaClassName} extends TableManager<$beanClass>
 #foreach ( $pk in $primaryKeys )
      * @param $pk.getVarName() $pk.getJavaType() - PK# $velocityCount
 #end
-     * @see #loadByPrimaryKey($keys)
      * @return
      * @throws RuntimeDaoException
      */

@@ -133,8 +133,8 @@ public class ConfigUtils {
      * @param properties
      * @param propertiesFile properties文件名
      * @throws IOException
-     * @see {@link Properties${esc.hash}store(java.io.Writer, String)}
-     * @see {@link System${esc.hash}getProperties()}
+     * @see Properties${esc.hash}store(java.io.Writer, String)
+     * @see System${esc.hash}getProperties()
      */
     public static void storePropertiesInUserHome(Properties properties,String propertiesFile) throws IOException{
         if(null==properties){

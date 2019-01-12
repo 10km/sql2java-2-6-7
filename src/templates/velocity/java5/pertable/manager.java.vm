@@ -698,7 +698,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //3.6 SYNC SAVE AS TRANSACTION
     /**
      * Transaction version for sync save
-     * @see {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", ${m_importedClass}[] " '' ''))}
+     * @see ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", ${m_importedClass}[] " '' ''))
      */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -754,7 +754,8 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     //3.8 SYNC SAVE AS TRANSACTION
     /**
      * Transaction version for sync save
-     * @see {@link ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))}
+     * @see ${esc.hash}save($beanClass #foreachForeignTables('' $table  ", $m_foreignClass " '' '')#foreachImportedTables('' $table  ", java.util.Collection " '' ''))
+     * @throws DaoException
      */
     public $beanClass saveAsTransaction(final $beanClass bean
         #foreachForeignTables('' $table  ",final $m_foreignClass $table.asRefArg($m_fkName) " '' '')
@@ -1725,7 +1726,7 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #set ( $linkManagerClass = ${linkedTable.asManagerClass($isGeneral)})
     //22 MANY TO MANY
     /**
-     * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($beanClass,int,int)
+     * @see ${esc.hash}$jTable.getLoadMethodOfJunction()AsList($linkedBean,int,int)
      */
     public List<${beanClass}> $jTable.getLoadMethodOfJunction()AsList($linkedBean bean) throws DaoException
     {
