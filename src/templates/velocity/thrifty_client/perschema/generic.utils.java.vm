@@ -284,7 +284,7 @@ public class GenericUtils {
         }
         return Maps.transformEntries(source, DATE_ENTRY_TRANSFORMER);
     }
-    /** get a view of {@code Map<Date,Date>} with {@code Long} key & value type */
+    /** get a view of {@code Map<Date,Date>} with {@code Long} key and value type */
     public static final<D extends Date>Map<Long,Long> toLong(Map<D,D> source,Class<D>clazz){
         if(null == source){
             return null;
@@ -369,7 +369,7 @@ public class GenericUtils {
                 return trans.fromRight(value);
             }});
     }
-    /** get a view of {@code Map<Long,Long>} with {@code Date} key & value type */
+    /** get a view of {@code Map<Long,Long>} with {@code Date} key and value type */
     public static final<D extends Date>Map<D,D> toDate(Map<Long,Long> source,final Class<D>clazz){
         if(null == source){
             return null;

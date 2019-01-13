@@ -106,8 +106,7 @@ public class ClientFactory {
     }
     /**
      * set all timeout arguments
-     * @param time
-     * @param unit
+     * @param timeout
      * @return
      * @see ${esc.hash}setConnectTimeout(Duration)
      * @see ${esc.hash}setReceiveTimeout(Duration)

@@ -101,7 +101,7 @@ public class $javaClassName implements Constant{
     private final ClientFactory factory;
     /**
      * constructor 
-     * @param service a instance of ${interfaceClass} created by Swift, must not be null
+     * @param factory a instance of ${ClientFactory}, must not be null
      */
     $javaClassName(ClientFactory factory){
         this.factory = checkNotNull(factory,"factory is null");
