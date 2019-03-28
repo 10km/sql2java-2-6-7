@@ -249,8 +249,16 @@ public class $cacheManagerClass extends $managerClass
 #if($jTable.isSampleJunctionTable())
 #set($linkedCol = $linkedFk.columns[0])
 #set($localCol = $localFk.columns[0])
-        java.util.List<$junctionBeanClass> junctions = 
-            com.google.common.collect.Lists.newArrayList(${jTable.asInstanceMethod(true)}().${linkedCol.getGetCacheMethod()}Unchecked(bean.$linkedCol.foreignColumn.getGetMethod()()));
+        ${jTable.asManagerClass($isGeneral)} m = ${jTable.asInstanceMethod(true)}();
+        java.util.List<$junctionBeanClass> junctions;
+        if(m instanceof ${jTable.asCacheManagerClass($isGeneral)}){
+            junctions = 
+                    com.google.common.collect.Lists.newArrayList(((${jTable.asCacheManagerClass($isGeneral)})m).${linkedCol.getGetCacheMethod()}Unchecked(bean.${linkedCol.foreignColumn.getGetMethod()}()));
+        }else{
+            ${junctionBeanClass} template = ${junctionBeanClass}.builder().personGroupId(bean.${linkedCol.foreignColumn.getGetMethod()}()).build();
+            junctions = 
+                    m.loadUsingTemplateAsList(template);
+        }
         startRow = Math.min(Math.max(0, startRow - 1), junctions.size() - 1);
         numRows = numRows < 0 ? junctions.size():Math.min(junctions.size(), numRows);
         numRows = Math.min(junctions.size() - startRow , numRows) ;

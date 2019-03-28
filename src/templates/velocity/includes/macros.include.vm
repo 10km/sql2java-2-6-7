@@ -71,18 +71,21 @@ import ${linkedTable.getPackage(false)}.${linkedTable.asManagerClass($isGeneral)
 #end
 ####################
 #macro(defineInstanceMehod $table $currentManagerClass $override)
-#if($currentManagerClass == $table.asManagerClass($isGeneral))
-#define($linkedManagerClass)$linkedTable.asManagerClass($isGeneral)#end
-#elseif($currentManagerClass == $table.asCacheManagerClass($isGeneral))
-#define($linkedManagerClass)$linkedTable.asCacheManagerClass($isGeneral)#end
-#end
 
+#define($linkedManagerClass)$linkedTable.asCacheManagerClass($isGeneral)#end
 #foreach ($linkedTable in $table.linkedTables)
 #if($override)
     @Override
 #end
-    protected ${linkedManagerClass} ${linkedTable.asInstanceMethod($isGeneral)}(){
+    protected ${linkedTable.asManagerClass($isGeneral)} ${linkedTable.asInstanceMethod($isGeneral)}(){
+#if($currentManagerClass == $table.asManagerClass($isGeneral))
+        return ${linkedTable.asManagerClass($isGeneral)}.getInstance();
+#else
+        if(${linkedManagerClass}.getInstance() == null){
+            ${linkedTable.asManagerClass($isGeneral)}.getInstance();
+        }
         return ${linkedManagerClass}.getInstance();
+#end
     }
 #end
 #if($table.getImportedTablesAsList().contains($table))
