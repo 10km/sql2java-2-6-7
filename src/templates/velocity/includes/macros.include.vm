@@ -81,10 +81,11 @@ import ${linkedTable.getPackage(false)}.${linkedTable.asManagerClass($isGeneral)
 #if($currentManagerClass == $table.asManagerClass($isGeneral))
         return ${linkedTable.asManagerClass($isGeneral)}.getInstance();
 #else
-        if(${linkedManagerClass}.getInstance() == null){
-            ${linkedTable.asManagerClass($isGeneral)}.getInstance();
+        try{
+            return ${linkedManagerClass}.getInstance();
+        } catch(IllegalStateException e){
+            return ${linkedTable.asManagerClass($isGeneral)}.getInstance();
         }
-        return ${linkedManagerClass}.getInstance();
 #end
     }
 #end
