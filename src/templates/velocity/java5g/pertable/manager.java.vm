@@ -1591,7 +1591,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
                 ; parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','))){
             list.add(parent);
             if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
-                || (#join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
+                || (list.size() > 1 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
                 // cycle reference
                 break;
             }
@@ -1616,7 +1616,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
            ; null != parent
            ; ++count,parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','))){
             if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
-                || (#join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
+                || (count > 0 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
                 // cycle reference
                 return -1;
             }
@@ -1651,9 +1651,10 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             throw new NullPointerException();
         }
         $beanClass parent = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
+        int count = 0 ;
         for(;null != parent && #join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
             if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
-                || (#join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
+                || (++count > 1 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
                 // cycle reference
                 throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
             }
