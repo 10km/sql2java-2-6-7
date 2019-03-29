@@ -2687,20 +2687,20 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DaoException
      */
     public java.util.List<$beanClass> $table.getListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
-        $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
-            ? null
-            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
-        java.util.List<$beanClass> list;
-        for(list = new java.util.ArrayList<$beanClass>();null != parent;list.add(parent)){
-            parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'java.util.Objects.equals($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
+        java.util.List<$beanClass> list = new java.util.ArrayList<$beanClass>();
+        for($beanClass parent = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','))
+                ; null != parent
+                ; parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','))){
+            list.add(parent);
+            if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
+                || (list.size() > 1 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
                 // cycle reference
-                list.add(parent);
                 break;
             }
         }
         java.util.Collections.reverse(list);
         return list;
+
     }
     //48
     /**
@@ -2722,17 +2722,18 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
      * @throws DaoException
      */
     public int $table.getLevelMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')) throws DaoException{
-        $beanClass parent = (#join($primaryKeys 'null == $e.getVarName()' ' || '))
-            ? null
-            : new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
-        int count;
-        for(count = 0;null != parent;++count){
-            parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(null != parent #join($primaryKeys ' && java.util.Objects.equals($e.getVarName(),parent.$e.getGetMethod()())' '')){
+        int count = 0 ;
+        for($beanClass parent = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','))
+           ; null != parent
+           ; ++count,parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','))){
+            if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
+                || (count > 0 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
+                // cycle reference
                 return -1;
             }
         }
         return count;
+
     }
     //50
     /**
@@ -2780,12 +2781,15 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         if(#join($primaryKeys 'null == $e.getVarName()' ' || ')){
             throw new NullPointerException();
         }
-        $beanClass parent = new $beanClass(#join($primaryKeys '$e.getVarName()' ','));
-        for(;#join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
-            parent = loadByPrimaryKey(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
-            if(#join($primaryKeys 'java.util.Objects.equals($e.getVarName(),parent.$e.getGetMethod()())' ' && ')){
+        $beanClass parent = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
+        int count = 0 ;
+        for(;null != parent && #join($selfFk.columns 'null != parent.$e.getGetMethod()()' ' && ');){
+            if(    (#join($primaryKeys 'parent.$e.getGetMethod()().equals(parent.$selfFk.foreignColumnOf($e).getGetMethod()())' ' && '))
+                || (++count > 1 && #join($primaryKeys 'parent.$e.getGetMethod()().equals(${e.getVarName()})' ' && '))){
+                // cycle reference
                 throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
             }
+            parent = loadByPrimaryKeyChecked(#join($primaryKeys 'parent.$selfFk.foreignColumnOf($e).getGetMethod()()' ','));
         }
         return parent;
     }
