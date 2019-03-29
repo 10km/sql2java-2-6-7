@@ -656,6 +656,7 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @return top bean
      * @throws NullPointerException if input primary key is {@code null}
      * @throws IllegalStateException if self-reference field is cycle
+     * @throws ObjectRetrievalException not found record by primary key
      * @throws RuntimeDaoException
      */
     public $beanClass $table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
@@ -664,6 +665,9 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * see also {@link ${esc.hash}$table.getTopMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
      * @param bean
      * @return
+     * @throws NullPointerException if input primary key is {@code null}
+     * @throws IllegalStateException if self-reference field is cycle
+     * @throws ObjectRetrievalException not found record by primary key
      * @throws RuntimeDaoException
      */
     public $beanClass $table.getTopMethod($selfFk)($beanClass bean)throws RuntimeDaoException;

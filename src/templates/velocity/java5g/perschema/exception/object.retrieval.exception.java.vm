@@ -4,8 +4,6 @@
 $codewriter.setCurrentJavaFilename("${schemaPkg}.exception", "ObjectRetrievalException.java")
 package ${schemaPkg}.exception;
 
-import java.sql.SQLException;
-
 /**
  *
  * @author guyadong
