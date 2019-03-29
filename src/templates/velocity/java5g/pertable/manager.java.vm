@@ -590,8 +590,10 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
+        if(null != $impVar){
+            this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+            ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
+        }
 #end
 #end
         return bean;
@@ -627,7 +629,9 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #set ( $foreignClassManager = "$foreignTable.asManagerClassNSP()" )
 #foreach ( $fkName in $table.getFkMapNames($foreignTable.name) )
 #set ( $columnsOfFk = $foreignTable.getForeignKeysByFkName($fkName) )
-        this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+        if(null != $table.asRefArg($fkName)){
+            this.$table.getReferencedVarSetMethod($fkName)(bean,$table.asRefArg($fkName));
+        }
 #end
 #end
         bean = this.save( bean );
@@ -637,8 +641,10 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
 #foreach ( $fkName in $importedTable.getFkMapNames($table.name) )
 #set ( $columnsOfFk = $importedTable.getForeignKeysByFkName($fkName) )
 #set ( $impVar= $importedTable.asImpArg($fkName) )
-        this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
-        ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
+        if(null != $impVar){
+            this.${importedTable.getImportedBeansSetMethod($fkName)}(bean,$impVar);
+            ${importedTable.asInstanceMethod($isGeneral)}().save( $impVar );
+        }
 #end
 #end
         return bean;
