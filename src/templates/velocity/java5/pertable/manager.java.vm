@@ -292,7 +292,7 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
 
     @Override
     public $beanClass checkDuplicate($beanClass bean) throws DaoException{
-        if(!existsByPrimaryKey(bean)){
+        if(existsByPrimaryKey(bean)){
             throw new ObjectRetrievalException("Duplicate entry ("+ #join( $primaryKeys "bean.$e.getGetMethod()()" ' + " " +') +") for key 'PRIMARY'");
         }
         return bean;
