@@ -693,5 +693,25 @@ public interface ${javaClassName} extends TableManager<$beanClass>
      * @see ${esc.hash}$table.getCyeleTestMethod($selfFk)($beanClass)
      */
     public $beanClass $table.getCheckNotCycleMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
+    //57
+    /**
+     * return child bean list (self included) by the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
+     * throw {@link RuntimeDaoException} if self-reference field is cycle
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @return  child bean list,{@code null} if not found record
+     * @throws IllegalStateException if self-reference field is cycle
+     * @throws RuntimeDaoException
+     */
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws RuntimeDaoException;
+    //58
+    /**
+     * see also {@link ${esc.hash}$table.getChildListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
+     * @param bean
+     * @return
+     * @throws RuntimeDaoException
+     */
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)($beanClass bean)throws RuntimeDaoException;
 #end
 }

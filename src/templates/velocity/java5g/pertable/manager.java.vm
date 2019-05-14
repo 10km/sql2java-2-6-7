@@ -208,7 +208,7 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
         try{
             return this.nativeManager.checkDuplicate($pk.getVarName());
         }catch(${exceptionPkg}.ObjectRetrievalException e){
-        	throw new ObjectRetrievalException(e);
+            throw new ObjectRetrievalException(e);
         }catch(DaoException e){
             throw new RuntimeDaoException(e);
         }
@@ -1696,6 +1696,43 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
             throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
         }
         return bean;
+    }
+    //57 $table.asManagerInterfaceNSP()
+
+    @Override
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ',')){
+        java.util.LinkedHashSet<$beanClass> set = new java.util.LinkedHashSet<$beanClass>();
+        return new java.util.ArrayList<$beanClass>(doListOfChild(#join($primaryKeys '$e.getVarName()' ','),set));
+    }
+    //58 $table.asManagerInterfaceNSP()
+
+    @Override
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)($beanClass bean){
+        return null == bean
+                ? java.util.Collections.<$beanClass>emptyList()
+                : $table.getChildListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
+    }
+    /**
+     * get all of child recursively
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @param set child set for output
+     */
+    private java.util.LinkedHashSet<$beanClass> doListOfChild(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','), java.util.LinkedHashSet<$beanClass> set){
+        $beanClass bean = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
+        if(bean != null){
+            if(set.contains(bean)){
+                throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+            }
+            set.add(bean);
+            $beanClass tmpl = ${beanClass}.builder()#join($selfFk.columns '.${e.varName}(bean.${e.foreignColumn.getMethod}())' '').build();
+            java.util.List<$beanClass> childs = loadUsingTemplateAsList(tmpl);
+            for($beanClass c:childs){
+                doListOfChild(c.getId(),set);
+            }
+        }
+        return set;
     }
 #end
 }

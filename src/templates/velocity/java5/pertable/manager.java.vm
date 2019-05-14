@@ -2841,5 +2841,53 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
         }
         return bean;
     }
+    //57
+    /**
+     * return child bean list (self included) by the self-reference field : {@code ${table.name}(#join($selfFk.columns '$e.name' ',')) }<br>
+     * throw {@link RuntimeDaoException} if self-reference field is cycle
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @return  child bean list,{@code null} if not found record
+     * @throws IllegalStateException if self-reference field is cycle
+     * @throws DaoException
+     */
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','))throws DaoException{
+        java.util.LinkedHashSet<$beanClass> set = new java.util.LinkedHashSet<$beanClass>();
+        return new java.util.ArrayList<$beanClass>(doListOfChild(#join($primaryKeys '$e.getVarName()' ','),set));
+    }
+    //58
+    /**
+     * see also {@link ${esc.hash}$table.getChildListMethod($selfFk)(#join($primaryKeys '$e.getJavaType()' ','))}
+     */
+    public java.util.List<$beanClass> $table.getChildListMethod($selfFk)($beanClass bean) throws DaoException{
+        return null == bean
+                ? java.util.Collections.<$beanClass>emptyList()
+                : $table.getChildListMethod($selfFk)(#join($primaryKeys 'bean.$e.getGetMethod()()' ','));
+    }
+    /**
+     * get all of child recursively
+     * #join($primaryKeys '@param $e.getVarName() PK# $velocityCount ' '
+     ')
+
+     * @param set child set for output
+     * @throws IllegalStateException if self-reference field is cycle
+     * @throws DaoException 
+     */
+    private java.util.LinkedHashSet<$beanClass> doListOfChild(#join($primaryKeys '$e.getJavaType() $e.getVarName()' ','), java.util.LinkedHashSet<$beanClass> set)throws DaoException{
+        $beanClass bean = loadByPrimaryKey(#join($primaryKeys '$e.getVarName()' ','));
+        if(bean != null){
+            if(set.contains(bean)){
+                throw new IllegalStateException("cycle on field: " + #join($selfFk.columns '"$e.name"' '+'));
+            }
+            set.add(bean);
+            $beanClass tmpl = ${beanClass}.builder()#join($selfFk.columns '.${e.varName}(bean.${e.foreignColumn.getMethod}())' '').build();
+            java.util.List<$beanClass> childs = loadUsingTemplateAsList(tmpl);
+            for($beanClass c:childs){
+                doListOfChild(c.getId(),set);
+            }
+        }
+        return set;
+    }
 #end
 }
