@@ -1396,6 +1396,9 @@ public class Table {
 	public String getCheckNotCycleMethod(ForeignKey fk) {
 		return getSelftMethod(fk,"check_cycle_of_");
 	}
+	public String getChildListMethod(ForeignKey fk) {
+		return getSelftMethod(fk,"child_list_by_");
+	}
 	private  String getSelftMethod(ForeignKey fk,String prefix) {
 		if(null == fk )return null;
 		return StringUtilities.convertName(
