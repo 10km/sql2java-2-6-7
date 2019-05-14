@@ -287,6 +287,10 @@ public $!{final} class ${beanClass}
     public void $column.getSetMethod()($column.getJavaType() newVal)
     {
         checkMutable();
+
+        $column.bitORAssignExpression("modified");
+        $column.bitORAssignExpression("initialized");
+
 #if ($column.useEqualsInSetter())
         if (Objects.equals(newVal, $column.getVarName())) {
             return;
@@ -327,9 +331,6 @@ public $!{final} class ${beanClass}
 #else
         $column.getVarName() = newVal;
 #end###if ( $column.hasPrimaryType() && $codewriter.getProperty('bean.compatible_axis2') )
-
-        $column.bitORAssignExpression("modified");
-        $column.bitORAssignExpression("initialized");
     }
 ################ SETTER METHOD FOR SWIFT ###############
 #if($swiftBeanSupport)
