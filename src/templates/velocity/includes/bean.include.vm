@@ -57,13 +57,13 @@ public $!{final} class ${beanClass}
     /** flag whether {@code this} can be modified */
     private Boolean immutable;
     /** columns modified flag */
-    #swaggerField("columns modified flag")
+    #swaggerField("columns modified flag","$table.stateVarType()",true)
     private $table.stateVarType() modified;
     /** columns initialized flag */
-    #swaggerField("columns initialized flag")
+    #swaggerField("columns initialized flag","$table.stateVarType()",true)
     private $table.stateVarType() initialized;
     /** new record flag  */
-    #swaggerField("new record flag")
+    #swaggerField("new record flag","boolean",true)
     private boolean isNew;        
 #if( $swiftBeanSupport && $table.countColumns() > 64  )
     private static final java.util.List<Long> toList(long[] array) {
