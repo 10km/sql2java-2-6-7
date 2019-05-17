@@ -123,4 +123,13 @@ public final class StringUtilities {
 		String[] list = MoreObjects.firstNonNull(input, "").split("\\r?\\n");
 		return "\"" + Joiner.on("\\n\"\n+\"").join(list) + "\"";	
 	}
+	/**
+	 * 返回一个类的简单名字
+	 * 
+	 * @param className
+	 * @return
+	 */
+	public static final String simpleName(String className) {
+		return className.replaceAll("(?:\\w+\\.)*(\\w+)", "$1");
+	}
 }
