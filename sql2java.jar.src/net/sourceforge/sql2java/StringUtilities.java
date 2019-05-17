@@ -121,6 +121,6 @@ public final class StringUtilities {
 	}
 	public static final String asJavaString(String input){
 		String[] list = MoreObjects.firstNonNull(input, "").split("\\r?\\n");
-		return "\"" + Joiner.on("\"\n+\"").join(list) + "\"";	
+		return "\"" + Joiner.on("\\n\"\n+\"").join(list) + "\"";	
 	}
 }
