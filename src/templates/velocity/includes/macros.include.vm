@@ -57,6 +57,20 @@ import com.facebook.swift.codec.ThriftField.Requiredness;
 #end
 #end
 ########################
+#macro(swaggerModel $description)#if($swaggerBeanSupport)@ApiModel(description=$strUtil.asJavaString($description))
+#end#end
+#macro(swaggerField $value)#if($swaggerBeanSupport)@ApiModelProperty($strUtil.asJavaString($value))
+#end#end
+#macro(swaggerColumn $column)#if($swaggerBeanSupport)@ApiModelProperty(#if ( $column.remarks.length() > 0 )$strUtil.asJavaString($column.remarks)#{else}"$column.name"#end)
+#end#end
+########################
+#macro(swaggerImport)
+#if($swaggerBeanSupport)
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+#end
+#end
+########################
 #macro( converterClass $c)${c}Converter#end
 ########################
 #macro(importLinkedTable)

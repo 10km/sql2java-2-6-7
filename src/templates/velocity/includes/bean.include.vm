@@ -23,6 +23,7 @@ import ${schemaPkg}.EqualsBuilder;
 import ${schemaPkg}.HashCodeBuilder;
 #end
 #swiftImport()
+#swaggerImport()
 /**
  * $beanClass is a mapping of $table.getName() Table.
 #if ( $table.getRemarks().length() > 0 )
@@ -34,6 +35,7 @@ import ${schemaPkg}.HashCodeBuilder;
  * @author guyadong
 */
 #swiftThriftStruct()
+#swaggerModel($table.getRemarks())
 #set( $fieldIndex = 1 )
 public $!{final} class ${beanClass}
     implements Serializable,BaseBean<$beanClass>,Comparable<$beanClass>,Constant,Cloneable
@@ -48,15 +50,20 @@ public $!{final} class ${beanClass}
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
 #end
+    #swaggerColumn($column)
     private $column.getJavaType() $column.getVarName();
 
 #end
     /** flag whether {@code this} can be modified */
     private Boolean immutable;
     /** columns modified flag */
+    #swaggerField("columns modified flag")
     private $table.stateVarType() modified;
     /** columns initialized flag */
+    #swaggerField("columns initialized flag")
     private $table.stateVarType() initialized;
+    /** new record flag  */
+    #swaggerField("new record flag")
     private boolean isNew;        
 #if( $swiftBeanSupport && $table.countColumns() > 64  )
     private static final java.util.List<Long> toList(long[] array) {
