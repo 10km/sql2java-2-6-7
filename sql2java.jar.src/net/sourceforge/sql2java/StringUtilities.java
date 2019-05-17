@@ -3,6 +3,8 @@ package net.sourceforge.sql2java;
 
 import java.util.Random;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 
 import net.sourceforge.sql2java.Column;
@@ -116,5 +118,9 @@ public final class StringUtilities {
 			s.append(latin[rand.nextInt(latin.length)]).append(" ");
 		}
 		return s.toString();
+	}
+	public static final String asJavaString(String input){
+		String[] list = MoreObjects.firstNonNull(input, "").split("\\r?\\n");
+		return "\"" + Joiner.on("\"\n+\"").join(list) + "\"";	
 	}
 }
