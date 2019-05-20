@@ -61,11 +61,11 @@ import com.facebook.swift.codec.ThriftField.Requiredness;
 #end#end
 #macro(swaggerField $value $dataType $required)##
 #if($swaggerBeanSupport)##
-@ApiModelProperty(value=$strUtil.asJavaString($value)#if($dataType),dataType="$dataType"#end#if($required),required=$required#end)
+$!SPACE@ApiModelProperty(value=$strUtil.asJavaString($value)#if($dataType),dataType="$dataType"#end#if($required),required=$required#end)
 #end#end
 #macro(swaggerColumn $column)##
 #if($swaggerBeanSupport)##
-@ApiModelProperty(##
+$!SPACE@ApiModelProperty(##
 value = #if ( $column.remarks.length() > 0 )$strUtil.asJavaString($column.remarks)#{else}"$column.name"#end ##
 #if($column.notNull && !$column.originalDefaultValue),required=true#end ##
 ,dataType="$strUtil.simpleName($column.javaType)"##

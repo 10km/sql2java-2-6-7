@@ -50,20 +50,20 @@ public $!{final} class ${beanClass}
 #if ( $column.getRemarks().length() > 0 )
     /** comments:$column.getRemarks() */
 #end
-    #swaggerColumn($column)
+#swaggerColumn($column)
     private $column.getJavaType() $column.getVarName();
 
 #end
     /** flag whether {@code this} can be modified */
     private Boolean immutable;
     /** columns modified flag */
-    #swaggerField("columns modified flag","$table.stateVarType()",true)
+#swaggerField("columns modified flag","$table.stateVarType()",true)
     private $table.stateVarType() modified;
     /** columns initialized flag */
-    #swaggerField("columns initialized flag","$table.stateVarType()",true)
+#swaggerField("columns initialized flag","$table.stateVarType()",true)
     private $table.stateVarType() initialized;
     /** new record flag  */
-    #swaggerField("new record flag","boolean",true)
+#swaggerField("new record flag","boolean",true)
     private boolean isNew;        
 #if( $swiftBeanSupport && $table.countColumns() > 64  )
     private static final java.util.List<Long> toList(long[] array) {
@@ -367,6 +367,7 @@ public $!{final} class ${beanClass}
 #end
 #end###if($swiftBeanSupport)
 #if ( $column.hasPrimaryType() )
+#if($primitiveSetterSupport)
     /**
      * Setter method for {@link #$column.getVarName()}.<br>
      * Convenient for those who do not want to deal with Objects for primary types.
@@ -377,7 +378,8 @@ public $!{final} class ${beanClass}
     {
         $column.getSetMethod()(new $column.getJavaType()(newVal));
     }
-#if($column.isDate())
+#end
+#if($column.isDate() && $dateLongSetterSupport)
     /**
      * Setter method for {@link ${esc.hash}$column.getVarName()}.<br>
      * @param newVal the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object.
