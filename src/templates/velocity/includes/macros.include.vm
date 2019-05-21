@@ -72,6 +72,10 @@ value = #if ( $column.remarks.length() > 0 )$strUtil.asJavaString($column.remark
 )
 #end##
 #end
+#macro(swaggerColumnHidden)##
+#if($swaggerBeanSupport)$!SPACE@ApiModelProperty(hidden = true)
+#end##
+#end
 ########################
 #macro(swaggerImport)
 #if($swaggerBeanSupport)

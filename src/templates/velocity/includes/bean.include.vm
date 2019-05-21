@@ -433,6 +433,7 @@ public $!{final} class ${beanClass}
      * Getter method for {@link #${referencedBean}}.
      * @return $foreignClass
      */
+#swaggerColumnHidden()
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
