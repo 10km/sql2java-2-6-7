@@ -428,12 +428,12 @@ public $!{final} class ${beanClass}
      * The referenced {@link $foreignClass} by #join($columnsOfFk "{@link #$e.getVarName()}" ",") . <br>
      * FOREIGN KEY (#join($columnsOfFk "$e.name" ",")) REFERENCES ${foreignTable.name}(#join($columnsOfFk "$e.getForeignColumn().name" ","))
      */
+#swaggerColumnHidden()
     private $foreignClass $referencedBean;
     /**
      * Getter method for {@link #${referencedBean}}.
      * @return $foreignClass
      */
-#swaggerColumnHidden()
     public $foreignClass $table.getReferencedVarGetMethod($fkName)() {
         return this.$referencedBean;
     }
