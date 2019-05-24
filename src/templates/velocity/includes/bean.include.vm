@@ -813,7 +813,7 @@ public $!{final} class ${beanClass}
     }
     
     public static final Builder builder(){
-        return new Builder();
+        return new Builder().reset();
     }
     /** 
      * a builder for $beanClass,the template instance is thread local variable
