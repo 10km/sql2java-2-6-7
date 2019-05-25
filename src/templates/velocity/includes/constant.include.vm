@@ -37,7 +37,10 @@
  * @author guyadong
  */
 public interface $javaClassName {    
-    public static final int LONG_BIT_NUM = 64;
+    public static final int STATE_BIT_NUM = ${codewriter.bitStateClassSize};
+    public static final int STATE_BIT_SHIFT = ${codewriter.bitStateClassShift};
+    public static final int STATE_BIT_MASK = ${codewriter.bitStateMaskHex};
+
     public static final String SQL_LIKE_WILDCARD = "%";
     /** set =QUERY for loadUsingTemplate */
     public static final int SEARCH_EXACT = 0;
@@ -117,8 +120,8 @@ public interface $javaClassName {
 #set ( $vcmo = $velocityCount - 1 )
     /** Identify the $column.getFullName() field (ordinal:$column.getOrdinalPosition()). */
     public static final int $column.getIDConstName() = $vcmo;
-#if( $t.countColumns() <= 64 )
-    public static final long $column.getIDMaskConstName() = 1L << $vcmo;
+#if( !$t.stateVarTypeIsArray() )
+    public static final ${codewriter.bitStateClassName} $column.getIDMaskConstName() = 1$!{codewriter.bitStateConstSuffix} << $vcmo;
 #end
 #end
 #end

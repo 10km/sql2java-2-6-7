@@ -65,22 +65,22 @@ public $!{final} class ${beanClass}
     /** new record flag  */
 #swaggerField("new record flag","boolean",true)
     private boolean isNew;        
-#if( $swiftBeanSupport && $table.countColumns() > 64  )
-    private static final java.util.List<Long> toList(long[] array) {
-        java.util.ArrayList<Long> result = new java.util.ArrayList<Long>(array.length);
+#if( $swiftBeanSupport && $table.stateVarTypeIsArray() )
+    private static final java.util.List<${codewriter.bitStateClassWrapName}> toList(${codewriter.bitStateClassName}[] array) {
+        java.util.ArrayList<${codewriter.bitStateClassWrapName}> result = new java.util.ArrayList<${codewriter.bitStateClassWrapName}>(array.length);
         for (int i = 0; i < array.length; i++) {
-            result.add(new Long(array[i]));
+            result.add(new ${codewriter.bitStateClassWrapName}(array[i]));
         }
         return result;
     }
-    private static final void toPrimitive(java.util.List<Long> list,long[]dst) {
+    private static final void toPrimitive(java.util.List<${codewriter.bitStateClassWrapName}> list,${codewriter.bitStateClassName}[]dst) {
         if ( null == list  || list.size() != dst.length) {
             return;
         }
         Long element;
         for (int i = 0; i < dst.length; i++) {
             if(null != (element = list.get(i)))
-                dst[i] = element.longValue();
+                dst[i] = element.${codewriter.bitStateClassName}Value();
         }
     }
 #end
@@ -150,8 +150,8 @@ public $!{final} class ${beanClass}
      */
 #set( $fieldIndex = $fieldIndex + 1 )
 #swiftThriftField( $fieldIndex 'Requiredness.REQUIRED' $null)
-#if( $swiftBeanSupport && $table.countColumns() > 64  )
-    public java.util.List<Long> getModified(){
+#if( $swiftBeanSupport && $table.stateVarTypeIsArray() )
+    public java.util.List<${codewriter.bitStateClassWrapName}> getModified(){
         return toList(modified);
     }
 #else
@@ -164,8 +164,8 @@ public $!{final} class ${beanClass}
      * @param modified the modified status bit to be assigned to {@link #modified}
      */
 #swiftThriftField( $null $null $null)
-#if( $swiftBeanSupport && $table.countColumns() > 64  )
-    public void setModified(List<Long> modified){
+#if( $swiftBeanSupport && $table.stateVarTypeIsArray() )
+    public void setModified(List<${codewriter.bitStateClassWrapName}> modified){
         toPrimitive(modified,this.modified);
     }
 #else
@@ -186,7 +186,7 @@ public $!{final} class ${beanClass}
      * @param initialized the initialized status bit to be assigned to {@link #initialized}
      */
 #swiftThriftField( $null $null $null)
-#if( $swiftBeanSupport && $table.countColumns() > 64  )
+#if( $swiftBeanSupport && $table.stateVarTypeIsArray()  )
     public void setInitialized($table.stateVarType() initialized){
         toPrimitive(initialized,this.initialized);
     }
@@ -450,8 +450,8 @@ public $!{final} class ${beanClass}
     @Override
     public boolean isModified()
     {
-#if( $table.countColumns() > 64 )
-        for( long m: modified )if( 0 != m )return true;
+#if( $table.stateVarTypeIsArray() )
+        for( ${codewriter.bitStateClassName} m: modified )if( 0 != m )return true;
         return false;
 #else
         return 0 != modified;
@@ -496,10 +496,10 @@ public $!{final} class ${beanClass}
     public void resetIsModified()
     {
         checkMutable();
-#if( $table.countColumns() > 64 )
-        java.util.Arrays.fill(modified,0L);
+#if( $table.stateVarTypeIsArray() )
+        java.util.Arrays.fill(modified,0$!{codewriter.bitStateConstSuffix});
 #else
-        modified = 0L;
+        modified = 0$!{codewriter.bitStateConstSuffix};
 #end
     }
 
@@ -520,10 +520,10 @@ public $!{final} class ${beanClass}
      */
     private void resetInitialized()
     {
-#if( $table.countColumns() > 64 )
-        java.util.Arrays.fill(initialized,0L);
+#if( $table.stateVarTypeIsArray() )
+        java.util.Arrays.fill(initialized,0$!{codewriter.bitStateConstSuffix});
 #else
-        initialized = 0L;
+        initialized = 0$!{codewriter.bitStateConstSuffix};
 #end
     }
     /** reset all fields to initial value, equal to a new bean */
@@ -677,10 +677,10 @@ public $!{final} class ${beanClass}
      * @see ${esc.hash}asNULL()
      */
     public boolean checkNULL(){
-#if($table.countColumns()>64)
+#if($table.stateVarTypeIsArray())
         return isAllZero(getInitialized()) && isAllZero(getModified());
 #else
-        return 0L == getInitialized();
+        return 0$!{codewriter.bitStateConstSuffix} == getInitialized();
 #end
     }
     /** 
@@ -712,9 +712,9 @@ public $!{final} class ${beanClass}
         }
         return source;
     }
-#if($table.countColumns()>64)
-    private static final boolean isAllZero(long[] array){
-        for(long e : array)if(0L != e)return false;
+#if($table.stateVarTypeIsArray())
+    private static final boolean isAllZero(${codewriter.bitStateClassName}[] array){
+        for(${codewriter.bitStateClassName} e : array)if(0$!{codewriter.bitStateConstSuffix} != e)return false;
         return true;
     }
 #end

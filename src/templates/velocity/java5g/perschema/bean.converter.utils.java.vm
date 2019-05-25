@@ -124,11 +124,11 @@ public class ${javaClassName} implements Constant {
             throw cce;
         }
     }
-    private static final boolean bitCheck(int index,long...bits){
-        return 0 != (bits[index>>6]&(1L<<(index&0x3f)));
+    private static final boolean bitCheck(int index,${codewriter.bitStateClassName}...bits){
+        return 0 != (bits[index>>STATE_BIT_SHIFT]&(1$!{codewriter.bitStateConstSuffix}<<(index&${codewriter.bitStateMaskHex})));
     }
-    private static final long[] bitOR(int index,long... bits){
-         bits[index>>6] |= (1L<<(index&0x3f));
+    private static final ${codewriter.bitStateClassName}[] bitOR(int index,${codewriter.bitStateClassName}... bits){
+         bits[index>>STATE_BIT_SHIFT] |= (1$!{codewriter.bitStateConstSuffix}<<(index&${codewriter.bitStateMaskHex}));
          return bits;
     }
 #foreach ( $table in $tables )
@@ -157,11 +157,11 @@ public class ${javaClassName} implements Constant {
         private final Map<String,Integer> rightIndexs = new Hashtable<String,Integer>();
         private final Map<String, Class<?>> setterParams = new Hashtable<String,Class<?>>();
 
-        private boolean bitCheck(String name,long...bits){
+        private boolean bitCheck(String name,${codewriter.bitStateClassName}...bits){
             Integer id = rightIndexs.get(name);
             return (null == id)?false:BeanConverterUtils.bitCheck(id.intValue(),bits);
         }
-        private long[] bitOR(String name,long... bits){
+        private ${codewriter.bitStateClassName}[] bitOR(String name,${codewriter.bitStateClassName}... bits){
             return BeanConverterUtils.bitOR(rightIndexs.get(name),bits);
         }
         private void getGetter(String name){
@@ -229,16 +229,16 @@ public class ${javaClassName} implements Constant {
                 methods.put(IS_NEW,rightType.getMethod(IS_NEW));
                 methods.put(GET_INITIALIZED,rightType.getMethod(GET_INITIALIZED));
                 getSetter(SET_NEW,boolean.class);
-                if(rightIndexs.size() > LONG_BIT_NUM){
-                    getSetter(SET_INITIALIZED,long[].class,List.class);
+                if(rightIndexs.size() > STATE_BIT_NUM){
+                    getSetter(SET_INITIALIZED,${codewriter.bitStateClassName}[].class,List.class);
                 }else{
-                    getSetter(SET_INITIALIZED,long.class);
+                    getSetter(SET_INITIALIZED,${codewriter.bitStateClassName}.class);
                 }
                 getGetter(GET_MODIFIED);
-                if(rightIndexs.size() > LONG_BIT_NUM){
-                    getSetter(SET_MODIFIED,long[].class,List.class);
+                if(rightIndexs.size() > STATE_BIT_NUM){
+                    getSetter(SET_MODIFIED,${codewriter.bitStateClassName}[].class,List.class);
                 }else{
-                    getSetter(SET_MODIFIED,long.class);
+                    getSetter(SET_MODIFIED,${codewriter.bitStateClassName}.class);
                 }
             }catch(NoSuchMethodException e){
                 throw new RuntimeException(e);
@@ -268,14 +268,14 @@ public class ${javaClassName} implements Constant {
                 Method getterMethod;
                 left.resetIsModified();
                 $table.stateVarType() selfModified = $table.maskInitializeWithZero();
-                long[] initialized;
-                long[] modified;
-                if(rightIndexs.size() > LONG_BIT_NUM){
-                    initialized = (long[])methods.get(GET_INITIALIZED).invoke(right);
-                    modified = (long[])methods.get(GET_MODIFIED).invoke(right);
+                ${codewriter.bitStateClassName}[] initialized;
+                ${codewriter.bitStateClassName}[] modified;
+                if(rightIndexs.size() > STATE_BIT_NUM){
+                    initialized = (${codewriter.bitStateClassName}[])methods.get(GET_INITIALIZED).invoke(right);
+                    modified = (${codewriter.bitStateClassName}[])methods.get(GET_MODIFIED).invoke(right);
                 }else{
-                    initialized = new long[]{(Long)methods.get(GET_INITIALIZED).invoke(right)};
-                    modified = new long[]{(Long)methods.get(GET_MODIFIED).invoke(right)};
+                    initialized = new ${codewriter.bitStateClassName}[]{(${codewriter.bitStateClassWrapName})methods.get(GET_INITIALIZED).invoke(right)};
+                    modified = new ${codewriter.bitStateClassName}[]{(${codewriter.bitStateClassWrapName})methods.get(GET_MODIFIED).invoke(right)};
                 }
 #foreach ( $column in $table.columns )
 #set ($name = "Column.${column.varName}.name()")
@@ -299,10 +299,10 @@ public class ${javaClassName} implements Constant {
         protected void doToRight(${leftClass} left, ${rightClass} right) {
             try{
                 Method setterMethod;
-                long[] initialized = new long[(rightIndexs.size() + LONG_BIT_NUM - 1)>>6];
-                long[] modified = new long[(rightIndexs.size() + LONG_BIT_NUM - 1)>>6];
-                Arrays.fill(initialized, 0L);
-                Arrays.fill(modified, 0L);
+                ${codewriter.bitStateClassName}[] initialized = new ${codewriter.bitStateClassName}[(rightIndexs.size() + STATE_BIT_NUM - 1)>>STATE_BIT_SHIFT];
+                ${codewriter.bitStateClassName}[] modified = new ${codewriter.bitStateClassName}[(rightIndexs.size() + STATE_BIT_NUM - 1)>>STATE_BIT_SHIFT];
+                Arrays.fill(initialized, 0$!{codewriter.bitStateConstSuffix});
+                Arrays.fill(modified, 0$!{codewriter.bitStateConstSuffix});
 #foreach ( $column in $table.columns )
 #set ($name = "Column.${column.varName}.name()")
 #set ( $setterName = "Column.${column.varName}.setter") 
