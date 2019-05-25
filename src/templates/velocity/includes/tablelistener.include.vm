@@ -4,7 +4,6 @@
 $codewriter.setCurrentJavaFilename($schemaPkg, "TableListener.java")
 package $schemaPkg;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -174,56 +173,98 @@ public interface TableListener<B>{
      * @author guyadong 
      */
     public static class ListenerContainer <B> implements TableListener<B> {
-        private final Set<TableListener<B>> listeners = Collections.synchronizedSet(new LinkedHashSet<TableListener<B>>(16));
+        private final Set<TableListener<B>> listeners = new LinkedHashSet<TableListener<B>>(16);
         public ListenerContainer() {
         }
     
         @Override
         public void beforeInsert(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.beforeInsert(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.beforeInsert(bean);
+                    }catch(Exception e){
+                        System.out.printf("beforeInsert listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
     
         @Override
         public void afterInsert(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.afterInsert(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.afterInsert(bean);
+                    }catch(Exception e){
+                        System.out.printf("afterInsert listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
     
         @Override
         public void beforeUpdate(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.beforeUpdate(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.beforeUpdate(bean);
+                    }catch(Exception e){
+                        System.out.printf("beforeUpdate listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
     
         @Override
         public void afterUpdate(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.afterUpdate(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.afterUpdate(bean);
+                    }catch(Exception e){
+                        System.out.printf("afterUpdate listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
     
         @Override
         public void beforeDelete(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.beforeDelete(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.beforeDelete(bean);
+                    }catch(Exception e){
+                        System.out.printf("beforeDelete listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
     
         @Override
         public void afterDelete(B bean)$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.afterDelete(bean);
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.afterDelete(bean);
+                    }catch(Exception e){
+                        System.out.printf("afterDelete listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
 
         @Override
         public void done()$!throwsString{
-            for(TableListener<B> listener:listeners){
-                listener.done();
+            synchronized (listeners) {
+                for(TableListener<B> listener:listeners){
+                    try{
+                        listener.done();
+                    }catch(Exception e){
+                        System.out.printf("done listener error:%s\n",e.getMessage());
+                    }
+                }
             }
         }
         /**
@@ -239,14 +280,18 @@ public interface TableListener<B>{
          * @return {@code true} if {@code listener} exists in container
          */
         public boolean contains(TableListener<B> listener) {
-            return listeners.contains(listener);
+            synchronized (listeners) {
+                return listeners.contains(listener);
+            }
         }
         /**
          * add {@code listener} into container
          * @return {@code true} if add successfully.
          */
         public boolean add(TableListener<B> listener) {
-            return null == listener ? false : listeners.add(listener);
+            synchronized (listeners) {
+                return null == listener ? false : listeners.add(listener);
+            }
         }
         /**
          * remove {@code listener} from container
@@ -254,11 +299,15 @@ public interface TableListener<B>{
          * @return {@code true} if remove successfully.
          */
         public boolean remove(TableListener<B> listener) {
-            return null == listener? false : listeners.remove(listener);
+            synchronized (listeners) {
+                return null == listener? false : listeners.remove(listener);
+            }
         }
         /** remove all listeners in container */
         public void clear() {
-            listeners.clear();
+            synchronized (listeners) {
+                listeners.clear();
+            }
         }
     }
     /**
