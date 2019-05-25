@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,10 +37,13 @@ import org.apache.velocity.tools.generic.EscapeTool;
 import org.apache.velocity.tools.generic.SortTool;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
+import com.google.common.primitives.Primitives;
 import static com.google.common.base.Preconditions.checkNotNull;;
 
 public class CodeWriter {
 	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
+	protected static final String DEFAULT_BITSTAE_TYPE = "int";
 	protected static Properties props;
 	public static String MGR_CLASS;
 	protected static String dateClassName;
@@ -47,6 +51,10 @@ public class CodeWriter {
 	protected static String timestampClassName;
 	/** type for byte array,default 'byte[]',defined in properties */
 	public static String binaryClassName;
+	private static String bitStateClassName;
+	private static Class<?> bitStateClass;
+	private static int bitStateClassSize;
+	private static String bitStateConstSuffix;
 	protected static Database db;
 	protected static Hashtable<String, String> includeHash;
 	protected static Hashtable<String, String> excludeHash;
@@ -80,6 +88,10 @@ public class CodeWriter {
 			timeClassName = props.getProperty("jdbc2java.time", "java.sql.Time");
 			timestampClassName = props.getProperty("jdbc2java.timestamp", "java.sql.Timestamp");
 			binaryClassName = props.getProperty("binary.type", DEFAULT_BINARY_TYPE);
+			bitStateClassName = props.getProperty("bitstate.type", DEFAULT_BITSTAE_TYPE);
+			bitStateClass = bitStateClassOf(bitStateClassName);
+			bitStateClassSize = bitSizeOf(bitStateClass);
+			bitStateConstSuffix = constSuffixOf(bitStateClassName);
 			generalPackage = props.getProperty("general.package"); 
 			basePackage = props.getProperty("codewriter.package");
 			if (basePackage == null) {
@@ -173,9 +185,8 @@ public class CodeWriter {
 		boolean error = false;
 		Table[] tables = db.getTables();
 		for (int i = 0; i < tables.length; ++i) {
-			boolean b;
 			if (!CodeWriter.authorizeProcess(tables[i].getName(), "tables.include", "tables.exclude")
-					|| !(b = this.checkTable(tables[i])))
+					|| !this.checkTable(tables[i]))
 				continue;
 			error = true;
 		}
@@ -462,13 +473,12 @@ public class CodeWriter {
 	}
 
 	public Vector<String> recurseTemplate(Vector<String> files, String folder, boolean perSchema) {
-		FileFilter filter;
 		File[] dirEntries;
 		String schemaOrTable = "perschema";
 		if (!perSchema) {
 			schemaOrTable = "pertable";
 		}
-		if ((dirEntries = new File(folder).listFiles(filter = new FileFilter() {
+		if ((dirEntries = new File(folder).listFiles(new FileFilter() {
 
 			public boolean accept(File filename) {
 				if (filename.isDirectory()) {
@@ -557,9 +567,79 @@ public class CodeWriter {
 	public static String getBinaryClassName() {
 		return binaryClassName;
 	}
+
+	public static String getBitStateClassName() {
+		return bitStateClassName;
+	}
+	public static String getBitStateClassWrapName() {
+		return Primitives.wrap(bitStateClass).getSimpleName();
+	}
+	public Class<?> getBitStateClass() {
+		return bitStateClass;
+	}
+	public static int getBitStateClassSize() {
+		return bitStateClassSize;
+	}
+	private static  Class<?> bitStateClassOf(String className) {
+		if("byte".equals(className)){
+			return  byte.class;
+		}
+		if("short".equals(className)){
+			return short.class;
+		}
+		if("int".equals(className)){
+			return int.class;
+		}
+		if("long".equals(className)){
+			return long.class;
+		}
+		throw new IllegalArgumentException("INVALID class name for state type [" + className + "]");
+	}
+	private static  int bitSizeOf(Class<?> clazz) {
+		try {
+			// access field such as Integer.SIZE
+			Field size = Primitives.wrap(clazz).getField("SIZE");
+			return size.getInt(null);
+		} catch (Exception e) {
+			Throwables.throwIfUnchecked(e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static  String constSuffixOf(String className) {
+		if("byte".equals(className)){
+			return "";
+		}
+		if("shot".equals(className)){
+			return "";
+		}
+		if("int".equals(className)){
+			return "";
+		}
+		if("long".equals(className)){
+			return "L";
+		}
+		
+		throw new IllegalArgumentException("INVALID class name for state type [" + className + "]");
+	}
+
+	public static String getBitStateConstSuffix() {
+		return bitStateConstSuffix;
+	}
+	public static int getBitStateMask() {
+		return (1<<Integer.numberOfTrailingZeros(bitStateClassSize))-1;
+	}
+	
+	public static String getBitStateMaskHex() {
+		return "0x"+Integer.toHexString(getBitStateMask());
+	}
+	public static int getBitStateClassShift() {
+		return Integer.numberOfTrailingZeros(bitStateClassSize);
+	}
 	public static boolean binaryIsByteBuffer() {
 		return !DEFAULT_BINARY_TYPE.equals(binaryClassName);
 	}
+
 	public static boolean isGeneral(){
 		return null != generalPackage && !generalPackage.isEmpty();
 	}

@@ -1144,44 +1144,47 @@ public class Table {
 						getForeignTableByFkName(fkName).getBasename(false),"Manager"),
 				true);
 	}
-	
+	public boolean stateVarTypeIsArray(){
+		return countColumns()>CodeWriter.getBitStateClassSize();
+	}	
 	public String stateVarType(){
-		return countColumns()>64 ? "long[]":"long";
+		return stateVarTypeIsArray() ? CodeWriter.getBitStateClassName() + "[]" : CodeWriter.getBitStateClassName();
 	}
 	/** 生成全0L的modified初始值  */
 	public String maskInitializeWithZero(){
-		if(countColumns()>64){
-			int len = (countColumns()+63)>>6;
+		if(stateVarTypeIsArray()){
+			int len = (countColumns() + CodeWriter.getBitStateClassSize() - 1)/CodeWriter.getBitStateClassSize();
 			StringBuffer sb = new StringBuffer();
 			for(int i=0;i<len;++i){
 				if(i>0)sb.append(",");
-				sb.append("0L");				
+				sb.append("0" + CodeWriter.getBitStateConstSuffix());		
 			}
-			return String.format("new long[]{%s}",sb.toString());
+			return String.format("new " + CodeWriter.getBitStateClassName() + "[]{%s}",sb.toString());
 		}else{
-			return "0L";
+			return "0" + CodeWriter.getBitStateConstSuffix();
 		}
 	}
+
 	/** 根据字段是否有default value生成initialized字段初始值  */
 	public String maskInitializeWithDefaultValue(){
-		if(countColumns()>64){
-			final long[] array = new long[(countColumns()+63)>>6];
+		if(stateVarTypeIsArray()){
+			final long[] array = new long[(countColumns()+CodeWriter.getBitStateClassSize() - 1)/CodeWriter.getBitStateClassSize()];
 			Arrays.fill(array, 0L);
 			Collections2.filter(getColumnsAsList(), new Predicate<Column>(){
 				@Override
 				public boolean apply(Column input) {
 					if(!input.getDefaultValue().isEmpty()){
 						int index = input.getOrdinalPosition()-1;
-						array[index>>6] |= (1L << (index & 0x3f));
+						array[index/CodeWriter.getBitStateClassSize()] |= (1L << (index & CodeWriter.getBitStateMask()));
 					}
 					return false;
 				}});
 			String initValue = Joiner.on(',').join(Lists.transform(Longs.asList(array),new Function<Long,String>(){
 				@Override
 				public String apply(Long input) {
-					return Long.toBinaryString(input.longValue());
+					return "0B" + Long.toBinaryString(input.longValue()) + CodeWriter.getBitStateConstSuffix();
 				}}));
-			return String.format("new long[]{%s}",initValue);
+			return String.format("new " + CodeWriter.getBitStateClassName() + "[]{%s}",initValue);
 		}else{
 			Collection<Column> defCols = Collections2.filter(getColumnsAsList(), new Predicate<Column>(){
 				@Override
@@ -1194,12 +1197,12 @@ public class Table {
 						public String apply(Column input) {
 							return input.getIDMaskConstName();
 						}}));
-			return mask.isEmpty()?"0L":"("+mask+")";
+			return mask.isEmpty()?"0" + CodeWriter.getBitStateConstSuffix():"("+mask+")";
 		}
 	}
 
 	public String stateVarAssignStatement(String src,String dst){
-		if(countColumns()>64){
+		if(stateVarTypeIsArray()){
 	        return "if( null != ${src} && ${dst}.length != ${src}.length )System.arraycopy(${src},0,${dst},0,${dst}.length)"
 	        		.replace("${src}", src).replace("${dst}", dst);
 		}else{
@@ -1242,7 +1245,7 @@ public class Table {
 	public String bitResetAssignExpression(Column[]columns,String varName,String indent){
 		if(null == columns || 0 == columns.length)return "// columns is null or empty";
 		if(null == indent)indent = "";
-		if(countColumns()>64){
+		if(stateVarTypeIsArray()){
 			StringBuffer buffer = new StringBuffer();
 			for(Column column : columns){
 				int pos = column.getOrdinalPosition()-1;
