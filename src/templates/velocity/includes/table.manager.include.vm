@@ -338,10 +338,10 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
             }
             sql.append(" FROM " + this.getTableName() + " ");
             if(null != where && where.length() > 0){
-                if(where.trim().toUpperCase().startsWith("WHERE")){
-                    sql.append(where);
+                if( ! where.trim().toUpperCase().startsWith("WHERE")){
+                    throw new IllegalArgumentException("WHERE expression must start with 'WHERE'(case insensitive):[" + where + "]");
                 }
-                throw new IllegalArgumentException("WHERE expression must start with 'WHERE'(case insensitive):[" + where + "]");
+                sql.append(where);
             }
             return sql.toString();
         }
