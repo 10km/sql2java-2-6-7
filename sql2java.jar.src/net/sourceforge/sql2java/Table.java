@@ -884,7 +884,10 @@ public class Table {
 	public String asComparatorClass() {
 		return this.convertName("Comparator");
 	}
-
+	
+	public String asComparatorClass(Boolean nsp) {
+		return convertName("Comparator",nsp);
+	}
 	public String asListenerClass() {
 		return this.convertName("Listener");
 	}
