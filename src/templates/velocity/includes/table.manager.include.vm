@@ -446,17 +446,6 @@ public interface $javaClassName<B extends $B_parentClass> extends Constant {
                     return saveCollection(bean , args );
                 }});
         }
-        
-        @Override
-        public void runAsTransaction(final Runnable fun)$!throwsString{
-            this.runAsTransaction(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    fun.run();
-                    return null;
-                }
-            });
-        }
     }    
 
     /**

@@ -2618,9 +2618,13 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
     }
    
     @Override
-
     public <T>T runAsTransaction(Callable<T> fun) throws DaoException{
         return Manager.getInstance().runAsTransaction(fun);
+    }
+    
+    @Override
+    public void runAsTransaction(Runnable fun) throws DaoException{
+        Manager.getInstance().runAsTransaction(fun);
     }
     
     class DeleteBeanAction extends Action.BaseAdapter<$beanClass>{
