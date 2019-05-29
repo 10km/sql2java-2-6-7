@@ -272,21 +272,25 @@ public final class Manager implements Constant
     }
     /**
      * Run {@code Callable<T>} as a transaction.<br>
-     * all exceptions but {@code SQLException} threw by {@code Callable<T>} is warpped into {@code RuntimeException}<br>
+     * all exceptions but {@code SQLException} threw by {@code Callable<T>} is wrapped into {@code RuntimeException}<br>
      * throw {@code NullPointerException} if {@code fun} be {@code null}<br>
      * @param <T>  type of return result
      * @param fun
+     * @param transactionListener listener for transaction status
      * @return
      * @throws DaoException
-     * @see #beginTransaction()
-     * @see #endTransaction(boolean)
+     * @see ${esc.hash}beginTransaction()
+     * @see ${esc.hash}endTransaction(boolean)
      */
-    public <T>T runAsTransaction(Callable<T> fun) throws DaoException{
+    public <T>T runAsTransaction(Callable<T> fun,TableListener.TransactionListener transactionListener) throws DaoException{
         if(null==fun) {
             throw new NullPointerException();
         }
         try {
-            Manager.getInstance().beginTransaction();
+            beginTransaction();
+            if(null != transactionListener){
+                transactionListener.beginTransaction();
+            }
             boolean commit = false;
             try {
                 T result = fun.call();
@@ -299,7 +303,10 @@ public final class Manager implements Constant
             }catch (Exception e) {
                 throw new RuntimeException(e);
             }finally {
-                Manager.getInstance().endTransaction(commit);
+                endTransaction(commit);
+                if(null != transactionListener){
+                    transactionListener.endTransaction(commit);
+                }
             }
         } catch (DaoException e) {
             throw e;
@@ -307,13 +314,24 @@ public final class Manager implements Constant
             throw new DaoException(e);
         }
     }
+    
+    /**
+     * @param fun
+     * @return
+     * @throws DaoException
+     * @deprecated replaced by {@link ${esc.hash}runAsTransaction(Callable, TableListener.TransactionListener)}
+     */
+    public <T>T runAsTransaction(Callable<T> fun) throws DaoException{
+        return runAsTransaction(fun, null);
+    }
     /**
      * Run {@code Runnable} as a transaction.no return
      * @param fun
+     * @param transactionListener listener for transaction status
      * @throws DaoException
-     * @see #runAsTransaction(Callable)
+     * @see ${esc.hash}runAsTransaction(Callable,TableListener.TransactionListener)
      */
-    public void runAsTransaction(final Runnable fun) throws DaoException{
+    public void runAsTransaction(final Runnable fun,TableListener.TransactionListener transactionListener) throws DaoException{
         if(null==fun) {
             throw new NullPointerException();
         }
@@ -323,7 +341,17 @@ public final class Manager implements Constant
             public Object call() throws Exception {
                 fun.run();
                 return null;
-            }});
+            }},transactionListener);
+    }
+    
+    /**
+     * Run {@code Runnable} as a transaction.no return
+     * @param fun
+     * @throws DaoException
+     * @deprecated replaced by {@link ${esc.hash}runAsTransaction(Runnable, TableListener.TransactionListener)}
+     */
+    public void runAsTransaction(final Runnable fun) throws DaoException{
+        runAsTransaction(fun,null);
     }
     /**
      * Sets the PrintWriter where logs are printed.
