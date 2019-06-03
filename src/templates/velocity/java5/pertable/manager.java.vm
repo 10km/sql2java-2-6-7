@@ -2475,6 +2475,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
                         #join($fkObj.columns 'bean.${e.getSetMethod()}(null);' '
                         ')
 
+#if(${fkObj.deleteRule.eventOfDeleteRule}=="UPDATE")
+                        Event.${fkObj.deleteRule.eventOfDeleteRule}_BEFORE.fire(listenerContainer, bean);
+#end
 #elseif($fkObj.deleteRule.equals("SET_DEFAULT"))
                         #join($fkObj.columns '
 #if($e.originalDefaultValue)
@@ -2483,6 +2486,9 @@ $codewriter.log("    WARN : $tablename does not have any primary key...")
 #end
                         bean.${e.getSetMethod()}($e.getDefaultValue(true));' '')
 
+#if(${fkObj.deleteRule.eventOfDeleteRule}=="UPDATE")
+                        Event.${fkObj.deleteRule.eventOfDeleteRule}_BEFORE.fire(listenerContainer, bean);
+#end
 #else
 ## CASCADE DO NOTHING
 #end
