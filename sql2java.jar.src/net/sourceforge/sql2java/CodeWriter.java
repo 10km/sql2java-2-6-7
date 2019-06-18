@@ -42,6 +42,7 @@ import com.google.common.primitives.Primitives;
 import static com.google.common.base.Preconditions.checkNotNull;;
 
 public class CodeWriter {
+	public static final String NEW_LINE = System.getProperty("line.separator");
 	protected static final String DEFAULT_BINARY_TYPE = "byte[]";
 	protected static final String DEFAULT_BITSTAE_TYPE = "int";
 	protected static Properties props;
@@ -325,7 +326,9 @@ public class CodeWriter {
 			File file = new File(this.current_fullfilename);
 			new File(file.getParent()).mkdirs();
 			PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.current_fullfilename),"UTF-8"));
-			writer.write(sw.toString());
+			// 换行符归一化:所有换行符替换为当前系统的换行符
+			String content = Pattern.compile("(\r\n|\n|\r)", Pattern.MULTILINE).matcher(sw.toString()).replaceAll(NEW_LINE);
+			writer.write(content);
 			writer.flush();
 			writer.close();
 			System.out.println("    " + this.current_filename + " done.");
