@@ -141,5 +141,10 @@ public interface $javaClassName {
     public static final String $t.name.toUpperCase()_JAVA_FIELDS = "#join($t.columns '$e.varName' '"
                             + ",')";
     public static final java.util.List<String> $t.name.toUpperCase()_JAVA_FIELDS_LIST = java.util.Arrays.asList(${t.name.toUpperCase()}_JAVA_FIELDS.split(","));
+    
+    /** Field java types of the $t.name table. */
+    public static final Class<?>[] $t.name.toUpperCase()_FIELD_TYPES = new Class<?>[]{
+        #join($t.columns '${e.getJavaType()}.class' ',
+        ')};
 #end
 }
