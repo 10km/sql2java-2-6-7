@@ -61,8 +61,15 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     @Override
     public String[] getPrimarykeyNames() {
         return this.nativeManager.getPrimarykeyNames();
+    }    
+    @Override
+    public int columnIDOf(String column){
+        return ${beanClass}.columnIDOf(column);
     }
-    
+    @Override
+    public Class<?> typeOf(int columnId){
+        return ${beanClass}.typeOf(columnId);
+    }
     /**
      * Get the {@link $managerClassNSP} singleton.
      *
@@ -77,7 +84,11 @@ public class $managerClassNSP extends TableManager.BaseAdapter<$beanClass> imple
     protected Class<$beanClass> beanType(){
         return ${beanClass}.class;
     }
-    
+
+    @Override
+    protected String columnNameOf(int columnId){
+        return ${beanClass}.columnNameOf(columnId);
+    }
 #if ( $table.countPrimaryKeys() > 0 )
     //////////////////////////////////////
     // PRIMARY KEY METHODS

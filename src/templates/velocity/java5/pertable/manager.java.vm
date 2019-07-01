@@ -69,7 +69,14 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     public String[] getPrimarykeyNames() {
         return PRIMARYKEY_NAMES;
     }
-
+    @Override
+    public int columnIDOf(String column){
+        return ${beanClass}.columnIDOf(column);
+    }
+    @Override
+    public Class<?> typeOf(int columnId){
+        return ${beanClass}.typeOf(columnId);
+    }
     private static $managerClass singleton = new $managerClass();
     protected $managerClass(){}
     /**
@@ -96,6 +103,10 @@ public class $managerClass extends TableManager.BaseAdapter<$beanClass>
     @Override
     protected Class<$beanClass> beanType(){
         return ${beanClass}.class;
+    }
+    @Override
+    protected String columnNameOf(int columnId){
+        return ${beanClass}.columnNameOf(columnId);
     }
     #defineInstanceMehod($table $managerClass false)
 #if ( $table.hasPrimaryKey() )
