@@ -59,15 +59,47 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
             }
             @Override
             protected $columnType returnKey($beanClass bean) {
-                return null == bean ? null : bean.$indexColumn.getGetMethod()();
+                if(null == bean){
+                    return null;
+                }
+                $columnType key = bean.$indexColumn.getGetMethod()();
+                if(key == null){
+                    bean = ${cacheClass}.this.getBeanIfPresent(bean.$pk.getGetMethod()());
+                    return null == bean ? null : bean.$indexColumn.getGetMethod()();
+                }
+                return key;
             }
             @Override
             protected $beanClass loadfromDatabase($columnType key) throws Exception {
-                return manager.loadBy${index.asCamelCaseName()}Checked(key);
+                $beanClass bean = manager.loadBy${index.asCamelCaseName()}Checked(key);
+                addToOtherCache(bean,this);
+                return bean;
             }};
 #end###if($index.isUnique())
 #end##foreach
     }
+    /**
+     * add bean to all other cacher
+     * @param bean
+     * @param exclude
+     */
+    private void addToOtherCache($beanClass bean,BaseTableLoadCaching<?,?> exclude){
+        if(exclude != this){
+            this.getCacheMap().putIfAbsent(bean.$pk.getGetMethod()(),bean);
+        }
+#foreach ( $index in $table.getIndices() )
+#if($index.isUnique())
+#set ($indexColumn = $index.getIndexColumn())
+#set ($columnType = $indexColumn.getJavaType())
+        if(exclude != ${indexColumn.cacheVarName}){
+            $columnType key = bean.$indexColumn.getGetMethod()();
+            if(key != null){
+                ${indexColumn.cacheVarName}.getCacheMap().putIfAbsent(key,bean);
+            }
+        }
+#end###if($index.isUnique())
+#end##foreach            
+    }    
     public $cacheClass(long maximumSize, long duration, TimeUnit unit) {
         this(DEFAULT_STRATEGY,maximumSize,duration,unit);
     }
@@ -83,11 +115,11 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
     }
     
     @Override
-    public void registerListener() {
-        manager.registerListener(tableListener);
+    public void registerListener() {        
         #join($uniqueIndices '
         ${e.getIndexColumn().getCacheVarName()}.registerListener();' '')
 
+        manager.registerListener(tableListener);
     }
     @Override
     public void unregisterListener() {
@@ -102,7 +134,9 @@ public class $cacheClass extends BaseTableLoadCaching<$pkType, $beanClass> {
     }
     @Override
     protected $beanClass loadfromDatabase($pkType key)throws Exception {
-        return manager.loadByPrimaryKeyChecked(key);
+        $beanClass bean = manager.loadByPrimaryKeyChecked(key);
+        addToOtherCache(bean,this);
+        return bean;
     }
 #if(!$uniqueIndices.empty)
     @Override

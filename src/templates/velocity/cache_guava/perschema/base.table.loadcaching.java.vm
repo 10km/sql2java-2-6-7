@@ -165,5 +165,11 @@ public abstract class BaseTableLoadCaching<K ,B extends BaseBean<B>> implements 
     public UpdateStrategy getUpdateStrategy() {
         return updateStrategy;
     }
+    /**
+     * @return cacheMap
+     */
+    public ConcurrentMap<K, B> getCacheMap() {
+        return cacheMap;
+    }
 }
 
